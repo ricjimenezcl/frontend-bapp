@@ -1,0 +1,134 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Verificación de Identidad por Rostro</ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    
+    <!-- STEP 1: UPLOAD - Take photos of selfie and document -->
+    <div *ngIf="verificationState === VerificationState.UPLOAD">
+      <p style="color: #666; margin-bottom: 16px;">
+        Toma dos fotos claras: primero una selfie (fotografía tuya) y luego la foto de tu documento de identidad.
+      </p>
+
+      <!-- SELFIE SECTION -->
+      <ion-item>
+        <ion-label>
+          <h3>Selfie (Cámara Frontal)</h3>
+          <p *ngIf="selfieFaceValid" style="color: green;">✓ Rostro detectado ({{ selfieFaceConfidence }}%)</p>
+          <p *ngIf="!selfieFaceValid && selfieFile" style="color: orange;">⚠ {{ selfieError || 'Esperando validación' }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-button 
+        expand="block" 
+        (click)="tomarSelfie()"
+        [disabled]="isLoading"
+      >
+        {{ selfiePreview ? 'Retomar Selfie' : 'Tomar Selfie' }}
+      </ion-button>
+      <img 
+        *ngIf="selfiePreview" 
+        [src]="selfiePreview" 
+        width="120" 
+        style="margin-top:8px; border-radius: 4px;"
+      />
+
+      <!-- DOCUMENT SECTION -->
+      <ion-item style="margin-top: 16px;">
+        <ion-label>
+          <h3>Documento de Identidad (Cámara Trasera)</h3>
+          <p *ngIf="docFaceValid" style="color: green;">✓ Documento claro ({{ docFaceConfidence }}%)</p>
+          <p *ngIf="!docFaceValid && docFile" style="color: orange;">⚠ {{ docError || 'Esperando validación' }}</p>
+        </ion-label>
+      </ion-item>
+      <ion-button 
+        expand="block" 
+        (click)="tomarFotoDocumento()"
+        [disabled]="isLoading"
+      >
+        {{ docPreview ? 'Retomar Documento' : 'Tomar Documento' }}
+      </ion-button>
+      <img 
+        *ngIf="docPreview" 
+        [src]="docPreview" 
+        width="120" 
+        style="margin-top:8px; border-radius: 4px;"
+      />
+
+      <!-- SUBMIT BUTTON -->
+      <ion-button 
+        expand="block" 
+        color="primary" 
+        (click)="enviarValidacion()" 
+        [disabled]="!selfieFile || !docFile || isLoading"
+        style="margin-top: 20px;"
+      >
+        {{ isLoading ? 'Enviando...' : 'Enviar Verificación' }}
+      </ion-button>
+    </div>
+
+    <!-- STEP 2: VALIDATING / PENDING - Waiting for results -->
+    <div *ngIf="verificationState === VerificationState.VALIDATING || verificationState === VerificationState.PENDING">
+      <ion-item>
+        <ion-spinner name="circles"></ion-spinner>
+        <p style="margin-left: 16px;">
+          {{ verificationState === VerificationState.VALIDATING ? 'Validando documentos...' : 'Procesando verificación. Por favor espera...' }}
+        </p>
+      </ion-item>
+      <p style="text-align: center; color: #999; margin-top: 16px; font-size: 12px;">
+        Esto puede tomar unos minutos. No cierres la aplicación.
+      </p>
+    </div>
+
+    <!-- STEP 3: APPROVED - Success -->
+    <div *ngIf="verificationState === VerificationState.APPROVED">
+      <ion-item>
+        <p style="text-align: center; color: green; font-size: 18px; font-weight: bold;">
+          ✓ ¡Verificación Aprobada!
+        </p>
+      </ion-item>
+      <p style="text-align: center; margin-top: 16px;">
+        Tu identidad ha sido verificada exitosamente. Accede a tu perfil de proveedor.
+      </p>
+      <ion-button 
+        expand="block" 
+        color="success"
+        (click)="router.navigate(['/provider/tabs'])"
+      >
+        Ir al Perfil
+      </ion-button>
+    </div>
+
+    <!-- STEP 4: REJECTED - Failed verification with retry option -->
+    <div *ngIf="verificationState === VerificationState.REJECTED">
+      <ion-card color="danger" style="margin: 0; margin-bottom: 16px;">
+        <ion-card-header>
+          <ion-card-title style="color: white;">Verificación Rechazada</ion-card-title>
+        </ion-card-header>
+        <ion-card-content style="color: white;">
+          <p>{{ rejectionReason || 'Los documentos no pudieron ser verificados. Por favor, intenta nuevamente.' }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      <p style="color: #666; margin-bottom: 16px;">
+        <strong>Consejos para mejor resultado:</strong>
+      </p>
+      <ul style="color: #666; font-size: 14px;">
+        <li>Asegúrate de que tu rostro sea claramente visible</li>
+        <li>El documento debe estar completo y legible</li>
+        <li>Evita reflejos de luz o sombras</li>
+        <li>La iluminación debe ser natural o clara</li>
+        <li>Mantén la cámara estable al capturar</li>
+      </ul>
+
+      <ion-button 
+        expand="block" 
+        color="primary"
+        (click)="reintentar()"
+        style="margin-top: 20px;"
+      >
+        Reintentar
+      </ion-button>
+    </div>
+
+  </ion-card-content>
+</ion-card>

@@ -1,0 +1,86 @@
+<ion-content>
+
+  <!-- ── Page header ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h2 class="page-title">Mis Servicios</h2>
+      <p class="page-subtitle">{{ servicios.length }} servicios registrados</p>
+    </div>
+    <button class="fab-add" (click)="openAddServiceModal()">
+      <ion-icon name="add"></ion-icon>
+    </button>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────── -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner color="primary"></ion-spinner>
+    <p>Cargando servicios...</p>
+  </div>
+
+  <!-- ── Empty state ──────────────────────────────────────── -->
+  <div *ngIf="!isLoading && servicios.length === 0" class="empty-state">
+    <ion-icon name="construct-outline"></ion-icon>
+    <p class="empty-title">No tienes servicios registrados</p>
+    <p class="empty-sub">Agrega tu primer servicio para comenzar a recibir solicitudes</p>
+    <ion-button shape="round" color="primary" size="small" (click)="openAddServiceModal()">
+      <ion-icon name="add" slot="start"></ion-icon>
+      Agregar servicio
+    </ion-button>
+  </div>
+
+  <!-- ── Lista de servicios ───────────────────────────────── -->
+  <div *ngIf="!isLoading && servicios.length > 0" class="services-list">
+
+    <div class="service-card" *ngFor="let servicio of servicios; trackBy: trackById"
+         [class.inactive]="!servicio.is_available">
+
+      <!-- Top row: badge + toggle -->
+      <div class="card-top">
+        <div class="card-top-left">
+          <h3 class="service-name">{{ servicio.business_name }}</h3>
+          <span class="status-badge" [class]="'badge-' + getEstadoColor(servicio)">
+            {{ getEstadoServicio(servicio) }}
+          </span>
+        </div>
+        <ion-toggle
+          class="toggle"
+          mode="md"
+          [checked]="servicio.is_available"
+          [disabled]="servicio.validation_status === 'rejected'"
+          (ionChange)="toggleDisponibilidad(servicio, $event)"
+        ></ion-toggle>
+      </div>
+
+      <!-- Description -->
+      <p class="service-desc" *ngIf="servicio.description">
+        {{ truncateText(servicio.description, 60) }}
+      </p>
+
+      <!-- Price + category row -->
+      <div class="card-meta">
+        <div class="price-group" *ngIf="servicio.hourly_rate">
+          <span class="price">${{ servicio.hourly_rate | number }}</span>
+          <span class="price-unit">/hora</span>
+        </div>
+        <div class="category-group">
+          <ion-icon [name]="getServiceIcon(servicio)" class="cat-icon"></ion-icon>
+          <span class="cat-label">{{ servicio.service_category?.name || 'Servicio' }}</span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="card-actions">
+        <button class="btn-edit" (click)="goEditServicio(servicio)">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar
+        </button>
+        <button class="btn-delete" (click)="delServicio(servicio)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+
+    </div><!-- end service-card -->
+
+  </div><!-- end services-list -->
+
+</ion-content>

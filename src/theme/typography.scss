@@ -1,0 +1,254 @@
+// src/theme/typography.scss
+// BAPP Design System — Escala tipográfica
+// Requiere variables.scss y mixins.scss
+
+@import 'mixins';
+
+// ── Headings ──────────────────────────────────────────────────────────────────
+
+h1, .h1 {
+  font-family: var(--bapp-font-display);
+  font-size: var(--bapp-text-4xl);
+  font-weight: var(--bapp-weight-bold);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-4);
+}
+
+h2, .h2 {
+  font-family: var(--bapp-font-display);
+  font-size: var(--bapp-text-3xl);
+  font-weight: var(--bapp-weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-3);
+}
+
+h3, .h3 {
+  font-family: var(--bapp-font-base);
+  font-size: var(--bapp-text-2xl);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-3);
+}
+
+h4, .h4 {
+  font-family: var(--bapp-font-base);
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.3;
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-2);
+}
+
+h5, .h5 {
+  font-family: var(--bapp-font-base);
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-weight-medium);
+  line-height: 1.4;
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-2);
+}
+
+h6, .h6 {
+  font-family: var(--bapp-font-base);
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-weight-medium);
+  line-height: 1.5;
+  color: var(--bapp-text-secondary);
+  margin: 0 0 var(--bapp-space-2);
+}
+
+// ── Section title (uso en tarjetas, secciones de app) ─────────────────────────
+
+.section-title {
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.page-title {
+  font-family: var(--bapp-font-display);
+  font-size: var(--bapp-text-2xl);
+  font-weight: var(--bapp-weight-bold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.015em;
+}
+
+// ── Body text ─────────────────────────────────────────────────────────────────
+
+.body-lg {
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-weight-regular);
+  line-height: 1.6;
+  color: var(--bapp-text-primary);
+}
+
+.body-md {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-regular);
+  line-height: 1.55;
+  color: var(--bapp-text-primary);
+}
+
+.body-sm {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-weight-regular);
+  line-height: 1.5;
+  color: var(--bapp-text-secondary);
+}
+
+// ── Labels ────────────────────────────────────────────────────────────────────
+
+.label-lg {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--bapp-text-primary);
+}
+
+.label-md {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--bapp-text-primary);
+}
+
+.label-sm {
+  font-size: var(--bapp-text-2xs);
+  font-weight: var(--bapp-weight-medium);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: var(--bapp-text-tertiary);
+}
+
+// ── Captions ──────────────────────────────────────────────────────────────────
+
+.caption {
+  font-size: var(--bapp-text-2xs);
+  font-weight: var(--bapp-weight-regular);
+  line-height: 1.4;
+  color: var(--bapp-text-tertiary);
+}
+
+.caption-strong {
+  font-size: var(--bapp-text-2xs);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.4;
+  color: var(--bapp-text-secondary);
+}
+
+// ── Overlines ─────────────────────────────────────────────────────────────────
+
+.overline {
+  font-size: var(--bapp-text-2xs);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bapp-text-tertiary);
+}
+
+.overline-primary {
+  font-size: var(--bapp-text-2xs);
+  font-weight: var(--bapp-weight-semibold);
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bapp-color-primary);
+}
+
+// ── Price / numeric display ───────────────────────────────────────────────────
+
+.price-lg {
+  font-family: var(--bapp-font-display);
+  font-size: var(--bapp-text-2xl);
+  font-weight: var(--bapp-weight-bold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.price-md {
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.price-sm {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-medium);
+  color: var(--bapp-text-secondary);
+}
+
+.price-strike {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-regular);
+  color: var(--bapp-text-disabled);
+  text-decoration: line-through;
+}
+
+// ── Text color utilities ──────────────────────────────────────────────────────
+
+.text-primary    { color: var(--bapp-text-primary)   !important; }
+.text-secondary  { color: var(--bapp-text-secondary) !important; }
+.text-tertiary   { color: var(--bapp-text-tertiary)  !important; }
+.text-disabled   { color: var(--bapp-text-disabled)  !important; }
+.text-brand      { color: var(--bapp-color-primary)  !important; }
+.text-accent     { color: var(--bapp-color-accent)   !important; }
+.text-success    { color: var(--bapp-color-success)  !important; }
+.text-warning    { color: var(--bapp-color-warning)  !important; }
+.text-danger     { color: var(--bapp-color-danger)   !important; }
+.text-inverse    { color: var(--bapp-bg-base)        !important; }
+
+// ── Text weight utilities ─────────────────────────────────────────────────────
+
+.font-regular   { font-weight: var(--bapp-weight-regular)   !important; }
+.font-medium    { font-weight: var(--bapp-weight-medium)    !important; }
+.font-semibold  { font-weight: var(--bapp-weight-semibold)  !important; }
+.font-bold      { font-weight: var(--bapp-weight-bold)      !important; }
+
+// ── Text size utilities ───────────────────────────────────────────────────────
+
+.text-2xs   { font-size: var(--bapp-text-2xs)  !important; }
+.text-xs    { font-size: var(--bapp-text-xs)   !important; }
+.text-sm    { font-size: var(--bapp-text-sm)   !important; }
+.text-base  { font-size: var(--bapp-text-base) !important; }
+.text-lg    { font-size: var(--bapp-text-lg)   !important; }
+.text-xl    { font-size: var(--bapp-text-xl)   !important; }
+.text-2xl   { font-size: var(--bapp-text-2xl)  !important; }
+
+// ── Truncate utilities ────────────────────────────────────────────────────────
+
+.truncate      { @include truncate-text(1); }
+.truncate-2    { @include truncate-text(2); }
+.truncate-3    { @include truncate-text(3); }
+
+// ── Link style ────────────────────────────────────────────────────────────────
+
+.link {
+  color: var(--bapp-color-primary);
+  font-weight: var(--bapp-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--bapp-transition-fast);
+
+  &:hover  { opacity: 0.8; text-decoration: underline; }
+  &:active { opacity: 0.6; }
+}
+
+.link-muted {
+  color: var(--bapp-text-tertiary);
+  font-size: var(--bapp-text-xs);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--bapp-transition-fast);
+
+  &:hover { color: var(--bapp-text-secondary); }
+}

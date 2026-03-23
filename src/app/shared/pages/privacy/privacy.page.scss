@@ -1,0 +1,31 @@
+.legal-page {
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ion-color-dark);
+    margin-bottom: 4px;
+  }
+
+  .last-updated {
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+    margin-bottom: 24px;
+  }
+
+  section {
+    margin-bottom: 20px;
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      margin-bottom: 6px;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: var(--ion-color-medium-shade);
+      line-height: 1.6;
+    }
+  }
+}

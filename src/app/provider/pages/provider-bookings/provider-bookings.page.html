@@ -1,0 +1,99 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <!-- Título + subtítulo -->
+    <div class="header-content">
+      <h2 class="page-title">Gestión de Reservas</h2>
+      <p class="page-subtitle">{{ bookings.length }} reservas en total</p>
+    </div>
+  </ion-toolbar>
+
+  <!-- Filter pills (segment → pill tabs) -->
+  <ion-toolbar class="filter-toolbar">
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)"
+                 scrollable class="filter-segment">
+      <ion-segment-button value="pending">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="confirmed">
+        <ion-label>Confirmadas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>Historial</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando reservas...</p>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && filteredBookings.length === 0">
+    <span class="empty-emoji">📅</span>
+    <p class="empty-title">Sin reservas</p>
+    <p class="empty-sub">No hay reservas en esta categoría</p>
+  </div>
+
+  <!-- Booking cards -->
+  <div class="bookings-list" *ngIf="!isLoading && filteredBookings.length > 0">
+
+    <div class="booking-card" *ngFor="let booking of filteredBookings">
+
+      <!-- Client row -->
+      <div class="client-row">
+        <div class="client-avatar">
+          <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
+        </div>
+        <div class="client-info">
+          <div class="client-header">
+            <span class="client-name">Cliente #{{ booking.client_id }}</span>
+            <span class="status-badge"
+              [class.badge-pending]="(booking.status | lowercase) === 'pending'"
+              [class.badge-confirmed]="(booking.status | lowercase) === 'confirmed' || (booking.status | lowercase) === 'in_progress'"
+              [class.badge-completed]="(booking.status | lowercase) === 'completed'"
+              [class.badge-cancelled]="(booking.status | lowercase) === 'cancelled'">
+              {{ booking.status | uppercase }}
+            </span>
+          </div>
+          <span class="client-service">{{ booking.description || 'Reserva de servicio' }}</span>
+        </div>
+      </div>
+
+      <!-- Info rows -->
+      <div class="info-row">
+        <ion-icon name="calendar-outline" class="info-icon"></ion-icon>
+        <span class="info-text">{{ booking.scheduled_date | date:'short' }}</span>
+      </div>
+
+      <div class="info-row" *ngIf="booking.location_address">
+        <ion-icon name="location-outline" class="info-icon"></ion-icon>
+        <span class="info-text truncate">{{ booking.location_address }}</span>
+      </div>
+
+      <!-- Description quote -->
+      <div class="description-box" *ngIf="booking.description">
+        <span class="desc-text">"{{ booking.description }}"</span>
+      </div>
+
+      <!-- Action buttons for pending -->
+      <div class="card-actions" *ngIf="(booking.status | lowercase) === 'pending'">
+        <button class="btn-accept" (click)="acceptBooking(booking)">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Aceptar
+        </button>
+        <button class="btn-reject" (click)="rejectBooking(booking)">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          Rechazar
+        </button>
+      </div>
+
+    </div><!-- end booking-card -->
+
+  </div><!-- end bookings-list -->
+
+</ion-content>

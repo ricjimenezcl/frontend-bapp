@@ -1,0 +1,885 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin-top: 16px;
+    color: #fff;
+  }
+}
+
+ion-datetime {
+  --background:var(--ion-color-dark);
+}
+
+/* Main Content - Adaptado de salon-info-screen */
+.salon-info-screen {
+  padding-bottom: 100px;
+
+  /* Top Header con Imagen Simple */
+  .top-header {
+    position: relative;
+
+    .top-btn {
+      position: absolute;
+      top: 40px;
+      width: 100%;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    /* Banner Image (Static) */
+    .top-gallery-content {
+      height: 250px;
+      width: 100%;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      position: relative;
+
+      .overlay {
+        height: 250px;
+        width: 100%;
+        position: relative;
+        background-color: rgba(0, 0, 0, 0.65);
+      }
+    }
+  }
+
+  /* Name Content */
+  .name-content {
+    padding: 10px 16px;
+
+    .top-content {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+
+      .title {
+        font-size: 18px;
+        font-family: 'bold';
+        color: #fff;
+        text-align: start;
+        margin: 5px 0px;
+        flex: 1;
+      }
+
+      .options {
+        font-size: 10px;
+        font-family: 'bold';
+        color: var(--ion-color-light);
+        background-color: var(--ion-color-primary);
+        padding: 5px 12px;
+        border-radius: 50px;
+        width: max-content;
+        margin-left: 8px;
+      }
+    }
+
+    .address {
+      font-size: 14px;
+      font-family: 'regular';
+      color: var(--ion-color-medium);
+      margin: 5px 0px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  /* Bottom Content - Action Buttons */
+  .bottom-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin: 10px 0px;
+    padding: 10px 0;
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      .circle {
+        background-color: rgb(248 158 2 / 13%);
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: scale(1.1);
+          background-color: rgb(248 158 2 / 20%);
+        }
+
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+
+      .title {
+        font-size: 10px;
+        font-family: 'bold';
+        color: #fff;
+        text-align: center;
+        margin: 5px 0px;
+      }
+    }
+  }
+
+  /* Break Line */
+  .break {
+    height: 1px;
+    background-color: #f3f3f3;
+    width: 100%;
+    margin: 20px 0px;
+  }
+
+  /* Main Title */
+  .main-title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px 16px;
+    margin-bottom: 12px;
+
+    .title {
+      font-size: 14px;
+      font-family: 'bold';
+      color: #fff;
+      text-align: start;
+    }
+
+    ion-button {
+      margin: 0;
+      font-size: 12px;
+    }
+  }
+
+  /* Description */
+  .desc {
+    font-size: 14px;
+    font-family: 'regular';
+    color: #fff;
+    padding: 0px 16px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  /* Price Info Section */
+  .price-info {
+    padding: 0px 16px;
+    margin-bottom: 20px;
+
+    .price-box {
+      background: linear-gradient(135deg, var(--ion-color-primary) 0%, #0066cc 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+      .price-label {
+        display: block;
+        font-size: 12px;
+        font-family: 'semi-bold';
+        color: rgba(255, 255, 255, 0.9);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+      }
+
+      .price-value {
+        display: block;
+        font-size: 48px;
+        font-family: 'bold';
+        font-weight: 700;
+        line-height: 1;
+        color: #fff;
+      }
+    }
+  }
+
+  /* Contact List */
+  .contact-list {
+    padding: 0px 16px;
+    margin-bottom: 20px;
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px;
+      background: var(--ion-color-medium);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      gap: 12px;
+
+      ion-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+        margin-top: 2px;
+      }
+
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+
+        .label {
+          font-size: 12px;
+          font-family: 'semi-bold';
+          color: #fff;
+        }
+
+        .value {
+          font-size: 14px;
+          font-family: 'semi-bold';
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  /* Form Group */
+  .form-group {
+    padding: 0px 16px;
+    margin-bottom: 16px;
+     --background:var(--ion-color-dark);
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-family: 'bold';
+      color: var(--ion-color-dark);
+      margin-bottom: 8px;
+    }
+
+    .datetime-button {
+      --padding-start: 12px;
+      --padding-end: 12px;
+      height: auto;
+      min-height: 44px;
+      font-size: 14px;
+      text-align: left;
+      margin: 0;
+    }
+
+    .error-hint {
+      color: var(--ion-color-danger);
+      font-size: 0.8em;
+      margin: 8px 0 0 0;
+    }
+  }
+
+  /* Input with Suggestions */
+  .input-with-suggestions {
+    position: relative;
+
+    ion-item {
+      margin: 0;
+      --background:var(--ion-color-dark);
+      --border-radius: 8px;
+      border-radius: 8px;
+    }
+
+    .suggestions-container {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+      .suggestion-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: #f9f9f9;
+        }
+
+        ion-icon {
+          flex-shrink: 0;
+          margin-right: 12px;
+          margin-top: 2px;
+          font-size: 18px;
+        }
+
+        .suggestion-text {
+          flex: 1;
+          min-width: 0;
+
+          .suggestion-main {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            word-break: break-word;
+          }
+
+          .suggestion-details {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+            word-break: break-word;
+          }
+        }
+      }
+    }
+  }
+
+  .input-item {
+    --background:var(--ion-color-dark);
+    --border-radius: 8px;
+    border-radius: 8px;
+    margin: 0;
+
+    ion-textarea {
+      --padding-start: 12px;
+      --padding-end: 12px;
+    }
+  }
+}
+
+/* DateTime Modal */
+.datetime-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    position: relative;
+    background: #fff;
+    width: 100%;
+    max-height: 70vh;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      ion-button {
+        margin: 0;
+      }
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+
+      .form-group {
+        margin-bottom: 16px;
+        padding: 0;
+
+        label {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 8px;
+          color: #333;
+        }
+
+        .modal-picker,
+        .modal-select {
+          width: 100%;
+        }
+      }
+    }
+
+    .modal-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px;
+      border-top: 1px solid #f0f0f0;
+
+      ion-button {
+        margin: 0;
+      }
+    }
+  }
+}
+
+/* Error Hint */
+.error-hint {
+  color: var(--ion-color-danger);
+  font-size: 0.8em;
+  margin: 4px 16px 8px 16px;
+  padding: 0;
+}
+
+/* Footer Booking */
+.booking-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+
+  ion-toolbar {
+    --background:  var(--ion-color-primary);
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --min-height: 70px;
+
+    ion-row {
+      width: 100%;
+      margin: 0;
+    }
+
+    ion-col {
+      padding: 4px;
+    }
+  }
+
+  .footer-button {
+    margin: 0;
+    --border-radius: 8px;
+    height: 48px;
+    font-size: 14px;
+    font-family: 'bold';
+    text-transform: none;
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .salon-info-screen {
+    .name-content {
+      .top-content {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .title {
+          width: 100%;
+          margin-bottom: 8px;
+        }
+
+        .options {
+          margin-left: 0;
+        }
+      }
+    }
+
+    .main-title {
+      padding: 0px 12px;
+    }
+
+    .desc {
+      padding: 0px 12px;
+    }
+
+    .price-info {
+      padding: 0px 12px;
+    }
+
+    .contact-list {
+      padding: 0px 12px;
+    }
+
+    .form-group {
+      padding: 0px 12px;
+    }
+  }
+
+  .error-hint {
+    margin: 4px 12px 8px 12px;
+  }
+
+  .booking-footer {
+    ion-toolbar {
+      --padding-start: 8px;
+      --padding-end: 8px;
+    }
+  }
+}
+
+/* ==================== BOOKING MODAL STYLES ==================== */
+
+ion-modal.booking-modal {
+  --background: var(--ion-background-color, #1a1a1a);
+  --border-radius: 20px 20px 0 0;
+  --box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+
+  ion-header {
+    ion-toolbar {
+      --background: var(--ion-color-primary);
+      --color: #fff;
+      
+      ion-title {
+        font-size: 18px;
+        font-family: 'bold';
+      }
+    }
+  }
+
+  .booking-modal-content {
+    --background: var(--ion-background-color, #1a1a1a);
+    --padding-top: 0;
+    --padding-bottom: 20px;
+  }
+
+  .booking-form-container {
+    padding: 16px;
+    max-height: calc(75vh - 56px); // 75vh - altura del header
+    overflow-y: auto;
+
+    .provider-summary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--ion-color-step-50, #2a2a2a);
+      border-radius: 12px;
+      margin-bottom: 16px;
+
+      ion-icon {
+        font-size: 28px;
+      }
+
+      .provider-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        strong {
+          font-size: 15px;
+          font-family: 'bold';
+          color: var(--ion-color-light);
+        }
+
+        .provider-rate {
+          font-size: 13px;
+          color: var(--ion-color-primary);
+          font-family: 'semi-bold';
+        }
+      }
+    }
+
+    .booking-field {
+      margin-bottom: 16px;
+
+      .field-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-family: 'semi-bold';
+        color: var(--ion-color-light);
+        margin-bottom: 10px;
+
+        ion-icon {
+          font-size: 18px;
+        }
+      }
+
+      .datetime-button {
+        --padding-start: 16px;
+        --padding-end: 16px;
+        height: 52px;
+        font-size: 14px;
+        text-align: left;
+        margin: 0;
+        --border-radius: 12px;
+      }
+
+      .error-hint {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--ion-color-danger);
+        font-size: 0.75em;
+        margin: 8px 0 0 0;
+        padding-left: 4px;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+
+      .input-with-suggestions {
+        position: relative;
+
+        .address-input {
+          --background: var(--ion-color-step-50, #2a2a2a);
+          --border-radius: 12px;
+          border-radius: 12px;
+          margin: 0;
+          --padding-start: 8px;
+          --padding-end: 8px;
+          --min-height: 52px;
+        }
+
+        .suggestions-container {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: #fff;
+          border: 1px solid #e0e0e0;
+          border-top: none;
+          border-radius: 0 0 12px 12px;
+          max-height: 200px;
+          overflow-y: auto;
+          z-index: 1000;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          margin-top: 2px;
+
+          .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+
+            &:last-child {
+              border-bottom: none;
+            }
+
+            &:hover {
+              background: #f5f5f5;
+            }
+
+            ion-icon {
+              flex-shrink: 0;
+              margin-right: 12px;
+              margin-top: 2px;
+              font-size: 18px;
+            }
+
+            .suggestion-text {
+              flex: 1;
+              min-width: 0;
+
+              .suggestion-main {
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+                word-break: break-word;
+              }
+
+              .suggestion-details {
+                font-size: 12px;
+                color: #999;
+                margin-top: 4px;
+                word-break: break-word;
+              }
+            }
+          }
+        }
+      }
+
+      .notes-input {
+        --background: var(--ion-color-step-50, #2a2a2a);
+        --border-radius: 12px;
+        border-radius: 12px;
+        margin: 0;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --min-height: 100px;
+
+        ion-textarea {
+          --padding-start: 12px;
+          --padding-end: 12px;
+          --padding-top: 12px;
+          --padding-bottom: 12px;
+          font-size: 14px;
+        }
+      }
+
+      // Customización del datetime para fecha (compacto)
+      ion-datetime.compact-date {
+        --background: var(--ion-color-step-50, #2a2a2a);
+        --background-rgb: 42, 42, 42;
+        border-radius: 12px;
+        padding: 12px;
+        max-height: 320px;
+        width: 100%;
+        display: block;
+        
+        ::part(calendar-day) {
+          font-size: 13px;
+          height: 32px;
+          width: 32px;
+        }
+      }
+
+      // Selector de hora personalizado
+      .time-select {
+        width: 100%;
+        --padding-start: 12px;
+        --padding-end: 12px;
+        --padding-top: 12px;
+        --padding-bottom: 12px;
+        font-size: 14px;
+        border: 1px solid var(--ion-color-step-200, #3a3a3a);
+        border-radius: 8px;
+      }
+    }
+
+    .action-buttons {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--ion-color-step-150, #3a3a3a);
+
+      .confirm-button {
+        --border-radius: 12px;
+        height: 52px;
+        font-size: 15px;
+        font-family: 'bold';
+        text-transform: none;
+        margin-bottom: 10px;
+
+        &:disabled {
+          opacity: 0.5;
+        }
+      }
+
+      .cancel-button {
+        --border-radius: 12px;
+        height: 44px;
+        font-size: 14px;
+        font-family: 'semi-bold';
+        text-transform: none;
+      }
+    }
+  }
+}
+
+// Asegurar que el datetime modal aparezca sobre el booking modal
+.datetime-modal {
+  z-index: 10001 !important;
+}

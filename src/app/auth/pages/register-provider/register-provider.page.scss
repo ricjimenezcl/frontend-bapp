@@ -1,0 +1,87 @@
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+// Estilos para la sección de avatar
+.avatar-section {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.avatar-preview {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--ion-color-dark);
+  margin-bottom: 16px;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.no-avatar-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 0;
+  
+  ion-button {
+    margin: 0;
+  }
+}
+
+.avatar-subtitle {
+  font-size: 0.8em;
+  color: var(--ion-color-medium);
+  margin: 4px 0 0 0;
+  font-weight: normal;
+}
+
+// Elimina o modifica la clase .no-avatar si ya no la usas

@@ -1,0 +1,255 @@
+// ─── Provider Home — ProviderDashboard Design ────────────────────────
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+// ─── Gradient hero header ─────────────────────────────────────────────
+.ph-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(253,215,53,0.18) 0%, rgba(240,165,0,0.08) 50%, transparent 100%);
+  padding: calc(var(--bapp-space-xl) + var(--ion-safe-area-top, 16px)) var(--bapp-space-md) 48px;
+  border-bottom: 1px solid var(--bapp-border);
+
+  .ph-hero-glow {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(253, 215, 53, 0.12);
+    filter: blur(60px);
+    pointer-events: none;
+  }
+
+  .ph-hero-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--ion-color-primary);
+    font-family: 'semi-bold', sans-serif;
+    margin-bottom: var(--bapp-space-xs);
+  }
+
+  .ph-greeting {
+    font-size: 22px;
+    font-family: 'bold', sans-serif;
+    color: var(--bapp-text-primary);
+    margin: 0;
+    line-height: 1.3;
+
+    strong {
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+// ─── Stats cards ──────────────────────────────────────────────────────
+.ph-stats {
+  display: flex;
+  gap: var(--bapp-space-sm);
+  margin: -24px var(--bapp-space-md) var(--bapp-space-md);
+  position: relative;
+  z-index: 1;
+
+  .ph-stat-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--bapp-surface-01);
+    border: 1px solid var(--bapp-border);
+    border-radius: var(--bapp-radius-md);
+    padding: var(--bapp-space-sm) var(--bapp-space-xs);
+    box-shadow: var(--bapp-shadow-card);
+
+    .ph-stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(253, 215, 53, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 18px;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .ph-stat-label {
+      font-size: 10px;
+      color: var(--bapp-text-tertiary);
+      font-family: 'medium', sans-serif;
+      text-align: center;
+    }
+
+    .ph-stat-value {
+      font-size: 15px;
+      font-family: 'bold', sans-serif;
+      color: var(--bapp-text-primary);
+    }
+  }
+}
+
+// ─── Home screen container ────────────────────────────────────────────
+.home_screen {
+  padding: var(--bapp-space-lg) var(--bapp-space-md);
+}
+
+// ─── Old greeting title (now in ph-hero) ──────────────────────────────
+.greeting-title {
+  display: none !important;
+}
+
+// ─── Pending services alert ───────────────────────────────────────────
+.pending-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 196, 0, 0.15);
+  border: 1px solid rgba(255, 196, 0, 0.5);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  cursor: pointer;
+
+  ion-icon:first-child {
+    color: #ffc400;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  span {
+    flex: 1;
+    font-size: 13px;
+    color: #ffe082;
+
+    strong {
+      font-weight: 700;
+    }
+  }
+
+  ion-icon:last-child {
+    color: #ffc400;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}
+
+// ─── Metrics panel ────────────────────────────────────────────────────
+.metrics-panel {
+  margin-bottom: var(--bapp-space-lg);
+
+  .metrics-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--bapp-text-tertiary);
+    font-family: 'semi-bold', sans-serif;
+    margin: 0 0 var(--bapp-space-sm) 0;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--bapp-space-sm);
+  }
+
+  .metric-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: var(--bapp-surface-01);
+    border: 1px solid var(--bapp-border);
+    border-radius: var(--bapp-radius-md);
+    padding: var(--bapp-space-md) var(--bapp-space-sm);
+    box-shadow: var(--bapp-shadow-card);
+
+    .metric-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(253, 215, 53, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      ion-icon {
+        font-size: 20px;
+        color: var(--ion-color-primary);
+      }
+    }
+
+    .metric-value {
+      font-size: 22px;
+      font-family: 'bold', sans-serif;
+      color: var(--bapp-text-primary);
+      line-height: 1;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--bapp-text-tertiary);
+      font-family: 'medium', sans-serif;
+      text-align: center;
+      line-height: 1.3;
+    }
+  }
+}

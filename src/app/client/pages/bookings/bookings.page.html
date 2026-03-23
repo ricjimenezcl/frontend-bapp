@@ -1,0 +1,121 @@
+<ion-header class="bk-header">
+  <ion-toolbar class="bk-toolbar">
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)" class="bk-segment">
+      <ion-segment-button value="upcoming">
+        <ion-label>Próximas</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="past">
+        <ion-label>Pendientes</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="cancelled">
+        <ion-label>Canceladas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bk-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="crescent">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- ── Loading ──────────────────────────────────────────────────── -->
+  <div class="bk-loading" *ngIf="isLoading">
+    <div class="booking-skeleton" *ngFor="let n of [0,1,2]">
+      <div class="skel-row">
+        <div class="skel-title"></div>
+        <div class="skel-badge"></div>
+      </div>
+      <div class="skel-line skel-long"></div>
+      <div class="skel-line skel-short"></div>
+    </div>
+  </div>
+
+  <!-- ── Booking list ──────────────────────────────────────────────── -->
+  <div class="bk-list" *ngIf="!isLoading && filteredBookings.length > 0">
+    <div class="booking-card" *ngFor="let booking of filteredBookings">
+
+      <!-- Card header: service + status -->
+      <div class="bk-card-head">
+        <div class="bk-service-icon">
+          <ion-icon name="construct-outline"></ion-icon>
+        </div>
+        <div class="bk-service-info">
+          <span class="bk-service-name">{{ booking.service_category }}</span>
+          <span class="bk-service-label">Servicio solicitado</span>
+        </div>
+        <div class="bk-status-badge" [attr.data-status]="booking.status">
+          {{ getStatusLabel(booking.status) }}
+        </div>
+      </div>
+
+      <div class="bk-divider"></div>
+
+      <!-- Details -->
+      <div class="bk-details">
+
+        <div class="bk-detail-row" *ngIf="booking.location_address">
+          <ion-icon name="location-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text">{{ booking.location_address }}</span>
+        </div>
+
+        <div class="bk-detail-row" *ngIf="booking.scheduled_date">
+          <ion-icon name="calendar-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text">
+            {{ booking.scheduled_date | date:'dd/MM/yyyy' }}
+            <span *ngIf="booking.scheduled_time"> · {{ booking.scheduled_time }}</span>
+          </span>
+        </div>
+
+        <div class="bk-detail-row" *ngIf="booking.price || booking.total_price">
+          <ion-icon name="cash-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text bk-price">
+            ${{ (booking.price || booking.total_price) | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <div class="bk-detail-row" *ngIf="booking.description">
+          <ion-icon name="document-text-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text bk-desc">{{ booking.description }}</span>
+        </div>
+
+      </div>
+
+      <!-- Actions (PENDING or CONFIRMED only) -->
+      <div class="bk-actions" *ngIf="booking.status === 'PENDING' || booking.status === 'CONFIRMED'">
+        <button
+          class="bk-btn bk-btn-chat"
+          (click)="goToChat(booking)"
+          [disabled]="chatOpeningBookingId === booking.id"
+          type="button">
+          <ion-spinner *ngIf="chatOpeningBookingId === booking.id" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="chatOpeningBookingId !== booking.id" name="chatbubbles-outline"></ion-icon>
+          <span>{{ chatOpeningBookingId === booking.id ? 'Abriendo…' : 'Chat' }}</span>
+        </button>
+        <button
+          class="bk-btn bk-btn-cancel"
+          (click)="cancelBooking(booking)"
+          type="button">
+          <ion-icon name="close-outline"></ion-icon>
+          <span>Cancelar</span>
+        </button>
+      </div>
+
+    </div><!-- end booking-card -->
+  </div>
+
+  <!-- ── Empty state ───────────────────────────────────────────────── -->
+  <div class="bk-empty" *ngIf="!isLoading && filteredBookings.length === 0">
+    <div class="bk-empty-icon-wrap">
+      <ion-icon name="calendar-outline"></ion-icon>
+    </div>
+    <p class="bk-empty-title">Sin reservas</p>
+    <p class="bk-empty-sub">
+      No tienes reservas
+      {{ selectedSegment === 'upcoming' ? 'próximas' : selectedSegment === 'past' ? 'pendientes' : 'canceladas' }}
+    </p>
+  </div>
+
+</ion-content>

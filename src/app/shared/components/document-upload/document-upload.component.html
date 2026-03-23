@@ -1,0 +1,194 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Verificación de Identidad</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Status Card -->
+  <ion-card [color]="getStatusColor()">
+    <ion-card-header>
+      <ion-card-title>Estado de Verificación</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>{{ state.verificationMessage }}</p>
+      <p *ngIf="state.verificationStatus === 'APPROVED'" class="ion-text-center">
+        <strong>✅ Ya puedes agregar servicios</strong>
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Info Alert -->
+  <ion-card color="light">
+    <ion-card-content>
+      <p>
+        <strong>ℹ️ Importante:</strong> Para garantizar tu seguridad y la de nuestros
+        clientes, necesitamos verificar tu identidad.
+      </p>
+      <ol>
+        <li>Captura una selfie clara frente a la cámara</li>
+        <li>Sube una foto de tu documento de identidad (cédula, pasaporte, etc.)</li>
+        <li>Verificaremos que el rostro coincida</li>
+        <li>Nuestro equipo revisará y aprobará</li>
+      </ol>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Selfie Section -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="camera"></ion-icon> Capturar Selfie
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Selfie Preview -->
+      <div *ngIf="state.selfieUrl" class="preview-container">
+        <img [src]="state.selfieUrl" alt="Selfie preview" class="preview-image" />
+        <ion-text color="success">
+          <p>✅ Selfie capturada</p>
+        </ion-text>
+      </div>
+
+      <!-- Selfie Upload Buttons -->
+      <div class="button-group">
+        <ion-button
+          expand="block"
+          color="primary"
+          (click)="captureSelfie()"
+          [disabled]="state.uploading"
+        >
+          <ion-icon name="camera" slot="start"></ion-icon>
+          Capturar Selfie
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="primary"
+          (click)="uploadSelfie()"
+          [disabled]="!state.selfieFile || state.uploading"
+        >
+          <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
+          <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
+          {{ state.uploading ? 'Subiendo...' : 'Subir Selfie' }}
+        </ion-button>
+      </div>
+
+      <!-- Upload Progress -->
+      <div *ngIf="state.uploading && state.uploadProgress > 0">
+        <ion-progress-bar
+          [value]="state.uploadProgress / 100"
+          color="primary"
+        ></ion-progress-bar>
+        <p class="ion-text-center">{{ state.uploadProgress }}%</p>
+      </div>
+
+      <!-- Success Indicator -->
+      <div *ngIf="state.selfieDocumentId" class="success-indicator">
+        <ion-icon name="checkmark-circle" color="success"></ion-icon>
+        <p>Selfie subida exitosamente</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ID Document Section -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="document"></ion-icon> Documento de Identidad
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- ID Document Preview -->
+      <div *ngIf="state.idDocumentUrl" class="preview-container">
+        <img [src]="state.idDocumentUrl" alt="ID preview" class="preview-image" />
+        <ion-text color="success">
+          <p>✅ Documento seleccionado</p>
+        </ion-text>
+      </div>
+
+      <!-- ID Document Upload Buttons -->
+      <div class="button-group">
+        <ion-button
+          expand="block"
+          color="secondary"
+          (click)="selectIdDocument()"
+          [disabled]="state.uploading"
+        >
+          <ion-icon name="image-outline" slot="start"></ion-icon>
+          Seleccionar Documento
+        </ion-button>
+
+        <ion-button
+          expand="block"
+          color="secondary"
+          (click)="uploadIdDocument()"
+          [disabled]="!state.idDocumentFile || state.uploading"
+        >
+          <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
+          <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
+          {{ state.uploading ? 'Subiendo...' : 'Subir Documento' }}
+        </ion-button>
+      </div>
+
+      <!-- Upload Progress -->
+      <div *ngIf="state.uploading && state.uploadProgress > 0">
+        <ion-progress-bar
+          [value]="state.uploadProgress / 100"
+          color="secondary"
+        ></ion-progress-bar>
+        <p class="ion-text-center">{{ state.uploadProgress }}%</p>
+      </div>
+
+      <!-- Success Indicator -->
+      <div *ngIf="state.idDocumentId" class="success-indicator">
+        <ion-icon name="checkmark-circle" color="success"></ion-icon>
+        <p>Documento subido exitosamente</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Verification Button -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Verificación de Rostro</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p *ngIf="!allDocumentsUploaded" class="ion-text-center ion-color-warning">
+        Debe subir selfie y documento de identidad
+      </p>
+
+      <ion-button
+        expand="block"
+        color="primary"
+        size="large"
+        (click)="initiateVerification()"
+        [disabled]="!canVerify"
+      >
+        <ion-icon
+          [name]="
+            state.verificationStatus === 'APPROVED'
+              ? 'checkmark-circle'
+              : 'checkmark-done-circle'
+          "
+          slot="start"
+        ></ion-icon>
+        Verificar Identidad
+      </ion-button>
+
+      <p class="ion-text-center ion-text-sm ion-margin-top">
+        Nuestro equipo revisará tu verificación en las próximas 24 horas
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Check Services Button -->
+  <ion-card *ngIf="state.verificationStatus === 'APPROVED'">
+    <ion-card-content>
+      <ion-button expand="block" color="success" (click)="checkCanAddServices()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Agregar Servicio
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

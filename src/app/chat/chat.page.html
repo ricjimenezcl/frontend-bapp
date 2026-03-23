@@ -1,0 +1,103 @@
+<ion-header class="ion-no-border chat-header">
+  <ion-toolbar class="chat-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()" class="chat-back-btn">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <div class="chat-header-info" slot="start">
+      <div class="chat-header-avatar">
+        <span class="chat-header-initials">{{ (conversationName || '?').charAt(0).toUpperCase() }}</span>
+      </div>
+      <div class="chat-header-meta">
+        <span class="chat-header-name">{{ conversationName }}</span>
+        <span class="chat-header-status">
+          <span class="chat-status-dot"></span>
+          En línea
+        </span>
+      </div>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button class="chat-action-btn" color="primary">
+        <ion-icon name="call" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button class="chat-action-btn" color="primary">
+        <ion-icon name="videocam" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button class="chat-action-btn" color="primary">
+        <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="chat-content">
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="chat-loading">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <span>Cargando mensajes...</span>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="messages.length === 0 && !loading" class="chat-empty">
+    <div class="chat-empty-bubble">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+    </div>
+    <p class="chat-empty-title">Sin mensajes aún</p>
+    <p class="chat-empty-hint">Inicia la conversación con un saludo</p>
+  </div>
+
+  <!-- Messages list -->
+  <div class="chat-messages" *ngIf="messages.length > 0 && !loading">
+    <div
+      *ngFor="let msg of messages"
+      class="chat-msg-row"
+      [class.chat-msg-row-own]="isMyMessage(msg)"
+      [class.chat-msg-row-other]="!isMyMessage(msg)">
+
+      <!-- Other's avatar (only on their messages) -->
+      <div class="chat-msg-avatar" *ngIf="!isMyMessage(msg)">
+        <span>{{ (conversationName || '?').charAt(0).toUpperCase() }}</span>
+      </div>
+
+      <!-- Bubble -->
+      <div class="chat-bubble" [class.chat-bubble-own]="isMyMessage(msg)" [class.chat-bubble-other]="!isMyMessage(msg)">
+        <p class="chat-bubble-text">{{ msg.messageContent }}</p>
+        <span class="chat-bubble-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border chat-footer">
+  <form (ngSubmit)="sendMessage()" *ngIf="conversationId">
+    <div class="chat-input-bar">
+      <div class="chat-input-wrap">
+        <ion-textarea
+          rows="1"
+          [autoGrow]="true"
+          placeholder="Escribe un mensaje..."
+          [(ngModel)]="newMessage"
+          name="newMessage"
+          required
+          class="chat-textarea">
+        </ion-textarea>
+        <ion-button fill="clear" size="small" class="chat-attach-btn" type="button">
+          <ion-icon name="attach-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+      <button
+        type="submit"
+        class="chat-send-btn"
+        [class.chat-send-btn-active]="newMessage && newMessage.trim()"
+        [disabled]="!newMessage || loading">
+        <ion-icon name="send"></ion-icon>
+      </button>
+    </div>
+  </form>
+</ion-footer>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular gris -->
+  <circle cx="100" cy="100" r="100" fill="#e0e0e0"/>
+  
+  <!-- Cabeza -->
+  <circle cx="100" cy="70" r="30" fill="#999"/>
+  
+  <!-- Cuerpo -->
+  <ellipse cx="100" cy="130" rx="35" ry="45" fill="#999"/>
+  
+  <!-- Hombros suavizados -->
+  <path d="M 65 110 Q 65 95 70 85 L 130 85 Q 135 95 135 110" fill="#999"/>
+</svg>

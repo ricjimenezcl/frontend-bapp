@@ -1,0 +1,125 @@
+<!-- Sub-header: plain div instead of ion-header to avoid Ionic's JS height
+     measurement running while the tab container is display:none (which caches
+     a zero scroll-area height and causes the black-screen bug). -->
+<div class="ss-ion-header">
+  <div class="ss-header">
+
+    <!-- Active location bar -->
+    <div class="location-bar">
+      <ion-icon name="location" class="loc-icon"></ion-icon>
+      <span class="loc-text">{{ activeLocationLabel }}</span>
+    </div>
+
+    <!-- Filter segment -->
+    <div class="filter-row">
+      <ion-segment (ionChange)="onFilterChange($event)" class="filter-segment">
+        <ion-segment-button *ngFor="let f of filters" [value]="f.value">
+          <ion-label>{{ f.label }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Results count -->
+    <div class="results-bar" *ngIf="!isLoading">
+      <ion-icon name="business-outline" class="results-icon"></ion-icon>
+      <span class="results-text">{{ filteredProviders.length }} proveedor{{ filteredProviders.length !== 1 ? 'es' : '' }} encontrado{{ filteredProviders.length !== 1 ? 's' : '' }}</span>
+      <span class="service-tag" *ngIf="selectedServices.length > 0">· {{ selectedServices[0].name }}</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- Scroll container: ion-content is required for ion-refresher and
+     ion-infinite-scroll to work. The height-measurement issue (display:none
+     parent at connectedCallback time) is fixed by dispatching a resize event
+     from tabs.page ngAfterViewInit after Angular's first change detection. -->
+<ion-content class="ss-content">
+
+  <!-- Pull to refresh (must be slot="fixed" inside ion-content) -->
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="crescent">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="ss-wrapper">
+
+    <!-- ── Loading state ─────────────────────────────────────────────── -->
+    <app-loading-skeleton *ngIf="isLoading" type="provider-card" [count]="4"></app-loading-skeleton>
+
+    <!-- ── Provider list ─────────────────────────────────────────────── -->
+    <div class="providers-list" *ngIf="!isLoading && filteredProviders.length > 0">
+      <div
+        class="provider-card"
+        *ngFor="let provider of filteredProviders; let i = index"
+        [class.provider-locked]="i >= freeProviderLimit"
+        (click)="handleProviderInteraction(provider, i)">
+
+        <!-- Lock overlay -->
+        <div class="lock-overlay" *ngIf="i >= freeProviderLimit">
+          <div class="lock-content">
+            <ion-icon name="lock-closed"></ion-icon>
+            <span>Premium</span>
+          </div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="provider-avatar-wrap">
+          <img
+            class="provider-avatar"
+            [src]="provider.avatar | providerImage"
+            [alt]="provider.business_name || provider.full_name" />
+          <div class="online-dot"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="provider-info">
+          <div class="provider-top">
+            <span class="provider-name">{{ provider.business_name || provider.full_name }}</span>
+            <span class="provider-rate" *ngIf="provider.hourly_rate">
+              ${{ provider.hourly_rate | number }}
+            </span>
+          </div>
+
+          <div class="provider-meta">
+            <div class="meta-item">
+              <ion-icon name="star" class="star-icon"></ion-icon>
+              <span>{{ provider.rating_avg || 'Nuevo' }}</span>
+              <span class="meta-muted">({{ provider.total_reviews || 0 }})</span>
+            </div>
+            <div class="meta-dot"></div>
+            <div class="meta-item">
+              <ion-icon name="location-outline" class="dist-icon"></ion-icon>
+              <span>{{ provider.distance | number:'1.1-1' }} km</span>
+            </div>
+          </div>
+
+          <p class="provider-desc" *ngIf="provider.description">
+            {{ provider.description.length > 80 ? provider.description.substring(0,80) + '…' : provider.description }}
+          </p>
+
+          <div class="provider-chips" *ngIf="provider.serviceName">
+            <span class="chip-service">{{ provider.serviceName }}</span>
+          </div>
+        </div>
+
+      </div><!-- end provider-card -->
+    </div>
+
+    <!-- ── Empty state ───────────────────────────────────────────────── -->
+    <app-empty-state
+      *ngIf="!isLoading && filteredProviders.length === 0"
+      icon="business-outline"
+      title="Sin proveedores"
+      subtitle="Intenta cambiar los filtros o seleccionar otros servicios">
+    </app-empty-state>
+
+    <div class="list-spacer"></div>
+  </div>
+
+  <!-- Infinite scroll -->
+  <ion-infinite-scroll (ionInfinite)="loadMore($event)" [disabled]="!hasMore">
+    <ion-infinite-scroll-content loadingSpinner="crescent" loadingText="Cargando más...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+</ion-content>

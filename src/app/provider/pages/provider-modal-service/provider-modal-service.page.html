@@ -1,0 +1,133 @@
+﻿<ion-header class="ion-no-border">
+  <ion-toolbar mode="ios">
+    <ion-title>Selecciona Servicio</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" [scrollY]="true">
+  <div class="page-wrapper">
+
+    <!-- Instrucciones -->
+    <div class="instructions">
+      <p class="instructions-title">Selecciona el servicio que deseas agregar</p>
+      <p class="instructions-sub">Primero elige una categoría y luego selecciona el servicio específico</p>
+    </div>
+
+    <!-- Selección de Categoría Principal -->
+    <div class="category-section">
+      <div class="main-title">
+        <span class="lbl">Categoría Principal</span>
+      </div>
+
+      <!-- Spinner de carga inicial -->
+      <div *ngIf="isLoading && mainCategories.length === 0" class="loading-services">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span class="loading-text">Cargando categorías...</span>
+      </div>
+
+      <!-- Estado vacío -->
+      <div *ngIf="!isLoading && mainCategories.length === 0" class="empty-state">
+        <ion-icon name="construct-outline" class="empty-icon"></ion-icon>
+        <span class="empty-text">No hay categorías disponibles</span>
+      </div>
+
+      <!-- Grid de tiles de categorías -->
+      <div class="categories-grid" *ngIf="mainCategories.length > 0">
+        <div
+          *ngFor="let category of mainCategories"
+          class="category-tile"
+          [class.selected]="selectedMainCategory?.id === category.id"
+          (click)="selectMainCategory(category)">
+          <div class="tile-icon-wrap">
+            <ion-icon
+              [name]="getCategoryIcon(category.name)"
+              class="category-icon">
+            </ion-icon>
+          </div>
+          <span class="tile-label">{{ category.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selección de Servicio (Subcategoría) -->
+    <div class="subcategory-section" *ngIf="selectedMainCategory">
+      <div class="subcategory-header">
+        <div class="subcat-info">
+          <p class="subcat-title">{{ selectedMainCategory.name }}</p>
+          <p class="subcat-sub">Selecciona los servicios que ofreces</p>
+        </div>
+      </div>
+
+      <!-- Spinner de carga de servicios -->
+      <div *ngIf="isLoading" class="loading-services">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span class="loading-text">Cargando servicios...</span>
+      </div>
+
+      <!-- Cards de servicios -->
+      <div class="services-container" *ngIf="!isLoading && subcategories.length > 0">
+        <div
+          *ngFor="let service of subcategories"
+          class="service-card-content"
+          [class.selected]="selectedService?.id === service.id"
+          (click)="selectService(service)">
+          <div class="service-card-header">
+            <ion-checkbox
+              class="service-checkbox"
+              [value]="service.id"
+              [checked]="selectedService?.id === service.id">
+            </ion-checkbox>
+            <div class="service-info">
+              <span class="service-name">{{ service.name }}</span>
+              <span *ngIf="service.description" class="service-desc">{{ service.description }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sin servicios -->
+      <div *ngIf="!isLoading && subcategories.length === 0" class="empty-services">
+        <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
+        <span class="empty-text">No hay servicios disponibles para esta categoría</span>
+      </div>
+    </div>
+
+    <!-- Hint: ninguna categoría seleccionada -->
+    <div class="no-category-selected" *ngIf="!selectedMainCategory && mainCategories.length > 0">
+      <div class="hint-card">
+        <ion-icon name="arrow-up-outline" class="hint-icon"></ion-icon>
+        <span class="hint-title">Selecciona una categoría</span>
+        <span class="hint-text">Elige una categoría principal para ver los servicios disponibles</span>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar>
+    <div class="footer-buttons">
+      <ion-button
+        (click)="cancel()"
+        expand="block"
+        fill="outline"
+        shape="round"
+        class="footer-button btn-cancel">
+        Cancelar
+      </ion-button>
+      <ion-button
+        (click)="confirmSelection()"
+        expand="block"
+        shape="round"
+        class="footer-button btn-confirm"
+        [disabled]="!selectedService">
+        Confirmar
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

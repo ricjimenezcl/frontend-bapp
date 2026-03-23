@@ -1,0 +1,251 @@
+<ion-content class="mc-content">
+
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      refreshingSpinner="crescent">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-wrapper">
+
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <div class="mc-header">
+
+      <!-- Greeting -->
+      <div class="greeting-row">
+        <div class="greeting-text">
+          <p class="greeting-label">¿Qué necesitas hoy?</p>
+          <h1 class="greeting-title">Buscar servicio</h1>
+        </div>
+        <div class="header-logo-wrap">
+          <ion-icon name="storefront" class="header-logo-icon"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Location pill -->
+      <button class="location-pill" (click)="toggleLocationSearch()" type="button">
+        <div class="loc-pill-left">
+          <ion-icon name="location" class="loc-icon"></ion-icon>
+          <span class="loc-text">{{ selectedLocationName }}</span>
+        </div>
+        <ion-icon
+          [name]="selectedLocationName !== 'Tu ubicación actual' ? 'close-circle' : 'chevron-down'"
+          class="loc-chevron"
+          (click)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()">
+        </ion-icon>
+      </button>
+
+      <!-- Location dropdown -->
+      <div class="loc-dropdown" *ngIf="showLocationSearch">
+        <div class="loc-input-row">
+          <ion-icon name="search-outline" class="loc-input-icon"></ion-icon>
+          <input
+            class="loc-input"
+            placeholder="Zona, ciudad o dirección..."
+            [(ngModel)]="locationQuery"
+            (input)="onLocationInput($event)"
+            autofocus />
+          <ion-spinner *ngIf="isLocationSearching" name="crescent" class="loc-spinner"></ion-spinner>
+        </div>
+        <div class="loc-results" *ngIf="locationSuggestions.length > 0">
+          <button
+            class="loc-result-item"
+            *ngFor="let s of locationSuggestions"
+            (click)="selectLocation(s)"
+            type="button">
+            <div class="loc-result-dot"></div>
+            <div class="loc-result-text">
+              <span class="loc-result-name">{{ s.text }}</span>
+              <span class="loc-result-sub">{{ s.place_name }}</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-wrap">
+        <ion-searchbar
+          [(ngModel)]="searchQuery"
+          placeholder="Buscar servicio o profesional..."
+          (ionInput)="onSearchInput($event)"
+          (ionClear)="clearSearch()"
+          [debounce]="0"
+          class="mc-searchbar">
+        </ion-searchbar>
+      </div>
+
+    </div><!-- end mc-header -->
+
+    <!-- ── Autocomplete results ────────────────────────────────────────── -->
+    <div class="autocomplete-panel" *ngIf="filteredCategories.length > 0">
+      <p class="autocomplete-label">Resultados</p>
+      <button
+        class="autocomplete-item"
+        *ngFor="let cat of filteredCategories"
+        (click)="selectServiceCategory(cat)"
+        type="button">
+        <div class="autocomplete-icon-wrap">
+          <ion-icon [name]="cat.icon || getCategoryIcon(cat.name)"></ion-icon>
+        </div>
+        <div class="autocomplete-info">
+          <span class="autocomplete-name">{{ cat.name }}</span>
+          <span class="autocomplete-desc" *ngIf="cat.description">{{ cat.description }}</span>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="autocomplete-arrow"></ion-icon>
+      </button>
+    </div>
+
+    <!-- ── No results ─────────────────────────────────────────────────── -->
+    <div class="no-results" *ngIf="searchQuery.length >= 2 && filteredCategories.length === 0">
+      <ion-icon name="search-outline" class="no-results-icon"></ion-icon>
+      <p class="no-results-text">Sin resultados para <strong>"{{ searchQuery }}"</strong></p>
+      <p class="no-results-hint">Intenta con otra palabra clave</p>
+    </div>
+
+    <!-- ── Main body (when no search) ────────────────────────────────── -->
+    <div class="mc-body" *ngIf="filteredCategories.length === 0 && searchQuery.length === 0">
+
+      <!-- ── Hero banner ────────────────────────────────────────────── -->
+      <div class="hero-banner" *ngIf="!selectedMainCategory">
+        <div class="hero-inner">
+          <div class="hero-badge">
+            <ion-icon name="flash"></ion-icon>
+            <span>Disponible ahora</span>
+          </div>
+          <h2 class="hero-title">Proveedores verificados<br>cerca de ti</h2>
+          <p class="hero-sub">Elige una categoría para ver quién puede ayudarte</p>
+        </div>
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+      </div>
+
+      <!-- ── Categories grid ─────────────────────────────────────────── -->
+      <div class="section" *ngIf="!selectedMainCategory">
+        <div class="section-hd">
+          <span class="section-title-txt">Categorías principales</span>
+        </div>
+
+        <!-- Skeleton while loading -->
+        <div class="cat-grid" *ngIf="isLoading">
+          <div class="cat-skeleton" *ngFor="let n of [0,1,2,3,4,5]">
+            <div class="skel-icon"></div>
+            <div class="skel-text"></div>
+          </div>
+        </div>
+
+        <!-- Category tiles -->
+        <div class="cat-grid" *ngIf="!isLoading && mainCategories.length > 0">
+          <button
+            class="cat-tile"
+            *ngFor="let cat of mainCategories; let i = index"
+            [attr.data-idx]="i % 6"
+            (click)="selectMainCategory(cat)"
+            type="button">
+            <div class="cat-tile-icon-wrap">
+              <ion-icon [name]="cat.icon || getCategoryIcon(cat.name)" class="cat-tile-icon"></ion-icon>
+            </div>
+            <span class="cat-tile-label">{{ cat.name }}</span>
+          </button>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state-box" *ngIf="!isLoading && mainCategories.length === 0">
+          <ion-icon name="construct-outline" class="empty-icon"></ion-icon>
+          <p class="empty-text">No hay categorías disponibles</p>
+        </div>
+      </div>
+
+      <!-- ── Hint prompt ─────────────────────────────────────────────── -->
+      <div class="hint-card" *ngIf="!selectedMainCategory && mainCategories.length > 0 && !isLoading">
+        <ion-icon name="hand-left-outline" class="hint-icon"></ion-icon>
+        <div class="hint-body">
+          <p class="hint-title">Toca una categoría</p>
+          <p class="hint-text">Para ver los servicios disponibles</p>
+        </div>
+      </div>
+
+      <!-- ── Subcategory panel ────────────────────────────────────────── -->
+      <div class="subcat-panel" *ngIf="selectedMainCategory">
+
+        <!-- Panel header -->
+        <div class="subcat-panel-hd">
+          <button class="back-btn" (click)="selectedMainCategory = null" type="button">
+            <ion-icon name="arrow-back-outline"></ion-icon>
+          </button>
+          <div>
+            <h2 class="subcat-title">{{ selectedMainCategory.name }}</h2>
+            <p class="subcat-subtitle">Selecciona uno o más servicios</p>
+          </div>
+        </div>
+
+        <!-- Loading services -->
+        <div class="services-loading" *ngIf="isLoading">
+          <ion-spinner name="crescent" color="primary"></ion-spinner>
+          <span>Cargando servicios...</span>
+        </div>
+
+        <!-- Services list -->
+        <div class="services-list" *ngIf="!isLoading && subcategories.length > 0">
+          <button
+            class="service-item"
+            *ngFor="let svc of subcategories"
+            [class.service-item-checked]="isServiceSelected(svc)"
+            (click)="toggleService(svc)"
+            type="button">
+            <div class="svc-check-icon">
+              <ion-icon
+                [name]="isServiceSelected(svc) ? 'checkmark-circle' : 'radio-button-off-outline'">
+              </ion-icon>
+            </div>
+            <span class="svc-name">{{ svc.name }}</span>
+            <ion-icon name="chevron-forward-outline" class="svc-arrow" *ngIf="!isServiceSelected(svc)"></ion-icon>
+          </button>
+        </div>
+
+        <!-- Empty services -->
+        <div class="empty-state-box" *ngIf="!isLoading && subcategories.length === 0">
+          <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
+          <p class="empty-text">Sin servicios en esta categoría</p>
+        </div>
+
+        <!-- Selection summary -->
+        <div class="selection-summary" *ngIf="selectedServices.length > 0">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+          <span>
+            {{ selectedServices.length }} servicio{{ selectedServices.length > 1 ? 's' : '' }} seleccionado{{ selectedServices.length > 1 ? 's' : '' }}
+          </span>
+        </div>
+
+      </div><!-- end subcat-panel -->
+
+    </div><!-- end mc-body -->
+
+    <div class="footer-spacer"></div>
+  </div>
+</ion-content>
+
+<!-- ── Footer CTA ────────────────────────────────────────────────────────── -->
+<ion-footer class="mc-footer">
+  <ion-toolbar class="mc-footer-toolbar">
+    <div class="footer-cta-row">
+
+      <button class="btn-cancel" (click)="cancel()" type="button">
+        <ion-icon name="close-outline"></ion-icon>
+        <span>Cancelar</span>
+      </button>
+
+      <button
+        class="btn-search"
+        (click)="confirmSelection()"
+        [disabled]="selectedServices.length === 0"
+        type="button">
+        <ion-icon name="search-outline"></ion-icon>
+        <span>Buscar</span>
+        <span class="btn-count" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</span>
+      </button>
+
+    </div>
+  </ion-toolbar>
+</ion-footer>

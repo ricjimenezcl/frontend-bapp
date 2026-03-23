@@ -1,0 +1,138 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="slots-badge loading">
+  <ion-skeleton-text animated style="width: 100%; height: 80px;"></ion-skeleton-text>
+</div>
+
+<!-- Slots Card -->
+<ion-card *ngIf="!loading" class="slots-card" [class.compact]="compactMode">
+  <ion-card-content>
+
+    <!-- Compact Mode -->
+    <div *ngIf="compactMode" class="compact-content">
+      <div class="slots-header">
+        <ion-icon name="layers-outline" color="primary"></ion-icon>
+        <span class="slots-label">Slots: {{ usedSlots }}/{{ totalSlots }}</span>
+      </div>
+      <ion-button 
+        *ngIf="isSlotsFullOrNearlyFull()"
+        (click)="goToCatalog()" 
+        size="small" 
+        fill="outline"
+        color="primary">
+        Agregar
+      </ion-button>
+    </div>
+
+    <!-- Full Mode -->
+    <div *ngIf="!compactMode" class="full-content">
+
+      <!-- Header -->
+      <div class="slots-header">
+        <ion-icon name="layers-outline" color="primary" class="slots-icon"></ion-icon>
+        <div class="slots-info">
+          <h3>Slots de Servicio</h3>
+          <p>{{ availableSlots }} de {{ totalSlots }} disponibles</p>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-labels">
+          <span class="used">{{ usedSlots }} usados</span>
+          <span class="available">{{ availableSlots }} disponibles</span>
+        </div>
+        <ion-progress-bar 
+          [value]="getSlotUsagePercentage() / 100" 
+          [color]="getProgressColor()">
+        </ion-progress-bar>
+      </div>
+
+      <!-- Slot Breakdown -->
+      <div class="slot-breakdown">
+        
+        <!-- Free Slots -->
+        <div class="breakdown-item">
+          <div class="item-icon">
+            <ion-icon name="gift-outline" color="success"></ion-icon>
+          </div>
+          <div class="item-info">
+            <span class="item-label">Slots Gratuitos</span>
+            <span class="item-value">2 slots</span>
+          </div>
+        </div>
+
+        <!-- Paid Slots -->
+        <div class="breakdown-item" *ngIf="paidSlots > 0">
+          <div class="item-icon">
+            <ion-icon name="star-outline" color="warning"></ion-icon>
+          </div>
+          <div class="item-info">
+            <span class="item-label">Slots Premium</span>
+            <span class="item-value">{{ paidSlots }} slots</span>
+          </div>
+        </div>
+
+        <!-- Expiration Info -->
+        <div class="breakdown-item expiration" *ngIf="paidSlotsExpiring">
+          <div class="item-icon">
+            <ion-icon name="time-outline" color="medium"></ion-icon>
+          </div>
+          <div class="item-info">
+            <span class="item-label">Expiran en</span>
+            <ion-badge [color]="getRemainingDays() <= 7 ? 'warning' : 'medium'" class="days-badge">
+              {{ getRemainingDays() }} días
+            </ion-badge>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert: Slots Nearly Full -->
+      <ion-card *ngIf="isSlotsFullOrNearlyFull()" class="alert-card warning">
+        <ion-card-content>
+          <div class="alert-content">
+            <ion-icon name="alert-circle" color="warning"></ion-icon>
+            <div class="alert-text">
+              <h4>Slots casi llenos</h4>
+              <p>Considera agregar más slots para publicar más servicios</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Alert: Slots Full -->
+      <ion-card *ngIf="availableSlots === 0" class="alert-card danger">
+        <ion-card-content>
+          <div class="alert-content">
+            <ion-icon name="warning" color="danger"></ion-icon>
+            <div class="alert-text">
+              <h4>Sin slots disponibles</h4>
+              <p>Compra más slots para continuar publicando servicios</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Actions -->
+      <div class="actions">
+        <ion-button 
+          (click)="goToTransactions()" 
+          fill="clear" 
+          size="small"
+          class="action-button">
+          <ion-icon slot="start" name="receipt-outline"></ion-icon>
+          Ver Historial
+        </ion-button>
+        
+        <ion-button 
+          (click)="goToCatalog()" 
+          size="small"
+          class="action-button primary">
+          <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+          Comprar Slots
+        </ion-button>
+      </div>
+
+    </div>
+
+  </ion-card-content>
+</ion-card>

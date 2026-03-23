@@ -1,0 +1,63 @@
+<ion-content [fullscreen]="true">
+  <!-- Gradient hero header -->
+  <div class="ph-hero">
+    <div class="ph-hero-glow"></div>
+    <span class="ph-hero-label">Panel de Control</span>
+    <p class="ph-greeting">{{ getGreeting() }}, <strong>{{ providerName }}</strong> {{ getGreetingEmoji() }}</p>
+  </div>
+
+  <div class="home_screen">
+    <!-- Stats cards (overlap hero) -->
+    <div class="ph-stats">
+      <div class="ph-stat-card">
+        <div class="ph-stat-icon"><ion-icon name="calendar-outline"></ion-icon></div>
+        <span class="ph-stat-label">Reservas</span>
+        <span class="ph-stat-value">—</span>
+      </div>
+      <div class="ph-stat-card">
+        <div class="ph-stat-icon"><ion-icon name="star-outline"></ion-icon></div>
+        <span class="ph-stat-label">Calificación</span>
+        <span class="ph-stat-value">—</span>
+      </div>
+      <div class="ph-stat-card">
+        <div class="ph-stat-icon"><ion-icon name="trending-up-outline"></ion-icon></div>
+        <span class="ph-stat-label">Este mes</span>
+        <span class="ph-stat-value">—</span>
+      </div>
+    </div>
+
+    <!-- Indicador de servicios pendientes de activación -->
+    <div class="pending-alert" *ngIf="metrics.pendingServices > 0" (click)="router.navigate(['/provider/services'])">
+      <ion-icon name="warning-outline"></ion-icon>
+      <span>Servicios pendientes de activación: <strong>{{ metrics.pendingServices }}</strong></span>
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </div>
+
+    <!-- Panel de métricas -->
+    <div class="metrics-panel">
+      <p class="metrics-title">Tu actividad</p>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon"><ion-icon name="eye-outline"></ion-icon></div>
+          <span class="metric-value">{{ metrics.profileViews }}</span>
+          <span class="metric-label">Visitas al perfil</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><ion-icon name="construct-outline"></ion-icon></div>
+          <span class="metric-value">{{ metrics.serviceViews }}</span>
+          <span class="metric-label">Vistas a servicios</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><ion-icon name="search-outline"></ion-icon></div>
+          <span class="metric-value">{{ metrics.zoneSearches }}</span>
+          <span class="metric-label">Búsquedas en tu zona</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+          <span class="metric-value">{{ metrics.activeServices }}</span>
+          <span class="metric-label">Servicios activos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

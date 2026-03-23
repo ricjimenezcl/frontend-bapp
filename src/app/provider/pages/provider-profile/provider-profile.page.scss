@@ -1,0 +1,144 @@
+// ─── Provider Profile — Premium SaaS Design ────────────────────────
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  height: calc(100vh - 70px);
+  overflow-y: auto;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+// ─── Settings content ────────────────────────────────────────────────
+.settings-content {
+  padding-bottom: var(--bapp-space-xl);
+}
+
+// ─── Avatar item (profile hero) ──────────────────────────────────────
+.avatar-item {
+  --background: linear-gradient(180deg, var(--bapp-surface-01) 0%, transparent 100%) !important;
+  --min-height: 100px !important;
+  --padding-start: var(--bapp-space-md) !important;
+  --padding-top: var(--bapp-space-lg) !important;
+  --padding-bottom: var(--bapp-space-lg) !important;
+  --border-color: transparent !important;
+  margin-bottom: var(--bapp-space-sm);
+
+  ion-avatar {
+    width: 72px !important;
+    height: 72px !important;
+    border: 3px solid var(--ion-color-primary);
+    box-shadow: 0 0 0 4px rgba(253,215,53,0.15), var(--bapp-shadow-md);
+    border-radius: 50%;
+    margin-right: var(--bapp-space-md) !important;
+
+    img {
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  }
+
+  ion-label {
+    .title {
+      font-size: 18px !important;
+      font-family: 'bold', sans-serif !important;
+      color: var(--bapp-text-primary) !important;
+      margin: 0 0 4px !important;
+    }
+
+    .sub-title {
+      font-size: 13px !important;
+      font-family: 'regular', sans-serif !important;
+      color: var(--bapp-text-secondary) !important;
+      margin: 0 !important;
+    }
+  }
+}
+
+// ─── Menu items ───────────────────────────────────────────────────────
+.content-item {
+  --background: transparent !important;
+  --border-color: var(--bapp-border) !important;
+  --padding-start: var(--bapp-space-md) !important;
+  --inner-padding-end: var(--bapp-space-md) !important;
+  --min-height: 52px !important;
+
+  ion-icon[slot="start"] {
+    font-size: 20px !important;
+    margin-right: 12px !important;
+  }
+
+  ion-label {
+    font-size: 15px !important;
+    font-family: 'medium', sans-serif !important;
+    color: var(--bapp-text-primary) !important;
+  }
+
+  ion-toggle {
+    --handle-background: #fff;
+    --handle-background-checked: #000;
+  }
+
+  // Danger (logout)
+  .lbl-red {
+    color: var(--ion-color-danger) !important;
+  }
+
+  &.item-has-detail-icon::part(detail-icon) {
+    color: var(--bapp-text-tertiary);
+  }
+}
+
+// ─── Section card grouping ────────────────────────────────────────────
+.profile-section-card {
+  margin: 0 var(--bapp-space-md) var(--bapp-space-md);
+  background: var(--bapp-surface-01);
+  border-radius: var(--bapp-radius-lg);
+  border: 1px solid var(--bapp-border);
+  overflow: hidden;
+}

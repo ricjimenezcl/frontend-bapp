@@ -1,0 +1,15 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Cambiar Foto de Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="avatar-upload-container">
+    <img *ngIf="previewUrl" [src]="previewUrl" class="avatar-preview" />
+    <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+    <ion-button expand="block" (click)="uploadAvatar()" [disabled]="!selectedFile || uploading">
+      {{ uploading ? 'Subiendo...' : 'Subir Foto' }}
+    </ion-button>
+  </div>
+</ion-content>

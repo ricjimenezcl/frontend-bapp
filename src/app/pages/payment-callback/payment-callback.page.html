@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Verificando Pago</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="callback-container">
+    
+    <!-- Processing State -->
+    <div *ngIf="status === 'processing'" class="status-section processing">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <h2>{{ message }}</h2>
+      <p>Por favor espera mientras verificamos tu pago...</p>
+    </div>
+
+    <!-- Success State -->
+    <div *ngIf="status === 'success'" class="status-section success">
+      <ion-icon name="checkmark-circle" color="success"></ion-icon>
+      <h2>¡Pago Exitoso!</h2>
+      <p>{{ message }}</p>
+      
+      <ion-card *ngIf="transactionId">
+        <ion-card-content>
+          <div class="transaction-detail">
+            <span class="label">ID de Transacción:</span>
+            <span class="value">#{{ transactionId }}</span>
+          </div>
+          <div class="transaction-detail" *ngIf="expiresAt">
+            <span class="label">Válido hasta:</span>
+            <span class="value">{{ formatDate(expiresAt) }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="actions">
+        <ion-button expand="block" color="primary" (click)="goToProfile()">
+          <ion-icon slot="start" name="person"></ion-icon>
+          Ver mi Perfil
+        </ion-button>
+        <ion-button expand="block" fill="outline" (click)="goToCatalog()">
+          <ion-icon slot="start" name="storefront"></ion-icon>
+          Volver a la Tienda
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Failed State -->
+    <div *ngIf="status === 'failed'" class="status-section failed">
+      <ion-icon name="close-circle" color="danger"></ion-icon>
+      <h2>Error en el Pago</h2>
+      <p>{{ message }}</p>
+      
+      <ion-card *ngIf="errorMessage" color="danger">
+        <ion-card-content>
+          <p class="error-detail">{{ errorMessage }}</p>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-content>
+          <p class="info-text">
+            <ion-icon name="information-circle"></ion-icon>
+            Si se realizó un cargo a tu tarjeta, será reembolsado automáticamente 
+            en un plazo de 5 a 10 días hábiles.
+          </p>
+        </ion-card-content>
+      </ion-card>
+
+      <div class="actions">
+        <ion-button expand="block" color="primary" (click)="goToCatalog()">
+          <ion-icon slot="start" name="refresh"></ion-icon>
+          Intentar de Nuevo
+        </ion-button>
+        <ion-button expand="block" fill="outline" color="medium" (click)="contactSupport()">
+          <ion-icon slot="start" name="mail"></ion-icon>
+          Contactar Soporte
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

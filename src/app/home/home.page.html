@@ -1,0 +1,40 @@
+<ion-content class="ion-padding">
+  <div class="welcome-screen">
+    <div class="progress">
+      <div [ngClass]="activeIndex == item ? 'active-dots':'dots'" *ngFor="let item of [0,1,2]"></div>
+    </div>
+    
+    <!-- Elimina [modules]="swiperModules" -->
+    <swiper-container #swiper (swiperslidechange)="changed()" slides-per-view="1" autoplay="true">
+      <swiper-slide>
+        <div class="slider-screen">
+          <div class="bg-cover slider-image"><ion-img src="assets/img/1.png" alt="Logo" class="logo"></ion-img></div>
+          <ion-label class="title">Find Barbers and Salons Easily in Your Hands</ion-label>
+          <ion-button expand="block" shape="round" color="primary" (click)="onNext()">
+            Next
+          </ion-button>
+        </div>
+      </swiper-slide>
+
+      <swiper-slide>
+        <div class="slider-screen">
+          <div class="bg-cover slider-image"><ion-img src="assets/img/2.png" alt="Logo" class="logo"></ion-img></div>
+          <ion-label class="title">Book Your Favourite Barber and Salon Quickly</ion-label>
+          <ion-button expand="block" shape="round" color="primary" (click)="onNext()">
+            Next
+          </ion-button>
+        </div>
+      </swiper-slide>
+
+      <swiper-slide>
+        <div class="slider-screen">
+          <div class="bg-cover slider-image"><ion-img src="assets/img/3.png" alt="Logo" class="logo"></ion-img></div>
+          <ion-label class="title">Thanks for choosing our salon, and we look forward to serving you.</ion-label>
+          <ion-button expand="block" shape="round" color="primary" (click)="onNext()">
+            Get Started
+          </ion-button>
+        </div>
+      </swiper-slide>
+    </swiper-container>
+  </div>
+</ion-content>

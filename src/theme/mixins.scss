@@ -1,0 +1,314 @@
+// src/theme/mixins.scss
+// BAPP Design System — Mixins reutilizables
+// Requiere variables de variables.scss
+
+// ── Flex helpers ─────────────────────────────────────────────────────────────
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@mixin flex-column($gap: 0) {
+  display: flex;
+  flex-direction: column;
+  @if $gap != 0 { gap: $gap; }
+}
+
+@mixin flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// ── Card style ────────────────────────────────────────────────────────────────
+
+@mixin card-style($padding: var(--bapp-space-4), $radius: var(--bapp-radius-xl)) {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: $radius;
+  padding: $padding;
+  box-shadow: var(--bapp-shadow-sm);
+}
+
+@mixin card-hover {
+  transition: box-shadow var(--bapp-transition-normal), transform var(--bapp-transition-normal);
+  &:hover, &:focus-within {
+    box-shadow: var(--bapp-shadow-md);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--bapp-shadow-sm);
+  }
+}
+
+@mixin glass-card($blur: 12px) {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur($blur);
+  -webkit-backdrop-filter: blur($blur);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--bapp-radius-xl);
+}
+
+// ── Button mixins ─────────────────────────────────────────────────────────────
+
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bapp-space-2);
+  font-family: var(--bapp-font-sans);
+  font-weight: var(--bapp-font-semibold);
+  font-size: var(--bapp-text-sm);
+  border-radius: var(--bapp-radius-full);
+  cursor: pointer;
+  transition: all var(--bapp-transition-normal);
+  border: none;
+  outline: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: var(--bapp-color-primary);
+  color: var(--bapp-color-on-primary);
+  padding: var(--bapp-space-3) var(--bapp-space-6);
+  min-height: var(--bapp-btn-height-md);
+
+  &:hover { background: var(--bapp-color-primary-hover); }
+  &:active { background: var(--bapp-color-primary-active); transform: scale(0.98); }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(253, 215, 53, 0.4); }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background: transparent;
+  color: var(--bapp-color-primary);
+  border: 1.5px solid var(--bapp-color-primary);
+  padding: var(--bapp-space-3) var(--bapp-space-6);
+  min-height: var(--bapp-btn-height-md);
+
+  &:hover {
+    background: rgba(253, 215, 53, 0.08);
+  }
+  &:active {
+    background: rgba(253, 215, 53, 0.15);
+    transform: scale(0.98);
+  }
+}
+
+@mixin button-ghost {
+  @include button-base;
+  background: transparent;
+  color: var(--bapp-text-secondary);
+  padding: var(--bapp-space-2) var(--bapp-space-4);
+
+  &:hover { background: rgba(255,255,255,0.06); color: var(--bapp-text-primary); }
+  &:active { background: rgba(255,255,255,0.10); transform: scale(0.97); }
+}
+
+@mixin button-danger {
+  @include button-base;
+  background: var(--bapp-color-danger);
+  color: #fff;
+  padding: var(--bapp-space-3) var(--bapp-space-6);
+  min-height: var(--bapp-btn-height-md);
+
+  &:hover { filter: brightness(1.1); }
+  &:active { filter: brightness(0.9); transform: scale(0.98); }
+}
+
+// ── Input style ───────────────────────────────────────────────────────────────
+
+@mixin input-style {
+  background: var(--bapp-bg-input);
+  border: 1.5px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  color: var(--bapp-text-primary);
+  font-family: var(--bapp-font-sans);
+  font-size: var(--bapp-text-sm);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  transition: border-color var(--bapp-transition-fast), box-shadow var(--bapp-transition-fast);
+  width: 100%;
+
+  &::placeholder { color: var(--bapp-text-disabled); }
+
+  &:focus {
+    border-color: var(--bapp-border-focus);
+    box-shadow: 0 0 0 3px rgba(253, 215, 53, 0.15);
+    outline: none;
+  }
+}
+
+// ── Text helpers ──────────────────────────────────────────────────────────────
+
+@mixin truncate-text($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@mixin hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+@mixin custom-scrollbar($width: 4px) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bapp-border) transparent;
+  &::-webkit-scrollbar { width: $width; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--bapp-border);
+    border-radius: $width;
+  }
+}
+
+// ── Overlay / backdrop ────────────────────────────────────────────────────────
+
+@mixin overlay-full {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@mixin backdrop($opacity: 0.6) {
+  @include overlay-full;
+  background: rgba(0, 0, 0, $opacity);
+}
+
+// ── Responsive breakpoints ────────────────────────────────────────────────────
+// Mobile-first: min-width queries
+// xs  = 0     (default — always)
+// sm  = 576px
+// md  = 768px
+// lg  = 992px
+// xl  = 1200px
+
+@mixin sm-up { @media (min-width: 576px) { @content; } }
+@mixin md-up { @media (min-width: 768px) { @content; } }
+@mixin lg-up { @media (min-width: 992px) { @content; } }
+@mixin xl-up { @media (min-width: 1200px) { @content; } }
+
+// Max-width (rare use — avoid mobile-first exceptions)
+@mixin xs-only { @media (max-width: 575.98px) { @content; } }
+@mixin sm-only { @media (min-width: 576px) and (max-width: 767.98px) { @content; } }
+
+// Safe area helpers (notch / dynamic island)
+@mixin safe-top    { padding-top: env(safe-area-inset-top); }
+@mixin safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+@mixin safe-x      {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+
+@mixin avatar($size: 40px) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+// ── Skeleton loading ──────────────────────────────────────────────────────────
+
+@mixin skeleton($radius: var(--bapp-radius-md)) {
+  background: linear-gradient(
+    90deg,
+    var(--bapp-bg-card-raised) 25%,
+    rgba(255,255,255,0.06) 50%,
+    var(--bapp-bg-card-raised) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: $radius;
+  color: transparent !important;
+
+  * { visibility: hidden; }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Glow effect ───────────────────────────────────────────────────────────────
+
+@mixin glow-primary($blur: 20px) {
+  box-shadow: 0 0 $blur rgba(253, 215, 53, 0.35);
+}
+
+@mixin glow-accent($blur: 20px) {
+  box-shadow: 0 0 $blur rgba(14, 165, 233, 0.35);
+}
+
+// ── Status dot ────────────────────────────────────────────────────────────────
+
+@mixin status-dot($size: 10px) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  border: 2px solid var(--bapp-bg-base);
+  flex-shrink: 0;
+
+  &.online  { background: var(--bapp-color-success); }
+  &.offline { background: var(--bapp-text-disabled); }
+  &.busy    { background: var(--bapp-color-warning); }
+}
+
+// ── Rating stars ──────────────────────────────────────────────────────────────
+
+@mixin rating-color($value) {
+  @if $value >= 4 { color: var(--bapp-color-primary); }
+  @else if $value >= 3 { color: var(--bapp-color-warning); }
+  @else { color: var(--bapp-text-disabled); }
+}
+
+// ── Focus ring (accessibility) ────────────────────────────────────────────────
+
+@mixin focus-ring($color: var(--bapp-color-primary)) {
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: 2px;
+  }
+}

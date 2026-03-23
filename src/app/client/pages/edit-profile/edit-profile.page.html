@@ -1,0 +1,150 @@
+<ion-header class="ion-no-border ep-header">
+  <ion-toolbar class="ep-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()" class="ep-close-btn">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="ep-title">Mi Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ep-content">
+  <div class="ep-wrapper">
+
+    <!-- ── Avatar ──────────────────────────────────────────────────── -->
+    <div class="ep-avatar-section">
+      <div class="ep-avatar-wrap">
+        <img [src]="avatar || 'assets/images/default-avatar.png'" class="ep-avatar"
+             alt="Avatar"
+             (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+        <button class="ep-camera-btn" *ngIf="isEditing" (click)="changeAvatar()" type="button">
+          <ion-icon name="camera"></ion-icon>
+        </button>
+      </div>
+      <p class="ep-avatar-hint" *ngIf="isEditing">Toca la cámara para cambiar tu foto</p>
+    </div>
+
+    <!-- ── Form fields ─────────────────────────────────────────────── -->
+    <div class="ep-form">
+
+      <!-- Nombre completo -->
+      <div class="ep-field-group">
+        <label class="ep-label">
+          <ion-icon name="person-outline"></ion-icon>
+          Nombre completo
+        </label>
+        <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
+          <ion-input
+            type="text"
+            [value]="fullName"
+            [disabled]="!isEditing"
+            placeholder="Tu nombre completo"
+            (ionChange)="updateField('name', $event)"
+            (ionBlur)="onFieldBlur('name')">
+          </ion-input>
+        </div>
+        <div class="ep-error" *ngIf="fieldTouched['name'] && fieldErrors['name']">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors['name'] }}
+        </div>
+      </div>
+
+      <!-- Teléfono -->
+      <div class="ep-field-group">
+        <label class="ep-label">
+          <ion-icon name="call-outline"></ion-icon>
+          Teléfono
+        </label>
+        <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
+          <ion-input
+            type="tel"
+            [value]="phone"
+            [disabled]="!isEditing"
+            maxlength="17"
+            placeholder="+56 9 1234 5678"
+            (ionInput)="formatPhone($event)"
+            (ionBlur)="onPhoneBlur()">
+          </ion-input>
+        </div>
+        <div class="ep-error" *ngIf="fieldTouched['fono'] && fieldErrors['fono']">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors['fono'] }}
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="ep-field-group">
+        <label class="ep-label">
+          <ion-icon name="mail-outline"></ion-icon>
+          Email
+        </label>
+        <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
+          <ion-input
+            type="email"
+            [value]="email"
+            [disabled]="!isEditing"
+            placeholder="correo@ejemplo.com"
+            (ionChange)="updateField('email', $event)"
+            (ionBlur)="onFieldBlur('email')">
+          </ion-input>
+        </div>
+        <div class="ep-error" *ngIf="fieldTouched['email'] && fieldErrors['email']">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors['email'] }}
+        </div>
+      </div>
+
+      <!-- Biografía -->
+      <div class="ep-field-group">
+        <label class="ep-label">
+          <ion-icon name="reader-outline"></ion-icon>
+          Sobre mí
+        </label>
+        <div class="ep-input-wrap ep-textarea-wrap" [class.ep-input-disabled]="!isEditing">
+          <ion-input
+            type="text"
+            [value]="bio"
+            [disabled]="!isEditing"
+            placeholder="Cuéntanos algo sobre ti..."
+            (ionChange)="updateField('bio', $event)"
+            (ionBlur)="onFieldBlur('bio')">
+          </ion-input>
+        </div>
+        <div class="ep-error" *ngIf="fieldTouched['bio'] && fieldErrors['bio']">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors['bio'] }}
+        </div>
+      </div>
+
+    </div><!-- end .ep-form -->
+
+    <!-- ── Actions ─────────────────────────────────────────────────── -->
+    <div class="ep-actions">
+
+      <!-- View mode: single Edit button -->
+      <button class="ep-btn-primary" *ngIf="!isEditing" (click)="onPin()" type="button">
+        <ion-icon name="create-outline"></ion-icon>
+        Editar perfil
+      </button>
+
+      <!-- Edit mode: Cancel + Confirm -->
+      <div class="ep-btn-row" *ngIf="isEditing">
+        <button class="ep-btn-ghost" (click)="cancelEdit()" type="button">
+          Cancelar
+        </button>
+        <button
+          class="ep-btn-primary"
+          (click)="confirmEdit()"
+          [disabled]="!isFormValid || isUpdating"
+          type="button">
+          <ion-spinner *ngIf="isUpdating" name="crescent" class="ep-spinner"></ion-spinner>
+          <ion-icon *ngIf="!isUpdating" name="checkmark-circle-outline"></ion-icon>
+          Confirmar
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

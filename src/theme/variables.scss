@@ -1,0 +1,504 @@
+// ============================================================================
+// BAPP DESIGN SYSTEM — variables.scss
+// Marketplace de Servicios Chile | Ionic v8 + Angular 18
+// Inspiración: Airbnb · Uber · Cornershop · Bsale
+// Versión: 2.0 | Dark-first | Mobile-first
+// ============================================================================
+
+// ── 1. FUENTES PERSONALIZADAS ────────────────────────────────────────────────
+@font-face {
+  font-family: "NotoSans";
+  src: url(../assets/fonts/NotoSans-Regular.ttf) format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NotoSans";
+  src: url(../assets/fonts/NotoSans-Medium.ttf) format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NotoSans";
+  src: url(../assets/fonts/NotoSans-SemiBold.ttf) format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "NotoSans";
+  src: url(../assets/fonts/NotoSans-Bold.ttf) format('truetype');
+  font-weight: 700;
+  font-display: swap;
+}
+// Alias legacy (compatibilidad con código existente)
+@font-face { font-family: "regular";   src: url(../assets/fonts/NotoSans-Regular.ttf);   }
+@font-face { font-family: "medium";    src: url(../assets/fonts/NotoSans-Medium.ttf);    }
+@font-face { font-family: "semi-bold"; src: url(../assets/fonts/NotoSans-SemiBold.ttf);  }
+@font-face { font-family: "bold";      src: url(../assets/fonts/NotoSans-Bold.ttf);      }
+
+$ionicons-font-path: "../assets/fonts";
+
+// ── 2. VARIABLES SCSS (para uso en mixins) ───────────────────────────────────
+$bp-xs:  375px;
+$bp-sm:  430px;
+$bp-md:  768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
+// ============================================================================
+// 3. :ROOT — TOKEN SYSTEM COMPLETO
+// ============================================================================
+:root {
+
+  // ── 3.1 PALETA PRIMITIVA ──────────────────────────────────────────────────
+  // Amarillo Marca (identidad BAPP)
+  --bapp-yellow-50:  #FFFDE7;
+  --bapp-yellow-100: #FFF9C4;
+  --bapp-yellow-200: #FFF176;
+  --bapp-yellow-300: #FFEE58;
+  --bapp-yellow-400: #FFCA28;
+  --bapp-yellow-500: #FDD735; // ← PRIMARY BRAND
+  --bapp-yellow-600: #F9A825;
+  --bapp-yellow-700: #F57F17;
+  --bapp-yellow-800: #E65100;
+  --bapp-yellow-900: #BF360C;
+
+  // Cielo Acento (proveedor, links, CTAs secundarios)
+  --bapp-sky-50:  #F0F9FF;
+  --bapp-sky-100: #E0F2FE;
+  --bapp-sky-200: #BAE6FD;
+  --bapp-sky-300: #7DD3FC;
+  --bapp-sky-400: #38BDF8;
+  --bapp-sky-500: #0EA5E9; // ← ACCENT PROVIDER
+  --bapp-sky-600: #0284C7;
+  --bapp-sky-700: #0369A1;
+  --bapp-sky-800: #075985;
+  --bapp-sky-900: #0C4A6E;
+
+  // Neutral escala completa (grises cálidos)
+  --bapp-neutral-0:   #FFFFFF;
+  --bapp-neutral-50:  #F9FAFB;
+  --bapp-neutral-100: #F3F4F6;
+  --bapp-neutral-200: #E5E7EB;
+  --bapp-neutral-300: #D1D5DB;
+  --bapp-neutral-400: #9CA3AF;
+  --bapp-neutral-500: #6B7280;
+  --bapp-neutral-600: #4B5563;
+  --bapp-neutral-700: #374151;
+  --bapp-neutral-800: #1F2937;
+  --bapp-neutral-900: #111827;
+  --bapp-neutral-950: #080C10;
+
+  // Éxito · Advertencia · Peligro · Info
+  --bapp-green-400:   #34D399;
+  --bapp-green-500:   #10B981; // success
+  --bapp-green-600:   #059669;
+  --bapp-amber-400:   #FBBF24;
+  --bapp-amber-500:   #F59E0B; // warning
+  --bapp-amber-600:   #D97706;
+  --bapp-red-400:     #F87171;
+  --bapp-red-500:     #EF4444; // danger
+  --bapp-red-600:     #DC2626;
+  --bapp-blue-400:    #60A5FA;
+  --bapp-blue-500:    #3B82F6; // info
+  --bapp-blue-600:    #2563EB;
+
+  // ── 3.2 COLORES SEMÁNTICOS ────────────────────────────────────────────────
+  --bapp-color-primary:         #FDD735;
+  --bapp-color-primary-rgb:     253, 215, 53;
+  --bapp-color-primary-dark:    #E6C22F;
+  --bapp-color-primary-light:   #FFEC6E;
+  --bapp-color-primary-subtle:  rgba(253, 215, 53, 0.12);
+  --bapp-color-primary-glow:    rgba(253, 215, 53, 0.25);
+  --bapp-color-primary-hover:   var(--bapp-color-primary-dark);
+  --bapp-color-primary-active:  #CCB02A;
+  --bapp-color-on-primary:      #141414;
+
+  --bapp-color-accent:          #0EA5E9;
+  --bapp-color-accent-rgb:      14, 165, 233;
+  --bapp-color-accent-dark:     #0284C7;
+  --bapp-color-accent-light:    #38BDF8;
+  --bapp-color-accent-subtle:   rgba(14, 165, 233, 0.12);
+
+  --bapp-color-success:         #10B981;
+  --bapp-color-success-rgb:     16, 185, 129;
+  --bapp-color-success-subtle:  rgba(16, 185, 129, 0.12);
+
+  --bapp-color-warning:         #F59E0B;
+  --bapp-color-warning-rgb:     245, 158, 11;
+  --bapp-color-warning-subtle:  rgba(245, 158, 11, 0.12);
+
+  --bapp-color-danger:          #EF4444;
+  --bapp-color-danger-rgb:      239, 68, 68;
+  --bapp-color-danger-subtle:   rgba(239, 68, 68, 0.12);
+
+  --bapp-color-info:            #3B82F6;
+  --bapp-color-info-rgb:        59, 130, 246;
+  --bapp-color-info-subtle:     rgba(59, 130, 246, 0.12);
+
+  // Roles
+  --bapp-color-client:          var(--bapp-color-primary);
+  --bapp-color-provider:        var(--bapp-color-accent);
+
+  // ── 3.3 SURFACES (tema oscuro base) ──────────────────────────────────────
+  --bapp-bg-base:         #141414; // contenido page más profundo
+  --bapp-bg-page:         #1A1A1A; // fondo de pages (ion-content)
+  --bapp-bg-card:         #232323; // tarjetas nivel 1
+  --bapp-bg-card-raised:  #2C2C2C; // tarjetas elevadas / modals internos
+  --bapp-bg-input:        #2A2A2A; // inputs, selects
+  --bapp-bg-overlay:      rgba(0, 0, 0, 0.65); // overlays/backdrop
+
+  // Superficies legacy (retrocompatibilidad)
+  --bapp-surface-01: var(--bapp-bg-card);
+  --bapp-surface-02: var(--bapp-bg-card-raised);
+  --bapp-surface-03: #363636;
+  --bapp-surface-card:     var(--bapp-bg-card);
+  --bapp-surface-elevated: var(--bapp-bg-card-raised);
+  --bapp-surface-input:    var(--bapp-bg-input);
+  --bapp-surface-overlay:  var(--bapp-bg-overlay);
+  --bapp-surface-hover:    rgba(255, 255, 255, 0.06);
+  --bapp-surface-active:   rgba(255, 255, 255, 0.10);
+
+  // ── 3.4 BORDES ────────────────────────────────────────────────────────────
+  --bapp-border:            rgba(255, 255, 255, 0.08);
+  --bapp-border-medium:     rgba(255, 255, 255, 0.14);
+  --bapp-border-strong:     rgba(255, 255, 255, 0.24);
+  --bapp-border-primary:    rgba(253, 215, 53, 0.35);
+  --bapp-border-accent:     rgba(14, 165, 233, 0.35);
+  // Aliases legacy
+  --bapp-border-default:    var(--bapp-border);
+  --bapp-border-subtle:     var(--bapp-border);
+  --bapp-border-focus:      var(--bapp-color-primary);
+
+  // ── 3.5 TEXTO ─────────────────────────────────────────────────────────────
+  --bapp-text-primary:    #FFFFFF;
+  --bapp-text-secondary:  rgba(255, 255, 255, 0.62);
+  --bapp-text-tertiary:   rgba(255, 255, 255, 0.38);
+  --bapp-text-disabled:   rgba(255, 255, 255, 0.24);
+  --bapp-text-inverse:    #141414;
+  --bapp-text-accent:     var(--bapp-color-primary);
+  --bapp-text-link:       var(--bapp-color-accent);
+  --bapp-text-success:    var(--bapp-green-400);
+  --bapp-text-warning:    var(--bapp-amber-400);
+  --bapp-text-danger:     var(--bapp-red-400);
+
+  // ── 3.6 TIPOGRAFÍA ───────────────────────────────────────────────────────
+  // Familias
+  --bapp-font-sans:    'NotoSans', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --bapp-font-display: 'Good Times', 'NotoSans', system-ui, sans-serif; // brand headings
+  --bapp-font-mono:    'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  // Escala de tamaños (mobile-first, base 15px)
+  --bapp-text-xs:   11px;  // labels diminutos, captions de tabla
+  --bapp-text-sm:   13px;  // body secundario, metadata
+  --bapp-text-md:   15px;  // body principal (base)
+  --bapp-text-lg:   17px;  // body destacado, subtítulos
+  --bapp-text-xl:   20px;  // subtítulos de sección
+  --bapp-text-2xl:  24px;  // títulos de card
+  --bapp-text-3xl:  28px;  // títulos de página
+  --bapp-text-4xl:  32px;  // headings grandes
+  --bapp-text-5xl:  40px;  // display / hero
+
+  // Pesos
+  --bapp-font-regular:   400;
+  --bapp-font-medium:    500;
+  --bapp-font-semibold:  600;
+  --bapp-font-bold:      700;
+  --bapp-font-extrabold: 800;
+  // Aliases legacy
+  --bapp-weight-regular:  var(--bapp-font-regular);
+  --bapp-weight-medium:   var(--bapp-font-medium);
+  --bapp-weight-semibold: var(--bapp-font-semibold);
+  --bapp-weight-bold:     var(--bapp-font-bold);
+  --bapp-font-base:       var(--bapp-font-sans);
+  --bapp-text-base:       var(--bapp-text-md);
+  --bapp-text-2xs:        var(--bapp-text-xs);
+  --bapp-transition-base: var(--bapp-transition-normal);
+
+  // Line heights
+  --bapp-leading-tight:   1.2;
+  --bapp-leading-snug:    1.35;
+  --bapp-leading-normal:  1.5;
+  --bapp-leading-relaxed: 1.625;
+
+  // Letter spacing
+  --bapp-tracking-tight:  -0.02em;
+  --bapp-tracking-normal:  0;
+  --bapp-tracking-wide:    0.03em;
+  --bapp-tracking-wider:   0.06em;
+  --bapp-tracking-widest:  0.12em;
+
+  // ── 3.7 ESPACIADO (base 4px) ─────────────────────────────────────────────
+  --bapp-space-0:   0px;
+  --bapp-space-0_5: 2px;
+  --bapp-space-1:   4px;
+  --bapp-space-2:   8px;
+  --bapp-space-3:   12px;
+  --bapp-space-4:   16px;
+  --bapp-space-5:   20px;
+  --bapp-space-6:   24px;
+  --bapp-space-7:   28px;
+  --bapp-space-8:   32px;
+  --bapp-space-10:  40px;
+  --bapp-space-12:  48px;
+  --bapp-space-14:  56px;
+  --bapp-space-16:  64px;
+  --bapp-space-20:  80px;
+  --bapp-space-24:  96px;
+
+  // Aliases semánticos legacy (retrocompatibilidad)
+  --bapp-space-xs: var(--bapp-space-2);   // 8px
+  --bapp-space-sm: var(--bapp-space-3);   // 12px
+  --bapp-space-md: var(--bapp-space-4);   // 16px
+  --bapp-space-lg: var(--bapp-space-6);   // 24px
+  --bapp-space-xl: var(--bapp-space-8);   // 32px
+
+  // ── 3.8 BORDER RADIUS ───────────────────────────────────────────────────
+  --bapp-radius-none: 0px;
+  --bapp-radius-xs:   4px;
+  --bapp-radius-sm:   8px;
+  --bapp-radius-md:   12px;
+  --bapp-radius-lg:   16px;
+  --bapp-radius-xl:   20px;
+  --bapp-radius-2xl:  24px;
+  --bapp-radius-3xl:  32px;
+  --bapp-radius-full: 9999px;
+
+  // ── 3.9 SOMBRAS ─────────────────────────────────────────────────────────
+  --bapp-shadow-xs:       0 1px 2px rgba(0, 0, 0, 0.20);
+  --bapp-shadow-sm:       0 2px 8px rgba(0, 0, 0, 0.28);
+  --bapp-shadow-md:       0 4px 16px rgba(0, 0, 0, 0.36);
+  --bapp-shadow-lg:       0 8px 32px rgba(0, 0, 0, 0.46);
+  --bapp-shadow-xl:       0 16px 48px rgba(0, 0, 0, 0.56);
+  --bapp-shadow-card:     0 2px 12px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --bapp-shadow-modal:    0 24px 64px rgba(0, 0, 0, 0.64);
+  --bapp-shadow-inset:    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  --bapp-shadow-primary:  0 4px 24px rgba(253, 215, 53, 0.30);
+  --bapp-shadow-accent:   0 4px 24px rgba(14, 165, 233, 0.28);
+  --bapp-shadow-danger:   0 4px 24px rgba(239, 68, 68, 0.28);
+  --bapp-shadow-success:  0 4px 24px rgba(16, 185, 129, 0.28);
+
+  // ── 3.10 TRANSICIONES ───────────────────────────────────────────────────
+  --bapp-duration-fast:   120ms;
+  --bapp-duration-normal: 200ms;
+  --bapp-duration-slow:   300ms;
+  --bapp-duration-xslow:  500ms;
+
+  --bapp-ease-default: ease;
+  --bapp-ease-in:      cubic-bezier(0.4, 0, 1, 1);
+  --bapp-ease-out:     cubic-bezier(0, 0, 0.2, 1);
+  --bapp-ease-inout:   cubic-bezier(0.4, 0, 0.2, 1);
+  --bapp-ease-spring:  cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  --bapp-transition-fast:   var(--bapp-duration-fast)   var(--bapp-ease-out);
+  --bapp-transition-normal: var(--bapp-duration-normal) var(--bapp-ease-out);
+  --bapp-transition-slow:   var(--bapp-duration-slow)   var(--bapp-ease-out);
+
+  // ── 3.11 Z-INDEX ─────────────────────────────────────────────────────────
+  --bapp-z-base:      0;
+  --bapp-z-raised:    10;
+  --bapp-z-dropdown:  100;
+  --bapp-z-sticky:    200;
+  --bapp-z-overlay:   300;
+  --bapp-z-modal:     400;
+  --bapp-z-toast:     500;
+  --bapp-z-tooltip:   600;
+
+  // ── 3.12 DIMENSIONES COMPONENTES ────────────────────────────────────────
+  --bapp-header-height:    56px;
+  --bapp-tabbar-height:    64px;  // tab bar + safe area
+  --bapp-input-height:     52px;
+  --bapp-button-h-sm:      36px;
+  --bapp-button-h-md:      48px;
+  --bapp-button-h-lg:      56px;
+  // Aliases legacy
+  --bapp-btn-height-sm:      var(--bapp-button-h-sm);
+  --bapp-btn-height-md:      var(--bapp-button-h-md);
+  --bapp-btn-height-lg:      var(--bapp-button-h-lg);
+  --bapp-bottom-nav-height:  var(--bapp-tabbar-height);
+  --bapp-z-header:           var(--bapp-z-sticky);
+  --bapp-card-padding:     var(--bapp-space-4);
+  --bapp-page-padding:     var(--bapp-space-4);
+  --bapp-avatar-xs:        28px;
+  --bapp-avatar-sm:        36px;
+  --bapp-avatar-md:        48px;
+  --bapp-avatar-lg:        64px;
+  --bapp-avatar-xl:        80px;
+
+  // ── 3.13 IONIC CORE VARIABLES ────────────────────────────────────────────
+  // Colores base Ionic
+  --ion-background-color:         var(--bapp-bg-page);
+  --ion-background-color-rgb:     26, 26, 26;
+  --ion-text-color:                var(--bapp-text-primary);
+  --ion-text-color-rgb:            255, 255, 255;
+  --ion-card-background:           var(--bapp-bg-card);
+  --ion-item-background:           transparent;
+  --ion-toolbar-background:        var(--bapp-bg-base);
+  --ion-tab-bar-background:        var(--bapp-bg-base);
+  --ion-tab-bar-border-color:      var(--bapp-border);
+  --ion-border-color:              var(--bapp-border);
+  --ion-color-step-50:             #1f1f1f;
+  --ion-color-step-100:            #2b2b2b;
+  --ion-color-step-150:            #363636;
+  --ion-color-step-200:            #404040;
+  --ion-color-step-300:            #555555;
+  --ion-color-step-400:            #6b6b6b;
+  --ion-color-step-500:            #808080;
+  --ion-color-step-600:            #969696;
+  --ion-color-step-700:            #ababab;
+  --ion-color-step-800:            #c0c0c0;
+  --ion-color-step-900:            #d6d6d6;
+  --ion-color-step-950:            #e8e8e8;
+
+  // Fuente global Ionic
+  --ion-font-family: var(--bapp-font-sans);
+
+  // ── 3.14 IONIC COLOR PALETTE ─────────────────────────────────────────────
+  /** primary — Amarillo marca **/
+  --ion-color-primary:              #FDD735;
+  --ion-color-primary-rgb:          253, 215, 53;
+  --ion-color-primary-contrast:     #141414;
+  --ion-color-primary-contrast-rgb: 20, 20, 20;
+  --ion-color-primary-shade:        #E6C22F;
+  --ion-color-primary-tint:         #FFEC6E;
+
+  /** secondary — Gris oscuro **/
+  --ion-color-secondary:              #3A3A3A;
+  --ion-color-secondary-rgb:          58, 58, 58;
+  --ion-color-secondary-contrast:     #FFFFFF;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade:        #2E2E2E;
+  --ion-color-secondary-tint:         #4A4A4A;
+
+  /** tertiary — Azul acento **/
+  --ion-color-tertiary:              #0EA5E9;
+  --ion-color-tertiary-rgb:          14, 165, 233;
+  --ion-color-tertiary-contrast:     #FFFFFF;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade:        #0284C7;
+  --ion-color-tertiary-tint:         #38BDF8;
+
+  /** success **/
+  --ion-color-success:              #10B981;
+  --ion-color-success-rgb:          16, 185, 129;
+  --ion-color-success-contrast:     #FFFFFF;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade:        #059669;
+  --ion-color-success-tint:         #34D399;
+
+  /** warning **/
+  --ion-color-warning:              #F59E0B;
+  --ion-color-warning-rgb:          245, 158, 11;
+  --ion-color-warning-contrast:     #141414;
+  --ion-color-warning-contrast-rgb: 20, 20, 20;
+  --ion-color-warning-shade:        #D97706;
+  --ion-color-warning-tint:         #FBB024;
+
+  /** danger **/
+  --ion-color-danger:              #EF4444;
+  --ion-color-danger-rgb:          239, 68, 68;
+  --ion-color-danger-contrast:     #FFFFFF;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade:        #DC2626;
+  --ion-color-danger-tint:         #F87171;
+
+  /** dark **/
+  --ion-color-dark:              #1A1A1A;
+  --ion-color-dark-rgb:          26, 26, 26;
+  --ion-color-dark-contrast:     #FFFFFF;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade:        #141414;
+  --ion-color-dark-tint:         #242424;
+
+  /** medium **/
+  --ion-color-medium:              #6B7280;
+  --ion-color-medium-rgb:          107, 114, 128;
+  --ion-color-medium-contrast:     #FFFFFF;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade:        #4B5563;
+  --ion-color-medium-tint:         #9CA3AF;
+
+  /** light **/
+  --ion-color-light:              #F3F4F6;
+  --ion-color-light-rgb:          243, 244, 246;
+  --ion-color-light-contrast:     #141414;
+  --ion-color-light-contrast-rgb: 20, 20, 20;
+  --ion-color-light-shade:        #D1D5DB;
+  --ion-color-light-tint:         #F9FAFB;
+
+  /** verde (retrocompatibilidad) **/
+  --ion-color-verde:              #10B981;
+  --ion-color-verde-rgb:          16, 185, 129;
+  --ion-color-verde-contrast:     #FFFFFF;
+  --ion-color-verde-contrast-rgb: 255, 255, 255;
+  --ion-color-verde-shade:        #059669;
+  --ion-color-verde-tint:         #34D399;
+
+  /** azul (retrocompatibilidad) **/
+  --ion-color-azul:              #0EA5E9;
+  --ion-color-azul-rgb:          14, 165, 233;
+  --ion-color-azul-contrast:     #FFFFFF;
+  --ion-color-azul-contrast-rgb: 255, 255, 255;
+  --ion-color-azul-shade:        #0284C7;
+  --ion-color-azul-tint:         #38BDF8;
+}
+
+// ── Clases de color Ionic para custom colors ─────────────────────────────────
+.ion-color-verde {
+  --ion-color-base:         var(--ion-color-verde);
+  --ion-color-base-rgb:     var(--ion-color-verde-rgb);
+  --ion-color-contrast:     var(--ion-color-verde-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-verde-contrast-rgb);
+  --ion-color-shade:        var(--ion-color-verde-shade);
+  --ion-color-tint:         var(--ion-color-verde-tint);
+}
+.ion-color-azul {
+  --ion-color-base:         var(--ion-color-azul);
+  --ion-color-base-rgb:     var(--ion-color-azul-rgb);
+  --ion-color-contrast:     var(--ion-color-azul-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-azul-contrast-rgb);
+  --ion-color-shade:        var(--ion-color-azul-shade);
+  --ion-color-tint:         var(--ion-color-azul-tint);
+}
+
+// ── 4. DARK MODE (por defecto — el app ya es dark) ───────────────────────────
+// Cuando el sistema está en light mode, mantenemos nuestros colores oscuros
+// porque el app fue diseñado dark-first.
+@media (prefers-color-scheme: light) {
+  :root {
+    // Override para mantener dark theme incluso en dispositivos con light mode
+    --ion-background-color:     var(--bapp-bg-page);
+    --ion-background-color-rgb: 26, 26, 26;
+    --ion-text-color:            var(--bapp-text-primary);
+    --ion-text-color-rgb:        255, 255, 255;
+  }
+}
+
+// Clase manual dark mode (si se implementa toggle en futuro)
+.dark-mode {
+  --bapp-bg-base:        #141414;
+  --bapp-bg-page:        #1A1A1A;
+  --bapp-bg-card:        #232323;
+  --bapp-bg-card-raised: #2C2C2C;
+  --bapp-bg-input:       #2A2A2A;
+  --bapp-text-primary:   #FFFFFF;
+  --bapp-text-secondary: rgba(255, 255, 255, 0.62);
+}
+
+// Clase light mode (preparado para futuro)
+.light-mode {
+  --bapp-bg-base:         #FFFFFF;
+  --bapp-bg-page:         #F3F4F6;
+  --bapp-bg-card:         #FFFFFF;
+  --bapp-bg-card-raised:  #F9FAFB;
+  --bapp-bg-input:        #F3F4F6;
+  --bapp-border:          rgba(0, 0, 0, 0.08);
+  --bapp-border-medium:   rgba(0, 0, 0, 0.14);
+  --bapp-text-primary:    #111827;
+  --bapp-text-secondary:  #6B7280;
+  --bapp-text-tertiary:   #9CA3AF;
+  --bapp-text-inverse:    #FFFFFF;
+  --ion-background-color: #F3F4F6;
+  --ion-text-color:        #111827;
+  --ion-card-background:   #FFFFFF;
+}

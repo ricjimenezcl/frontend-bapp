@@ -1,0 +1,195 @@
+// edit-profile.page.scss
+@import '../../../../theme/mixins';
+
+:host { display: block; height: 100%; width: 100%; }
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.ep-header {
+  .ep-toolbar {
+    --background: var(--bapp-surface-card);
+    --border-color: var(--bapp-border-default);
+  }
+
+  .ep-close-btn { --color: var(--bapp-text-secondary); }
+
+  .ep-title {
+    font-size: var(--bapp-text-base);
+    font-weight: var(--bapp-weight-semibold);
+    color: var(--bapp-text-primary);
+  }
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+.ep-content { --background: var(--bapp-bg-page); }
+
+.ep-wrapper {
+  @include flex-column;
+  padding: var(--bapp-space-6) var(--bapp-space-4) var(--bapp-space-8);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+// ── Avatar section ────────────────────────────────────────────────────────────
+.ep-avatar-section {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-6);
+}
+
+.ep-avatar-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ep-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bapp-color-primary);
+  box-shadow: 0 0 0 5px rgba(253, 215, 53, 0.15), var(--bapp-shadow-md);
+  display: block;
+}
+
+.ep-camera-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bapp-color-primary);
+  border: none;
+  @include flex-center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform var(--bapp-transition-fast);
+
+  ion-icon { font-size: 15px; color: #000; }
+  &:active { transform: scale(0.9); }
+}
+
+.ep-avatar-hint {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  margin: 0;
+  text-align: center;
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.ep-form {
+  @include flex-column;
+  gap: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-6);
+}
+
+.ep-field-group {
+  @include flex-column;
+  gap: var(--bapp-space-1);
+}
+
+.ep-label {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+
+  ion-icon { font-size: 14px; color: var(--bapp-color-primary); }
+}
+
+.ep-input-wrap {
+  background: var(--bapp-surface-card);
+  border: 1.5px solid var(--bapp-border-default);
+  border-radius: var(--bapp-radius-xl);
+  padding: 0 var(--bapp-space-1);
+  transition: border-color var(--bapp-transition-fast);
+
+  &:focus-within { border-color: var(--bapp-border-focus); }
+
+  ion-input {
+    --background: transparent;
+    --color: var(--bapp-text-primary);
+    --placeholder-color: var(--bapp-text-disabled);
+    --padding-start: var(--bapp-space-3);
+    --padding-end: var(--bapp-space-3);
+    --padding-top: var(--bapp-space-3);
+    --padding-bottom: var(--bapp-space-3);
+    font-size: var(--bapp-text-sm);
+  }
+
+  &.ep-input-disabled {
+    background: var(--bapp-surface-elevated);
+    border-color: var(--bapp-border-subtle);
+    opacity: 0.7;
+  }
+}
+
+.ep-textarea-wrap {
+  ion-input {
+    --padding-top: var(--bapp-space-3);
+    --padding-bottom: var(--bapp-space-3);
+    min-height: 56px;
+  }
+}
+
+.ep-error {
+  @include flex-start;
+  gap: var(--bapp-space-1);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+
+  ion-icon { font-size: 13px; flex-shrink: 0; }
+}
+
+// ── Action buttons ────────────────────────────────────────────────────────────
+.ep-actions { @include flex-column; gap: var(--bapp-space-3); }
+
+.ep-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bapp-space-3);
+}
+
+.ep-btn-primary {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  height: 50px;
+  background: var(--bapp-color-primary);
+  border: none;
+  border-radius: var(--bapp-radius-full);
+  color: #000;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-bold);
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(253, 215, 53, 0.3);
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; }
+
+  &:active { transform: scale(0.98); }
+  &:disabled { opacity: 0.45; pointer-events: none; }
+}
+
+.ep-btn-ghost {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  height: 50px;
+  background: transparent;
+  border: 1.5px solid var(--bapp-border-default);
+  border-radius: var(--bapp-radius-full);
+  color: var(--bapp-text-secondary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  &:active { background: var(--bapp-surface-hover); }
+}
+
+.ep-spinner { width: 18px; height: 18px; }

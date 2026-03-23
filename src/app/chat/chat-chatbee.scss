@@ -1,0 +1,158 @@
+// Estilos ChatBee para vista de chat individual
+
+
+ion-toolbar {
+  --background: var(--ion-color-medium);
+}
+
+.inbox-chat-avatar {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+.inbox-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #171313;
+  display: block;
+  margin: 0;
+}
+
+.inbox-status {
+  font-size: 12px;
+  color: var(--ion-color-success);
+  display: block;
+  margin: 0;
+}
+
+.chat-inbox-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+
+  .empty-chat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    text-align: center;
+
+    ion-icon {
+      font-size: 64px;
+      color: var(--ion-color-primary);
+      margin-bottom: 16px;
+    }
+
+    ion-text {
+      font-size: 14px;
+    }
+  }
+
+  .chat-list {
+    display: flex;
+    flex-direction: column;
+    margin: 4px 0;
+
+    .receiver,
+    .sender {
+      display: flex;
+      margin: 4px 0;
+
+      .text-type {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 16px;
+
+        .msg {
+          color: rgb(205, 58, 58);
+          font-size: 14px;
+          line-height: 1.4;
+          margin: 0;
+          word-wrap: break-word;
+        }
+      }
+    }
+
+    .receiver {
+      justify-content: flex-start;
+
+      .text-type {
+        background-color: var(--ion-color-medium);
+        border-bottom-left-radius: 4px;
+      }
+    }
+
+    .sender {
+      justify-content: flex-end;
+
+      .text-type {
+        background-color: var(--ion-color-primary);
+        border-bottom-right-radius: 4px;
+
+        .msg {
+          text-align: right;
+        }
+      }
+    }
+  }
+}
+
+.bottom-content-chat {
+  align-items: center;
+  padding: 8px;
+  --background: var(--ion-color-danger);
+
+  .text-input {
+    --background: var(--ion-color-light);
+    border-radius: 24px;
+    padding: 4px 12px;
+    margin: 0;
+
+    ion-textarea {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      font-size: 14px;
+      min-height: 36px;
+    }
+
+    ion-icon {
+      font-size: 20px;
+      margin: 0 4px;
+      cursor: pointer;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+
+  .voice-btn {
+    background-color: var(--ion-color-primary);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}

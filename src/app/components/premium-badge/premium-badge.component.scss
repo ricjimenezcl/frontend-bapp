@@ -1,0 +1,258 @@
+.premium-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    ion-card-content {
+      padding: 20px;
+    }
+  }
+
+  &.inactive {
+    border: 2px dashed var(--ion-color-medium);
+    background: var(--ion-color-light);
+
+    ion-card-content {
+      padding: 20px;
+    }
+  }
+
+  &.compact {
+    margin: 8px 0;
+    
+    ion-card-content {
+      padding: 12px;
+    }
+  }
+}
+
+// Compact Mode Styles
+.compact-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .premium-header,
+  .upgrade-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    .premium-label,
+    .upgrade-label {
+      font-weight: 600;
+      font-size: 14px;
+    }
+  }
+
+  .days-badge {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+// Full Mode Styles
+.full-content {
+
+  // Premium Header
+  .premium-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .premium-icon {
+      font-size: 36px;
+    }
+
+    .premium-info {
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: white;
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        opacity: 0.9;
+        color: white;
+      }
+    }
+  }
+
+  // Expiration Info
+  .expiration-info {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+
+    .expiration-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+
+      &:first-child {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 12px;
+        margin-bottom: 4px;
+      }
+
+      ion-icon {
+        font-size: 20px;
+        color: white;
+      }
+
+      > div {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .label {
+          font-size: 13px;
+          color: rgba(255, 255, 255, 0.9);
+        }
+
+        .value {
+          font-size: 13px;
+          font-weight: 600;
+          color: white;
+        }
+
+        .days-badge {
+          font-size: 12px;
+          padding: 4px 10px;
+        }
+      }
+    }
+  }
+
+  // Actions
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+
+    .action-button {
+      --color: white;
+      font-size: 13px;
+    }
+  }
+
+  // Upgrade Header
+  .upgrade-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .upgrade-icon {
+      font-size: 36px;
+    }
+
+    .upgrade-info {
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ion-color-dark);
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  // Benefits List
+  .benefits-list {
+    margin-bottom: 20px;
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+
+      ion-icon {
+        font-size: 20px;
+      }
+
+      span {
+        font-size: 14px;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+
+  // Upgrade Button
+  .upgrade-button {
+    margin-top: 12px;
+    font-weight: 600;
+  }
+}
+
+// Loading State
+.premium-badge.loading {
+  margin: 16px;
+  border-radius: 12px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .premium-card {
+    margin: 12px;
+
+    &.compact {
+      margin: 6px 0;
+    }
+  }
+
+  .full-content {
+    .premium-header,
+    .upgrade-header {
+      .premium-icon,
+      .upgrade-icon {
+        font-size: 32px;
+      }
+
+      .premium-info,
+      .upgrade-info {
+        h3 {
+          font-size: 16px;
+        }
+
+        p {
+          font-size: 12px;
+        }
+      }
+    }
+
+    .benefits-list {
+      .benefit-item {
+        span {
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}

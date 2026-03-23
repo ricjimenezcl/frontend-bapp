@@ -1,0 +1,82 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Términos y Condiciones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding terms-acceptance">
+
+  <div class="welcome-block">
+    <ion-icon name="shield-checkmark-outline" class="shield-icon"></ion-icon>
+    <h2>Antes de continuar</h2>
+    <p>Para usar BAPP Search debes aceptar nuestros Términos y Condiciones y Política de Privacidad.</p>
+  </div>
+
+  <div class="terms-summary">
+    <h3>Resumen de lo más importante:</h3>
+    <ul>
+      <li>Tu información es tratada de forma confidencial y segura.</li>
+      <li>No vendemos tus datos personales a terceros.</li>
+      <li>Puedes solicitar la eliminación de tu cuenta en cualquier momento.</li>
+      <li>El servicio conecta clientes con proveedores de servicios en Chile.</li>
+    </ul>
+  </div>
+
+  <div class="links-block">
+    <ion-button fill="clear" routerLink="/terms" target="_blank" size="small">
+      <ion-icon name="document-text-outline" slot="start"></ion-icon>
+      Leer Términos y Condiciones completos
+    </ion-button>
+    <ion-button fill="clear" routerLink="/privacy" target="_blank" size="small">
+      <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+      Leer Política de Privacidad completa
+    </ion-button>
+  </div>
+
+  <!-- Checkbox obligatorio -->
+  <ion-item lines="none" class="checkbox-item">
+    <ion-checkbox
+      [(ngModel)]="termsAccepted"
+      slot="start"
+    ></ion-checkbox>
+    <ion-label class="ion-text-wrap">
+      Acepto los <a routerLink="/terms">Términos y Condiciones</a>
+      y la <a routerLink="/privacy">Política de Privacidad</a> *
+    </ion-label>
+  </ion-item>
+
+  <!-- Checkbox opcional -->
+  <ion-item lines="none" class="checkbox-item">
+    <ion-checkbox
+      [(ngModel)]="emailOptIn"
+      slot="start"
+    ></ion-checkbox>
+    <ion-label class="ion-text-wrap">
+      Deseo recibir ofertas y novedades de BAPP Search por email (opcional)
+    </ion-label>
+  </ion-item>
+
+  <div class="actions">
+    <ion-button
+      expand="block"
+      [disabled]="!canContinue || isLoading"
+      (click)="onAccept()"
+      class="accept-button"
+    >
+      <ion-spinner *ngIf="isLoading" slot="start" name="crescent"></ion-spinner>
+      <ion-icon *ngIf="!isLoading" name="checkmark-circle-outline" slot="start"></ion-icon>
+      {{ isLoading ? 'Guardando...' : 'Aceptar y continuar' }}
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="medium"
+      (click)="onDecline()"
+      [disabled]="isLoading"
+    >
+      Rechazar y cerrar sesión
+    </ion-button>
+  </div>
+
+</ion-content>

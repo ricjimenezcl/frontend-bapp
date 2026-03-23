@@ -1,0 +1,118 @@
+
+<ion-content class="inbox-content" [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="refreshConversations($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="crescent"
+      refreshingText="Actualizando conversaciones...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <section class="inbox-hero">
+    <div>
+      <p class="eyebrow">Mensajes</p>
+      <h1>Charla con tus proveedores</h1>
+      <p class="subtitle">{{ stats().unread }} mensajes pendientes</p>
+    </div>
+    <ion-chip color="light" class="last-sync" *ngIf="stats().lastUpdated">
+      <ion-icon name="time-outline"></ion-icon>
+      <ion-label>Actualizado {{ stats().lastUpdated | date: 'shortTime' }}</ion-label>
+    </ion-chip>
+  </section>
+
+  <section class="stats-grid">
+    <article class="stat-card highlight">
+      <p>Conversaciones totales</p>
+      <h2>{{ stats().totalConversations }}</h2>
+    </article>
+    <article class="stat-card">
+      <p>Sin leer</p>
+      <h2>{{ stats().unread }}</h2>
+    </article>
+    <article class="stat-card">
+      <p>Activas</p>
+      <h2>{{ stats().active }}</h2>
+    </article>
+  </section>
+
+  <section class="search-card">
+    <ion-searchbar
+      placeholder="Buscar proveedor o mensaje"
+      [value]="searchTerm()"
+      (ionInput)="onSearch($event)"
+      [debounce]="250"
+      showCancelButton="never"
+      animated="true">
+    </ion-searchbar>
+
+    <ion-segment class="filter-segment" [value]="filter()" (ionChange)="onFilterChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todo</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="unread">
+        <ion-label>Sin leer</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </section>
+
+  <ng-container *ngIf="isLoading(); else conversationsState">
+    <div class="skeleton-card" *ngFor="let _ of skeletonItems">
+      <ion-skeleton-text animated class="skeleton-avatar"></ion-skeleton-text>
+      <div class="skeleton-text-block">
+        <ion-skeleton-text animated style="width: 60%;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 40%;"></ion-skeleton-text>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #conversationsState>
+    <div *ngIf="error(); else conversationList" class="state-card error">
+      <ion-icon name="warning-outline"></ion-icon>
+      <p>{{ error() }}</p>
+      <ion-button color="tertiary" (click)="refreshConversations()">Reintentar</ion-button>
+    </div>
+
+    <ng-template #conversationList>
+      <div *ngIf="filteredConversations().length === 0; else list" class="state-card empty">
+        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+        <p>No encontramos conversaciones para esta vista.</p>
+        <p class="muted">Realiza una reserva o inicia un chat desde un proveedor.</p>
+      </div>
+
+      <ng-template #list>
+        <button
+          type="button"
+          class="conversation-card"
+          *ngFor="let conversation of filteredConversations(); trackBy: trackByConversation"
+          [class.unread]="(conversation.unreadCount ?? 0) > 0"
+          (click)="openConversation(conversation)">
+          <div class="avatar">
+            <img
+              [src]="conversation.otherUser?.avatarUrl || 'assets/images/default-avatar.png'"
+              alt="Avatar"
+              loading="lazy">
+          </div>
+
+          <div class="conversation-info">
+            <div class="conversation-header">
+              <h2>{{ conversation.displayName }}</h2>
+              <span class="timestamp">{{ conversation.updatedAt | date: 'HH:mm' }}</span>
+            </div>
+
+            <p class="conversation-preview">{{ conversation.lastMessagePreview }}</p>
+
+            <div class="conversation-meta">
+              <ion-badge color="primary" *ngIf="conversation.unreadCount">
+                {{ conversation.unreadCount }} sin leer
+              </ion-badge>
+              <ion-badge color="medium" *ngIf="!conversation.unreadCount">
+                Al día
+              </ion-badge>
+            </div>
+          </div>
+        </button>
+      </ng-template>
+    </ng-template>
+  </ng-template>
+</ion-content>

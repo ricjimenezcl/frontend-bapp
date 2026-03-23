@@ -1,0 +1,112 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Tienda</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Platform info -->
+  <ion-card class="platform-info">
+    <ion-card-content>
+      <div class="platform-badge">
+        <ion-icon [name]="platform === 'android' ? 'logo-google-playstore' : platform === 'ios' ? 'logo-apple-appstore' : 'globe'"></ion-icon>
+        <span>{{ paymentMethod }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Products list -->
+  <div *ngIf="!loading && getFilteredProducts().length > 0">
+    <ion-card *ngFor="let product of getFilteredProducts()" class="product-card">
+      <ion-card-header>
+        <div class="product-header">
+          <ion-icon 
+            [name]="getProductIcon(product)" 
+            [color]="getProductColor(product)"
+            class="product-icon"
+          ></ion-icon>
+          <div class="product-title-section">
+            <ion-card-title>{{ product.name }}</ion-card-title>
+            <ion-badge [color]="getProductColor(product)">
+              {{ product.duration_days }} días
+            </ion-badge>
+          </div>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p class="product-description">{{ product.description }}</p>
+
+        <!-- Features -->
+        <div class="features" *ngIf="product.metadata?.features">
+          <ion-chip *ngFor="let feature of product.metadata.features" color="light" outline>
+            <ion-icon name="checkmark-circle" color="success"></ion-icon>
+            <ion-label>{{ feature }}</ion-label>
+          </ion-chip>
+        </div>
+
+        <!-- Price and purchase button -->
+        <div class="purchase-section">
+          <div class="price">
+            <span class="price-label">Precio:</span>
+            <span class="price-value">{{ formatPrice(product) }}</span>
+          </div>
+
+          <ion-button 
+            expand="block" 
+            [color]="getProductColor(product)"
+            (click)="purchaseProduct(product)"
+          >
+            <ion-icon slot="start" name="cart"></ion-icon>
+            Comprar Ahora
+          </ion-button>
+        </div>
+
+        <!-- Payment method info -->
+        <div class="payment-info">
+          <ion-text color="medium">
+            <small>
+              <ion-icon name="information-circle"></ion-icon>
+              {{ paymentService.getPaymentInstructions() }}
+            </small>
+          </ion-text>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && getFilteredProducts().length === 0" class="empty-state">
+    <ion-icon name="storefront-outline" color="medium"></ion-icon>
+    <h3>No hay productos disponibles</h3>
+    <p>No se encontraron productos para tu rol de usuario.</p>
+  </div>
+
+  <!-- Help section -->
+  <ion-card class="help-card">
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="help-circle"></ion-icon>
+        ¿Necesitas ayuda?
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Si tienes problemas con tu compra, contáctanos:</p>
+      <ion-button fill="outline" size="small" href="mailto:soporte@bappsearch.com">
+        <ion-icon slot="start" name="mail"></ion-icon>
+        Contactar Soporte
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

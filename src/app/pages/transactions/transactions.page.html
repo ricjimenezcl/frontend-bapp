@@ -1,0 +1,162 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis Compras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  
+  <!-- Stats Summary -->
+  <ion-card class="stats-card">
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3" class="stat-item">
+            <div class="stat-value">{{stats.total}}</div>
+            <div class="stat-label">Total</div>
+          </ion-col>
+          <ion-col size="3" class="stat-item">
+            <div class="stat-value success">{{stats.completed}}</div>
+            <div class="stat-label">Exitosas</div>
+          </ion-col>
+          <ion-col size="3" class="stat-item">
+            <div class="stat-value warning">{{stats.pending}}</div>
+            <div class="stat-label">Pendientes</div>
+          </ion-col>
+          <ion-col size="3" class="stat-item">
+            <div class="stat-value danger">{{stats.failed}}</div>
+            <div class="stat-label">Fallidas</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Filter Segment -->
+  <ion-segment [(ngModel)]="filterStatus" class="filter-segment">
+    <ion-segment-button value="all">
+      <ion-label>Todas</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="completed">
+      <ion-label>Completadas</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="pending">
+      <ion-label>Pendientes</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="failed">
+      <ion-label>Fallidas</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando transacciones...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && transactions.length === 0" class="empty-state">
+    <ion-icon name="receipt-outline" class="empty-icon"></ion-icon>
+    <h3>No tienes compras</h3>
+    <p>Aún no has realizado ninguna compra en BAPP.</p>
+    <ion-button (click)="goToCatalog()" expand="block" class="cta-button">
+      Ver Productos Disponibles
+    </ion-button>
+  </div>
+
+  <!-- Transactions List -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="!loading && transactions.length > 0" class="transactions-list">
+    <ion-card *ngFor="let transaction of getFilteredTransactions()" class="transaction-card">
+      
+      <!-- Transaction Header -->
+      <ion-card-header>
+        <div class="transaction-header">
+          <div class="transaction-title">
+            <ion-icon [name]="getStatusIcon(transaction.status)" 
+                      [color]="getStatusColor(transaction.status)"></ion-icon>
+            <h3>{{ transaction.product?.name }}</h3>
+          </div>
+          <ion-badge [color]="getStatusColor(transaction.status)">
+            {{ getStatusLabel(transaction.status) }}
+          </ion-badge>
+        </div>
+      </ion-card-header>
+
+      <!-- Transaction Details -->
+      <ion-card-content>
+        
+        <!-- Amount -->
+        <div class="detail-row">
+          <span class="detail-label">Monto</span>
+          <span class="detail-value amount">{{ formatAmount(transaction) }}</span>
+        </div>
+
+        <!-- Date -->
+        <div class="detail-row">
+          <span class="detail-label">Fecha</span>
+          <span class="detail-value">{{ formatDate(transaction.created_at) }}</span>
+        </div>
+
+        <!-- Platform -->
+        <div class="detail-row">
+          <span class="detail-label">Plataforma</span>
+          <span class="detail-value">
+            <ion-badge color="medium" class="platform-badge">
+              {{ transaction.platform.toUpperCase() }}
+            </ion-badge>
+          </span>
+        </div>
+
+        <!-- Transaction ID -->
+        <div class="detail-row">
+          <span class="detail-label">ID Transacción</span>
+          <span class="detail-value transaction-id">{{ transaction.external_transaction_id }}</span>
+        </div>
+
+        <!-- Active Benefit -->
+        <div *ngIf="isActive(transaction)" class="active-benefit">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <span>
+            Activo - Expira en {{ getRemainingDays(transaction.expires_at!) }} días
+          </span>
+        </div>
+
+        <!-- Expired Benefit -->
+        <div *ngIf="transaction.expires_at && !isActive(transaction) && transaction.status === 'completed'" 
+             class="expired-benefit">
+          <ion-icon name="alert-circle" color="warning"></ion-icon>
+          <span>Beneficio expirado</span>
+        </div>
+
+        <!-- Product Description -->
+        <div *ngIf="transaction.product?.description" class="product-description">
+          <p>{{ transaction.product?.description }}</p>
+        </div>
+
+      </ion-card-content>
+
+    </ion-card>
+
+    <!-- No filtered results -->
+    <div *ngIf="getFilteredTransactions().length === 0" class="no-results">
+      <ion-icon name="filter-outline"></ion-icon>
+      <p>No hay transacciones {{ getStatusLabel(filterStatus).toLowerCase() }}</p>
+    </div>
+  </div>
+
+  <!-- CTA to Catalog -->
+  <div *ngIf="!loading && transactions.length > 0" class="catalog-cta">
+    <ion-button (click)="goToCatalog()" expand="block" fill="outline">
+      <ion-icon slot="start" name="cart-outline"></ion-icon>
+      Ver Más Productos
+    </ion-button>
+  </div>
+
+</ion-content>

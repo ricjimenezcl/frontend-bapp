@@ -1,0 +1,63 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Califica el servicio</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" fill="clear">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Rating stars -->
+  <div class="review-stars-container ion-text-center ion-margin-bottom">
+    <p class="rating-label">¿Cómo calificarías el servicio?</p>
+    <div class="stars-row">
+      <ion-icon
+        *ngFor="let star of stars"
+        [name]="star <= selectedRating ? 'star' : 'star-outline'"
+        [class.active]="star <= selectedRating"
+        (click)="setRating(star)"
+        class="review-star">
+      </ion-icon>
+    </div>
+    <p class="rating-value">{{ selectedRating }}/5</p>
+  </div>
+
+  <!-- Comment -->
+  <ion-item lines="full">
+    <ion-label position="stacked">Comentario (opcional)</ion-label>
+    <ion-textarea
+      [formControl]="$any(reviewForm.controls['comment'])"
+      placeholder="Describe tu experiencia..."
+      rows="4"
+      maxlength="500">
+    </ion-textarea>
+  </ion-item>
+  <p class="char-count ion-text-end ion-padding-horizontal">
+    {{ (reviewForm.value.comment?.length || 0) }}/500
+  </p>
+
+  <!-- Submit -->
+  <ion-button
+    expand="block"
+    color="primary"
+    [disabled]="isSubmitting"
+    (click)="submit()"
+    class="ion-margin-top">
+    <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+    <span *ngIf="!isSubmitting">Enviar reseña</span>
+  </ion-button>
+
+  <ion-button
+    expand="block"
+    fill="outline"
+    color="medium"
+    (click)="dismiss()"
+    class="ion-margin-top">
+    Después
+  </ion-button>
+
+</ion-content>

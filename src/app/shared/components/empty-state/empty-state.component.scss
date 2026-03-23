@@ -1,0 +1,63 @@
+@import '../../../../theme/mixins';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.es-wrap {
+  @include flex-column-center;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-12) var(--bapp-space-6);
+  text-align: center;
+
+  &.es-compact {
+    padding: var(--bapp-space-8) var(--bapp-space-4);
+    gap: var(--bapp-space-2);
+  }
+}
+
+.es-icon-wrap {
+  @include flex-center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--bapp-radius-2xl);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--bapp-border);
+
+  ion-icon {
+    font-size: 32px;
+    color: var(--bapp-text-disabled);
+  }
+
+  .es-compact & {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--bapp-radius-xl);
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.es-title {
+  font-size: var(--bapp-text-md);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-secondary);
+  margin: 0;
+}
+
+.es-subtitle {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  max-width: 260px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.es-action {
+  @include button-primary;
+  margin-top: var(--bapp-space-2);
+  padding: var(--bapp-space-3) var(--bapp-space-6);
+}

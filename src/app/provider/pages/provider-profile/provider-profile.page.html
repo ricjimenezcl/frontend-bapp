@@ -1,0 +1,132 @@
+<ion-content>
+  <div class="settings-content">
+    <!-- Profile hero -->
+    <ion-item lines="none" class="avatar-item">
+      <ion-avatar slot="start" (click)="onPage('account-info')">
+        <img [src]="providerProfile?.avatar || 'assets/images/default-avatar.png'"
+             [alt]="providerProfile?.full_name || 'Avatar'" />
+      </ion-avatar>
+      <ion-label (click)="onPage('account-info')">
+        <p class="title">{{ providerProfile?.full_name || 'Provider Name' }}</p>
+        <p class="sub-title">{{ providerProfile?.status || 'Always Available' }}</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Service Slots Component -->
+    <app-service-slots 
+      [providerId]="providerProfile?.id"
+      [compactMode]="false">
+    </app-service-slots>
+
+    <!-- Premium Badge Component -->
+    <app-premium-badge 
+      [userId]="providerProfile?.user_id"
+      [compactMode]="false">
+    </app-premium-badge>
+
+    <!-- Account section -->
+    <div class="profile-section-card">
+      <ion-item
+        lines="inset"
+        class="content-item"
+        button
+        detail
+        (click)="onPage('/provider/provider-account-info')"
+      >
+        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
+        <ion-label>Cuenta</ion-label>
+      </ion-item>
+
+      <ion-item
+        lines="none"
+        class="content-item"
+        button
+        detail
+        (click)="onPage('/provider/provider-validation')"
+      >
+        <ion-icon slot="start" name="shield-checkmark-outline" color="primary"></ion-icon>
+        <ion-label>Validación Biométrica</ion-label>
+      </ion-item>
+    </div>
+
+    <!-- Preferences section -->
+    <div class="profile-section-card">
+      <ion-item
+        lines="inset"
+        class="content-item"
+        detail=""
+        (click)="onPage('languages')"
+      >
+        <ion-icon slot="start" name="language-outline" color="primary"></ion-icon>
+        <ion-label>Languages</ion-label>
+      </ion-item>
+
+      <ion-item lines="none" class="content-item">
+        <ion-icon slot="start" name="contrast" color="primary"></ion-icon>
+        <ion-label>Dark Mode</ion-label>
+        <ion-toggle slot="end" mode="md"></ion-toggle>
+      </ion-item>
+    </div>
+
+    <!-- Support section -->
+    <div class="profile-section-card">
+      <ion-item
+        lines="inset"
+        class="content-item"
+        detail=""
+        (click)="goToTransactions()"
+      >
+        <ion-icon slot="start" name="receipt-outline" color="primary"></ion-icon>
+        <ion-label>Mis Compras</ion-label>
+      </ion-item>
+
+      <ion-item
+        lines="inset"
+        class="content-item"
+        detail=""
+        (click)="goToCatalog()"
+      >
+        <ion-icon slot="start" name="cart-outline" color="primary"></ion-icon>
+        <ion-label>Tienda Premium</ion-label>
+      </ion-item>
+
+      <ion-item
+        lines="inset"
+        class="content-item"
+        detail=""
+        (click)="onPage('help')"
+      >
+        <ion-icon slot="start" name="information-circle-outline" color="primary"></ion-icon>
+        <ion-label>Centro de ayuda</ion-label>
+      </ion-item>
+
+      <ion-item
+        lines="inset"
+        class="content-item"
+        detail=""
+        (click)="onPage('help')"
+      >
+        <ion-icon slot="start" name="information-circle-outline" color="primary"></ion-icon>
+        <ion-label>Terminos y condiciones</ion-label>
+      </ion-item>
+
+      <ion-item
+        lines="none"
+        class="content-item"
+        detail=""
+        (click)="onPage('invite-friends')"
+      >
+        <ion-icon slot="start" name="gift-outline" color="primary"></ion-icon>
+        <ion-label>Invite Friends</ion-label>
+      </ion-item>
+    </div>
+
+    <!-- Logout -->
+    <div class="profile-section-card">
+      <ion-item lines="none" class="content-item" (click)="goSalir()">
+        <ion-icon slot="start" name="log-out-outline" color="danger"></ion-icon>
+        <ion-label class="lbl-red">Logout</ion-label>
+      </ion-item>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,111 @@
+<ion-content class="profile-content">
+
+  <div class="profile-wrapper">
+
+    <!-- ── Profile header ────────────────────────────────────────────── -->
+    <div class="profile-hero">
+      <!-- Background decoration -->
+      <div class="hero-bg-orb"></div>
+
+      <!-- Avatar -->
+      <div class="profile-avatar-wrap">
+        <img
+          class="profile-avatar"
+          [src]="avatar || 'assets/images/default-avatar.png'"
+          alt="Avatar"
+          (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+      </div>
+
+      <h2 class="profile-name">{{ fullName || 'Usuario' }}</h2>
+      <p class="profile-email">{{ email }}</p>
+
+      <!-- Premium Badge -->
+      <div class="premium-badge-wrap">
+        <app-premium-badge
+          [userId]="user?.id"
+          [compactMode]="false">
+        </app-premium-badge>
+      </div>
+    </div>
+
+    <!-- ── Info quick cards ───────────────────────────────────────────── -->
+    <div class="info-row">
+      <div class="info-card">
+        <ion-icon name="call-outline" class="info-icon"></ion-icon>
+        <span class="info-label">Teléfono</span>
+        <span class="info-value">{{ phone || 'Sin registrar' }}</span>
+      </div>
+      <div class="info-card">
+        <ion-icon name="mail-outline" class="info-icon"></ion-icon>
+        <span class="info-label">Email</span>
+        <span class="info-value">{{ email }}</span>
+      </div>
+    </div>
+
+    <!-- ── Menu: cuenta ──────────────────────────────────────────────── -->
+    <div class="menu-section">
+      <p class="menu-section-label">Cuenta</p>
+
+      <div class="menu-list">
+        <button class="menu-item" (click)="goToEditProfile()" type="button">
+          <div class="menu-icon menu-icon-blue">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Editar perfil</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="goToTransactions()" type="button">
+          <div class="menu-icon menu-icon-green">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Mis Compras</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="goToCatalog()" type="button">
+          <div class="menu-icon menu-icon-gold">
+            <ion-icon name="cart-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Tienda Premium</span>
+          <div class="menu-tag">Premium</div>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Menu: preferencias ────────────────────────────────────────── -->
+    <div class="menu-section">
+      <p class="menu-section-label">Preferencias</p>
+
+      <div class="menu-list">
+        <button class="menu-item" (click)="goToSettings()" type="button">
+          <div class="menu-icon menu-icon-slate">
+            <ion-icon name="settings-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Configuración</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="inviteFriends()" type="button">
+          <div class="menu-icon menu-icon-violet">
+            <ion-icon name="gift-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Invitar amigos</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Logout ─────────────────────────────────────────────────────── -->
+    <div class="logout-wrap">
+      <button class="logout-btn" (click)="goLogout()" type="button">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+
+    <div class="profile-footer-spacer"></div>
+  </div>
+
+</ion-content>

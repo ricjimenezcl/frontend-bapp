@@ -1,0 +1,130 @@
+<!-- Chat Component Template -->
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/provider/tabs/inbox" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+
+    <!-- Header Title -->
+    <ion-title class="chat-title">
+      <div class="chat-header">
+        <div class="chat-user-info">
+          <h1>{{ displayName() }}</h1>
+          <p class="status-subtitle">Conversación activa</p>
+        </div>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="chat-content">
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <ion-spinner></ion-spinner>
+    <p>Cargando conversación...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !isLoading()" class="error-banner">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <span>{{ error() }}</span>
+    <ion-button fill="clear" size="small" (click)="error.set(null)">
+      <ion-icon name="close" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Messages Container -->
+  <div *ngIf="!isLoading()" class="messages-wrapper">
+    <div #messagesContainer class="messages-container">
+
+      <!-- Empty State -->
+      <div *ngIf="messages().length === 0" class="empty-state">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <p>No hay mensajes aún</p>
+        <p class="subtitle">Inicia la conversación</p>
+      </div>
+
+      <!-- Messages List -->
+      <ng-container *ngFor="let message of messages(); trackBy: trackByMessageId">
+        <div class="message-group" [class.own-message]="isMessageFromUser(message)" [class.pending]="message.id < 0">
+
+          <div class="message-wrapper">
+            <!-- Other user avatar -->
+            <ion-avatar *ngIf="!isMessageFromUser(message)" class="message-avatar">
+              <img [src]="otherUser()?.avatarUrl || 'assets/images/default-avatar.png'" alt="Avatar">
+            </ion-avatar>
+
+            <div class="bubble-col" [class.own-col]="isMessageFromUser(message)">
+              <!-- Sender name (only for received messages) -->
+              <span *ngIf="!isMessageFromUser(message)" class="sender-name">
+                {{ otherUser()?.firstName || 'Usuario' }}
+              </span>
+
+              <!-- Message Bubble -->
+              <div class="message-bubble" [class.own]="isMessageFromUser(message)">
+                <p class="message-content">{{ message.messageContent }}</p>
+                <p class="message-time">
+                  {{ message.createdAt | date: 'HH:mm' }}
+                  <!-- Pending indicator -->
+                  <ion-icon *ngIf="message.id < 0" name="time-outline" class="pending-icon"></ion-icon>
+                  <!-- Read confirmation (own messages only) -->
+                  <ion-icon *ngIf="isMessageFromUser(message) && message.id > 0 && message.isRead"
+                    name="checkmark-done"
+                    class="read-icon"></ion-icon>
+                  <ion-icon *ngIf="isMessageFromUser(message) && message.id > 0 && !message.isRead"
+                    name="checkmark"
+                    class="sent-icon"></ion-icon>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Typing Indicator -->
+      <div *ngIf="isTyping()" class="typing-indicator">
+        <ion-avatar class="typing-avatar">
+          <img [src]="otherUser()?.avatarUrl || 'assets/images/default-avatar.png'" alt="Avatar">
+        </ion-avatar>
+        <div class="typing-bubble">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</ion-content>
+
+<!-- Footer - Message Input -->
+<ion-footer class="ion-no-border chat-footer" *ngIf="!isLoading()">
+  <ion-toolbar>
+    <!-- Message Input Form -->
+    <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
+      <div class="input-wrapper">
+        <!-- Text Input -->
+        <ion-textarea
+          formControlName="content"
+          placeholder="Escribe un mensaje..."
+          (ionInput)="onMessageInput($event)"
+          class="message-input"
+          rows="1"
+          autoGrow="true"
+          [disabled]="isSending()">
+        </ion-textarea>
+
+        <!-- Send Button -->
+        <ion-button
+          (click)="sendMessage()"
+          [disabled]="!messageForm.valid || isSending()"
+          class="send-button"
+          color="primary"
+          shape="round">
+          <ion-icon *ngIf="!isSending()" name="send" slot="icon-only"></ion-icon>
+          <ion-spinner *ngIf="isSending()" name="crescent" class="small-spinner" slot="icon-only"></ion-spinner>
+        </ion-button>
+      </div>
+    </form>
+  </ion-toolbar>
+</ion-footer>

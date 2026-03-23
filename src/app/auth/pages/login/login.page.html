@@ -1,0 +1,127 @@
+<ion-content class="ion-padding">
+  <div class="login-screen">
+    <div class="logo-section">
+      <img src="assets/imgs/logo.png" alt="logo" class="logo">
+      <img src="assets/imgs/titulo.png" alt="titulo" class="titulo">
+    </div>
+    <ion-label class="title">Iniciar sesión en su cuenta</ion-label>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <ion-item lines="none" class="input-item">
+          <ion-icon slot="start" name="mail-outline" ></ion-icon>
+          <ion-input 
+            formControlName="email"
+            type="email"
+            placeholder="Correo electrónico"
+            required></ion-input>
+        </ion-item>
+
+        <!-- Mensaje de error para email -->
+        <div *ngIf="emailControl?.touched && emailControl?.invalid" class="error-message">
+          <ion-text color="danger" *ngIf="emailControl?.errors?.['required']">
+            El email es requerido
+          </ion-text>
+          <ion-text color="danger" *ngIf="emailControl?.errors?.['email']">
+            Ingresa un email válido
+          </ion-text>
+        </div>
+
+        <ion-item lines="none" class="input-item">
+          <ion-icon slot="start" name="lock-closed-outline" ></ion-icon>
+          <ion-input 
+            formControlName="password"
+            type="password"
+            placeholder="Contraseña"
+            required></ion-input>
+        </ion-item>
+
+        <!-- Mensaje de error para password -->
+        <div *ngIf="passwordControl?.touched && passwordControl?.invalid" class="error-message">
+          <ion-text color="danger" *ngIf="passwordControl?.errors?.['required']">
+            La contraseña es requerida
+          </ion-text>
+          <ion-text color="danger" *ngIf="passwordControl?.errors?.['minlength']">
+            Mínimo 6 caracteres
+          </ion-text>
+        </div>
+
+        <ion-item lines="none" class="check-item">
+          <ion-label>Recuérdame</ion-label>
+          <ion-checkbox slot="start" mode="md"></ion-checkbox>
+        </ion-item>
+
+        <ion-button 
+        type="submit"
+        expand="block" 
+        color="primary" 
+        class="login-button"
+        [disabled]="isLoading || loginForm.invalid">
+        
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Iniciar Sesión</span>
+      </ion-button>
+
+    </form>
+
+    <ion-button expand="block" fill="clear" shape="round" color="medium" (click)="onReset()">
+      ¿Has olvidado tu contraseña?
+    </ion-button>
+
+    <ion-row class="or-content">
+      <ion-col size="4">
+        <div class="line"></div>
+      </ion-col>
+      <ion-col size="4">
+        <ion-label class="lbl">o continuar con</ion-label>
+      </ion-col>
+      <ion-col size="4">
+        <div class="line"></div>
+      </ion-col>
+    </ion-row>
+
+    <div class="social-login">
+      <ion-button fill="outline" color="medium" (click)="loginWithFacebook()" [disabled]="isLoading">
+        <ion-icon slot="icon-only" name="logo-facebook" color="secondary"></ion-icon>
+      </ion-button>
+      <ion-button fill="outline" color="medium" (click)="loginWithGoogle()" [disabled]="isLoading">
+        <ion-icon slot="icon-only" name="logo-google" color="danger"></ion-icon>
+      </ion-button>
+    </div>
+
+    <ion-button expand="block" fill="clear" shape="round" color="medium">
+      ¿No tienes una cuenta?
+    </ion-button>
+    <ion-button id="open-custom-dialog" expand="block" fill="clear" shape="round" color="medium">
+       <span class="register-lbl-bold">Regístrate como cliente o proveedor</span>
+    </ion-button>
+  </div>
+
+  <ion-modal id="example-modal" #modal trigger="open-custom-dialog">
+  <ng-template>
+    <div class="wrapper">
+      <h1>Selecciona tu tipo de registro</h1> <!-- Título más descriptivo -->
+
+      <ion-list lines="none">
+        <!-- Botón para registro de proveedor -->
+        <ion-item button="true" detail="false" (click)="onRegisterProvider()">
+          <ion-icon name="person-circle" slot="start"></ion-icon>
+          <ion-label>Regístrate como Proveedor</ion-label>
+        </ion-item>
+        
+        <!-- Botón para registro de cliente -->
+        <ion-item button="true" detail="false" (click)="onRegisterClient()">
+          <ion-icon name="person-circle" slot="start"></ion-icon>
+          <ion-label>Regístrate como Cliente</ion-label>
+        </ion-item>
+        
+        <!-- Botón para cancelar -->
+        <ion-item button="true" detail="false" (click)="modal.dismiss()">
+          <ion-icon name="close-circle" slot="start"></ion-icon>
+          <ion-label>Cancelar</ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+  </ng-template>
+</ion-modal>
+
+</ion-content>

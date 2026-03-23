@@ -1,0 +1,301 @@
+ion-content {
+  --background: #f5f5f5;
+}
+
+// Stats Card
+.stats-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  .stat-item {
+    text-align: center;
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      margin-bottom: 4px;
+
+      &.success {
+        color: var(--ion-color-success);
+      }
+
+      &.warning {
+        color: var(--ion-color-warning);
+      }
+
+      &.danger {
+        color: var(--ion-color-danger);
+      }
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// Filter Segment
+.filter-segment {
+  margin: 0 16px 16px;
+}
+
+// Loading State
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+
+  .empty-icon {
+    font-size: 80px;
+    color: var(--ion-color-medium);
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .cta-button {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}
+
+// Transactions List
+.transactions-list {
+  padding: 0 16px 16px;
+}
+
+// Transaction Card
+.transaction-card {
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  ion-card-header {
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+    .transaction-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .transaction-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        ion-icon {
+          font-size: 28px;
+        }
+
+        h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: white;
+        }
+      }
+
+      ion-badge {
+        font-size: 12px;
+        padding: 6px 12px;
+        border-radius: 12px;
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
+  }
+
+  // Detail Row
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      font-weight: 500;
+    }
+
+    .detail-value {
+      font-size: 14px;
+      color: var(--ion-color-dark);
+      font-weight: 600;
+
+      &.amount {
+        color: var(--ion-color-primary);
+        font-size: 16px;
+      }
+
+      &.transaction-id {
+        font-family: monospace;
+        font-size: 11px;
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .platform-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+    }
+  }
+
+  // Active Benefit
+  .active-benefit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(var(--ion-color-success-rgb), 0.1);
+    border-radius: 8px;
+    margin-top: 12px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    span {
+      font-size: 13px;
+      color: var(--ion-color-success);
+      font-weight: 600;
+    }
+  }
+
+  // Expired Benefit
+  .expired-benefit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(var(--ion-color-warning-rgb), 0.1);
+    border-radius: 8px;
+    margin-top: 12px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    span {
+      font-size: 13px;
+      color: var(--ion-color-warning);
+      font-weight: 600;
+    }
+  }
+
+  // Product Description
+  .product-description {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+
+    p {
+      font-size: 13px;
+      color: var(--ion-color-medium);
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+}
+
+// No Results
+.no-results {
+  text-align: center;
+  padding: 40px 20px;
+
+  ion-icon {
+    font-size: 60px;
+    color: var(--ion-color-medium);
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+  }
+}
+
+// Catalog CTA
+.catalog-cta {
+  padding: 16px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .stats-card {
+    ion-card-content {
+      padding: 12px;
+    }
+
+    .stat-item {
+      .stat-value {
+        font-size: 20px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+    }
+  }
+
+  .transaction-card {
+    ion-card-header {
+      .transaction-header {
+        .transaction-title {
+          h3 {
+            font-size: 16px;
+          }
+        }
+      }
+    }
+  }
+}

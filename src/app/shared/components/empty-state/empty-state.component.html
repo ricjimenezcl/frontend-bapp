@@ -1,0 +1,13 @@
+<div class="es-wrap" [class.es-compact]="compact">
+  <div class="es-icon-wrap">
+    <ion-icon [name]="icon"></ion-icon>
+  </div>
+
+  <h3 class="es-title">{{ title }}</h3>
+
+  <p class="es-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+
+  <button class="es-action" *ngIf="actionLabel" (click)="actionClick.emit()">
+    {{ actionLabel }}
+  </button>
+</div>

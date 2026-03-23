@@ -1,0 +1,112 @@
+
+<ion-content class="map-content">
+  <!-- Contenedor principal del mapa -->
+  <div class="map-container">
+    <!-- Mapa real (MapLibre GL) — NO modificar este elemento -->
+    <div #mapContainer id="map" class="map-element"></div>
+
+    <!-- ── Barra de búsqueda overlay (superior) ────────────────────── -->
+    <div class="map-search-overlay">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <span class="search-placeholder">Buscar en el mapa...</span>
+      <div class="radius-badge">
+        <ion-icon name="location" class="radius-icon"></ion-icon>
+        <span class="radius-text">5 km</span>
+      </div>
+    </div>
+
+    <!-- ── Controles de zoom (esquina superior derecha) ──────────────── -->
+    <div class="zoom-controls">
+      <ion-fab-button size="small" color="primary" (click)="zoomIn()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button size="small" color="primary" (click)="zoomOut()">
+        <ion-icon name="remove"></ion-icon>
+      </ion-fab-button>
+    </div>
+
+    <!-- ── Selector de estilo (esquina inferior izquierda) ───────────── -->
+    <div class="style-selector-container">
+      <ion-segment [value]="currentMapStyle" class="style-selector">
+        <ion-segment-button value="streets" (click)="changeMapStyle('streets')">
+          <ion-label>Calles</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="light" (click)="changeMapStyle('light')">
+          <ion-label>Claro</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="dark" (click)="changeMapStyle('dark')">
+          <ion-label>Oscuro</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- ── Chips de servicios seleccionados (superior izquierda) ──────── -->
+    <div class="selected-services-info" *ngIf="selectedServices.length > 0">
+      <ion-chip color="primary" outline>
+        <ion-icon name="construct"></ion-icon>
+        <ion-label>{{ selectedServices.length }} servicio{{ selectedServices.length > 1 ? 's' : '' }}</ion-label>
+      </ion-chip>
+      <ion-chip color="success" outline *ngIf="providerCount > 0">
+        <ion-icon name="business"></ion-icon>
+        <ion-label>{{ providerCount }} proveedor{{ providerCount > 1 ? 'es' : '' }}</ion-label>
+      </ion-chip>
+    </div>
+
+    <!-- ── Leyenda inferior (glass card) ─────────────────────────────── -->
+    <div class="map-legend" *ngIf="!isLoading && userLocation">
+      <p class="legend-count">{{ providerCount }} proveedores en el área</p>
+      <div class="legend-items">
+        <div class="legend-item">
+          <span class="legend-dot online"></span>
+          <span class="legend-label">En línea</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot offline"></span>
+          <span class="legend-label">Desconectado</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-pin">
+            <ion-icon name="navigate"></ion-icon>
+          </span>
+          <span class="legend-label">Tu posición</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Estado de carga ───────────────────────────────────────────── -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <ion-label>Cargando proveedores...</ion-label>
+    </div>
+
+    <!-- ── Sin ubicación ─────────────────────────────────────────────── -->
+    <div class="no-location" *ngIf="!userLocation && !isLoading">
+      <ion-icon name="location-outline" size="large"></ion-icon>
+      <ion-label>Obteniendo tu ubicación...</ion-label>
+      <ion-button (click)="retryLocation()" size="small">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Reintentar
+      </ion-button>
+    </div>
+
+    <!-- ── Sin servicios seleccionados ───────────────────────────────── -->
+    <div class="no-services" *ngIf="selectedServices.length === 0 && !isLoading && userLocation">
+      <ion-icon name="construct-outline" size="large"></ion-icon>
+      <ion-label>Selecciona servicios para ver proveedores</ion-label>
+      <ion-button (click)="goBack()" size="small">
+        <ion-icon name="list" slot="start"></ion-icon>
+        Explorar servicios
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      refreshingSpinner="crescent"
+      pullingText="Tira para actualizar"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+</ion-content>

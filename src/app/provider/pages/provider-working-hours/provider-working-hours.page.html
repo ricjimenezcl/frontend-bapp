@@ -1,0 +1,56 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/provider/tabs/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Horarios de Atención</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <ion-list *ngIf="!isLoading">
+    <div *ngFor="let day of days" class="day-card">
+      <ion-item lines="none">
+        <ion-label>
+          <strong>{{ day.dayName }}</strong>
+        </ion-label>
+        <ion-toggle
+          slot="end"
+          [(ngModel)]="day.isActive"
+          color="primary">
+        </ion-toggle>
+      </ion-item>
+
+      <div *ngIf="day.isActive" class="time-row ion-padding-horizontal ion-padding-bottom">
+        <div class="time-group">
+          <label>Desde</label>
+          <ion-select [(ngModel)]="day.startTime" interface="popover">
+            <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="time-group">
+          <label>Hasta</label>
+          <ion-select [(ngModel)]="day.endTime" interface="popover">
+            <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+  </ion-list>
+
+  <ion-button
+    expand="block"
+    color="primary"
+    [disabled]="isSaving || isLoading"
+    (click)="saveAll()"
+    class="ion-margin-top">
+    <ion-spinner *ngIf="isSaving" name="crescent"></ion-spinner>
+    <span *ngIf="!isSaving">Guardar todos</span>
+  </ion-button>
+
+</ion-content>

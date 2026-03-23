@@ -1,0 +1,137 @@
+ <ion-header class="ion-no-border">
+  <ion-toolbar mode="ios" color="primary">
+    <ion-title>Perfil proveedor</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="profile-info">
+    <!-- Avatar con opción de edición -->
+    <div class="user-avtar">
+      <img [src]="avatar" class="avatar-preview" />
+      <ion-button class="edit-btn" fill="clear" *ngIf="isEditing" (click)="changeAvatar()">
+        <ion-icon slot="icon-only" name="create-outline" color="light"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Nombre -->
+    <ion-item lines="none" class="input-content">
+      <ion-icon name="person" slot="start" color="primary"></ion-icon>
+      <ion-input 
+        type="text" 
+        [value]="name" 
+        [disabled]="!isEditing"
+        (ionChange)="updateField('name', $event)"
+        (ionBlur)="onFieldBlur('name')">
+      </ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="fieldTouched['name'] && fieldErrors['name']">
+      <span>{{ fieldErrors['name'] }}</span>
+    </div>
+
+    <!-- RUN -->
+    <ion-item lines="none" class="input-content">
+      <ion-icon name="finger-print" slot="start" color="primary"></ion-icon>
+      <ion-input 
+        type="text" 
+        [value]="run" 
+        [disabled]="!isEditing"
+        maxlength="12"
+        placeholder="12.345.678-5"
+        (ionInput)="formatRUT($event)"
+        (ionBlur)="onRUTBlur()">
+      </ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="fieldTouched['run'] && fieldErrors['run']">
+      <span>{{ fieldErrors['run'] }}</span>
+    </div>
+
+    <!-- Teléfono -->
+    <ion-item lines="none" class="input-content">
+      <ion-icon name="call" slot="start" color="primary"></ion-icon>
+      <ion-input 
+        type="tel" 
+        [value]="fono" 
+        [disabled]="!isEditing"
+        maxlength="17"
+        placeholder="+56 9 1234 5678"
+        (ionInput)="formatPhone($event)"
+        (ionBlur)="onPhoneBlur()">
+      </ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="fieldTouched['fono'] && fieldErrors['fono']">
+      <span>{{ fieldErrors['fono'] }}</span>
+    </div>
+
+    <!-- Email -->
+    <ion-item lines="none" class="input-content">
+      <ion-icon name="mail" slot="start" color="primary"></ion-icon>
+      <ion-input 
+        type="email" 
+        [value]="email" 
+        [disabled]="!isEditing"
+        (ionChange)="updateField('email', $event)"
+        (ionBlur)="onFieldBlur('email')">
+      </ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="fieldTouched['email'] && fieldErrors['email']">
+      <span>{{ fieldErrors['email'] }}</span>
+    </div>
+
+    <!-- Bio -->
+    <ion-item lines="none" class="input-content">
+      <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+      <ion-input
+        type="text"
+        [(ngModel)]="bio"
+        [disabled]="!isEditing"
+        (ionBlur)="onFieldBlur('bio')">
+      </ion-input>
+    </ion-item>
+    <div class="error-message" *ngIf="fieldTouched['bio'] && fieldErrors['bio']">
+      <span>{{ fieldErrors['bio'] }}</span>
+    </div>
+
+    <!-- Botón dinámico -->
+    <ion-button 
+      expand="block" 
+      shape="round" 
+      color="primary" 
+      class="submit-btn"
+      *ngIf="!isEditing"
+      (click)="onPin()">
+      Editar perfil
+    </ion-button>
+
+    <!-- Botones para confirmación o cancelación -->
+    <div *ngIf="isEditing" class="edit-buttons">
+      <ion-row>
+        <ion-col size="6">
+          <ion-button 
+            expand="block" 
+            shape="round" 
+            color="light"
+            fill="outline"
+            (click)="cancelEdit()">
+            Cancelar
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button 
+            expand="block" 
+            shape="round" 
+            color="primary"
+            [disabled]="!isFormValid"
+            (click)="confirmEdit()">
+            Confirmar edit
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ion-content>

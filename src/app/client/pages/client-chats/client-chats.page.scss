@@ -1,0 +1,253 @@
+// client-chats.page.scss
+@import '../../../../theme/mixins';
+
+:host { display: flex; flex-direction: column; height: 100%; }
+
+ion-content.chats-content { --background: var(--bapp-bg-page); }
+
+.chats-wrapper { @include flex-column; height: 100%; }
+
+// ── Intro ─────────────────────────────────────────────────────────────────────
+.chats-intro {
+  padding: var(--bapp-space-4) var(--bapp-space-4) var(--bapp-space-2);
+
+  .chats-title {
+    font-size: var(--bapp-text-2xl);
+    font-weight: var(--bapp-weight-bold);
+    color: var(--bapp-text-primary);
+    letter-spacing: -0.02em;
+    margin: 0 0 2px;
+  }
+
+  .chats-sub {
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
+    margin: 0;
+  }
+}
+
+// ── Search + filter ───────────────────────────────────────────────────────────
+.search-filter-row {
+  @include flex-between;
+  gap: var(--bapp-space-2);
+  padding: 0 var(--bapp-space-4) var(--bapp-space-3);
+}
+
+.chats-searchbar {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  flex: 1;
+  background: var(--bapp-surface-elevated);
+  border: 1.5px solid var(--bapp-border-default);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-2) var(--bapp-space-3);
+  transition: border-color var(--bapp-transition-fast);
+
+  &:focus-within { border-color: var(--bapp-border-focus); }
+
+  .search-icon { font-size: 16px; color: var(--bapp-text-tertiary); flex-shrink: 0; }
+
+  .search-input {
+    --background: transparent;
+    --color: var(--bapp-text-primary);
+    --placeholder-color: var(--bapp-text-disabled);
+    font-size: var(--bapp-text-sm);
+    font-family: var(--bapp-font-base);
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    flex: 1;
+  }
+}
+
+.filter-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--bapp-radius-xl);
+  background: var(--bapp-surface-elevated);
+  border: 1.5px solid var(--bapp-border-default);
+  @include flex-center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; color: var(--bapp-text-tertiary); }
+
+  &.filter-btn-active {
+    background: rgba(253,215,53,0.1);
+    border-color: rgba(253,215,53,0.35);
+    ion-icon { color: var(--bapp-color-primary); }
+  }
+}
+
+// ── Conversations area ────────────────────────────────────────────────────────
+.conversations-area {
+  flex: 1;
+  overflow-y: auto;
+  @include hide-scrollbar;
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+.chat-skeleton {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  border-bottom: 1px solid var(--bapp-border-subtle);
+
+  .skel-avatar  { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; @include skeleton; }
+  .skel-body    { @include flex-column; gap: var(--bapp-space-2); flex: 1; }
+  .skel-name    { height: 14px; width: 50%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-preview { height: 12px; width: 80%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-time    { height: 11px; width: 36px; border-radius: var(--bapp-radius-sm); align-self: flex-start; @include skeleton; }
+}
+
+// ── Chat item ─────────────────────────────────────────────────────────────────
+.chat-item {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  cursor: pointer;
+  border-bottom: 1px solid var(--bapp-border-subtle);
+  transition: background var(--bapp-transition-fast);
+
+  &:active { background: var(--bapp-surface-hover); }
+  &:last-child { border-bottom: none; }
+}
+
+.chat-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--bapp-surface-elevated);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  @include flex-center;
+  position: relative;
+
+  .avatar-initials {
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-weight-bold);
+    color: var(--bapp-text-secondary);
+    text-transform: uppercase;
+  }
+}
+
+.chat-body {
+  @include flex-column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-row {
+  @include flex-between;
+  gap: var(--bapp-space-2);
+
+  &.chat-row-preview { align-items: center; }
+}
+
+.chat-name {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-text-primary);
+  @include truncate-text(1);
+}
+
+.chat-time {
+  font-size: var(--bapp-text-2xs);
+  color: var(--bapp-text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chat-preview {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  @include truncate-text(1);
+  flex: 1;
+
+  &.chat-preview-unread {
+    color: var(--bapp-text-secondary);
+    font-weight: var(--bapp-weight-medium);
+  }
+}
+
+.chat-unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: var(--bapp-color-primary);
+  color: #000;
+  font-size: 10px;
+  font-weight: var(--bapp-weight-bold);
+  border-radius: var(--bapp-radius-full);
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.chat-read-icon {
+  font-size: 16px;
+  color: var(--bapp-color-accent);
+  flex-shrink: 0;
+}
+
+// ── State cards ───────────────────────────────────────────────────────────────
+.chats-state-card {
+  @include flex-column-center;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-12) var(--bapp-space-6);
+  text-align: center;
+
+  ion-icon { font-size: 44px; color: var(--bapp-text-disabled); opacity: 0.5; }
+  p { margin: 0; font-size: var(--bapp-text-sm); color: var(--bapp-text-secondary); }
+
+  &.chats-error ion-icon { color: var(--bapp-color-danger); opacity: 0.7; }
+}
+
+.empty-bubble {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--bapp-surface-elevated);
+  @include flex-center;
+
+  ion-icon { font-size: 36px; color: var(--bapp-text-disabled); opacity: 0.5; }
+}
+
+.empty-title {
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-text-secondary);
+  margin: 0;
+}
+
+.empty-hint {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  max-width: 240px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.retry-btn {
+  padding: var(--bapp-space-2) var(--bapp-space-4);
+  background: rgba(14,165,233,0.1);
+  border: 1.5px solid rgba(14,165,233,0.3);
+  border-radius: var(--bapp-radius-full);
+  color: var(--bapp-color-accent);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-weight-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  &:active { background: rgba(14,165,233,0.18); }
+}
+
+// ── FAB ───────────────────────────────────────────────────────────────────────
+ion-fab-button {
+  --background: var(--bapp-color-primary);
+  --color: #000;
+  --box-shadow: var(--bapp-shadow-lg);
+}

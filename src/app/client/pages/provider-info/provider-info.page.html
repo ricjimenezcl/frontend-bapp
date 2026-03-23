@@ -1,0 +1,347 @@
+<ion-content>
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading">
+    <ion-skeleton-text animated style="width: 100%; height: 220px;"></ion-skeleton-text>
+    <div style="padding: 16px;">
+      <ion-skeleton-text animated style="width: 60%; height: 24px; margin-bottom: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 40%; height: 18px; margin-bottom: 8px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 80%; height: 16px; margin-bottom: 8px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 70%; height: 16px;"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <!-- Provider Info Screen - Estilo Service Details (SIN SWIPER) -->
+  <div class="salon-info-screen" *ngIf="!isLoading && provider">
+    <!-- Top Header con Imagen Simple (sin Swiper) -->
+    <div class="top-header">
+      <div class="top-btn">
+        <ion-button (click)="goBack()" fill="clear" color="light" size="small">
+          <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" color="light" size="small">
+          <ion-icon slot="icon-only" name="bookmark-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Banner Image (Static) -->
+      <div class="top-gallery-content" [ngStyle]="{'background-image': 'url(assets/images/default-avatar.png)'}">
+        <div class="overlay"></div>
+      </div>
+    </div>
+
+    <!-- Name and Info Content -->
+    <div class="name-content">
+      <div class="top-content">
+        <ion-label class="title">{{ provider.business_name }}</ion-label>
+        <ion-label class="options" *ngIf="provider.rating">Disponible</ion-label>
+      </div>
+      <ion-label class="address">
+        <ion-icon name="briefcase-outline" color="primary"></ion-icon> &nbsp; {{ provider.business_name || 'Servicio' }}
+      </ion-label>
+      <ion-label class="address">
+        <ion-icon name="star-half" color="warning"></ion-icon> &nbsp; 
+        {{ provider.rating || 'Nuevo' }} ({{ provider.total_reviews || 0 }} reseñas)
+      </ion-label>
+    </div>
+
+    <!-- Bottom Content - Action Buttons -->
+    <div class="bottom-content">
+      <div class="content" (click)="openBookingActionSheet()">
+        <div class="circle">
+          <ion-icon name="globe-outline" color="primary"></ion-icon>
+        </div>
+        <ion-label class="title">Reservar</ion-label>
+      </div>
+      <div class="content" (click)="startChat()">
+        <div class="circle">
+          <ion-icon name="chatbubble-ellipses-outline" color="primary"></ion-icon>
+        </div>
+        <ion-label class="title">Mensaje</ion-label>
+      </div>
+      <div class="content">
+        <div class="circle">
+          <ion-icon name="call" color="primary"></ion-icon>
+        </div>
+        <ion-label class="title">Llamar</ion-label>
+      </div>
+      <div class="content">
+        <div class="circle">
+          <ion-icon name="navigate-circle" color="primary"></ion-icon>
+        </div>
+        <ion-label class="title">Compartir</ion-label>
+      </div>
+    </div>
+
+    <div class="break"></div>
+
+    <!-- About Section -->
+    <div class="main-title">
+      <ion-label class="title">Acerca de</ion-label>
+    </div>
+
+    <ion-label class="desc">
+      {{ provider.description || 'Proveedor de servicios profesional. Contacta para más información.' }}
+    </ion-label>
+
+    
+
+    <div class="break"></div>
+
+    <!-- Contact Information Section -->
+    <div class="main-title">
+      <ion-label class="title">Información de Contacto</ion-label>
+    </div>
+
+    <div class="contact-list">
+      <div class="contact-item" *ngIf="provider.phone">
+        <ion-icon name="call-outline" color="primary"></ion-icon>
+        <div class="contact-info">
+          <span class="value">{{ provider.phone }}</span>
+        </div>
+      </div>
+
+      <div class="contact-item" *ngIf="provider.email">
+        <ion-icon name="mail-outline" color="primary"></ion-icon>
+        <div class="contact-info">
+          <span class="label">Email</span>
+          <span class="value">{{ provider.email }}</span>
+        </div>
+      </div>
+
+      <div class="contact-item">
+        <ion-icon name="location" color="primary"></ion-icon>
+        <div class="contact-info">
+          <span class="label">Ubicación</span>
+          <span class="value">{{ provider.address || 'No disponible' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div class="info-container" *ngIf="!isLoading && provider">
+    <div class="main-title">
+      <ion-label class="title">Reseñas ({{ reviews.length }})</ion-label>
+    </div>
+
+    <div *ngIf="isLoadingReviews" class="ion-text-center ion-padding">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+
+    <div *ngIf="!isLoadingReviews && reviews.length === 0" class="ion-padding ion-text-center">
+      <p style="color: var(--ion-color-medium);">Sin reseñas aún</p>
+    </div>
+
+    <div *ngFor="let review of reviews" class="review-item">
+      <div class="review-header">
+        <span class="reviewer-name">{{ review.client_name || 'Cliente' }}</span>
+        <span class="review-stars">
+          <ion-icon *ngFor="let s of [1,2,3,4,5]"
+            [name]="s <= review.rating ? 'star' : 'star-outline'"
+            color="warning"
+            style="font-size:14px">
+          </ion-icon>
+          <span class="review-rating">&nbsp;{{ review.rating }}/5</span>
+        </span>
+      </div>
+      <p class="review-comment" *ngIf="review.comment">{{ review.comment }}</p>
+      <p class="review-date">{{ review.created_at | date:'mediumDate' }}</p>
+    </div>
+  </div>
+
+  <!-- Booking Action Sheet Modal -->
+  <ion-modal
+    [isOpen]="showBookingModal"
+    (didDismiss)="closeBookingActionSheet()"
+    [initialBreakpoint]="0.75"
+    [breakpoints]="[0, 0.5, 0.75, 1]"
+    [backdropDismiss]="true"
+    [backdropBreakpoint]="0.5"
+    cssClass="booking-modal">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Reservar Servicio</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeBookingActionSheet()">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="booking-modal-content">
+        <div class="booking-form-container">
+          <!-- Provider Info Summary -->
+          <div class="provider-summary">
+            <ion-icon name="business" color="primary"></ion-icon>
+            <div class="provider-info">
+              <strong>{{ provider?.business_name }}</strong>
+              <span class="provider-rate" *ngIf="provider?.hourly_rate">${{ provider?.hourly_rate | number }}/hora</span>
+            </div>
+          </div>
+
+          <!-- Fecha y Hora -->
+          <!-- Fecha -->
+          <div class="booking-field">
+            <label class="field-label">
+              <ion-icon name="calendar" color="primary"></ion-icon>
+              Selecciona la Fecha
+            </label>
+            <ion-datetime 
+              [(ngModel)]="selectedDate"
+              mode="md"
+              presentation="date"
+              locale="es-ES"
+              [min]="minDate"
+              class="compact-date">
+            </ion-datetime>
+          </div>
+
+          <!-- Hora -->
+          <div class="booking-field">
+            <label class="field-label">
+              <ion-icon name="time" color="primary"></ion-icon>
+              Selecciona la Hora
+            </label>
+
+            <!-- Cargando slots -->
+            <div *ngIf="isLoadingSlots" class="ion-text-center ion-padding-vertical">
+              <ion-spinner name="crescent" color="primary"></ion-spinner>
+            </div>
+
+            <!-- Sin horarios configurados para ese día -->
+            <div *ngIf="!isLoadingSlots && slots.length === 0"
+                 style="padding: 8px 0; text-align: center;">
+              <p style="color: var(--ion-color-medium); font-size: 13px; margin: 0;">
+                Sin horarios disponibles para este día.
+              </p>
+            </div>
+
+            <!-- Chips de slots -->
+            <div *ngIf="!isLoadingSlots && slots.length > 0"
+                 style="display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 0;">
+              <ion-chip
+                *ngFor="let slot of slots"
+                [color]="slot.time === selectedTime ? 'primary' : 'light'"
+                [outline]="slot.time !== selectedTime"
+                [disabled]="!slot.available"
+                (click)="slot.available && selectTime(slot.time)"
+                [style.opacity]="slot.available ? '1' : '0.4'"
+                [style.cursor]="slot.available ? 'pointer' : 'not-allowed'">
+                <ion-icon
+                  *ngIf="!slot.available"
+                  name="ban-outline"
+                  style="margin-right: 4px; font-size: 12px;">
+                </ion-icon>
+                <ion-label>{{ slot.time }}</ion-label>
+              </ion-chip>
+            </div>
+
+            <div class="error-hint" *ngIf="bookingAttempted && (!selectedDate || !selectedTime)">
+              <ion-icon name="alert-circle" color="danger"></ion-icon>
+              <span>Fecha y hora requeridos</span>
+            </div>
+          </div>
+
+          <!-- Ubicación de Servicio -->
+          <div class="booking-field">
+            <label class="field-label">
+              <ion-icon name="location" color="primary"></ion-icon>
+              Ubicación del Servicio
+            </label>
+            <div class="input-with-suggestions">
+              <ion-item lines="none" class="address-input">
+                <ion-icon name="location" slot="start" color="primary"></ion-icon>
+                <ion-input
+                  type="text"
+                  placeholder="Ingrese su dirección"
+                  (ionInput)="onAddressInput($event)"
+                  (ionFocus)="onAddressFocus()"
+                  (ionBlur)="onAddressBlur()"
+                  [value]="selectedAddressText"
+                  autocomplete="off">
+                </ion-input>
+                <ion-spinner *ngIf="isSearching" slot="end" name="crescent"></ion-spinner>
+                <ion-button
+                  *ngIf="selectedAddressText"
+                  slot="end"
+                  fill="clear"
+                  size="small"
+                  (click)="clearAddress()"
+                  (mousedown)="$event.preventDefault()">
+                  <ion-icon name="close-circle" color="medium"></ion-icon>
+                </ion-button>
+              </ion-item>
+
+              <!-- Suggestions Dropdown -->
+              <div class="suggestions-container" *ngIf="showAddressSuggestions && addressSuggestions.length > 0">
+                <div
+                  class="suggestion-item"
+                  *ngFor="let suggestion of addressSuggestions"
+                  (click)="selectAddressSuggestion(suggestion)"
+                  (mousedown)="$event.preventDefault()">
+                  <ion-icon
+                    [name]="getSuggestionIcon(suggestion)"
+                    [color]="getSuggestionColor(suggestion)">
+                  </ion-icon>
+                  <div class="suggestion-text">
+                    <div class="suggestion-main">
+                      {{ getSuggestionDisplayText(suggestion) }}
+                    </div>
+                    <div class="suggestion-details" *ngIf="getSuggestionContext(suggestion)">
+                      {{ getSuggestionContext(suggestion) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="error-hint" *ngIf="bookingAttempted && !locationAddress">
+              <ion-icon name="alert-circle" color="danger"></ion-icon>
+              <span>Ubicación requerida</span>
+            </div>
+          </div>
+
+          <!-- Notas Opcionales -->
+          <div class="booking-field">
+            <label class="field-label">
+              <ion-icon name="document-text" color="primary"></ion-icon>
+              Notas o Descripción (opcional)
+            </label>
+            <ion-item lines="none" class="notes-input">
+              <ion-textarea 
+                [(ngModel)]="description" 
+                rows="3" 
+                placeholder="Describe brevemente lo que necesitas...">
+              </ion-textarea>
+            </ion-item>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <ion-button 
+              expand="block" 
+              color="primary"
+              size="large"
+              (click)="confirmBookingFromSheet()"
+              [disabled]="!isBookingValid"
+              class="confirm-button">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Confirmar Reserva
+            </ion-button>
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              color="medium"
+              size="default"
+              (click)="closeBookingActionSheet()"
+              class="cancel-button">
+              Cancelar
+            </ion-button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
+

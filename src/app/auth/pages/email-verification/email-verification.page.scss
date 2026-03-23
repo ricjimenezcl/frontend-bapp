@@ -1,0 +1,43 @@
+.email-verification-page {
+  --background: var(--ion-color-light);
+}
+
+.verification-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 32px 24px;
+  text-align: center;
+
+  ion-spinner {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+  }
+
+  .status-icon {
+    font-size: 72px;
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ion-color-dark);
+  }
+
+  .status-text {
+    color: var(--ion-color-medium);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    max-width: 320px;
+  }
+
+  ion-button {
+    width: 100%;
+    max-width: 320px;
+  }
+}

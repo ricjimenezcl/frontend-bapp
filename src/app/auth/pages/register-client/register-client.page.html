@@ -1,0 +1,161 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Registro de Cliente</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="login-screen">
+    <ion-label class="title">Crear Cuenta de Cliente</ion-label>
+    
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- Nombre Completo -->
+      <ion-item lines="none" class="input-item">
+        <ion-icon slot="start" name="person" color="medium"></ion-icon>
+        <ion-input
+          type="text"
+          formControlName="fullName"
+          placeholder="Ingresa tu nombre completo"
+        ></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors">
+        <span *ngIf="registerForm.get('fullName')?.errors?.['required']">El nombre es requerido</span>
+        <span *ngIf="registerForm.get('fullName')?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
+      </div>
+
+      <!-- Email -->
+      <ion-item lines="none" class="input-item">
+        <ion-icon slot="start" name="mail-outline" color="medium"></ion-icon>
+        <ion-input
+          type="email"
+          formControlName="email"
+          placeholder="tu@email.com"
+        ></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors">
+        <span *ngIf="registerForm.get('email')?.errors?.['required']">El email es requerido</span>
+        <span *ngIf="registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['strictEmail']">
+          Ingresa un email válido
+        </span>
+      </div>
+
+      <!-- Teléfono -->
+      <ion-item lines="none" class="input-item">
+        <ion-icon slot="start" name="call" color="medium"></ion-icon>
+        <ion-input
+          type="tel"
+          formControlName="phone"
+          placeholder="+56 9 1234 5678"
+          maxlength="17"
+          (ionInput)="formatPhone($event)"
+        ></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.errors">
+        <span *ngIf="registerForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+        <span *ngIf="registerForm.get('phone')?.errors?.['pattern']">Formato de teléfono chileno inválido</span>
+      </div>
+
+      <!-- Contraseña -->
+      <ion-item lines="none" class="input-item">
+        <ion-icon slot="start" name="lock-closed-outline" color="medium"></ion-icon>
+        <ion-input
+          type="password"
+          formControlName="password"
+          placeholder="Mínimo 8 caracteres, con mayúscula y número"
+        ></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors">
+        <span *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['uppercaseRequired']">
+          Debe contener al menos una mayúscula
+        </span>
+        <span *ngIf="registerForm.get('password')?.errors?.['numberRequired']">
+          Debe contener al menos un número
+        </span>
+      </div>
+
+      <!-- Confirmar Contraseña -->
+      <ion-item lines="none" class="input-item">
+        <ion-icon slot="start" name="lock-closed-outline" color="medium"></ion-icon>
+        <ion-input
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Repite tu contraseña"
+        ></ion-input>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors">
+        <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
+          Confirma tu contraseña
+        </span>
+        <span *ngIf="registerForm.get('confirmPassword')?.errors?.['mismatch']">
+          Las contraseñas no coinciden
+        </span>
+      </div>
+
+      <!-- Términos y Condiciones (obligatorio) -->
+      <ion-item lines="none" class="checkbox-item">
+        <ion-checkbox formControlName="termsAccepted" slot="start"></ion-checkbox>
+        <ion-label class="ion-text-wrap">
+          Acepto los <a routerLink="/terms" target="_blank">Términos y Condiciones</a>
+          y la <a routerLink="/privacy" target="_blank">Política de Privacidad</a> *
+        </ion-label>
+      </ion-item>
+      <div class="error-message" *ngIf="registerForm.get('termsAccepted')?.touched && registerForm.get('termsAccepted')?.errors?.['required']">
+        <span>Debes aceptar los términos para continuar</span>
+      </div>
+
+      <!-- Consentimiento emails (opcional) -->
+      <ion-item lines="none" class="checkbox-item">
+        <ion-checkbox formControlName="emailOptIn" slot="start"></ion-checkbox>
+        <ion-label class="ion-text-wrap">
+          Deseo recibir ofertas y novedades de BAPP Search por email (opcional)
+        </ion-label>
+      </ion-item>
+
+      <!-- Botón de Registro -->
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="!registerForm.valid || isLoading"
+        class="submit-button"
+      >
+        <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!isLoading" name="person-add" slot="start"></ion-icon>
+        {{ isLoading ? "Registrando..." : "Registrarse" }}
+      </ion-button>
+    </form>
+
+    <!-- Separador o continuar con -->
+    <div class="or-separator">
+      <div class="line"></div>
+      <ion-label class="or-label">o regístrate con</ion-label>
+      <div class="line"></div>
+    </div>
+
+    <!-- Botones de registro social -->
+    <div class="social-login">
+      <ion-button fill="outline" color="medium" (click)="registerWithFacebook()" [disabled]="isLoading">
+        <ion-icon slot="icon-only" name="logo-facebook" color="secondary"></ion-icon>
+      </ion-button>
+      <ion-button fill="outline" color="medium" (click)="registerWithGoogle()" [disabled]="isLoading">
+        <ion-icon slot="icon-only" name="logo-google" color="danger"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Enlace para iniciar sesión -->
+    <ion-button
+      expand="block"
+      fill="clear"
+      color="medium"
+      routerLink="/auth/login"
+      class="login-link-button"
+    >
+      <ion-icon name="log-in" slot="start"></ion-icon>
+      ¿Ya tienes cuenta? Inicia sesión
+    </ion-button>
+  </div>
+</ion-content>

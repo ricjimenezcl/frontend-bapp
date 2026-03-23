@@ -1,0 +1,230 @@
+// tabs.page.scss
+@import '../../../../theme/mixins';
+
+// ── Host layout ───────────────────────────────────────────────────────────────
+:host {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+ion-header.tabs-header {
+  flex-shrink: 0;
+  z-index: var(--bapp-z-sticky);
+
+  .tabs-toolbar {
+    --background: var(--bapp-bg-card);
+    --border-color: var(--bapp-border);
+    --min-height: 56px;
+    --padding-start: var(--bapp-space-4);
+    --padding-end: var(--bapp-space-3);
+    box-shadow: 0 1px 0 var(--bapp-border);
+  }
+}
+
+.tabs-title-wrap {
+  padding-left: var(--bapp-space-1);
+}
+
+.tabs-title {
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.02em;
+}
+
+// Services chip (shows when services selected)
+.services-chip {
+  @include flex-center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 var(--bapp-space-2);
+  background: rgba(253,215,53,0.12);
+  border: 1.5px solid rgba(253,215,53,0.35);
+  border-radius: var(--bapp-radius-full);
+  cursor: pointer;
+  margin-right: var(--bapp-space-2);
+
+  ion-icon { font-size: 12px; color: var(--bapp-color-primary); }
+  span {
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-bold);
+    color: var(--bapp-color-primary);
+    min-width: 14px;
+  }
+}
+
+// New search button (icon only)
+.new-search-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--bapp-radius-lg);
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  @include flex-center;
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; color: var(--bapp-text-secondary); }
+  &:active { background: rgba(255,255,255,0.1); }
+}
+
+// ── Content area ──────────────────────────────────────────────────────────────
+// position:relative is the containing block for the absolutely-positioned
+// tab containers below.
+.tabs-content {
+  background: var(--bapp-bg-page);
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+}
+
+// Tab containers — inactive tabs use display:none so that when a tab becomes
+// active (display:flex) Ionic v8's ResizeObserver detects the dimension change
+// from 0 → actual height and triggers ion-content to recalculate its scroll
+// area. visibility:hidden was tried but does NOT change element dimensions so
+// ResizeObserver never fires and ion-content stays at cached height=0.
+// position:absolute ensures each active tab fills tabs-content independently.
+.tab-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  flex-direction: column;
+
+  &.tab-active {
+    display: flex;
+  }
+
+  > * {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+// ── Footer tab bar ────────────────────────────────────────────────────────────
+ion-footer.tabs-footer {
+  flex-shrink: 0;
+  background: var(--bapp-bg-card);
+  border-top: 1px solid var(--bapp-border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.28);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  ion-toolbar {
+    --background: transparent;
+    --border-style: none;
+  }
+}
+
+.tab-bar {
+  display: flex;
+  align-items: stretch;
+  height: 60px;
+  width: 100%;
+}
+
+.tab-btn {
+  flex: 1;
+  @include flex-column-center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--bapp-space-2) var(--bapp-space-1);
+  position: relative;
+  transition: all var(--bapp-transition-fast);
+  -webkit-tap-highlight-color: transparent;
+
+  // Active top-indicator bar
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 24px;
+    height: 3px;
+    border-radius: 0 0 var(--bapp-radius-sm) var(--bapp-radius-sm);
+    background: var(--bapp-color-primary);
+    transition: transform var(--bapp-transition-normal);
+    transform-origin: center;
+  }
+
+  &.tab-btn-active::before {
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+.tab-icon-wrap {
+  position: relative;
+  @include flex-center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--bapp-radius-lg);
+  transition: background var(--bapp-transition-fast);
+
+  ion-icon {
+    font-size: 22px;
+    color: var(--bapp-text-tertiary);
+    transition: color var(--bapp-transition-fast), transform var(--bapp-transition-fast);
+  }
+}
+
+.tab-btn-active .tab-icon-wrap {
+  background: rgba(253, 215, 53, 0.12);
+
+  ion-icon {
+    color: var(--bapp-color-primary);
+    transform: scale(1.05);
+  }
+}
+
+.tab-label {
+  font-size: 10px;
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-text-tertiary);
+  transition: color var(--bapp-transition-fast);
+  white-space: nowrap;
+}
+
+.tab-btn-active .tab-label {
+  color: var(--bapp-color-primary);
+  font-weight: var(--bapp-font-semibold);
+}
+
+// Dot badge (services count on search tab)
+.tab-dot-badge {
+  position: absolute;
+  top: -3px;
+  right: -6px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--bapp-color-primary);
+  color: #000;
+  font-size: 9px;
+  font-weight: var(--bapp-font-bold);
+  border-radius: var(--bapp-radius-full);
+  @include flex-center;
+  border: 1.5px solid var(--bapp-bg-card);
+  line-height: 1;
+}
+
+// ── Safe area (iOS) ───────────────────────────────────────────────────────────
+@supports (padding-top: env(safe-area-inset-top)) {
+  ion-header.tabs-header .tabs-toolbar {
+    --padding-top: env(safe-area-inset-top);
+  }
+}

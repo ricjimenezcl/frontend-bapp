@@ -1,0 +1,128 @@
+<!-- Loading State -->
+<div *ngIf="loading" class="premium-badge loading">
+  <ion-skeleton-text animated style="width: 100%; height: 60px;"></ion-skeleton-text>
+</div>
+
+<!-- Premium Active -->
+<ion-card *ngIf="!loading && isPremium" class="premium-card active" [class.compact]="compactMode">
+  <ion-card-content>
+    
+    <!-- Compact Mode -->
+    <div *ngIf="compactMode" class="compact-content">
+      <div class="premium-header">
+        <ion-icon name="star" color="warning"></ion-icon>
+        <span class="premium-label">Premium</span>
+      </div>
+      <ion-badge [color]="getBadgeColor()" class="days-badge">
+        {{ remainingDays }} días
+      </ion-badge>
+    </div>
+
+    <!-- Full Mode -->
+    <div *ngIf="!compactMode" class="full-content">
+      
+      <!-- Premium Icon and Title -->
+      <div class="premium-header">
+        <ion-icon name="star" color="warning" class="premium-icon"></ion-icon>
+        <div class="premium-info">
+          <h3>Cuenta Premium</h3>
+          <p>Acceso ilimitado a todas las funciones</p>
+        </div>
+      </div>
+
+      <!-- Expiration Info -->
+      <div class="expiration-info">
+        <div class="expiration-item">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <div>
+            <span class="label">Expira el</span>
+            <span class="value">{{ formatExpirationDate() }}</span>
+          </div>
+        </div>
+        
+        <div class="expiration-item">
+          <ion-icon name="time-outline"></ion-icon>
+          <div>
+            <span class="label">Días restantes</span>
+            <ion-badge [color]="getBadgeColor()" class="days-badge">
+              {{ remainingDays }} días
+            </ion-badge>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <ion-button 
+          (click)="goToTransactions()" 
+          fill="clear" 
+          size="small"
+          class="action-button">
+          <ion-icon slot="start" name="receipt-outline"></ion-icon>
+          Ver Historial
+        </ion-button>
+      </div>
+
+    </div>
+  </ion-card-content>
+</ion-card>
+
+<!-- Premium Inactive -->
+<ion-card *ngIf="!loading && !isPremium" class="premium-card inactive" [class.compact]="compactMode">
+  <ion-card-content>
+    
+    <!-- Compact Mode -->
+    <div *ngIf="compactMode" class="compact-content">
+      <div class="upgrade-header">
+        <ion-icon name="lock-closed" color="medium"></ion-icon>
+        <span class="upgrade-label">Gratuito</span>
+      </div>
+      <ion-button 
+        (click)="goToCatalog()" 
+        size="small" 
+        fill="outline"
+        color="primary">
+        Mejorar
+      </ion-button>
+    </div>
+
+    <!-- Full Mode -->
+    <div *ngIf="!compactMode" class="full-content">
+      
+      <!-- Upgrade Icon and Title -->
+      <div class="upgrade-header">
+        <ion-icon name="lock-closed" color="medium" class="upgrade-icon"></ion-icon>
+        <div class="upgrade-info">
+          <h3>Cuenta Gratuita</h3>
+          <p>Actualiza a Premium para más beneficios</p>
+        </div>
+      </div>
+
+      <!-- Benefits List -->
+      <div class="benefits-list">
+        <div class="benefit-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <span>Acceso ilimitado a búsquedas</span>
+        </div>
+        <div class="benefit-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <span>Sin límites de servicios guardados</span>
+        </div>
+        <div class="benefit-item">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <span>Prioridad en el soporte</span>
+        </div>
+      </div>
+
+      <!-- CTA Button -->
+      <ion-button 
+        (click)="goToCatalog()" 
+        expand="block" 
+        class="upgrade-button">
+        <ion-icon slot="start" name="rocket-outline"></ion-icon>
+        Actualizar a Premium
+      </ion-button>
+
+    </div>
+  </ion-card-content>
+</ion-card>

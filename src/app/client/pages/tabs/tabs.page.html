@@ -1,0 +1,109 @@
+<ion-header class="tabs-header">
+  <ion-toolbar class="tabs-toolbar">
+
+    <!-- Dynamic title -->
+    <div slot="start" class="tabs-title-wrap">
+      <span class="tabs-title" *ngIf="activeTab === 'service-search'">Proveedores</span>
+      <span class="tabs-title" *ngIf="activeTab === 'service-map'">Mapa</span>
+      <span class="tabs-title" *ngIf="activeTab === 'bookings'">Mis Reservas</span>
+      <span class="tabs-title" *ngIf="activeTab === 'chats'">Mensajes</span>
+      <span class="tabs-title" *ngIf="activeTab === 'client-profile'">Mi Perfil</span>
+    </div>
+
+    <!-- Actions slot -->
+    <ion-buttons slot="end">
+      <!-- Services count chip -->
+      <div class="services-chip" *ngIf="selectedServices.length > 0" (click)="changeTab('service-search')">
+        <ion-icon name="construct-outline"></ion-icon>
+        <span>{{ selectedServices.length }}</span>
+      </div>
+      <!-- New search button -->
+      <button class="new-search-btn" (click)="goToCategories()" type="button">
+        <ion-icon name="search-outline"></ion-icon>
+      </button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<div class="tabs-content">
+  <div class="tab-container" [class.tab-active]="activeTab === 'service-search'">
+    <app-service-search></app-service-search>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'service-map'">
+    <app-service-map></app-service-map>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'bookings'">
+    <app-client-bookings></app-client-bookings>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'chats'">
+    <app-client-chats></app-client-chats>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'client-profile'">
+    <app-client-profile></app-client-profile>
+  </div>
+  <router-outlet></router-outlet>
+</div>
+
+<!-- ── Bottom Tab Bar ──────────────────────────────────────────────── -->
+<ion-footer class="tabs-footer">
+  <div class="tab-bar">
+
+    <button
+      class="tab-btn"
+      [class.tab-btn-active]="activeTab === 'service-search'"
+      (click)="changeTab('service-search')"
+      type="button">
+      <div class="tab-icon-wrap">
+        <ion-icon [name]="activeTab === 'service-search' ? 'search' : 'search-outline'"></ion-icon>
+        <span class="tab-dot-badge" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</span>
+      </div>
+      <span class="tab-label">Servicios</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.tab-btn-active]="activeTab === 'service-map'"
+      (click)="changeTab('service-map')"
+      type="button">
+      <div class="tab-icon-wrap">
+        <ion-icon [name]="activeTab === 'service-map' ? 'map' : 'map-outline'"></ion-icon>
+      </div>
+      <span class="tab-label">Mapa</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.tab-btn-active]="activeTab === 'bookings'"
+      (click)="changeTab('bookings')"
+      type="button">
+      <div class="tab-icon-wrap">
+        <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
+      </div>
+      <span class="tab-label">Reservas</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.tab-btn-active]="activeTab === 'chats'"
+      (click)="changeTab('chats')"
+      type="button">
+      <div class="tab-icon-wrap">
+        <ion-icon [name]="activeTab === 'chats' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
+      </div>
+      <span class="tab-label">Chats</span>
+    </button>
+
+    <button
+      class="tab-btn"
+      [class.tab-btn-active]="activeTab === 'client-profile'"
+      (click)="changeTab('client-profile')"
+      type="button">
+      <div class="tab-icon-wrap">
+        <ion-icon [name]="activeTab === 'client-profile' ? 'person' : 'person-outline'"></ion-icon>
+      </div>
+      <span class="tab-label">Perfil</span>
+    </button>
+
+  </div>
+</ion-footer>

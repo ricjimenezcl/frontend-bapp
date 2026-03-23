@@ -1,0 +1,185 @@
+:host {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+
+.form-container {
+  padding: 20px;
+
+  .input-item {
+    --background: #c97c7c;
+    border-radius: 10px;
+    margin-bottom: 20px;
+
+    ion-label {
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      margin-bottom: 8px;
+    }
+
+    ion-input, ion-textarea, ion-select {
+      --padding-start: 10px;
+      margin-top: 8px;
+    }
+  }
+
+  .save-btn {
+    margin-top: 30px;
+    height: 50px;
+    font-weight: 600;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+  }
+
+  p {
+    margin-top: 16px;
+    color: var(--ion-color-medium);
+  }
+}
+
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.8em;
+  margin: 4px 0 8px 0;
+  padding: 0 16px;
+}
+
+// ── Horario por día ──────────────────────────────────────────────────────
+.schedule-section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ion-color-dark);
+  margin: 16px 0 8px 0;
+}
+
+.schedule-day-card {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.active {
+    border-color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.06);
+  }
+
+  .schedule-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .day-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--ion-color-medium);
+      transition: color 0.2s;
+
+      &.day-active {
+        color: var(--ion-color-dark);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .schedule-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+
+    .time-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+
+      .time-label {
+        font-size: 0.72rem;
+        color: var(--ion-color-medium);
+        margin-bottom: 2px;
+      }
+
+      .time-select {
+        --background: var(--ion-color-light-shade);
+        --padding-start: 8px;
+        --padding-end: 4px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+    }
+
+    .time-separator {
+      color: var(--ion-color-medium);
+      font-size: 1.1rem;
+      margin-top: 14px;
+    }
+  }
+
+  .day-unavailable {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+    font-style: italic;
+  }
+}

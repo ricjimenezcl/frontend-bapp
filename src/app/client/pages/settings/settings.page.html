@@ -1,0 +1,59 @@
+<ion-header class="ion-no-border ep-header">
+  <ion-toolbar class="ep-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="cancel()" class="ep-close-btn">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Configuración</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <!-- Idiomas -->
+    <ion-item lines="none" class="content-item">
+      <ion-icon slot="start" name="language-outline" color="dark"></ion-icon>
+      <ion-label class="lbl">Idiomas</ion-label>
+      <ion-select 
+        slot="end" 
+        [(ngModel)]="currentLanguage" 
+        (ionChange)="onLanguageChange()"
+        interface="popover">
+        <ion-select-option *ngFor="let lang of availableLanguages" [value]="lang.code">
+          {{ lang.name }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Modo Oscuro -->
+    <ion-item lines="none" class="content-item">
+      <ion-icon slot="start" name="contrast" color="dark"></ion-icon>
+      <ion-label class="lbl">Modo Oscuro</ion-label>
+      <ion-toggle 
+        slot="end" 
+        mode="md" 
+        [checked]="darkMode" 
+        (ionChange)="onDarkModeToggle($event)">
+      </ion-toggle>
+    </ion-item>
+
+    <!-- Centro de Ayuda -->
+    <ion-item lines="none" class="content-item" detail (click)="onPage('help')">
+      <ion-icon slot="start" name="information-circle-outline" color="dark"></ion-icon>
+      <ion-label class="lbl">Centro de Ayuda</ion-label>
+    </ion-item>
+
+    <!-- Cambiar Foto de Perfil -->
+    <ion-item lines="none" class="content-item" detail (click)="onChangeAvatar()">
+      <ion-icon slot="start" name="camera-outline" color="dark"></ion-icon>
+      <ion-label class="lbl">Cambiar Foto de Perfil</ion-label>
+    </ion-item>
+
+    <!-- Cambiar Contraseña -->
+    <ion-item lines="none" class="content-item" detail (click)="onChangePassword()">
+      <ion-icon slot="start" name="key-outline" color="dark"></ion-icon>
+      <ion-label class="lbl">Cambiar Contraseña</ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

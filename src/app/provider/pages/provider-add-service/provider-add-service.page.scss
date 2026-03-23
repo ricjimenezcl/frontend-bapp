@@ -1,0 +1,372 @@
+﻿// --- Provider Add Service - BAPP Design System ---
+// Variables definidas en src/theme/variables.scss
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+ion-header ion-toolbar {
+  --background: #1e1e1e;
+  --border-color: var(--bapp-border);
+  ion-title {
+    font-family: 'semi-bold', sans-serif;
+    font-size: 17px;
+    color: var(--bapp-text-primary);
+  }
+  ion-button { --color: var(--bapp-text-secondary); }
+}
+
+.modal-container {
+  padding: var(--bapp-space-md);
+  padding-bottom: 110px;
+}
+
+.instructions {
+  text-align: center;
+  padding: var(--bapp-space-md) 0 var(--bapp-space-sm);
+  margin-bottom: var(--bapp-space-md);
+  .title {
+    display: block;
+    font-family: 'bold', sans-serif;
+    font-size: 17px;
+    color: var(--bapp-text-primary);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .sub-title {
+    display: block;
+    font-size: 13px;
+    color: var(--bapp-text-secondary);
+    line-height: 1.5;
+  }
+}
+
+.map-container-centered {
+  border-radius: var(--bapp-radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--bapp-space-md);
+  border: 1px solid var(--bapp-border);
+  box-shadow: var(--bapp-shadow-md);
+  .static-map {
+    width: 100%;
+    display: block;
+    max-height: 180px;
+    object-fit: cover;
+  }
+}
+
+.form-section {
+  background: var(--bapp-surface-01);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  margin-bottom: var(--bapp-space-sm);
+  overflow: visible;
+  box-shadow: var(--bapp-shadow-card);
+}
+
+// Separador entre filas dentro de una misma form-section
+.form-section > .input-with-suggestions + .input-with-suggestions {
+  border-top: 1px solid var(--bapp-border);
+}
+.form-section > .selected-service-container > .input-with-suggestions + .input-with-suggestions {
+  border-top: 1px solid var(--bapp-border);
+}
+
+.input-with-suggestions {
+  position: relative;
+}
+
+.input-with-suggestions ion-item {
+  --background: transparent;
+  --border-color: transparent;
+  --inner-border-width: 0;
+  --padding-start: var(--bapp-space-sm);
+  --inner-padding-end: var(--bapp-space-sm);
+  --min-height: 52px;
+  --inner-padding-start: 0;
+}
+
+.input-with-suggestions ion-item ion-icon[slot="start"] {
+  color: var(--ion-color-primary);
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+.input-with-suggestions ion-item ion-input {
+  --color: var(--bapp-text-primary);
+  --placeholder-color: var(--bapp-text-tertiary);
+  --padding-start: 0;
+  --padding-end: 0;
+  --background: transparent;
+  border: none;
+  border-radius: 0;
+  margin-top: 0;
+  font-size: 15px;
+  font-family: 'regular', sans-serif;
+}
+
+.input-with-suggestions ion-item ion-textarea {
+  --color: var(--bapp-text-primary);
+  --placeholder-color: var(--bapp-text-tertiary);
+  --padding-start: 0;
+  --background: transparent;
+  font-size: 15px;
+  font-family: 'regular', sans-serif;
+}
+
+.selected-service-container {
+  .input-with-suggestions ion-item ion-label h3 {
+    font-family: 'semi-bold', sans-serif;
+    font-size: 14px;
+    color: var(--bapp-text-primary);
+  }
+  .input-with-suggestions ion-item ion-button[fill="clear"] {
+    --color: var(--bapp-text-tertiary);
+  }
+  .input-with-suggestions ion-item ion-icon[name="checkmark-circle"] {
+    color: var(--ion-color-success);
+  }
+}
+
+// Campos ocultos por nombre de campo
+ion-item:has(ion-input[name="direccion"]),
+ion-item:has(ion-input[name="lat"]),
+ion-item:has(ion-input[name="lng"]),
+ion-item:has(ion-input[name="servicio"]),
+ion-item:has(ion-input[name="categoria"]) {
+  display: none !important;
+}
+
+// Boton depurar oculto
+ion-item:has(ion-button[color="warning"]) {
+  display: none !important;
+}
+
+ion-spinner {
+  width: 20px;
+  height: 20px;
+  --color: var(--ion-color-primary);
+}
+
+.suggestions-container {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bapp-surface-02);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: var(--bapp-shadow-lg);
+  &::-webkit-scrollbar { width: 0; }
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px var(--bapp-space-md);
+  border-bottom: 1px solid var(--bapp-border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  &:last-child { border-bottom: none; }
+  &:active { background: var(--bapp-surface-03); }
+  ion-icon {
+    color: var(--ion-color-primary);
+    font-size: 18px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.suggestion-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestion-main {
+  font-family: 'medium', sans-serif;
+  font-size: 14px;
+  color: var(--bapp-text-primary);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-details {
+  font-size: 12px;
+  color: var(--bapp-text-secondary);
+  line-height: 1.3;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.error-message {
+  font-size: 12px;
+  color: var(--ion-color-danger);
+  padding: 2px var(--bapp-space-md) var(--bapp-space-xs);
+  display: block;
+}
+
+ion-footer {
+  background: #1e1e1e;
+  border-top: 1px solid var(--bapp-border);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  ion-toolbar {
+    --background: transparent;
+    --padding-start: var(--bapp-space-md);
+    --padding-end: var(--bapp-space-md);
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    --min-height: 68px;
+  }
+  ion-col { padding: 0 4px; }
+}
+
+.footer-button {
+  --border-radius: var(--bapp-radius-full);
+  height: 46px;
+  font-family: 'semi-bold', sans-serif;
+  font-size: 15px;
+  margin: 0;
+  &[color="light"] {
+    --border-color: var(--bapp-border);
+    --color: var(--bapp-text-secondary);
+    --background: transparent;
+  }
+  &[color="primary"] {
+    --color: #000000;
+    font-family: 'bold', sans-serif;
+  }
+}
+
+.ios ion-footer {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// Estilos para el diseño unificado de horarios (schedule)
+.schedule-day-card {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+
+  &.active {
+    border-color: var(--ion-color-primary);
+    background: rgba(var(--ion-color-primary-rgb), 0.06);
+  }
+
+  .schedule-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .day-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--ion-color-medium);
+      transition: color 0.2s;
+
+      &.day-active {
+        color: var(--ion-color-dark);
+        font-weight: 600;
+      }
+    }
+  }
+
+  .schedule-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+
+    .time-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+
+      .time-label {
+        font-size: 0.72rem;
+        color: var(--ion-color-medium);
+        margin-bottom: 2px;
+      }
+
+      .time-select {
+        --background: var(--ion-color-light-shade);
+        --padding-start: 8px;
+        --padding-end: 4px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+      }
+    }
+
+    .time-separator {
+      color: var(--ion-color-medium);
+      font-size: 1.1rem;
+      margin-top: 14px;
+    }
+  }
+
+  .day-unavailable {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--ion-color-medium);
+    font-style: italic;
+  }
+}

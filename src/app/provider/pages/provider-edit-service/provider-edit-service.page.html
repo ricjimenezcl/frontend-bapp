@@ -1,0 +1,196 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/provider/tabs"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Editar Servicio</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark">
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner color="primary"></ion-spinner>
+    <p>Cargando información del servicio...</p>
+  </div>
+
+  <!-- Formulario -->
+  <div *ngIf="!isLoading">
+    <!-- Mapa estático -->
+    <div *ngIf="mapUrl" class="map-container">
+      <img [src]="mapUrl" alt="Mapa" class="static-map" />
+    </div>
+
+    <!-- Categoría del servicio (solo lectura) -->
+    <ion-item lines="none" class="readonly-item">
+      <ion-icon name="construct" slot="start" color="primary"></ion-icon>
+      <ion-input 
+        type="text" 
+        [value]="serviceCategoryName" 
+        placeholder="CATEGORÍA"
+        readonly
+        disabled>
+      </ion-input>
+    </ion-item>
+
+    <!-- Búsqueda de dirección -->
+    <div class="input-with-suggestions">
+      <ion-item lines="none">
+        <ion-icon name="location-outline" slot="start" color="primary"></ion-icon>
+        <ion-input 
+          type="text" 
+          placeholder="Ingrese su dirección"
+          (ionInput)="onAddressInput($event)"
+          (ionFocus)="onAddressFocus()"
+          (ionBlur)="onAddressBlur()"
+          [value]="selectedAddressText"
+          autocomplete="off">
+        </ion-input>
+        <ion-spinner *ngIf="isSearching" slot="end" name="crescent"></ion-spinner>
+        <ion-button 
+          *ngIf="selectedAddressText" 
+          slot="end" 
+          fill="clear" 
+          size="small"
+          (click)="clearAddress()"
+          (mousedown)="$event.preventDefault()">
+          <ion-icon name="close-circle" color="medium"></ion-icon>
+        </ion-button>
+      </ion-item>
+      
+      <div class="suggestions-container" *ngIf="showAddressSuggestions && addressSuggestions.length > 0">
+        <div class="suggestion-item" 
+             *ngFor="let suggestion of addressSuggestions"
+             (click)="selectAddressSuggestion(suggestion)"
+             (mousedown)="$event.preventDefault()">
+          <ion-icon 
+            [name]="getSuggestionIcon(suggestion)" 
+            [color]="getSuggestionColor(suggestion)">
+          </ion-icon>
+          <div class="suggestion-text">
+            <div class="suggestion-main">{{ suggestion.place_name || suggestion.text }}</div>
+            <div class="suggestion-details" *ngIf="getSuggestionContext(suggestion)">
+              {{ getSuggestionContext(suggestion) }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="error-message" *ngIf="servicioForm.get('address')?.touched && servicioForm.get('latitude')?.errors?.['required']">
+        Selecciona una dirección de la lista de sugerencias
+      </div>
+    </div>
+
+    <form [formGroup]="servicioForm">
+      <!-- Nombre del Negocio -->
+      <ion-item>
+        <ion-icon name="business" slot="start" color="primary"></ion-icon>
+        <ion-input 
+          type="text" 
+          formControlName="business_name" 
+          placeholder="NOMBRE DEL NEGOCIO">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item *ngIf="servicioForm.get('business_name')?.errors && servicioForm.get('business_name')?.touched" lines="none">
+        <ion-label color="danger">
+          {{ getError('business_name') }}
+        </ion-label>
+      </ion-item>
+
+      <!-- Teléfono -->
+      <ion-item class="form-item">
+        <ion-icon name="call" slot="start" color="primary"></ion-icon>
+        <ion-input 
+          type="tel" 
+          formControlName="phone" 
+          placeholder="+56 9 1234 5678"
+          maxlength="17"
+          (ionInput)="formatPhone($event)">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item *ngIf="servicioForm.get('phone')?.errors && servicioForm.get('phone')?.touched" lines="none">
+        <ion-label color="danger">
+          {{ getError('phone') }}
+        </ion-label>
+      </ion-item>
+
+      <!-- Descripción del Servicio -->
+      <ion-item>
+        <ion-icon name="information-circle" slot="start" color="primary"></ion-icon>
+        <ion-textarea 
+          formControlName="description" 
+          placeholder="DESCRIPCIÓN DEL SERVICIO (opcional)" 
+          rows="3"
+          maxlength="100">
+        </ion-textarea>
+      </ion-item>
+
+      <!-- Campos ocultos con coordenadas -->
+      <div style="display: none;">
+        <ion-input formControlName="address" type="text"></ion-input>
+        <ion-input formControlName="latitude" type="text"></ion-input>
+        <ion-input formControlName="longitude" type="text"></ion-input>
+      </div>
+
+      <!-- ── Disponibilidad (horarios por día) ─────────────────────────── -->
+      <ion-item lines="none" style="margin-top: 16px;">
+        <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
+        <ion-label><strong>Horarios disponibles</strong></ion-label>
+      </ion-item>
+      <p style="padding: 0 16px; font-size: 13px; color: var(--ion-color-medium);">
+        Activa los días en que ofreces este servicio y define el horario.
+      </p>
+
+      <div class="schedule-day-card" *ngFor="let day of schedules" [class.active]="day.isActive">
+        <div class="schedule-day-header">
+          <span class="day-name" [class.day-active]="day.isActive">{{ day.dayName }}</span>
+          <ion-toggle
+            [(ngModel)]="day.isActive"
+            [ngModelOptions]="{standalone: true}"
+            color="primary"
+            mode="md">
+          </ion-toggle>
+        </div>
+        <div class="schedule-times" *ngIf="day.isActive">
+          <div class="time-group">
+            <span class="time-label">Desde</span>
+            <ion-select
+              [(ngModel)]="day.startTime"
+              [ngModelOptions]="{standalone: true}"
+              interface="popover"
+              class="time-select">
+              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+            </ion-select>
+          </div>
+          <span class="time-separator">—</span>
+          <div class="time-group">
+            <span class="time-label">Hasta</span>
+            <ion-select
+              [(ngModel)]="day.endTime"
+              [ngModelOptions]="{standalone: true}"
+              interface="popover"
+              class="time-select">
+              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+        <span class="day-unavailable" *ngIf="!day.isActive">No disponible</span>
+      </div>
+      <!-- ── Fin disponibilidad ──────────────────────────────────────────── -->
+
+      <!-- Botón de actualizar -->
+      <ion-button
+          expand="block"
+          color="primary"
+          type="button"
+          [disabled]="servicioForm.invalid || isSaving"
+          class="submit-button"
+          (click)="updateService()">
+          <ion-icon name="save" slot="start"></ion-icon>
+          <ion-spinner *ngIf="isSaving" slot="start" name="crescent"></ion-spinner>
+          Actualizar servicio
+      </ion-button>
+    </form>
+  </div>
+</ion-content>

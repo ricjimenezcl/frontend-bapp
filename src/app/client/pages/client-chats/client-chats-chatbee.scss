@@ -1,0 +1,276 @@
+// ─── ChatBee Shared — ClientChat.jsx Design ───────────────────────────
+// Imported by: client-chats, provider-inbox, provider-chats
+
+// ─── Header toolbars ──────────────────────────────────────────────────
+ion-header {
+  ion-toolbar {
+    --background: var(--bapp-surface-01) !important;
+    --border-color: var(--bapp-border) !important;
+    --color: var(--bapp-text-primary) !important;
+    --ion-color-base: var(--bapp-text-primary) !important;
+  }
+}
+
+.toolbar-title {
+  font-family: 'bold', sans-serif;
+  font-size: 20px;
+  color: var(--bapp-text-primary);
+}
+
+// ─── Content background ────────────────────────────────────────────────
+ion-content {
+  --background: #181818 !important;
+}
+
+// ─── Page intro (ClientChat.jsx "Mensajes" header) ─────────────────────
+.page-intro {
+  padding: 20px 20px 8px;
+
+  .intro-title {
+    font-size: 24px;
+    font-family: 'bold', sans-serif;
+    color: var(--bapp-text-primary);
+    margin: 0 0 3px;
+  }
+
+  .intro-sub {
+    font-size: 13px;
+    color: var(--bapp-text-secondary);
+    margin: 0;
+  }
+}
+
+// ─── Search bar ────────────────────────────────────────────────────────
+.search-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 16px 8px;
+  background: var(--bapp-surface-02);
+  border: 1px solid var(--bapp-border);
+  border-radius: 16px;
+  padding: 0 12px;
+  height: 44px;
+
+  .search-icon {
+    font-size: 18px;
+    color: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+  }
+
+  ion-input.search-input {
+    --padding-start: 0 !important;
+    --padding-end: 0 !important;
+    --color: var(--bapp-text-primary) !important;
+    --placeholder-color: var(--bapp-text-tertiary) !important;
+    font-size: 14px !important;
+    flex: 1;
+  }
+
+  .filter-icon {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+}
+
+// ─── Segment pills ─────────────────────────────────────────────────────
+.segment-wrapper {
+  padding: 0 16px 8px;
+}
+
+.chat-segment {
+  --background: var(--bapp-surface-02) !important;
+  border-radius: 20px !important;
+  padding: 3px !important;
+
+  ion-segment-button {
+    --border-radius: 17px !important;
+    --color: var(--bapp-text-secondary) !important;
+    --color-checked: #000 !important;
+    --background-checked: var(--ion-color-primary) !important;
+    --indicator-color: transparent !important;
+    min-height: 32px !important;
+
+    ion-label {
+      font-size: 13px !important;
+      font-family: 'medium', sans-serif !important;
+    }
+  }
+}
+
+// ─── Chat list screen ──────────────────────────────────────────────────
+.chats-screen {
+  padding: 0 0 100px;
+}
+
+// ─── Conversation items (ClientChat.jsx card pattern) ─────────────────
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 12px 8px;
+  background: var(--bapp-surface-01);
+  border-radius: 14px;
+  border: 1px solid var(--bapp-border);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+
+  &:active {
+    background: var(--bapp-surface-02);
+    transform: scale(0.985);
+  }
+}
+
+// Avatar
+.chat-avatar-wrap {
+  flex-shrink: 0;
+
+  .chat-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bapp-surface-02);
+    border: 2px solid var(--bapp-border);
+  }
+}
+
+// Body (name + preview)
+.chat-body {
+  flex: 1;
+  min-width: 0;
+
+  .chat-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    gap: 6px;
+
+    .chat-name {
+      font-size: 15px;
+      font-family: 'semi-bold', sans-serif;
+      color: var(--bapp-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chat-time {
+      font-size: 11px;
+      color: var(--bapp-text-tertiary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+
+  .chat-preview {
+    font-size: 13px;
+    color: var(--bapp-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+}
+
+// Unread badge (yellow gradient)
+.unread-badge {
+  background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+  color: #000;
+  border-radius: 10px;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-family: 'bold', sans-serif;
+  min-width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+// Read checkmark
+.read-icon {
+  font-size: 16px;
+  color: var(--bapp-text-tertiary);
+  flex-shrink: 0;
+}
+
+// ─── Skeleton items ────────────────────────────────────────────────────
+.chat-skeleton-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 0 12px 8px;
+  background: var(--bapp-surface-01);
+  border-radius: 14px;
+  border: 1px solid var(--bapp-border);
+
+  .skeleton-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    flex-shrink: 0;
+  }
+
+  .skeleton-info {
+    flex: 1;
+  }
+}
+
+// ─── State cards (empty / error) ──────────────────────────────────────
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+
+  &.empty {
+    ion-icon {
+      font-size: 52px;
+      color: var(--bapp-text-tertiary);
+      margin-bottom: var(--bapp-space-md);
+    }
+
+    p {
+      color: var(--bapp-text-primary);
+      font-size: 16px;
+      font-family: 'semi-bold', sans-serif;
+      margin: 0 0 6px;
+    }
+
+    .muted {
+      color: var(--bapp-text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+  }
+
+  &.error {
+    ion-icon {
+      font-size: 52px;
+      color: var(--ion-color-danger);
+      margin-bottom: var(--bapp-space-md);
+    }
+
+    p {
+      color: var(--ion-color-danger);
+      font-size: 14px;
+      margin: 0 0 var(--bapp-space-sm);
+    }
+  }
+}
+
+// ─── FAB button ────────────────────────────────────────────────────────
+ion-fab {
+  ion-fab-button {
+    --background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+    --color: #000;
+    --box-shadow: 0 4px 16px rgba(253,215,53,0.35);
+  }
+}

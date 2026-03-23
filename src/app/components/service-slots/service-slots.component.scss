@@ -1,0 +1,290 @@
+.slots-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-card-content {
+    padding: 20px;
+  }
+
+  &.compact {
+    margin: 8px 0;
+    
+    ion-card-content {
+      padding: 12px;
+    }
+  }
+}
+
+// Compact Mode Styles
+.compact-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .slots-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    .slots-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ion-color-dark);
+    }
+  }
+}
+
+// Full Mode Styles
+.full-content {
+
+  // Slots Header
+  .slots-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .slots-icon {
+      font-size: 36px;
+    }
+
+    .slots-info {
+      flex: 1;
+
+      h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ion-color-dark);
+      }
+
+      p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  // Progress Container
+  .progress-container {
+    margin-bottom: 20px;
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+
+      span {
+        font-size: 12px;
+        font-weight: 600;
+
+        &.used {
+          color: var(--ion-color-primary);
+        }
+
+        &.available {
+          color: var(--ion-color-success);
+        }
+      }
+    }
+
+    ion-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+    }
+  }
+
+  // Slot Breakdown
+  .slot-breakdown {
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .item-icon {
+        ion-icon {
+          font-size: 24px;
+        }
+      }
+
+      .item-info {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .item-label {
+          font-size: 14px;
+          color: var(--ion-color-dark);
+          font-weight: 500;
+        }
+
+        .item-value {
+          font-size: 14px;
+          color: var(--ion-color-medium);
+          font-weight: 600;
+        }
+
+        .days-badge {
+          font-size: 12px;
+          padding: 4px 10px;
+        }
+      }
+
+      &.expiration {
+        background: rgba(var(--ion-color-warning-rgb), 0.05);
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 8px;
+      }
+    }
+  }
+
+  // Alert Card
+  .alert-card {
+    margin: 16px 0;
+    border-radius: 8px;
+    box-shadow: none;
+
+    &.warning {
+      background: rgba(var(--ion-color-warning-rgb), 0.1);
+      border-left: 4px solid var(--ion-color-warning);
+    }
+
+    &.danger {
+      background: rgba(var(--ion-color-danger-rgb), 0.1);
+      border-left: 4px solid var(--ion-color-danger);
+    }
+
+    ion-card-content {
+      padding: 12px;
+    }
+
+    .alert-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+
+      ion-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+      }
+
+      .alert-text {
+        flex: 1;
+
+        h4 {
+          margin: 0 0 4px;
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--ion-color-dark);
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          color: var(--ion-color-medium);
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  // Actions
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    gap: 8px;
+
+    .action-button {
+      font-size: 13px;
+
+      &.primary {
+        --background: var(--ion-color-primary);
+        --color: white;
+        flex: 1;
+      }
+    }
+  }
+}
+
+// Loading State
+.slots-badge.loading {
+  margin: 16px;
+  border-radius: 12px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .slots-card {
+    margin: 12px;
+
+    &.compact {
+      margin: 6px 0;
+    }
+  }
+
+  .full-content {
+    .slots-header {
+      .slots-icon {
+        font-size: 32px;
+      }
+
+      .slots-info {
+        h3 {
+          font-size: 16px;
+        }
+
+        p {
+          font-size: 12px;
+        }
+      }
+    }
+
+    .slot-breakdown {
+      .breakdown-item {
+        .item-icon {
+          ion-icon {
+            font-size: 20px;
+          }
+        }
+
+        .item-info {
+          .item-label {
+            font-size: 13px;
+          }
+
+          .item-value {
+            font-size: 13px;
+          }
+        }
+      }
+    }
+
+    .actions {
+      flex-direction: column;
+
+      .action-button {
+        width: 100%;
+      }
+    }
+  }
+}

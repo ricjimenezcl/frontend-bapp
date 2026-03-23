@@ -1,0 +1,720 @@
+// src/app/client/pages/service-map/service-map.page.scss
+// NOTA: Este componente se renderiza DENTRO del tabs.page
+// El tabs tiene: header (56px) + footer (56px)
+// Este componente NO tiene header propio
+
+:host {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
+
+
+// ============ Wrapper del mapa ============
+// Este contenedor ocupa todo el espacio disponible
+.map-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: #1a1a1a !important;
+  overflow: hidden !important;
+}
+
+.map-element {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: #1a1a1a !important;
+}
+
+// ============ Botón de localización ============
+.locate-button {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 100 !important;
+
+  ion-fab-button {
+    --background: rgba(26, 26, 26, 0.92) !important;
+    --background-activated: rgba(50, 50, 50, 0.95) !important;
+    --background-hover: rgba(42, 42, 42, 0.95) !important;
+    --color: var(--bapp-text-primary) !important;
+    --box-shadow: var(--bapp-shadow-md) !important;
+    --border-radius: var(--bapp-radius-sm) !important;
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid var(--bapp-border) !important;
+    backdrop-filter: blur(16px) !important;
+
+    ion-icon { font-size: 20px !important; color: var(--ion-color-primary) !important; }
+  }
+}
+
+// ============ Controles de zoom ============
+.zoom-controls {
+  position: absolute !important;
+  top: 70px !important;
+  right: 16px !important;
+  z-index: 100 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+
+  ion-fab-button {
+    --background: rgba(26, 26, 26, 0.92) !important;
+    --background-activated: rgba(50, 50, 50, 0.95) !important;
+    --background-hover: rgba(42, 42, 42, 0.95) !important;
+    --color: var(--bapp-text-primary) !important;
+    --box-shadow: var(--bapp-shadow-md) !important;
+    --border-radius: var(--bapp-radius-sm) !important;
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid var(--bapp-border) !important;
+    backdrop-filter: blur(16px) !important;
+
+    ion-icon { font-size: 20px !important; }
+  }
+}
+
+// ============ Selector de estilo del mapa ============
+// IMPORTANTE: Debe estar ENCIMA del footer del tabs (56px + margen)
+.style-selector-container {
+  position: absolute !important;
+  bottom: 70px !important; // Encima del footer del tabs
+  left: 16px !important;
+  z-index: 100 !important;
+}
+
+.style-selector {
+  background: rgba(26, 26, 26, 0.92) !important;
+  border-radius: var(--bapp-radius-full) !important;
+  padding: 3px !important;
+  box-shadow: var(--bapp-shadow-md) !important;
+  border: 1px solid var(--bapp-border) !important;
+  backdrop-filter: blur(16px) !important;
+
+  ion-segment-button {
+    min-height: 30px !important;
+    min-width: 56px !important;
+    --padding-start: 12px !important;
+    --padding-end: 12px !important;
+    --background: transparent !important;
+    --background-checked: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+    --color: var(--bapp-text-secondary) !important;
+    --color-checked: #000 !important;
+    --indicator-color: transparent !important;
+    --border-radius: var(--bapp-radius-full) !important;
+    margin: 1px !important;
+
+    ion-label {
+      font-size: 11px !important;
+      font-family: 'medium', sans-serif !important;
+      text-transform: none !important;
+    }
+  }
+}
+
+// ============ Información de servicios seleccionados ============
+.selected-services-info {
+  position: absolute !important;
+  top: 80px !important;
+  left: 16px !important;
+  z-index: 100 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+
+  ion-chip {
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    background: rgba(26, 26, 26, 0.88) !important;
+    border-radius: var(--bapp-radius-full) !important;
+    box-shadow: var(--bapp-shadow-md) !important;
+    border: 1px solid var(--bapp-border) !important;
+    --color: var(--bapp-text-primary) !important;
+    height: 32px !important;
+
+    ion-icon {
+      color: var(--ion-color-primary) !important;
+      font-size: 15px !important;
+    }
+
+    ion-label {
+      color: var(--bapp-text-primary) !important;
+      font-size: 12px !important;
+      font-family: 'medium', sans-serif !important;
+    }
+
+    &[color="success"] {
+      ion-icon { color: #2dd36f !important; }
+    }
+  }
+}
+
+// ============ Estados de carga y mensajes ============
+.loading-overlay {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 100 !important;
+  background: rgba(26, 26, 26, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  padding: 24px 32px !important;
+  border-radius: var(--bapp-radius-lg) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 12px !important;
+  box-shadow: var(--bapp-shadow-lg) !important;
+  border: 1px solid var(--bapp-border) !important;
+
+  ion-spinner {
+    width: 36px !important;
+    height: 36px !important;
+    --color: var(--ion-color-primary) !important;
+  }
+
+  ion-label {
+    font-size: 14px !important;
+    color: var(--bapp-text-secondary) !important;
+    font-family: 'medium', sans-serif !important;
+  }
+}
+
+.no-location,
+.no-services {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 100 !important;
+  background: rgba(26, 26, 26, 0.92) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  padding: 28px 24px !important;
+  border-radius: var(--bapp-radius-lg) !important;
+  text-align: center !important;
+  max-width: 280px !important;
+  box-shadow: var(--bapp-shadow-lg) !important;
+  border: 1px solid var(--bapp-border) !important;
+
+  ion-icon {
+    color: var(--ion-color-primary) !important;
+    margin-bottom: 16px !important;
+    font-size: 48px !important;
+  }
+
+  ion-label {
+    display: block !important;
+    margin-bottom: 16px !important;
+    color: var(--bapp-text-secondary) !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+  }
+
+  ion-button {
+    --border-radius: var(--bapp-radius-full) !important;
+    --background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+    --color: #000 !important;
+    --box-shadow: 0 4px 12px rgba(253,215,53,0.3) !important;
+    font-family: 'semi-bold', sans-serif !important;
+  }
+}
+
+// ============ MARCADORES ============
+// Marcador de usuario: 34px (levemente más grande que proveedores de 30px)
+// Marcador de proveedor: 30px
+
+// Contenedor del marcador de usuario
+.user-marker-container {
+  width: 34px;
+  height: 34px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Anillo de pulso centrado
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  margin-top: -25px;
+  margin-left: -25px;
+  border-radius: 50%;
+  background: rgba(253, 215, 53, 0.3);
+  animation: pulse-animation 2s ease-out infinite;
+  pointer-events: none;
+}
+
+// Ícono del usuario
+.user-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+  display: block;
+  object-fit: cover;
+}
+
+// Fallback del ícono del usuario
+.user-icon-fallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid #fdd735;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background-color: #f0a500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+// Contenedor del marcador de proveedor
+.provider-marker-container {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.15);
+  }
+}
+
+// Ícono del proveedor
+.provider-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: block;
+  object-fit: cover;
+}
+
+// Fallback del ícono del proveedor
+.provider-icon-fallback {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+// Animación de pulso
+@keyframes pulse-animation {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+// ============ Estilos para popups ============
+:host ::ng-deep {
+  .maplibregl-popup {
+    z-index: 200 !important;
+  }
+
+  .maplibregl-popup-content {
+    background: rgba(26, 26, 26, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    padding: 0 !important;
+    box-shadow: var(--bapp-shadow-lg) !important;
+    border-radius: var(--bapp-radius-md) !important;
+    overflow: hidden !important;
+    border: 1px solid var(--bapp-border) !important;
+  }
+
+  .maplibregl-popup-tip {
+    border-top-color: rgba(26, 26, 26, 0.96) !important;
+  }
+
+  .maplibregl-popup-close-button {
+    color: var(--bapp-text-secondary) !important;
+    font-size: 18px !important;
+    padding: 4px 8px !important;
+    right: 4px !important;
+    top: 4px !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-radius: 4px !important;
+    }
+  }
+
+  // Ocultar controles nativos de Mapbox
+  .maplibregl-ctrl-group {
+    display: none !important;
+  }
+
+  .maplibregl-ctrl-scale {
+    background: rgba(26, 26, 26, 0.92) !important;
+    border-color: var(--bapp-border) !important;
+    color: var(--bapp-text-secondary) !important;
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+  }
+}
+
+// ============ Estilos para contenido de popups ============
+.user-popup {
+  padding: 10px;
+  color: var(--bapp-text-primary);
+
+  strong {
+    color: var(--ion-color-primary);
+  }
+
+  small {
+    color: var(--bapp-text-tertiary);
+  }
+}
+
+.provider-popup {
+  max-width: 250px;
+  padding: 14px;
+  color: var(--bapp-text-primary);
+
+  .provider-name {
+    margin: 0 0 10px 0;
+    color: var(--ion-color-primary);
+    font-size: 16px;
+    font-family: 'bold', sans-serif;
+  }
+
+  .popup-section {
+    margin-bottom: 10px;
+
+    strong { color: var(--bapp-text-secondary); }
+  }
+
+  .services-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .service-tag {
+    background: var(--bapp-surface-02);
+    color: var(--bapp-text-secondary);
+    border: 1px solid var(--bapp-border);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+  }
+
+  .popup-row {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--bapp-text-secondary);
+    font-size: 13px;
+
+    strong { color: var(--bapp-text-secondary); }
+  }
+
+  .icon-star { color: var(--ion-color-primary); }
+  .icon-location { color: #2dd36f; }
+  .icon-money { color: var(--ion-color-primary); }
+
+  .text-muted {
+    color: var(--bapp-text-tertiary);
+    font-size: 12px;
+  }
+
+  .popup-description {
+    margin-bottom: 10px;
+
+    p {
+      color: var(--bapp-text-secondary);
+      font-size: 12px;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .popup-action {
+    margin-top: 12px;
+  }
+
+  .btn-details {
+    background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+    color: #000;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--bapp-radius-full);
+    cursor: pointer;
+    width: 100%;
+    font-family: 'semi-bold', sans-serif;
+    font-size: 13px;
+    transition: opacity 0.15s;
+    box-shadow: 0 3px 10px rgba(253,215,53,0.3);
+
+    &:hover { opacity: 0.9; }
+    &:active { opacity: 0.8; }
+  }
+}
+
+// ============ Barra de búsqueda overlay ============
+.map-search-overlay {
+  position: absolute !important;
+  top: 16px !important;
+  left: 16px !important;
+  right: 16px !important;
+  z-index: 110 !important;
+  background: rgba(26, 26, 26, 0.90) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--bapp-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;
+
+  .search-icon {
+    font-size: 18px !important;
+    color: var(--bapp-text-secondary) !important;
+    flex-shrink: 0 !important;
+  }
+
+  .search-placeholder {
+    flex: 1 !important;
+    font-size: 14px !important;
+    font-family: 'regular', sans-serif !important;
+    color: var(--bapp-text-tertiary) !important;
+  }
+
+  .radius-badge {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: rgba(253,215,53,0.1) !important;
+    border: 1px solid rgba(253,215,53,0.2) !important;
+    border-radius: 8px !important;
+    padding: 4px 10px !important;
+
+    .radius-icon {
+      font-size: 12px !important;
+      color: var(--ion-color-primary) !important;
+    }
+
+    .radius-text {
+      font-size: 11px !important;
+      font-family: 'medium', sans-serif !important;
+      color: var(--ion-color-primary) !important;
+    }
+  }
+}
+
+// ============ Leyenda inferior ============
+.map-legend {
+  position: absolute !important;
+  bottom: 130px !important; // encima del style-selector (70px) + espacio
+  left: 16px !important;
+  right: 16px !important;
+  z-index: 100 !important;
+  background: rgba(26, 26, 26, 0.90) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--bapp-border) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  padding: 12px 16px !important;
+
+  .legend-count {
+    font-size: 12px !important;
+    font-family: 'medium', sans-serif !important;
+    color: var(--bapp-text-secondary) !important;
+    margin: 0 0 8px 0 !important;
+  }
+
+  .legend-items {
+    display: flex !important;
+    gap: 16px !important;
+    flex-wrap: wrap !important;
+
+    .legend-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+
+      .legend-dot {
+        width: 10px !important;
+        height: 10px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+
+        &.online  { background: #2dd36f !important; }
+        &.offline { background: var(--bapp-text-tertiary) !important; }
+      }
+
+      .legend-pin {
+        width: 16px !important;
+        height: 16px !important;
+        background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+
+        ion-icon {
+          font-size: 9px !important;
+          color: #000 !important;
+        }
+      }
+
+      .legend-label {
+        font-size: 11px !important;
+        font-family: 'regular', sans-serif !important;
+        color: var(--bapp-text-secondary) !important;
+      }
+    }
+  }
+}
+
+// ============ Ajustes responsive ============
+@media (max-width: 768px) {
+  .selected-services-info {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    max-width: calc(100% - 80px) !important;
+    top: 76px !important;
+    left: 12px !important;
+
+    ion-chip {
+      height: 28px !important;
+      
+      ion-icon {
+        font-size: 14px !important;
+      }
+
+      ion-label {
+        font-size: 10px !important;
+      }
+    }
+  }
+
+  .locate-button {
+    top: 12px !important;
+    right: 12px !important;
+  }
+
+  .zoom-controls {
+    top: 60px !important;
+    right: 12px !important;
+
+    ion-fab-button {
+      width: 36px !important;
+      height: 36px !important;
+
+      ion-icon {
+        font-size: 18px !important;
+      }
+    }
+  }
+
+  .style-selector-container {
+    bottom: 70px !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+
+  .style-selector {
+    width: 100% !important;
+    justify-content: center !important;
+
+    ion-segment-button {
+      min-height: 28px !important;
+      min-width: 50px !important;
+      flex: 1 !important;
+
+      ion-label {
+        font-size: 10px !important;
+      }
+    }
+  }
+
+  .loading-overlay,
+  .no-location,
+  .no-services {
+    max-width: 85% !important;
+    padding: 20px !important;
+
+    ion-icon {
+      font-size: 48px !important;
+    }
+
+    ion-label {
+      font-size: 14px !important;
+    }
+  }
+
+  .map-search-overlay {
+    top: 12px !important;
+    left: 12px !important;
+    right: 12px !important;
+    padding: 10px 14px !important;
+  }
+
+  .map-legend {
+    bottom: 125px !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+}
+
+// ============ Safe area para dispositivos con notch ============
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .style-selector-container {
+    bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .map-legend {
+    bottom: calc(130px + env(safe-area-inset-bottom)) !important;
+  }
+}

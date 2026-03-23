@@ -1,0 +1,35 @@
+<ion-content class="email-verification-page" fullscreen>
+  <div class="verification-container">
+
+    <!-- Loading -->
+    <ng-container *ngIf="status === 'loading'">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="status-text">Verificando tu correo…</p>
+    </ng-container>
+
+    <!-- Success -->
+    <ng-container *ngIf="status === 'success'">
+      <ion-icon name="checkmark-circle" color="success" class="status-icon"></ion-icon>
+      <h2>¡Correo verificado!</h2>
+      <p class="status-text">{{ message }}</p>
+      <ion-button expand="block" (click)="goToLogin()">Iniciar sesión</ion-button>
+    </ng-container>
+
+    <!-- Expired -->
+    <ng-container *ngIf="status === 'expired'">
+      <ion-icon name="time-outline" color="warning" class="status-icon"></ion-icon>
+      <h2>Enlace expirado</h2>
+      <p class="status-text">{{ message }}</p>
+      <ion-button expand="block" fill="outline" (click)="goToLogin()">Volver al inicio</ion-button>
+    </ng-container>
+
+    <!-- Error -->
+    <ng-container *ngIf="status === 'error'">
+      <ion-icon name="close-circle" color="danger" class="status-icon"></ion-icon>
+      <h2>Enlace inválido</h2>
+      <p class="status-text">{{ message }}</p>
+      <ion-button expand="block" fill="outline" (click)="goToLogin()">Volver al inicio</ion-button>
+    </ng-container>
+
+  </div>
+</ion-content>

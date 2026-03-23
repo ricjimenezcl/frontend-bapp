@@ -1,0 +1,110 @@
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+}
+
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  height: calc(100vh - 70px); // Deja espacio para el footer
+  overflow-y: auto;
+}
+
+ion-item {
+  --background: var(--ion-color-dark);
+  --border-radius: 12px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--ion-color-primary);
+  
+  ion-icon {
+    color: var(--ion-color-primary);
+    margin-right: 16px;
+    font-size: 24px;
+  }
+  
+  ion-label {
+    font-weight: 500;
+    color: #fff;
+  }
+  
+  ion-input {
+    --padding-start: 8px;
+    --color: #fff;
+    --background: var(--ion-color-dark);
+    --placeholder-color: rgba(255,255,255,0.4);
+
+    input {
+      color: #fff !important;
+      caret-color: var(--ion-color-primary);
+
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: #fff !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+        caret-color: var(--ion-color-primary);
+        transition: background-color 99999s ease-in-out 0s;
+      }
+    }
+  }
+}
+
+
+.profile-info {
+  padding: 20px;
+
+  .user-avtar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-bottom: 30px;
+
+    .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--ion-color-primary);
+    }
+
+    ion-button.edit-btn {
+      position: absolute;
+      bottom: 0;
+      right: calc(50% - 60px);
+      --background: var(--ion-color-primary);
+      --border-radius: 50%;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 36px;
+      height: 36px;
+      margin: 0;
+    }
+  }
+
+ 
+  .submit-btn {
+    margin-top: 30px;
+    height: 50px;
+    font-weight: 600;
+  }
+
+  .edit-buttons {
+    margin-top: 20px;
+
+    ion-button {
+      height: 45px;
+      font-weight: 500;
+    }
+  }
+
+  .error-message {
+    color: var(--ion-color-danger);
+    font-size: 0.8em;
+    margin: 2px 0 10px 0;
+    padding: 0 16px;
+  }
+}

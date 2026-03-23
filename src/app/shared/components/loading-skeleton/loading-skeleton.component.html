@@ -1,0 +1,43 @@
+<div class="sk-wrap" *ngFor="let i of items">
+
+  <!-- provider-card variant -->
+  <div class="sk-card" *ngIf="type === 'provider-card'">
+    <div class="sk-card-header">
+      <div class="sk-avatar"></div>
+      <div class="sk-lines">
+        <div class="sk-line sk-line--title"></div>
+        <div class="sk-line sk-line--short"></div>
+      </div>
+      <div class="sk-pill"></div>
+    </div>
+    <div class="sk-line sk-line--full"></div>
+    <div class="sk-line sk-line--medium"></div>
+    <div class="sk-chips">
+      <div class="sk-chip"></div>
+      <div class="sk-chip"></div>
+    </div>
+  </div>
+
+  <!-- category variant -->
+  <div class="sk-category" *ngIf="type === 'category'">
+    <div class="sk-cat-icon"></div>
+    <div class="sk-line sk-line--short" style="margin: 0 auto;"></div>
+  </div>
+
+  <!-- message variant -->
+  <div class="sk-message" *ngIf="type === 'message'">
+    <div class="sk-avatar sk-avatar--sm"></div>
+    <div class="sk-msg-lines">
+      <div class="sk-line sk-line--title"></div>
+      <div class="sk-line sk-line--medium"></div>
+    </div>
+    <div class="sk-time"></div>
+  </div>
+
+  <!-- list-item variant -->
+  <div class="sk-list-item" *ngIf="type === 'list-item'">
+    <div class="sk-list-icon"></div>
+    <div class="sk-line sk-line--full"></div>
+  </div>
+
+</div>
