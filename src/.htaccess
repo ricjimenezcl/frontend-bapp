@@ -1,5 +1,17 @@
 Options -MultiViews
 RewriteEngine On
+
+# MIME types para Angular 18 (type="module" requiere application/javascript estricto)
+AddType application/javascript .js .mjs
+AddType text/css .css
+AddType image/svg+xml .svg
+AddType application/json .json
+AddType font/woff2 .woff2
+
+# Pasar archivos estáticos directamente sin reescritura
+RewriteRule ^.*\.(js|mjs|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|map|txt|webmanifest|webp)$ - [NC,L]
+
+# Angular Router SPA: todo lo demás va a index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]
