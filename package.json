@@ -9,6 +9,8 @@
     "start": "npm run set-env && ng serve",
     "build": "npm run set-env && ng build",
     "build:prod": "npm run set-env && ng build --configuration production",
+    "build:gh": "npm run set-env && ng build --configuration production,gh-pages",
+    "build:donweb": "npm run set-env && ng build --configuration production,donweb",
     "watch": "npm run set-env && ng build --watch --configuration development",
     "test": "ng test",
     "ionic:serve": "npm run set-env && ng serve",

@@ -79,6 +79,12 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "gh-pages": {
+              "baseHref": "/frontend-bapp/"
+            },
+            "donweb": {
+              "baseHref": "/"
             }
           },
           "defaultConfiguration": "production"
