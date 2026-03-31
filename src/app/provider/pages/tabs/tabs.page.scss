@@ -1,36 +1,37 @@
-// ─── Provider Tabs — Premium SaaS Design ───────────────────────────
+// ─── Provider Tabs ─────────────────────────────────────────────────────────
+@import '../../../../theme/mixins';
 
 ion-tab-bar {
-  --background: var(--bapp-surface-01);
+  --background: var(--bapp-bg-card);
   height: 60px;
   border-top: 1px solid var(--bapp-border);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
 
   ion-tab-button {
-    --color: var(--bapp-text-secondary);
-    --color-selected: var(--ion-color-primary);
+    --color: var(--bapp-text-tertiary);
+    --color-selected: var(--bapp-color-primary);
     --background: transparent;
     --background-focused: transparent;
     position: relative;
 
     ion-icon {
       font-size: 22px;
-      transition: color 0.15s;
+      transition: color var(--bapp-transition-fast);
     }
 
     ion-label {
-      font-size: 10px;
-      font-family: 'medium', sans-serif;
+      font-size: var(--bapp-text-xs);
+      font-weight: var(--bapp-font-medium);
       margin-top: 4px;
-      transition: color 0.15s, font-family 0.15s;
+      transition: color var(--bapp-transition-fast);
     }
 
     &.tab-selected {
       ion-label {
-        font-family: 'semi-bold', sans-serif;
+        font-weight: var(--bapp-font-semibold);
       }
 
-      // Active state: gradient pill (matching React TabBar.jsx)
+      // Active state: gradient pill indicator
       &::before {
         content: '';
         position: absolute;
@@ -39,7 +40,7 @@ ion-tab-bar {
         transform: translateX(-50%);
         width: 40px;
         height: 28px;
-        border-radius: 14px;
+        border-radius: var(--bapp-radius-xl);
         background: linear-gradient(135deg, rgba(253,215,53,0.22) 0%, rgba(240,165,0,0.12) 100%);
         pointer-events: none;
       }

@@ -1,5 +1,5 @@
 // src/app/auth/pages/login/login.page.ts
-import { Component, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -36,7 +36,7 @@ import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@
     IonText
   ]
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
     // ...existing code...
     // ...existing code...
     // Método para resetear contraseña ya existe: onReset()
@@ -53,6 +53,12 @@ export class LoginPage implements OnInit {
   isLoading = false;
   errorMessage = '';
   sessionExpired = false;
+  showPassword = false;
+  isRetrying = false;
+  retryCountdown = 0;
+  private retryAttempts = 0;
+  private readonly maxRetryAttempts = 2;
+  private retryTimerRef: any = null;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -88,8 +94,9 @@ export class LoginPage implements OnInit {
       this.authService.loginClient(credentials).subscribe({
         next: (response) => {
           this.isLoading = false;
+          this.retryAttempts = 0;
           console.log('✅ Login exitoso', response);
-          
+
           if (response.role === 'CLIENT') {
             console.log("👤 CLIENTE - Redirigiendo a categorías");
             this.router.navigate(['/client/categories']);
@@ -103,19 +110,24 @@ export class LoginPage implements OnInit {
         error: (error) => {
           this.isLoading = false;
           console.error('❌ Error en login:', error);
-          
-          if (error.status === 422) {
+
+          if (error.status === 0 && this.retryAttempts < this.maxRetryAttempts) {
+            this.retryAttempts++;
+            this.scheduleLoginRetry(credentials);
+          } else if (error.status === 422) {
+            this.retryAttempts = 0;
             this.errorMessage = 'Error de validación: ' + this.getValidationErrors(error);
           } else if (error.status === 401) {
-            this.errorMessage = 'Email o contraseña incorrectos';
-            // Sugerir recuperación de contraseña si es 401
-            this.errorMessage += ' ¿Olvidaste tu contraseña? '; 
-            // Aquí podrías mostrar un botón o enlace para llamar a onReset()
+            this.retryAttempts = 0;
+            this.errorMessage = 'Email o contraseña incorrectos ¿Olvidaste tu contraseña?';
           } else if (error.status === 500) {
+            this.retryAttempts = 0;
             this.errorMessage = 'Error del servidor. Intenta más tarde.';
           } else if (error.status === 0) {
-            this.errorMessage = 'Error de conexión. Verifica tu internet.';
+            this.retryAttempts = 0;
+            this.errorMessage = 'El servidor no responde. Espera unos segundos e inténtalo nuevamente.';
           } else {
+            this.retryAttempts = 0;
             this.errorMessage = error.error?.detail || error.error?.message || 'Error desconocido';
           }
         }
@@ -124,6 +136,50 @@ export class LoginPage implements OnInit {
       this.markFormGroupTouched();
       this.errorMessage = 'Por favor completa todos los campos correctamente';
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.retryTimerRef) {
+      clearInterval(this.retryTimerRef);
+    }
+  }
+
+  private scheduleLoginRetry(credentials: { email: string; password: string }): void {
+    this.isRetrying = true;
+    this.retryCountdown = 10;
+
+    this.retryTimerRef = setInterval(() => {
+      this.retryCountdown--;
+      if (this.retryCountdown <= 0) {
+        clearInterval(this.retryTimerRef);
+        this.retryTimerRef = null;
+        this.isRetrying = false;
+        this.isLoading = true;
+        this.authService.loginClient(credentials).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.retryAttempts = 0;
+            if (response.role === 'CLIENT') {
+              this.router.navigate(['/client/categories']);
+            } else if (response.role === 'PROVIDER') {
+              this.redirectToMainCategories();
+            } else {
+              this.router.navigate(['/home']);
+            }
+          },
+          error: (error) => {
+            this.isLoading = false;
+            if (error.status === 0 && this.retryAttempts < this.maxRetryAttempts) {
+              this.retryAttempts++;
+              this.scheduleLoginRetry(credentials);
+            } else {
+              this.retryAttempts = 0;
+              this.errorMessage = 'El servidor no responde. Espera unos segundos e inténtalo nuevamente.';
+            }
+          }
+        });
+      }
+    }, 1000);
   }
 
   private redirectToMainCategories(): void {

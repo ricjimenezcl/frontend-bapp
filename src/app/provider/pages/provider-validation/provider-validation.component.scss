@@ -1,88 +1,66 @@
-@import 'src/theme/variables';
+// ─── Provider Validation ───────────────────────────────────────────────────
+@import '../../../../theme/mixins';
 
 :host {
-  display: block;
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--bapp-space-4);
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: var(--bapp-bg-page);
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
-
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
-
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
+// ─── Autofill override (iOS/web) ───────────────────────────────────────────
+ion-input input {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--bapp-text-primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    caret-color: var(--bapp-color-primary);
+    transition: background-color 99999s ease-in-out 0s;
   }
 }
 
 ion-card {
-  margin-bottom: 24px;
+  --background: var(--bapp-bg-card);
+  --color: var(--bapp-text-primary);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  margin-bottom: var(--bapp-space-6);
 }
 
 ion-img, img {
   width: 100%;
   max-width: 320px;
-  margin: 0 auto 12px auto;
+  margin: 0 auto var(--bapp-space-3);
   display: block;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-radius: var(--bapp-radius-lg);
+  box-shadow: var(--bapp-shadow-sm);
 }
 
 ion-button {
-  margin-top: 8px;
-  margin-bottom: 16px;
+  margin-top: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-4);
+  --border-radius: var(--bapp-radius-full);
 }
 
 ion-label {
-  font-weight: 500;
-  margin-bottom: 8px;
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-text-primary);
+  margin-bottom: var(--bapp-space-2);
   display: block;
 }
 
 ion-row {
-  margin-bottom: 16px;
+  margin-bottom: var(--bapp-space-4);
 }
 
 ion-card-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  @include flex-column-center;
 }
-
-// ion-alert usa el tema oscuro global definido en global.scss

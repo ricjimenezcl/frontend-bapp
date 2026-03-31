@@ -32,15 +32,9 @@ export interface BookingResponse {
     price?: number;
     duration?: number;
     created_at: string;
-
-
-
-
     location_lat: string;
     location_lng: string;
-
-  
     description: string;
-
-
+    client_name?: string;
+    client_avatar?: string;
 }

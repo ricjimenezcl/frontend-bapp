@@ -9,6 +9,7 @@ import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
 import { GeoLocationService } from  '../../../shared/services/geo-location.service';
 import { MapboxService } from '../../../shared/services/mapbox.service';
+import { MapPickerComponent } from '../../../shared/components/map-picker/map-picker.component';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
@@ -17,7 +18,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
   templateUrl: './main-categories.page.html',
   styleUrls: ['./main-categories.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule],
+  imports: [CommonModule, FormsModule, IonicModule, MapPickerComponent],
 })
 export class MainCategoriesPage implements OnInit, OnDestroy {
 
@@ -40,6 +41,11 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   selectedLocationName = 'Tu ubicación actual';
   isLocationSearching = false;
   private locationSearch$ = new Subject<string>();
+
+  // Map picker
+  showMapPicker = false;
+  mapPickerInitialLat = -33.4489;  // Santiago Centro por defecto
+  mapPickerInitialLng = -70.6693;
 
   constructor(
     private router: Router,
@@ -242,6 +248,53 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.showLocationSearch = false;
     this.locationSuggestions = [];
     this.locationQuery = '';
+  }
+
+  // ── Map picker methods ───────────────────────────────────────────────
+  async openMapPicker() {
+    console.log('🗺️ Abriendo map picker');
+    
+    // Priorizar ubicación alternativa, luego ubicación del usuario, finalmente default Santiago
+    const altLocation = this.stateService.getAlternateLocation();
+    if (altLocation) {
+      this.mapPickerInitialLat = altLocation.latitude;
+      this.mapPickerInitialLng = altLocation.longitude;
+    } else {
+      const userLocation = this.stateService.getUserLocation();
+      if (userLocation) {
+        this.mapPickerInitialLat = userLocation.latitude;
+        this.mapPickerInitialLng = userLocation.longitude;
+      } else {
+        // Intentar obtener ubicación GPS actual
+        try {
+          const position = await this.geoLocationService.getCurrentLocation();
+          this.mapPickerInitialLat = position.latitude;
+          this.mapPickerInitialLng = position.longitude;
+        } catch (error) {
+          console.log('No se pudo obtener ubicación GPS, usando Santiago Centro');
+          // Mantener valores por defecto
+        }
+      }
+    }
+    
+    this.showMapPicker = true;
+    this.showLocationSearch = false;
+  }
+
+  onLocationSelected(location: { lat: number; lng: number; address: string }) {
+    console.log('📍 Ubicación seleccionada desde mapa:', location);
+    this.stateService.setAlternateLocation({
+      latitude: location.lat,
+      longitude: location.lng,
+      address: location.address
+    });
+    this.selectedLocationName = location.address;
+    this.showMapPicker = false;
+  }
+
+  onMapPickerClose() {
+    console.log('🗺️ Cerrando map picker');
+    this.showMapPicker = false;
   }
 
   onSearchInput(event: any) {

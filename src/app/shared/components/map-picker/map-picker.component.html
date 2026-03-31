@@ -1,0 +1,75 @@
+<!-- src/app/shared/components/map-picker/map-picker.component.html -->
+<div class="map-picker-overlay">
+  <div class="map-picker-container">
+    
+    <!-- Header -->
+    <div class="map-picker-header">
+      <div class="flex-1">
+        <h2>Elegir ubicación</h2>
+        <p>Toca el mapa o arrastra el marcador</p>
+      </div>
+      <button class="close-btn" (click)="cancelSelection()" type="button">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+    
+    <!-- Mapa con overlays -->
+    <div class="map-picker-body">
+      <div #mapContainer class="map-container"></div>
+      
+      <!-- Loading overlay -->
+      <div class="loading-overlay" *ngIf="loading()">
+        <div class="spinner-wrap">
+          <ion-spinner name="crescent"></ion-spinner>
+        </div>
+        <span>Cargando mapa...</span>
+      </div>
+      
+      <!-- Error alert -->
+      <div class="error-alert" *ngIf="locationError()">
+        <ion-icon name="alert-circle"></ion-icon>
+        <p>{{ locationError() }}</p>
+      </div>
+      
+      <!-- Address card flotante -->
+      <div class="address-card">
+        <div class="address-content">
+          <div class="icon-container">
+            <ion-icon name="location"></ion-icon>
+          </div>
+          <div class="address-info">
+            <p class="label">Dirección seleccionada</p>
+            <p class="address">{{ selectedAddress() }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Hint -->
+      <div class="map-hint">
+        <ion-icon name="information-circle"></ion-icon>
+        <span>Arrastra el pin o toca el mapa para cambiar</span>
+      </div>
+    </div>
+    
+    <!-- Footer botones -->
+    <div class="map-picker-footer">
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        (click)="useCurrentLocation()"
+        [disabled]="loading()">
+        <ion-icon slot="start" name="navigate-outline"></ion-icon>
+        Mi ubicación
+      </ion-button>
+      <ion-button 
+        expand="block" 
+        fill="solid" 
+        (click)="confirmLocation()"
+        [disabled]="loading()">
+        <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+        Confirmar
+      </ion-button>
+    </div>
+    
+  </div>
+</div>

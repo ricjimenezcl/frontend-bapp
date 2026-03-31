@@ -109,6 +109,38 @@ ion-content.mc-content {
   }
 }
 
+// Map picker button
+.map-picker-btn {
+  @include flex-center;
+  width: 100%;
+  gap: var(--bapp-space-2);
+  background: var(--bapp-bg-card);
+  border: 1.5px solid rgba(253, 215, 53, 0.4);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-2) var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-3);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+  text-align: center;
+
+  &:active {
+    background: rgba(253, 215, 53, 0.08);
+    border-color: rgba(253, 215, 53, 0.6);
+    transform: scale(0.98);
+  }
+
+  .map-icon {
+    font-size: 16px;
+    color: var(--bapp-color-primary);
+  }
+
+  span {
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+  }
+}
+
 // Location dropdown
 .loc-dropdown {
   background: var(--bapp-bg-card-raised);

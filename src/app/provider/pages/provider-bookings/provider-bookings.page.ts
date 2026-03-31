@@ -2,10 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, forkJoin, of } from 'rxjs';
+import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
 import { ProviderBookingService } from '../../services/provider-booking.service';
 import { BookingResponse, BookingStatus } from '../../../core/models/booking.model';
+import { ClientService } from '../../../client/services/client.service';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -25,6 +26,7 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
 
   constructor(
     private bookingService: ProviderBookingService,
+    private clientService: ClientService,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController
@@ -46,20 +48,35 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
 
   loadBookings() {
     this.isLoading = true;
-    this.bookingService.getBookings()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (res) => {
-          this.bookings = res;
-          this.filterBookings();
-          this.isLoading = false;
-        },
-        error: (err) => {
-          console.error('❌ [ProviderBookings] Error cargando bookings:', err);
-          this.showToast('Error cargando reservas', 'danger');
-          this.isLoading = false;
-        }
-      });
+    this.bookingService.getBookings().pipe(
+      takeUntil(this.destroy$),
+      switchMap(bookings => {
+        if (!bookings.length) return of(bookings);
+        const uniqueIds = [...new Set(bookings.map(b => b.client_id))];
+        const clientRequests = uniqueIds.reduce((acc, id) => {
+          acc[id] = this.clientService.getClientById(id).pipe(catchError(() => of(null)));
+          return acc;
+        }, {} as Record<number, any>);
+        return forkJoin(clientRequests).pipe(
+          map(clientMap => bookings.map(b => ({
+            ...b,
+            client_name: (clientMap as any)[b.client_id]?.full_name ?? undefined,
+            client_avatar: (clientMap as any)[b.client_id]?.avatar ?? undefined
+          })))
+        );
+      })
+    ).subscribe({
+      next: (res) => {
+        this.bookings = res;
+        this.filterBookings();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('❌ [ProviderBookings] Error cargando bookings:', err);
+        this.showToast('Error cargando reservas', 'danger');
+        this.isLoading = false;
+      }
+    });
   }
 
   segmentChanged(event: any) {

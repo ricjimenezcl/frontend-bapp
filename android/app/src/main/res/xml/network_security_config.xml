@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Solo HTTPS permitido para el backend en producción -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">backend-bapp.onrender.com</domain>
+    </domain-config>
+    <!-- Política base: bloquear tráfico cleartext en toda la app -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

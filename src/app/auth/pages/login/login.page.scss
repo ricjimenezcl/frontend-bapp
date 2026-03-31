@@ -1,279 +1,363 @@
 // src/app/auth/pages/login/login.page.scss
+@import '../../../../theme/mixins';
 
 :host {
   display: block;
-  height: 100vh;
-  width: 100vw;
+  height: 100%;
 }
 
 ion-content {
   --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
-  height: calc(100vh - 70px); // Deja espacio para el footer
-  overflow-y: auto;
 }
 
-.login-screen {
-  display: flex;
-  flex-direction: column;
+// ── Outer layout ───────────────────────────────────────────────────────────────
+.login-bg {
   min-height: 100%;
-  padding: 20px;
+  @include flex-column-center;
+  padding: var(--bapp-space-6) var(--bapp-space-4);
 }
 
-.logo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 30px;
-  
-  .logo {
-    width: 100px;
-    height: 100px;
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+  @include flex-column-center;
+  gap: var(--bapp-space-5);
+}
+
+// ── Logo section ───────────────────────────────────────────────────────────────
+.login-logo {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  text-align: center;
+
+  .logo-img {
+    width: 80px;
+    height: 80px;
     object-fit: contain;
-    margin-bottom: 16px;
   }
-  
-  .titulo {
-    width: 200px;
+
+  .titulo-img {
+    width: 180px;
     height: auto;
     object-fit: contain;
   }
 }
 
-.title {
+.login-subtitle {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: rgba(255, 255, 255, 0.75);
   text-align: center;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 24px;
 }
 
-.login-form {
+// ── Card ───────────────────────────────────────────────────────────────────────
+.login-card {
   width: 100%;
-  --background: var(--ion-color-dark);
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  padding: var(--bapp-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-4);
 }
 
-.input-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  margin-bottom: 8px;
-   color: #fff;
-  
+.login-card-title {
+  margin: 0 0 var(--bapp-space-1);
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+// ── Error alert ────────────────────────────────────────────────────────────────
+.error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bapp-space-2);
+  padding: var(--bapp-space-3);
+  background: rgba(var(--bapp-color-danger-rgb, 239, 68, 68), 0.12);
+  border: 1px solid rgba(var(--bapp-color-danger-rgb, 239, 68, 68), 0.3);
+  border-radius: var(--bapp-radius-md);
+  color: var(--bapp-color-danger);
+  font-size: var(--bapp-text-sm);
+
   ion-icon {
-    margin-right: 12px;
-    color: var(--ion-color-primary);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
   }
-  
+}
+
+// ── Retry alert ────────────────────────────────────────────────────────────────
+.retry-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+  padding: var(--bapp-space-3);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: var(--bapp-radius-md);
+  color: #1d4ed8;
+  font-size: var(--bapp-text-sm);
+
+  ion-spinner {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    --color: #1d4ed8;
+  }
+}
+
+// ── Form ───────────────────────────────────────────────────────────────────────
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-4);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-1);
+}
+
+.form-label {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-text-secondary);
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bapp-bg-input);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  padding: 0 var(--bapp-space-3);
+  transition: border-color var(--bapp-transition-fast);
+
+  &:focus-within {
+    border-color: var(--bapp-color-primary);
+    box-shadow: 0 0 0 2px rgba(253, 215, 53, 0.15);
+  }
+
+  &.input-wrap-error {
+    border-color: var(--bapp-color-danger);
+  }
+
+  .input-icon {
+    font-size: 18px;
+    color: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+    margin-right: var(--bapp-space-2);
+  }
+
   ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
+    flex: 1;
+    --color: var(--bapp-text-primary);
+    --placeholder-color: var(--bapp-text-tertiary);
+    --background: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    font-size: var(--bapp-text-sm);
 
     input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
+      caret-color: var(--bapp-color-primary);
 
       &:-webkit-autofill,
       &:-webkit-autofill:hover,
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
+        -webkit-text-fill-color: var(--bapp-text-primary) !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+        box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+        caret-color: var(--bapp-color-primary);
         transition: background-color 99999s ease-in-out 0s;
       }
     }
   }
-}
 
-ion-item {
-        --background: var(--ion-color-dark);
-        --border-radius: 12px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-        border: 1px solid var(--ion-color-primary);
-        
-        ion-icon {
-          color: var(--ion-color-primary);
-          margin-right: 16px;
-          font-size: 24px;
-        }
-        
-        ion-label {
-          font-weight: 500;
-        }
-      }
+  .toggle-pass-btn {
+    background: none;
+    border: none;
+    padding: 0 0 0 var(--bapp-space-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--bapp-text-tertiary);
+    flex-shrink: 0;
 
-.error-message {
-  padding: 4px 16px;
-  margin-bottom: 8px;
-  
-  ion-text {
-    font-size: 0.85rem;
-     color: #e03e3e;
-  }
-  
-  &.general-error {
-    text-align: center;
-    padding: 12px;
-    background: rgba(var(--ion-color-danger-rgb), 0.1);
-    border-radius: 8px;
-    margin-bottom: 16px;
-  }
-}
-
-.session-expired-message {
-  text-align: center;
-  padding: 12px;
-  background: rgba(var(--ion-color-warning-rgb), 0.1);
-  border-radius: 8px;
-  margin-bottom: 16px;
-  
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-}
-
-.check-item {
-  --background: transparent;
-  margin: 12px 0;
-  
-  ion-label {
-    font-size: 0.9rem;
-    color: #fff;
-  }
-}
-
-.login-button {
-  margin-top: 16px;
-  --border-radius: 12px;
-  height: 48px;
-  font-weight: 600;
-  
-  ion-spinner {
-    margin-right: 8px;
-  }
-}
-
-.or-content {
-  margin: 24px 0;
-  align-items: center;
-  
-  .line {
-    height: 1px;
-    background: var(--ion-color-light-shade);
-  }
-  
-  .lbl {
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--ion-color-medium);
-    display: block;
-  }
-}
-
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  
-  ion-button {
-    --border-radius: 50%;
-    width: 56px;
-    height: 56px;
-    
     ion-icon {
-      font-size: 24px;
-      color: var(--ion-color-primary);
+      font-size: 18px;
+    }
+
+    &:focus {
+      outline: none;
     }
   }
 }
 
-.register-lbl-bold {
-  font-weight: 600;
-  color: var(--ion-color-primary);
+.form-error {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+  padding-left: var(--bapp-space-1);
 }
 
-// Modal styles
+// ── Forgot password ────────────────────────────────────────────────────────────
+.forgot-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--bapp-space-2));
+}
+
+.forgot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-color-primary);
+  cursor: pointer;
+}
+
+// ── Submit button ──────────────────────────────────────────────────────────────
+.submit-btn {
+  margin-top: var(--bapp-space-1);
+  --border-radius: var(--bapp-radius-full);
+  --background: var(--bapp-color-primary);
+  --color: #000;
+  --background-activated: var(--bapp-color-primary-dark, #e6c200);
+  font-weight: var(--bapp-font-semibold);
+  height: 48px;
+}
+
+// ── Divider ────────────────────────────────────────────────────────────────────
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--bapp-border);
+}
+
+.divider-text {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  white-space: nowrap;
+}
+
+// ── Social buttons ─────────────────────────────────────────────────────────────
+.social-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bapp-space-3);
+}
+
+.social-btn {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  height: 44px;
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  color: var(--bapp-text-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-medium);
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast);
+
+  &:active { background: rgba(255, 255, 255, 0.08); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Register links ─────────────────────────────────────────────────────────────
+.register-links {
+  @include flex-column-center;
+  gap: var(--bapp-space-1);
+  text-align: center;
+}
+
+.register-text {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+}
+
+.register-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-color-primary);
+  cursor: pointer;
+}
+
+// ── Terms footer ───────────────────────────────────────────────────────────────
+.terms-text {
+  margin: 0;
+  font-size: var(--bapp-text-xs);
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+}
+
+.terms-link {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: underline;
+}
+
+// ── Register modal ─────────────────────────────────────────────────────────────
 ion-modal#example-modal {
   --width: 90%;
   --min-width: 280px;
   --max-width: 400px;
   --height: auto;
-  --border-radius: 16px;
-  --box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  
-  &::part(backdrop) {
-    background: rgba(0, 0, 0, 0.6);
-  }
-  
-  .wrapper {
-    padding: 24px;
-    
-    h1 {
-      text-align: center;
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 24px;
-      color: var(--ion-color-dark);
-    }
-    
+  --border-radius: var(--bapp-radius-xl);
+  --box-shadow: var(--bapp-shadow-card);
+  --background: var(--bapp-bg-card);
+
+  .modal-wrapper {
+    padding: var(--bapp-space-6);
+
     ion-list {
       background: transparent;
-      
-      ion-item {
-        --background: var(--ion-color-dark);
-        --border-radius: 12px;
-        margin-bottom: 12px;
-        border: 1px solid var(--ion-color-primary);
-        
-        ion-icon {
-          color: var(--ion-color-primary);
-          margin-right: 16px;
-          font-size: 24px;
-        }
-        
-        ion-label {
-          font-weight: 500;
-        }
-        
-        &:last-child {
-          margin-bottom: 0;
-          
-          ion-icon {
-            color: var(--ion-color-primary);
-          }
-        }
+      padding: 0;
+    }
+
+    ion-item {
+      --background: var(--bapp-bg-card-raised);
+      --border-radius: var(--bapp-radius-md);
+      --color: var(--bapp-text-primary);
+      border: 1px solid var(--bapp-border);
+      border-radius: var(--bapp-radius-md);
+      margin-bottom: var(--bapp-space-3);
+
+      ion-icon {
+        color: var(--bapp-color-primary);
+        font-size: 22px;
+        margin-right: var(--bapp-space-3);
       }
+
+      ion-label {
+        font-weight: var(--bapp-font-medium);
+      }
+
+      &:last-child { margin-bottom: 0; }
     }
   }
 }
 
-// Dark mode support
-@media (prefers-color-scheme: dark) {
-  .login-screen {
-    .title {
-      color: #fff;
-    }
-  }
-  
-  .input-item {
-    --background: var(--ion-color-dark);
-  }
-  
-  ion-modal#example-modal .wrapper {
-    background: var(--ion-color-dark);
-    
-    h1 {
-      color: var(--ion-color-light);
-    }
-    
-    ion-item {
-      --background: var(--ion-color-dark);
-      border: 1px solid var(--ion-color-primary);
-    }
-  }
+.modal-title {
+  text-align: center;
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-5);
 }

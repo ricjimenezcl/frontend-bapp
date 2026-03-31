@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "BappSearch",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -14,7 +14,7 @@
     "watch": "npm run set-env && ng build --watch --configuration development",
     "test": "ng test",
     "ionic:serve": "npm run set-env && ng serve",
-    "ionic:build": "npm run set-env && ionic build",
+    "ionic:build": "npm run set-env && ng build",
     "cap:sync": "npx cap sync",
     "cap:android": "npx cap open android",
     "cap:ios": "npx cap open ios"
@@ -56,6 +56,7 @@
     "@angular/cli": "18.2.13",
     "@angular/compiler-cli": "18.2.13",
     "@angular/language-service": "18.2.13",
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "6.2.0",
     "@ionic/angular-toolkit": "11.0.1",
     "@types/jasmine": "5.1.4",

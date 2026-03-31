@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.bappsearch',
-  appName: 'frontend',
+  appName: 'BappSearch',
   webDir: 'www',
   server: {
     androidScheme: 'https'

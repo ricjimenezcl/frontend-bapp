@@ -1,185 +1,166 @@
+// ─── Provider Edit Service ─────────────────────────────────────────────────
+@import '../../../../theme/mixins';
+
 :host {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: var(--bapp-bg-page);
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
-
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
-
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
+// ─── Autofill override (iOS/web) ───────────────────────────────────────────
+ion-input input {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--bapp-text-primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    caret-color: var(--bapp-color-primary);
+    transition: background-color 99999s ease-in-out 0s;
   }
 }
 
-
+// ─── Form container ────────────────────────────────────────────────────────
 .form-container {
-  padding: 20px;
+  padding: var(--bapp-space-5) var(--bapp-space-4);
 
   .input-item {
-    --background: #c97c7c;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    --background: var(--bapp-bg-card);
+    --border-radius: var(--bapp-radius-lg);
+    --border-color: var(--bapp-border);
+    border-radius: var(--bapp-radius-lg);
+    border: 1px solid var(--bapp-border);
+    margin-bottom: var(--bapp-space-4);
 
     ion-label {
-      font-weight: 600;
-      color: var(--ion-color-dark);
-      margin-bottom: 8px;
+      font-weight: var(--bapp-font-semibold);
+      color: var(--bapp-text-secondary);
+      margin-bottom: var(--bapp-space-2);
     }
 
     ion-input, ion-textarea, ion-select {
-      --padding-start: 10px;
-      margin-top: 8px;
+      --padding-start: var(--bapp-space-3);
+      --color: var(--bapp-text-primary);
+      --placeholder-color: var(--bapp-text-disabled);
+      margin-top: var(--bapp-space-2);
     }
   }
 
   .save-btn {
-    margin-top: 30px;
-    height: 50px;
-    font-weight: 600;
+    margin-top: var(--bapp-space-8);
+    height: var(--bapp-button-h-lg);
+    font-weight: var(--bapp-font-semibold);
+    --border-radius: var(--bapp-radius-full);
+    --background: var(--bapp-color-primary);
+    --color: #000;
   }
 }
 
+// ─── Loading container ─────────────────────────────────────────────────────
 .loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  @include flex-column-center;
   height: 50vh;
 
   ion-spinner {
     width: 48px;
     height: 48px;
+    --color: var(--bapp-color-primary);
   }
 
   p {
-    margin-top: 16px;
-    color: var(--ion-color-medium);
+    margin-top: var(--bapp-space-4);
+    color: var(--bapp-text-secondary);
+    font-size: var(--bapp-text-sm);
   }
 }
 
 .error-message {
-  color: var(--ion-color-danger);
-  font-size: 0.8em;
-  margin: 4px 0 8px 0;
-  padding: 0 16px;
+  color: var(--bapp-color-danger);
+  font-size: var(--bapp-text-xs);
+  margin: 4px 0 var(--bapp-space-2);
+  padding: 0 var(--bapp-space-4);
 }
 
-// ── Horario por día ──────────────────────────────────────────────────────
+// ─── Schedule section ──────────────────────────────────────────────────────
 .schedule-section-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--ion-color-dark);
-  margin: 16px 0 8px 0;
+  font-weight: var(--bapp-font-semibold);
+  font-size: var(--bapp-text-md);
+  color: var(--bapp-text-primary);
+  margin: var(--bapp-space-4) 0 var(--bapp-space-2);
 }
 
+// ─── Schedule day card (dark theme) ───────────────────────────────────────
 .schedule-day-card {
-  background: var(--ion-color-light);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border: 1.5px solid transparent;
-  transition: border-color 0.2s, background 0.2s;
+  background: var(--bapp-bg-card-raised);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-2);
+  border: 1.5px solid var(--bapp-border);
+  transition: border-color var(--bapp-transition-normal), background var(--bapp-transition-normal);
 
   &.active {
-    border-color: var(--ion-color-primary);
-    background: rgba(var(--ion-color-primary-rgb), 0.06);
+    border-color: var(--bapp-color-primary);
+    background: rgba(253, 215, 53, 0.06);
   }
 
   .schedule-day-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    @include flex-between;
 
     .day-name {
-      font-weight: 500;
-      font-size: 0.95rem;
-      color: var(--ion-color-medium);
-      transition: color 0.2s;
+      font-weight: var(--bapp-font-medium);
+      font-size: var(--bapp-text-md);
+      color: var(--bapp-text-tertiary);
+      transition: color var(--bapp-transition-fast);
 
       &.day-active {
-        color: var(--ion-color-dark);
-        font-weight: 600;
+        color: var(--bapp-text-primary);
+        font-weight: var(--bapp-font-semibold);
       }
     }
   }
 
   .schedule-times {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    @include flex-start;
+    gap: var(--bapp-space-2);
+    margin-top: var(--bapp-space-3);
 
     .time-group {
-      display: flex;
-      flex-direction: column;
+      @include flex-column;
       flex: 1;
 
       .time-label {
-        font-size: 0.72rem;
-        color: var(--ion-color-medium);
+        font-size: var(--bapp-text-xs);
+        color: var(--bapp-text-tertiary);
         margin-bottom: 2px;
       }
 
       .time-select {
-        --background: var(--ion-color-light-shade);
-        --padding-start: 8px;
-        --padding-end: 4px;
-        border-radius: 8px;
-        font-size: 0.9rem;
+        --background: var(--bapp-bg-input);
+        --padding-start: var(--bapp-space-2);
+        --padding-end: var(--bapp-space-1);
+        --color: var(--bapp-text-primary);
+        border-radius: var(--bapp-radius-sm);
+        font-size: var(--bapp-text-sm);
       }
     }
 
     .time-separator {
-      color: var(--ion-color-medium);
-      font-size: 1.1rem;
-      margin-top: 14px;
+      color: var(--bapp-text-tertiary);
+      font-size: var(--bapp-text-lg);
+      margin-top: var(--bapp-space-4);
     }
   }
 
   .day-unavailable {
     display: block;
-    margin-top: 6px;
-    font-size: 0.8rem;
-    color: var(--ion-color-medium);
+    margin-top: var(--bapp-space-2);
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
     font-style: italic;
   }
 }

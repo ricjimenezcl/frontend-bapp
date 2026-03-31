@@ -115,6 +115,7 @@ import {
   closeOutline,
   trendingUpOutline,
   eyeOutline,
+  eyeOffOutline,
   checkmarkCircleOutline,
    logOut,
   camera,
@@ -137,6 +138,7 @@ import {
   radioButtonOffOutline,
   keyOutline,
   logIn,
+  navigateOutline,
   navigate
 
 
@@ -145,6 +147,7 @@ import {
 
 import { routes } from './app.routes';
 import { authInterceptor, errorInterceptor } from './core/interceptors/auth.interceptor';
+import { nativeHttpInterceptor } from './core/interceptors/native-http.interceptor';
 
 // Registrar todos los iconos necesarios
 addIcons({
@@ -253,6 +256,7 @@ addIcons({
   timeOutline,
   trendingUpOutline,
   eyeOutline,
+  eyeOffOutline,
   logOut,
   camera,
   personAdd,
@@ -277,6 +281,7 @@ addIcons({
   globe,
   logIn,
   storefrontOutline,
+  navigateOutline,
   list: listOutline
 });
 
@@ -284,7 +289,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, nativeHttpInterceptor])),
     provideIonicAngular({ mode: 'ios' }),
     importProvidersFrom(SocialLoginModule),
     {

@@ -1,100 +1,81 @@
-﻿// --- Provider Add Service - BAPP Design System ---
-// Variables definidas en src/theme/variables.scss
+// ─── Provider Add Service ──────────────────────────────────────────────────
+@import '../../../../theme/mixins';
 
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  width: 100%;
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: var(--bapp-bg-page);
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
-
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
-
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
+// ─── Autofill override (iOS/web) ───────────────────────────────────────────
+ion-input input {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--bapp-text-primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    caret-color: var(--bapp-color-primary);
+    transition: background-color 99999s ease-in-out 0s;
   }
 }
 
+// ─── Header ───────────────────────────────────────────────────────────────
 ion-header ion-toolbar {
-  --background: #1e1e1e;
+  --background: var(--bapp-bg-card);
   --border-color: var(--bapp-border);
+
   ion-title {
-    font-family: 'semi-bold', sans-serif;
-    font-size: 17px;
+    font-weight: var(--bapp-font-semibold);
+    font-size: var(--bapp-text-lg);
     color: var(--bapp-text-primary);
   }
+
   ion-button { --color: var(--bapp-text-secondary); }
 }
 
+// ─── Main container ───────────────────────────────────────────────────────
 .modal-container {
-  padding: var(--bapp-space-md);
+  padding: var(--bapp-space-4);
   padding-bottom: 110px;
 }
 
+// ─── Instructions block ────────────────────────────────────────────────────
 .instructions {
   text-align: center;
-  padding: var(--bapp-space-md) 0 var(--bapp-space-sm);
-  margin-bottom: var(--bapp-space-md);
+  padding: var(--bapp-space-4) 0 var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-4);
+
   .title {
     display: block;
-    font-family: 'bold', sans-serif;
-    font-size: 17px;
+    font-weight: var(--bapp-font-bold);
+    font-size: var(--bapp-text-lg);
     color: var(--bapp-text-primary);
-    margin-bottom: 6px;
+    margin-bottom: var(--bapp-space-2);
     line-height: 1.4;
   }
+
   .sub-title {
     display: block;
-    font-size: 13px;
+    font-size: var(--bapp-text-sm);
     color: var(--bapp-text-secondary);
     line-height: 1.5;
   }
 }
 
+// ─── Map container ────────────────────────────────────────────────────────
 .map-container-centered {
   border-radius: var(--bapp-radius-lg);
   overflow: hidden;
-  margin-bottom: var(--bapp-space-md);
+  margin-bottom: var(--bapp-space-4);
   border: 1px solid var(--bapp-border);
   box-shadow: var(--bapp-shadow-md);
+
   .static-map {
     width: 100%;
     display: block;
@@ -103,19 +84,18 @@ ion-header ion-toolbar {
   }
 }
 
+// ─── Form section card ────────────────────────────────────────────────────
 .form-section {
-  background: var(--bapp-surface-01);
+  background: var(--bapp-bg-card);
   border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-lg);
-  margin-bottom: var(--bapp-space-sm);
+  border-radius: var(--bapp-radius-xl);
+  margin-bottom: var(--bapp-space-3);
   overflow: visible;
   box-shadow: var(--bapp-shadow-card);
 }
 
 // Separador entre filas dentro de una misma form-section
-.form-section > .input-with-suggestions + .input-with-suggestions {
-  border-top: 1px solid var(--bapp-border);
-}
+.form-section > .input-with-suggestions + .input-with-suggestions,
 .form-section > .selected-service-container > .input-with-suggestions + .input-with-suggestions {
   border-top: 1px solid var(--bapp-border);
 }
@@ -128,16 +108,16 @@ ion-header ion-toolbar {
   --background: transparent;
   --border-color: transparent;
   --inner-border-width: 0;
-  --padding-start: var(--bapp-space-sm);
-  --inner-padding-end: var(--bapp-space-sm);
+  --padding-start: var(--bapp-space-3);
+  --inner-padding-end: var(--bapp-space-3);
   --min-height: 52px;
   --inner-padding-start: 0;
 }
 
 .input-with-suggestions ion-item ion-icon[slot="start"] {
-  color: var(--ion-color-primary);
+  color: var(--bapp-color-primary);
   font-size: 20px;
-  margin-right: 10px;
+  margin-right: var(--bapp-space-3);
 }
 
 .input-with-suggestions ion-item ion-input {
@@ -149,8 +129,8 @@ ion-header ion-toolbar {
   border: none;
   border-radius: 0;
   margin-top: 0;
-  font-size: 15px;
-  font-family: 'regular', sans-serif;
+  font-size: var(--bapp-text-md);
+  font-weight: var(--bapp-font-regular);
 }
 
 .input-with-suggestions ion-item ion-textarea {
@@ -158,21 +138,23 @@ ion-header ion-toolbar {
   --placeholder-color: var(--bapp-text-tertiary);
   --padding-start: 0;
   --background: transparent;
-  font-size: 15px;
-  font-family: 'regular', sans-serif;
+  font-size: var(--bapp-text-md);
+  font-weight: var(--bapp-font-regular);
 }
 
 .selected-service-container {
   .input-with-suggestions ion-item ion-label h3 {
-    font-family: 'semi-bold', sans-serif;
-    font-size: 14px;
+    font-weight: var(--bapp-font-semibold);
+    font-size: var(--bapp-text-sm);
     color: var(--bapp-text-primary);
   }
+
   .input-with-suggestions ion-item ion-button[fill="clear"] {
     --color: var(--bapp-text-tertiary);
   }
+
   .input-with-suggestions ion-item ion-icon[name="checkmark-circle"] {
-    color: var(--ion-color-success);
+    color: var(--bapp-color-success);
   }
 }
 
@@ -185,7 +167,7 @@ ion-item:has(ion-input[name="categoria"]) {
   display: none !important;
 }
 
-// Boton depurar oculto
+// Botón depurar oculto
 ion-item:has(ion-button[color="warning"]) {
   display: none !important;
 }
@@ -193,37 +175,40 @@ ion-item:has(ion-button[color="warning"]) {
 ion-spinner {
   width: 20px;
   height: 20px;
-  --color: var(--ion-color-primary);
+  --color: var(--bapp-color-primary);
 }
 
+// ─── Suggestions dropdown ─────────────────────────────────────────────────
 .suggestions-container {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: var(--bapp-surface-02);
+  background: var(--bapp-bg-card-raised);
   border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-md);
+  border-radius: var(--bapp-radius-lg);
   max-height: 260px;
   overflow-y: auto;
   z-index: 1000;
   box-shadow: var(--bapp-shadow-lg);
-  &::-webkit-scrollbar { width: 0; }
+  @include hide-scrollbar;
 }
 
 .suggestion-item {
-  display: flex;
+  @include flex-start;
   align-items: flex-start;
-  padding: 12px var(--bapp-space-md);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
   border-bottom: 1px solid var(--bapp-border);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--bapp-transition-fast);
+
   &:last-child { border-bottom: none; }
-  &:active { background: var(--bapp-surface-03); }
+  &:active { background: rgba(255,255,255,0.06); }
+
   ion-icon {
-    color: var(--ion-color-primary);
+    color: var(--bapp-color-primary);
     font-size: 18px;
-    margin-right: 12px;
+    margin-right: var(--bapp-space-3);
     flex-shrink: 0;
     margin-top: 2px;
   }
@@ -235,61 +220,62 @@ ion-spinner {
 }
 
 .suggestion-main {
-  font-family: 'medium', sans-serif;
-  font-size: 14px;
+  font-weight: var(--bapp-font-medium);
+  font-size: var(--bapp-text-sm);
   color: var(--bapp-text-primary);
   line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @include truncate-text(1);
 }
 
 .suggestion-details {
-  font-size: 12px;
+  font-size: var(--bapp-text-xs);
   color: var(--bapp-text-secondary);
   line-height: 1.3;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @include truncate-text(1);
 }
 
 .error-message {
-  font-size: 12px;
-  color: var(--ion-color-danger);
-  padding: 2px var(--bapp-space-md) var(--bapp-space-xs);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+  padding: 2px var(--bapp-space-4) var(--bapp-space-2);
   display: block;
 }
 
+// ─── Footer ───────────────────────────────────────────────────────────────
 ion-footer {
-  background: #1e1e1e;
+  background: var(--bapp-bg-card);
   border-top: 1px solid var(--bapp-border);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+
   ion-toolbar {
     --background: transparent;
-    --padding-start: var(--bapp-space-md);
-    --padding-end: var(--bapp-space-md);
-    --padding-top: 10px;
-    --padding-bottom: 10px;
+    --padding-start: var(--bapp-space-4);
+    --padding-end: var(--bapp-space-4);
+    --padding-top: var(--bapp-space-2);
+    --padding-bottom: var(--bapp-space-2);
     --min-height: 68px;
   }
+
   ion-col { padding: 0 4px; }
 }
 
 .footer-button {
   --border-radius: var(--bapp-radius-full);
   height: 46px;
-  font-family: 'semi-bold', sans-serif;
-  font-size: 15px;
+  font-weight: var(--bapp-font-semibold);
+  font-size: var(--bapp-text-md);
   margin: 0;
+
   &[color="light"] {
     --border-color: var(--bapp-border);
     --color: var(--bapp-text-secondary);
     --background: transparent;
   }
+
   &[color="primary"] {
     --color: #000000;
-    font-family: 'bold', sans-serif;
+    font-weight: var(--bapp-font-bold);
   }
 }
 
@@ -297,76 +283,73 @@ ion-footer {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-// Estilos para el diseño unificado de horarios (schedule)
+// ─── Schedule day card (dark theme) ───────────────────────────────────────
 .schedule-day-card {
-  background: var(--ion-color-light);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  border: 1.5px solid transparent;
-  transition: border-color 0.2s, background 0.2s;
+  background: var(--bapp-bg-card-raised);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-2);
+  border: 1.5px solid var(--bapp-border);
+  transition: border-color var(--bapp-transition-normal), background var(--bapp-transition-normal);
 
   &.active {
-    border-color: var(--ion-color-primary);
-    background: rgba(var(--ion-color-primary-rgb), 0.06);
+    border-color: var(--bapp-color-primary);
+    background: rgba(253, 215, 53, 0.06);
   }
 
   .schedule-day-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    @include flex-between;
 
     .day-name {
-      font-weight: 500;
-      font-size: 0.95rem;
-      color: var(--ion-color-medium);
-      transition: color 0.2s;
+      font-weight: var(--bapp-font-medium);
+      font-size: var(--bapp-text-md);
+      color: var(--bapp-text-tertiary);
+      transition: color var(--bapp-transition-fast);
 
       &.day-active {
-        color: var(--ion-color-dark);
-        font-weight: 600;
+        color: var(--bapp-text-primary);
+        font-weight: var(--bapp-font-semibold);
       }
     }
   }
 
   .schedule-times {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
+    @include flex-start;
+    gap: var(--bapp-space-2);
+    margin-top: var(--bapp-space-3);
 
     .time-group {
-      display: flex;
-      flex-direction: column;
+      @include flex-column;
       flex: 1;
 
       .time-label {
-        font-size: 0.72rem;
-        color: var(--ion-color-medium);
+        font-size: var(--bapp-text-xs);
+        color: var(--bapp-text-tertiary);
         margin-bottom: 2px;
       }
 
       .time-select {
-        --background: var(--ion-color-light-shade);
-        --padding-start: 8px;
-        --padding-end: 4px;
-        border-radius: 8px;
-        font-size: 0.9rem;
+        --background: var(--bapp-bg-input);
+        --padding-start: var(--bapp-space-2);
+        --padding-end: var(--bapp-space-1);
+        --color: var(--bapp-text-primary);
+        border-radius: var(--bapp-radius-sm);
+        font-size: var(--bapp-text-sm);
       }
     }
 
     .time-separator {
-      color: var(--ion-color-medium);
-      font-size: 1.1rem;
-      margin-top: 14px;
+      color: var(--bapp-text-tertiary);
+      font-size: var(--bapp-text-lg);
+      margin-top: var(--bapp-space-4);
     }
   }
 
   .day-unavailable {
     display: block;
-    margin-top: 6px;
-    font-size: 0.8rem;
-    color: var(--ion-color-medium);
+    margin-top: var(--bapp-space-2);
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
     font-style: italic;
   }
 }

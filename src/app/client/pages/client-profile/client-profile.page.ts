@@ -2,7 +2,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController, NavController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -40,6 +40,7 @@ export class ClientProfilePage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private navCtrl: NavController,
     private authService: AuthService,
     private clientService: ClientService,
     private alertCtrl: AlertController,
@@ -167,7 +168,7 @@ export class ClientProfilePage implements OnInit, OnDestroy {
           text: 'Sí, salir',
           handler: () => {
             this.authService.logout();
-            this.router.navigate(['/auth/login']);
+            this.navCtrl.navigateRoot(['/auth/login']);
           }
         }
       ]

@@ -47,11 +47,12 @@
       <!-- Client row -->
       <div class="client-row">
         <div class="client-avatar">
-          <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
+          <img *ngIf="booking.client_avatar" [src]="booking.client_avatar" alt="avatar" class="avatar-img">
+          <ion-icon *ngIf="!booking.client_avatar" name="person-circle-outline" class="avatar-icon"></ion-icon>
         </div>
         <div class="client-info">
           <div class="client-header">
-            <span class="client-name">Cliente #{{ booking.client_id }}</span>
+            <span class="client-name">{{ booking.client_name || 'Cliente #' + booking.client_id }}</span>
             <span class="status-badge"
               [class.badge-pending]="(booking.status | lowercase) === 'pending'"
               [class.badge-confirmed]="(booking.status | lowercase) === 'confirmed' || (booking.status | lowercase) === 'in_progress'"

@@ -37,6 +37,12 @@
         </ion-icon>
       </button>
 
+      <!-- Map picker button -->
+      <button class="map-picker-btn" (click)="openMapPicker()" type="button">
+        <ion-icon name="map-outline" class="map-icon"></ion-icon>
+        <span>Elegir ubicación en el mapa</span>
+      </button>
+
       <!-- Location dropdown -->
       <div class="loc-dropdown" *ngIf="showLocationSearch">
         <div class="loc-input-row">
@@ -107,8 +113,16 @@
     <!-- ── Main body (when no search) ────────────────────────────────── -->
     <div class="mc-body" *ngIf="filteredCategories.length === 0 && searchQuery.length === 0">
 
+      <!-- ── Hint prompt ─────────────────────────────────────────────── -->
+      <div class="hint-card" *ngIf="!selectedMainCategory && mainCategories.length > 0 && !isLoading">
+        <ion-icon name="hand-left-outline" class="hint-icon"></ion-icon>
+        <div class="hint-body">
+          <p class="hint-title">Toca una categoría</p>
+          <p class="hint-text">Para ver los servicios disponibles</p>
+        </div>
+      </div>
       <!-- ── Hero banner ────────────────────────────────────────────── -->
-      <div class="hero-banner" *ngIf="!selectedMainCategory">
+      <!-- <div class="hero-banner" *ngIf="!selectedMainCategory">
         <div class="hero-inner">
           <div class="hero-badge">
             <ion-icon name="flash"></ion-icon>
@@ -119,7 +133,7 @@
         </div>
         <div class="hero-orb hero-orb-1"></div>
         <div class="hero-orb hero-orb-2"></div>
-      </div>
+      </div> -->
 
       <!-- ── Categories grid ─────────────────────────────────────────── -->
       <div class="section" *ngIf="!selectedMainCategory">
@@ -144,7 +158,8 @@
             (click)="selectMainCategory(cat)"
             type="button">
             <div class="cat-tile-icon-wrap">
-              <ion-icon [name]="cat.icon || getCategoryIcon(cat.name)" class="cat-tile-icon"></ion-icon>
+              <img [src]="cat.icon" [alt]="cat.name" class="w-8 h-8 object-contain">
+             
             </div>
             <span class="cat-tile-label">{{ cat.name }}</span>
           </button>
@@ -157,14 +172,7 @@
         </div>
       </div>
 
-      <!-- ── Hint prompt ─────────────────────────────────────────────── -->
-      <div class="hint-card" *ngIf="!selectedMainCategory && mainCategories.length > 0 && !isLoading">
-        <ion-icon name="hand-left-outline" class="hint-icon"></ion-icon>
-        <div class="hint-body">
-          <p class="hint-title">Toca una categoría</p>
-          <p class="hint-text">Para ver los servicios disponibles</p>
-        </div>
-      </div>
+      
 
       <!-- ── Subcategory panel ────────────────────────────────────────── -->
       <div class="subcat-panel" *ngIf="selectedMainCategory">
@@ -224,7 +232,18 @@
 
     <div class="footer-spacer"></div>
   </div>
+
 </ion-content>
+
+<!-- Map Picker Modal — outside ion-content to avoid transform stacking context
+     that traps position:fixed elements inside ion-content. -->
+<app-map-picker
+  *ngIf="showMapPicker"
+  [initialLat]="mapPickerInitialLat"
+  [initialLng]="mapPickerInitialLng"
+  (locationSelected)="onLocationSelected($event)"
+  (closed)="onMapPickerClose()">
+</app-map-picker>
 
 <!-- ── Footer CTA ────────────────────────────────────────────────────────── -->
 <ion-footer class="mc-footer">

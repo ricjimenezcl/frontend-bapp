@@ -1,4 +1,5 @@
-﻿// ─── Provider Modal Service — mismo visual que main-categories ──────────
+// ─── Provider Modal Service ────────────────────────────────────────────────
+@import '../../../../theme/mixins';
 
 :host {
   display: flex;
@@ -7,14 +8,14 @@
   overflow: hidden;
 }
 
-// ─── Header ─────────────────────────────────────────────────────────────
+// ─── Header ───────────────────────────────────────────────────────────────
 ion-header ion-toolbar {
-  --background: #1e1e1e;
+  --background: var(--bapp-bg-card);
   --border-color: var(--bapp-border);
 
   ion-title {
-    font-family: 'semi-bold', sans-serif;
-    font-size: 17px;
+    font-weight: var(--bapp-font-semibold);
+    font-size: var(--bapp-text-lg);
     color: var(--bapp-text-primary);
   }
 
@@ -24,199 +25,152 @@ ion-header ion-toolbar {
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: var(--bapp-bg-page);
   flex: 1;
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
-
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
-
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
-  }
-}
-
-// ─── Page wrapper ────────────────────────────────────────────────────────
+// ─── Page wrapper ─────────────────────────────────────────────────────────
 .page-wrapper {
   padding-bottom: 100px;
 }
 
-// ─── Instrucciones ───────────────────────────────────────────────────────
+// ─── Instrucciones ────────────────────────────────────────────────────────
 .instructions {
   text-align: center;
-  padding: 20px 16px 12px;
+  padding: var(--bapp-space-5) var(--bapp-space-4) var(--bapp-space-3);
 
   .instructions-title {
-    font-size: 16px;
-    font-family: 'bold', sans-serif;
+    font-size: var(--bapp-text-lg);
+    font-weight: var(--bapp-font-bold);
     color: var(--bapp-text-primary);
-    margin: 0 0 6px;
+    margin: 0 0 var(--bapp-space-2);
   }
 
   .instructions-sub {
-    font-size: 13px;
-    font-family: 'regular', sans-serif;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-regular);
     color: var(--bapp-text-secondary);
     margin: 0;
     line-height: 1.5;
   }
 }
 
-// ─── Category section ────────────────────────────────────────────────────
+// ─── Category section ─────────────────────────────────────────────────────
 .category-section {
-  margin-bottom: 4px;
+  margin-bottom: var(--bapp-space-1);
 }
 
-// ─── Section titles ──────────────────────────────────────────────────────
+// ─── Section titles ───────────────────────────────────────────────────────
 .main-title {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 16px 12px;
+  @include flex-between;
+  margin: 0 var(--bapp-space-4) var(--bapp-space-3);
 
   .lbl {
-    font-size: 13px;
-    font-family: 'semi-bold', sans-serif;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-semibold);
     color: var(--bapp-text-primary);
   }
 }
 
-// ─── Categories grid — 4 col ─────────────────────────────────────────────
+// ─── Categories grid — 4 col ──────────────────────────────────────────────
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 0 16px 16px;
+  gap: var(--bapp-space-3);
+  padding: 0 var(--bapp-space-4) var(--bapp-space-4);
 }
 
 .category-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: transform var(--bapp-transition-fast);
 
   &:active { transform: scale(0.92); }
 
   &.selected {
     .tile-icon-wrap {
-      border-color: var(--ion-color-primary);
+      border-color: var(--bapp-color-primary);
       background: linear-gradient(135deg, rgba(253,215,53,0.2) 0%, rgba(240,165,0,0.12) 100%);
     }
-    .tile-label { color: var(--ion-color-primary); font-family: 'bold', sans-serif; }
+
+    .tile-label {
+      color: var(--bapp-color-primary);
+      font-weight: var(--bapp-font-bold);
+    }
   }
 
   .tile-icon-wrap {
     width: 100%;
     aspect-ratio: 1;
-    border-radius: 14px;
+    border-radius: var(--bapp-radius-lg);
     background: linear-gradient(135deg, rgba(253,215,53,0.14) 0%, rgba(240,165,0,0.08) 100%);
     border: 1px solid rgba(253,215,53,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include flex-center;
     overflow: hidden;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background var(--bapp-transition-fast), border-color var(--bapp-transition-fast);
 
     .category-icon {
       font-size: 26px;
-      color: var(--ion-color-primary);
+      color: var(--bapp-color-primary);
     }
   }
 
   .tile-label {
-    font-size: 11px;
-    font-family: 'medium', sans-serif;
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-medium);
     color: var(--bapp-text-primary);
     text-align: center;
     line-height: 1.3;
   }
 }
 
-// ─── Subcategory section ──────────────────────────────────────────────────
+// ─── Subcategory section ───────────────────────────────────────────────────
 .subcategory-section {
-  margin-top: 12px;
+  margin-top: var(--bapp-space-3);
   border-top: 2px solid rgba(253,215,53,0.25);
-  padding-top: 4px;
+  padding-top: var(--bapp-space-1);
   animation: slideDown 0.22s ease;
 }
 
-// ─── Subcategory header ───────────────────────────────────────────────────
+// ─── Subcategory header ────────────────────────────────────────────────────
 .subcategory-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px 16px;
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-2) var(--bapp-space-4) var(--bapp-space-4);
 
   .subcat-info {
     flex: 1;
 
     .subcat-title {
-      font-size: 18px;
-      font-family: 'bold', sans-serif;
+      font-size: var(--bapp-text-xl);
+      font-weight: var(--bapp-font-bold);
       color: var(--bapp-text-primary);
       margin: 0 0 2px;
     }
 
     .subcat-sub {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       color: var(--bapp-text-secondary);
       margin: 0;
     }
   }
 }
 
-// ─── Service cards ────────────────────────────────────────────────────────
+// ─── Service cards ─────────────────────────────────────────────────────────
 .services-container {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 0 16px;
-  margin-bottom: var(--bapp-space-md);
+  @include flex-column;
+  gap: var(--bapp-space-2);
+  padding: 0 var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-4);
 }
 
 .service-card-content {
-  background: var(--bapp-surface-01);
-  border-radius: var(--bapp-radius-md);
+  background: var(--bapp-bg-card);
+  border-radius: var(--bapp-radius-lg);
   border: 1px solid var(--bapp-border);
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color var(--bapp-transition-fast), background var(--bapp-transition-fast);
 
   &.selected {
     border-color: rgba(253,215,53,0.4);
@@ -224,17 +178,16 @@ ion-item {
   }
 
   .service-card-header {
-    display: flex;
-    align-items: center;
-    gap: var(--bapp-space-sm);
-    padding: var(--bapp-space-sm) var(--bapp-space-md);
+    @include flex-start;
+    gap: var(--bapp-space-3);
+    padding: var(--bapp-space-3) var(--bapp-space-4);
 
     ion-checkbox.service-checkbox {
       --color: var(--bapp-text-secondary);
       --color-checked: #000;
-      --background-checked: var(--ion-color-primary);
+      --background-checked: var(--bapp-color-primary);
       --border-color: var(--bapp-border);
-      --border-color-checked: var(--ion-color-primary);
+      --border-color-checked: var(--bapp-color-primary);
       --border-radius: 6px;
       --size: 20px;
       --checkmark-width: 2px;
@@ -246,16 +199,16 @@ ion-item {
 
       .service-name {
         display: block;
-        font-size: 14px;
-        font-family: 'medium', sans-serif;
+        font-size: var(--bapp-text-sm);
+        font-weight: var(--bapp-font-medium);
         color: var(--bapp-text-primary);
         margin: 0 0 2px;
       }
 
       .service-desc {
         display: block;
-        font-size: 12px;
-        font-family: 'regular', sans-serif;
+        font-size: var(--bapp-text-xs);
+        font-weight: var(--bapp-font-regular);
         color: var(--bapp-text-secondary);
         margin: 0;
         line-height: 1.4;
@@ -264,72 +217,67 @@ ion-item {
   }
 }
 
-// ─── Empty / loading states ───────────────────────────────────────────────
+// ─── Empty / loading states ────────────────────────────────────────────────
 .empty-state,
 .loading-services,
 .empty-services {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 20px;
+  @include flex-column-center;
+  padding: var(--bapp-space-8) var(--bapp-space-5);
   text-align: center;
   background: rgba(255,255,255,0.03);
-  border-radius: var(--bapp-radius-md);
+  border-radius: var(--bapp-radius-lg);
   border: 1px dashed var(--bapp-border);
-  margin: var(--bapp-space-sm) 16px;
+  margin: var(--bapp-space-3) var(--bapp-space-4);
 
   .empty-icon {
     font-size: 44px;
     color: var(--bapp-text-tertiary);
-    margin-bottom: var(--bapp-space-sm);
+    margin-bottom: var(--bapp-space-3);
   }
 
   .empty-text,
   .loading-text {
-    font-size: 14px;
-    font-family: 'regular', sans-serif;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-regular);
     color: var(--bapp-text-secondary);
   }
 
-  ion-spinner { --color: var(--ion-color-primary); margin-bottom: var(--bapp-space-sm); }
+  ion-spinner { --color: var(--bapp-color-primary); margin-bottom: var(--bapp-space-3); }
 }
 
-// ─── Hint card (sin categoría seleccionada) ───────────────────────────────
+// ─── Hint card (sin categoría seleccionada) ────────────────────────────────
 .no-category-selected {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: var(--bapp-space-md) 16px;
+  @include flex-column-center;
+  margin: var(--bapp-space-4) var(--bapp-space-4);
 
   .hint-card {
     background: linear-gradient(135deg, rgba(253,215,53,0.1) 0%, rgba(240,165,0,0.05) 100%);
     border: 1px solid rgba(253,215,53,0.2);
-    border-radius: var(--bapp-radius-lg);
-    padding: var(--bapp-space-lg) var(--bapp-space-md);
+    border-radius: var(--bapp-radius-xl);
+    padding: var(--bapp-space-6) var(--bapp-space-4);
     text-align: center;
     width: 100%;
 
     .hint-icon {
       font-size: 40px;
-      color: var(--ion-color-primary);
-      margin-bottom: var(--bapp-space-sm);
+      color: var(--bapp-color-primary);
+      margin-bottom: var(--bapp-space-3);
       display: block;
       animation: bounce 2s infinite;
     }
 
     .hint-title {
       display: block;
-      font-size: 16px;
-      font-family: 'bold', sans-serif;
+      font-size: var(--bapp-text-lg);
+      font-weight: var(--bapp-font-bold);
       color: var(--bapp-text-primary);
-      margin-bottom: 6px;
+      margin-bottom: var(--bapp-space-2);
     }
 
     .hint-text {
       display: block;
-      font-size: 13px;
-      font-family: 'regular', sans-serif;
+      font-size: var(--bapp-text-sm);
+      font-weight: var(--bapp-font-regular);
       color: var(--bapp-text-secondary);
       line-height: 1.5;
     }
@@ -338,23 +286,23 @@ ion-item {
 
 // ─── Footer ───────────────────────────────────────────────────────────────
 ion-footer {
-  --background: var(--bapp-surface-01);
-  background: var(--bapp-surface-01);
+  --background: var(--bapp-bg-card);
+  background: var(--bapp-bg-card);
   border-top: 1px solid var(--bapp-border);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
 
   ion-toolbar {
-    --background: var(--bapp-surface-01);
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --padding-top: 10px;
-    --padding-bottom: 10px;
+    --background: var(--bapp-bg-card);
+    --padding-start: var(--bapp-space-4);
+    --padding-end: var(--bapp-space-4);
+    --padding-top: var(--bapp-space-2);
+    --padding-bottom: var(--bapp-space-2);
     --min-height: 68px;
   }
 
   .footer-buttons {
-    display: flex;
-    gap: 10px;
+    @include flex-start;
+    gap: var(--bapp-space-2);
     width: 100%;
   }
 
@@ -362,8 +310,8 @@ ion-footer {
     flex: 1;
     --border-radius: var(--bapp-radius-full);
     height: 46px;
-    font-family: 'semi-bold', sans-serif;
-    font-size: 14px;
+    font-weight: var(--bapp-font-semibold);
+    font-size: var(--bapp-text-sm);
     margin: 0;
 
     &.btn-cancel {

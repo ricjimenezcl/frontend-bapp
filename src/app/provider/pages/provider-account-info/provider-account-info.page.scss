@@ -1,110 +1,121 @@
+// ─── Provider Account Info ─────────────────────────────────────────────────
+@import '../../../../theme/mixins';
+
 :host {
-  display: block;
-  height: 100vh;
-  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
-  height: calc(100vh - 70px); // Deja espacio para el footer
-  overflow-y: auto;
+  --background: var(--bapp-bg-page);
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
-
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
-
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
+// ─── Autofill override (iOS/web) ───────────────────────────────────────────
+ion-input input {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--bapp-text-primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    caret-color: var(--bapp-color-primary);
+    transition: background-color 99999s ease-in-out 0s;
   }
 }
 
-
+// ─── Profile info container ────────────────────────────────────────────────
 .profile-info {
-  padding: 20px;
+  padding: var(--bapp-space-5) var(--bapp-space-4);
 
+  // ─── Avatar section ──────────────────────────────────────────────────────
   .user-avtar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @include flex-center;
     position: relative;
-    margin-bottom: 30px;
+    margin-bottom: var(--bapp-space-8);
 
     .avatar-preview {
-      width: 120px;
-      height: 120px;
+      width: 96px;
+      height: 96px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid var(--ion-color-primary);
+      border: 3px solid var(--bapp-color-primary);
+      box-shadow: 0 0 0 4px rgba(253,215,53,0.15), var(--bapp-shadow-md);
     }
 
     ion-button.edit-btn {
       position: absolute;
       bottom: 0;
-      right: calc(50% - 60px);
-      --background: var(--ion-color-primary);
+      right: calc(50% - 48px);
+      --background: var(--bapp-color-primary);
       --border-radius: 50%;
       --padding-start: 0;
       --padding-end: 0;
-      width: 36px;
-      height: 36px;
+      --color: #000;
+      width: 32px;
+      height: 32px;
       margin: 0;
     }
   }
 
- 
-  .submit-btn {
-    margin-top: 30px;
-    height: 50px;
-    font-weight: 600;
-  }
+  // ─── Form fields ─────────────────────────────────────────────────────────
+  ion-item {
+    --background: var(--bapp-bg-card);
+    --border-radius: var(--bapp-radius-lg);
+    --border-color: var(--bapp-border);
+    --color: var(--bapp-text-primary);
+    --padding-start: var(--bapp-space-4);
+    --inner-padding-end: var(--bapp-space-4);
+    border-radius: var(--bapp-radius-lg);
+    margin-bottom: var(--bapp-space-3);
+    border: 1px solid var(--bapp-border);
 
-  .edit-buttons {
-    margin-top: 20px;
+    ion-icon {
+      color: var(--bapp-color-primary);
+      margin-right: var(--bapp-space-3);
+      font-size: 20px;
+    }
 
-    ion-button {
-      height: 45px;
-      font-weight: 500;
+    ion-label {
+      font-weight: var(--bapp-font-medium);
+      color: var(--bapp-text-secondary);
+    }
+
+    ion-input {
+      --padding-start: var(--bapp-space-2);
+      --color: var(--bapp-text-primary);
+      --background: transparent;
+      --placeholder-color: var(--bapp-text-disabled);
     }
   }
 
+  // ─── Submit button ───────────────────────────────────────────────────────
+  .submit-btn {
+    margin-top: var(--bapp-space-8);
+    height: var(--bapp-button-h-lg);
+    font-weight: var(--bapp-font-semibold);
+    --border-radius: var(--bapp-radius-full);
+    --background: var(--bapp-color-primary);
+    --color: #000;
+  }
+
+  // ─── Edit buttons row ────────────────────────────────────────────────────
+  .edit-buttons {
+    margin-top: var(--bapp-space-5);
+
+    ion-button {
+      height: var(--bapp-button-h-md);
+      font-weight: var(--bapp-font-medium);
+      --border-radius: var(--bapp-radius-full);
+    }
+  }
+
+  // ─── Error message ───────────────────────────────────────────────────────
   .error-message {
-    color: var(--ion-color-danger);
-    font-size: 0.8em;
-    margin: 2px 0 10px 0;
-    padding: 0 16px;
+    color: var(--bapp-color-danger);
+    font-size: var(--bapp-text-xs);
+    margin: 2px 0 var(--bapp-space-3);
+    padding: 0 var(--bapp-space-4);
   }
 }

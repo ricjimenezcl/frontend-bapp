@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { IonicModule, ModalController, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController, ToastController, NavController } from '@ionic/angular';
 import { ProviderAccountInfoPage } from '../provider-account-info/provider-account-info.page';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ProviderService } from '../../services/provider.service';
@@ -24,6 +24,7 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   constructor(
     private router: Router,
+    private navCtrl: NavController,
     private modalController: ModalController,
     private alertCtrl: AlertController,
     private readonly toastCtrl: ToastController,
@@ -157,7 +158,7 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
           text: 'Okay',
           handler: async () => {
             this.authService.logout();
-            this.router.navigate(['/auth/login']);
+            this.navCtrl.navigateRoot(['/auth/login']);
           }
         }
       ]
