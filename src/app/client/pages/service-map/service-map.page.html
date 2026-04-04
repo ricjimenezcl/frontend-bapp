@@ -1,7 +1,7 @@
 
-<ion-content class="map-content">
+<ion-content class="map-content" [scrollY]="false">
   <!-- Contenedor principal del mapa -->
-  <div class="map-container">
+  <div class="map-wrapper">
     <!-- Mapa real (MapLibre GL) — NO modificar este elemento -->
     <div #mapContainer id="map" class="map-element"></div>
 

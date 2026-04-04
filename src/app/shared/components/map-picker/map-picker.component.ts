@@ -1,8 +1,10 @@
 // src/app/shared/components/map-picker/map-picker.component.ts
-import { Component, signal, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, signal, OnDestroy, OnInit, inject, ElementRef, ViewChild, AfterViewInit, Output, EventEmitter, Input, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { MapboxService, GeocodingFeature } from '../../services/mapbox.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { MapboxService } from '../../services/mapbox.service';
 import { GeoLocationService } from '../../services/geo-location.service';
 
 @Component({
@@ -13,7 +15,7 @@ import { GeoLocationService } from '../../services/geo-location.service';
   styleUrls: ['./map-picker.component.scss'],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class MapPickerComponent implements OnDestroy, AfterViewInit {
+export class MapPickerComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   
   @Output() locationSelected = new EventEmitter<{ lat: number; lng: number; address: string }>();
@@ -30,10 +32,28 @@ export class MapPickerComponent implements OnDestroy, AfterViewInit {
   locationError = signal('');
   
   private map: any = null;
-  private marker: any = null;
   private L: any = null;
   private currentLat = -33.4489;
   private currentLng = -70.6693;
+  
+  // ✅ Debounce para reverse geocoding (previene rate limit Nominatim)
+  private readonly dragDebouncer$ = new Subject<{lat: number, lng: number}>();
+  private readonly destroy$ = new Subject<void>();
+  
+  ngOnInit() {
+    // ✅ Setup debounced reverse geocoding
+    this.dragDebouncer$.pipe(
+      debounceTime(500), // Esperar 500ms después de drag/click
+      distinctUntilChanged((a, b) => 
+        // Solo procesar si coordenadas cambiaron >10m (~0.0001°)
+        Math.abs(a.lat - b.lat) < 0.0001 && Math.abs(a.lng - b.lng) < 0.0001
+      ),
+      takeUntil(this.destroy$)
+    ).subscribe(({lat, lng}) => {
+      console.log('[Debounced] Reverse geocoding:', lat, lng);
+      this.updateAddressFromCoords(lat, lng);
+    });
+  }
   
   ngAfterViewInit() {
     // 300ms en Android es suficiente para que el overlay termine la animación
@@ -44,6 +64,11 @@ export class MapPickerComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    // ✅ Cleanup de observables
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.dragDebouncer$.complete();
+    
     if (this.map) {
       this.map.remove();
       this.map = null;
@@ -71,42 +96,30 @@ export class MapPickerComponent implements OnDestroy, AfterViewInit {
         attribution: '© OpenStreetMap contributors'
       }).addTo(this.map);
       
-      // Crear icono personalizado PNG
-      const customIcon = this.L.icon({
-        iconUrl: 'https://res.cloudinary.com/dghwotofx/image/upload/f_png,w_64,h_64/v1774631660/ubicacion_nbo2mo',
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -40]
-      });
-      
-      // Crear marcador arrastrable
-      this.marker = this.L.marker([this.currentLat, this.currentLng], {
-        icon: customIcon,
-        draggable: true
-      }).addTo(this.map);
-      
-      // Evento dragend del marcador
-      this.marker.on('dragend', () => {
-        const pos = this.marker.getLatLng();
-        this.updateLocation(pos.lat, pos.lng);
-      });
-      
-      // Evento click en el mapa
-      this.map.on('click', (e: any) => {
-        this.marker.setLatLng(e.latlng);
-        this.updateLocation(e.latlng.lat, e.latlng.lng);
+      // ✅ Evento moveend: detectar cuando el usuario termina de arrastrar el mapa
+      this.map.on('moveend', () => {
+        const center = this.map.getCenter();
+        this.currentLat = center.lat;
+        this.currentLng = center.lng;
+        // Emitir al debouncer para reverse geocoding
+        this.dragDebouncer$.next({ lat: center.lat, lng: center.lng });
       });
       
       this.loading.set(false);
 
-      // invalidateSize() fuerza a Leaflet a recalcular las dimensiones del
-      // contenedor. Necesario en Android cuando el mapa se inicializa dentro
-      // de un overlay con animación (el tamaño real llega después del paint).
+      // Primer invalidateSize: recalcula dimensiones tras animación de entrada.
+      // Segundo invalidateSize + setView a los 600ms: fuerza la recarga de tiles
+      // en Android donde el WebView puede pintar los tiles en blanco en el primer
+      // paint si el contenedor aún no tenía dimensiones reales.
       setTimeout(() => {
         this.map?.invalidateSize({ animate: false });
       }, 150);
+      setTimeout(() => {
+        this.map?.invalidateSize({ animate: false });
+        this.map?.setView([this.currentLat, this.currentLng], this.map.getZoom(), { animate: false });
+      }, 600);
 
-      // Obtener dirección inicial
+      // ✅ Obtener dirección inicial (sin debounce, es la primera vez)
       this.updateAddressFromCoords(this.currentLat, this.currentLng);
       
     } catch (error) {
@@ -116,18 +129,12 @@ export class MapPickerComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  private updateLocation(lat: number, lng: number): void {
-    this.currentLat = lat;
-    this.currentLng = lng;
-    this.updateAddressFromCoords(lat, lng);
-  }
-
   private updateAddressFromCoords(lat: number, lng: number): void {
     this.selectedAddress.set('Obteniendo dirección...');
     
     this.mapboxSvc.reverseGeocode(lng, lat).subscribe({
       next: (result) => {
-        if (result && result.display_name) {
+        if (result?.display_name) {
           // Extraer nombre más legible del display_name de Nominatim
           const parts = result.display_name.split(',');
           const address = parts.slice(0, 3).join(', ') || result.display_name;
@@ -151,9 +158,11 @@ export class MapPickerComponent implements OnDestroy, AfterViewInit {
       const lat = position.latitude;
       const lng = position.longitude;
       
-      this.marker?.setLatLng([lat, lng]);
+      // ✅ Solo centar el mapa (el pin está fijo en el centro)
       this.map?.setView([lat, lng], 15);
-      this.updateLocation(lat, lng);
+      this.currentLat = lat;
+      this.currentLng = lng;
+      this.updateAddressFromCoords(lat, lng);
       this.loading.set(false);
     } catch (error) {
       console.error('Error obteniendo ubicación:', error);

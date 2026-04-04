@@ -35,14 +35,15 @@ export class MapService {
   private readonly clusterSourceId = 'providers-cluster';
   private readonly clusterLayerIds = ['cluster-circles', 'cluster-count', 'unclustered-point'];
   private clusterClickHandlers: { layer: string; fn: (e: any) => void }[] = [];
-  private clusterPointClickSubject = new Subject<any>();
+  private hoverHandlers: Array<{ layer: string; event: string; fn: any }> = []; // ✅ Fix memory leak
+  private readonly clusterPointClickSubject = new Subject<any>();
   clusterPointClick$ = this.clusterPointClickSubject.asObservable();
 
   // Observables
-  private mapLoadedSubject = new BehaviorSubject<boolean>(false);
+  private readonly mapLoadedSubject = new BehaviorSubject<boolean>(false);
   mapLoaded$ = this.mapLoadedSubject.asObservable();
 
-  private providerClickSubject = new Subject<number>();
+  private readonly providerClickSubject = new Subject<number>();
   providerClick$ = this.providerClickSubject.asObservable();
 
   constructor() {}
@@ -79,7 +80,11 @@ export class MapService {
     this.map.on('load', () => {
       console.log('✓ Mapa MapLibre cargado');
       this.mapLoadedSubject.next(true);
+      // Primer resize: corrige dimensiones tras animación de entrada
       setTimeout(() => this.map?.resize(), 100);
+      // Segundo resize a 600ms: en Android el WebView puede pintar el contenedor
+      // con dimensiones 0 en el primer frame. El segundo resize fuerza el recálculo.
+      setTimeout(() => this.map?.resize(), 600);
     });
 
     this.map.on('error', (e) => {
@@ -248,7 +253,9 @@ export class MapService {
     if (!this.map) return;
     this.clearProviderCluster();
 
-    if (!this.map.hasImage('custom-marker')) {
+    if (this.map.hasImage('custom-marker')) {
+      this.addProviderClusterWithIcon(collection);
+    } else {
       // MapLibre v4+: loadImage() retorna Promise
       this.map.loadImage('/assets/icon/ubicacion.ico')
         .then(({ data: image }) => {
@@ -260,8 +267,6 @@ export class MapService {
         .catch(() => {
           this.addProviderClusterFallback(collection);
         });
-    } else {
-      this.addProviderClusterWithIcon(collection);
     }
   }
 
@@ -316,7 +321,7 @@ export class MapService {
         'icon-opacity': [
           'case',
           ['coalesce', ['get', 'isLocked'], false], 0.35,
-          1.0
+          1
         ]
       }
     });
@@ -416,14 +421,31 @@ export class MapService {
       { layer: 'cluster-circles', fn: clusterClickFn },
       { layer: 'unclustered-point', fn: pointClickFn }
     ];
+
+    // ✅ Fix memory leak: Guardar referencias de hover handlers para limpieza
+    this.hoverHandlers = [
+      { layer: 'cluster-circles', event: 'mouseenter', fn: cursorOn },
+      { layer: 'cluster-circles', event: 'mouseleave', fn: cursorOff },
+      { layer: 'unclustered-point', event: 'mouseenter', fn: cursorOn },
+      { layer: 'unclustered-point', event: 'mouseleave', fn: cursorOff }
+    ];
   }
 
   clearProviderCluster(): void {
     if (!this.map) return;
+    
+    // Limpiar click listeners
     for (const { layer, fn } of this.clusterClickHandlers) {
       this.map.off('click', layer, fn);
     }
     this.clusterClickHandlers = [];
+
+    // ✅ Fix memory leak: Limpiar hover listeners
+    for (const { layer, event, fn } of this.hoverHandlers) {
+      this.map.off(event as any, layer, fn);
+    }
+    this.hoverHandlers = [];
+    
     for (const layerId of this.clusterLayerIds) {
       if (this.map.getLayer(layerId)) this.map.removeLayer(layerId);
     }

@@ -48,11 +48,17 @@
                 "glob": ".htaccess",
                 "input": "src",
                 "output": "/"
+              },
+              {
+                "glob": "images/**",
+                "input": "node_modules/leaflet/dist",
+                "output": "/"
               }
             ],
             "styles": [
               "src/global.scss",
-              "src/theme/variables.scss"
+              "src/theme/variables.scss",
+              "node_modules/leaflet/dist/leaflet.css"
             ],
             "scripts": []
           },

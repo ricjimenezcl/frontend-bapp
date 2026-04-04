@@ -71,9 +71,23 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
         this.filterBookings();
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('❌ [ProviderBookings] Error cargando bookings:', err);
-        this.showToast('Error cargando reservas', 'danger');
+        // ✅ Manejo mejorado de errores
+        let errorMsg = 'Error cargando reservas';
+        if (err?.status === 0) {
+          errorMsg = 'Conectando al servidor... Puede tardar hasta 60 segundos.';
+          // ✅ Reintento automático
+          setTimeout(() => {
+            if (this.bookings.length === 0) {
+              console.log('🔄 [ProviderBookings] Reintentando...');
+              this.loadBookings();
+            }
+          }, 5000);
+        } else if (err?.error?.detail) {
+          errorMsg = err.error.detail;
+        }
+        this.showToast(errorMsg, 'danger');
         this.isLoading = false;
       }
     });

@@ -51,11 +51,23 @@ async function nativeRequest(req: any): Promise<HttpResponse<any>> {
       method: req.method,
       headers,
       data: body,
+      // ✅ Timeout de 90 segundos para backends con cold start (ej. Render free tier)
+      connectTimeout: 90000,
+      readTimeout: 90000,
     });
   } catch (err: any) {
     // Error de red (sin conexión, timeout, etc.)
+    console.error('[NativeHTTP] Network error:', {
+      url: req.urlWithParams,
+      method: req.method,
+      error: err
+    });
     throw new HttpErrorResponse({
-      error: err,
+      error: {
+        message: err.message || 'Network error',
+        details: 'Verifica tu conexión a internet. Si el problema persiste, el servidor puede estar iniciándose.',
+        originalError: err
+      },
       status: 0,
       statusText: 'Network Error',
       url: req.url,
@@ -66,6 +78,11 @@ async function nativeRequest(req: any): Promise<HttpResponse<any>> {
 
   // Errores HTTP (4xx, 5xx) deben llegar al errorInterceptor como HttpErrorResponse
   if (response.status >= 400) {
+    console.error('[NativeHTTP] HTTP error:', {
+      status: response.status,
+      url: req.urlWithParams,
+      errorData: response.data
+    });
     throw new HttpErrorResponse({
       error: response.data,
       headers: responseHeaders,
@@ -73,6 +90,13 @@ async function nativeRequest(req: any): Promise<HttpResponse<any>> {
       url: req.url,
     });
   }
+
+  // ✅ Log exitoso para debugging en producción
+  console.log('[NativeHTTP] Success:', {
+    status: response.status,
+    url: req.urlWithParams,
+    method: req.method
+  });
 
   return new HttpResponse({
     body: response.data,

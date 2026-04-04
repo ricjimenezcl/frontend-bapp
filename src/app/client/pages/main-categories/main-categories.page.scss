@@ -473,17 +473,21 @@ $tile-colors: (
   &:active { transform: scale(0.92); }
 
   .cat-tile-icon-wrap {
-    width: 100%;
+    width: 70%;
     aspect-ratio: 1;
-    border-radius: var(--bapp-radius-xl);
     @include flex-center;
     transition: all var(--bapp-transition-normal);
-    border: 1.5px solid transparent;
   }
 
   .cat-tile-icon {
-    font-size: 26px;
+    font-size: 13px;
     transition: transform var(--bapp-transition-fast);
+  }
+
+  .cat-tile-img {
+    width: 200%;
+    height: 200%;
+    object-fit: contain;
   }
 
   .cat-tile-label {
@@ -510,21 +514,12 @@ $tile-colors: (
   $icon-color: nth($colors, 3);
 
   .cat-tile[data-idx="#{$idx}"] {
-    .cat-tile-icon-wrap {
-      background: linear-gradient(135deg, rgba($grad-start, 0.18) 0%, rgba($grad-end, 0.1) 100%);
-      border-color: rgba($grad-start, 0.25);
-    }
     .cat-tile-icon {
       color: $grad-start;
       @if $idx == 0 { color: #C89800; } // gold needs darker on light bg
     }
 
     &.cat-tile-active {
-      .cat-tile-icon-wrap {
-        background: linear-gradient(135deg, $grad-start 0%, $grad-end 100%);
-        border-color: transparent;
-        box-shadow: 0 4px 14px rgba($grad-start, 0.45);
-      }
       .cat-tile-icon { color: $icon-color; }
       .cat-tile-label { color: var(--bapp-text-primary); }
     }
@@ -828,6 +823,56 @@ ion-footer.mc-footer {
   0%   { transform: scale(0.7); }
   70%  { transform: scale(1.15); }
   100% { transform: scale(1); }
+}
+
+// ── Sección mapa de proveedores ───────────────────────────────────────────────
+.map-section {
+  margin: var(--bapp-space-4) var(--bapp-space-4) 0;
+  border-radius: var(--bapp-radius-xl);
+  border: 1px solid var(--bapp-border);
+  overflow: hidden;
+  background: var(--bapp-bg-card);
+
+  .map-section-hd {
+    @include flex-between;
+    width: 100%;
+    padding: var(--bapp-space-3) var(--bapp-space-4);
+    background: var(--bapp-bg-card);
+    border: none;
+    cursor: pointer;
+    text-align: left;
+
+    .map-section-title {
+      @include flex-start;
+      gap: var(--bapp-space-2);
+      font-size: var(--bapp-text-sm);
+      font-weight: var(--bapp-font-semibold);
+      color: var(--bapp-text-primary);
+
+      ion-icon {
+        font-size: 18px;
+        color: var(--bapp-color-primary);
+      }
+    }
+
+    .map-chevron {
+      font-size: 16px;
+      color: var(--bapp-text-tertiary);
+      flex-shrink: 0;
+    }
+  }
+
+  .map-section-body {
+    height: 300px;
+    position: relative;
+    border-top: 1px solid var(--bapp-border);
+
+    app-service-map {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
 }
 
 // ── ion-item overrides (autocomplete dropdown) ───────────────────────────────

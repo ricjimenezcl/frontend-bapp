@@ -91,7 +91,7 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const clientId = Number(currentUser.user_id || currentUser.id);
+    const clientId = Number(currentUser.client_id || currentUser.user_id || currentUser.id);
     console.log('📋 [ClientBookings] Solicitando bookings para client_id:', clientId);
     this.coreService.getClientBookings(clientId).subscribe({
       next: (response: any) => {
@@ -102,9 +102,24 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
         console.log('✅ [ClientBookings] Bookings cargados:', this.bookings.length);
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('❌ [ClientBookings] Error loading bookings:', error);
         this.isLoading = false;
+        // ✅ Manejo mejorado de errores
+        let errorMsg = 'Error al cargar reservas';
+        if (error?.status === 0) {
+          errorMsg = 'Conectando al servidor... Puede tardar hasta 60 segundos si está iniciándose.';
+          // ✅ Reintento automático
+          setTimeout(() => {
+            if (this.bookings.length === 0) {
+              console.log('🔄 [ClientBookings] Reintentando carga...');
+              this.loadBookings();
+            }
+          }, 5000);
+        } else if (error?.error?.detail) {
+          errorMsg = error.error.detail;
+        }
+        this.showToast(errorMsg);
       }
     });
   }
@@ -204,7 +219,7 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
       return;
     }
     
-    this.coreService.getClientBookings(Number(currentUser.id)).subscribe({
+    this.coreService.getClientBookings(Number(currentUser.client_id || currentUser.user_id || currentUser.id)).subscribe({
       next: (response: any) => {
         // El backend devuelve { items: [...], total: X, page: 1, size: Y }
         const bookingsArray = Array.isArray(response) ? response : (response?.items || response || []);

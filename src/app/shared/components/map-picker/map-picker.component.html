@@ -6,7 +6,7 @@
     <div class="map-picker-header">
       <div class="flex-1">
         <h2>Elegir ubicación</h2>
-        <p>Toca el mapa o arrastra el marcador</p>
+        <p>Arrastra el mapa para posicionar el pin</p>
       </div>
       <button class="close-btn" (click)="cancelSelection()" type="button">
         <ion-icon name="close-outline"></ion-icon>
@@ -16,6 +16,14 @@
     <!-- Mapa con overlays -->
     <div class="map-picker-body">
       <div #mapContainer class="map-container"></div>
+      
+      <!-- ✅ Pin fijo en el centro del mapa -->
+      <div class="center-pin" [class.bounce]="!loading()">
+        <img src="https://res.cloudinary.com/dghwotofx/image/upload/f_png,w_64,h_64/v1774631660/ubicacion_nbo2mo" 
+             alt="Pin" 
+             class="pin-icon">
+        <div class="pin-shadow"></div>
+      </div>
       
       <!-- Loading overlay -->
       <div class="loading-overlay" *ngIf="loading()">
@@ -46,8 +54,8 @@
       
       <!-- Hint -->
       <div class="map-hint">
-        <ion-icon name="information-circle"></ion-icon>
-        <span>Arrastra el pin o toca el mapa para cambiar</span>
+        <ion-icon name="hand-left"></ion-icon>
+        <span>Arrastra el mapa para mover el pin</span>
       </div>
     </div>
     

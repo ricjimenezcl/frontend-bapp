@@ -3,7 +3,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonicModule, ToastController, InfiniteScrollCustomEvent, RefresherCustomEvent, ModalController, AlertController } from '@ionic/angular';
+import { IonicModule, ToastController, InfiniteScrollCustomEvent, RefresherCustomEvent, ModalController, AlertController, LoadingController } from '@ionic/angular';
 import { CoreService, ServiceCategory } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { MapboxService } from '../../../shared/services/mapbox.service';
@@ -11,6 +11,7 @@ import { ProviderImagePipe } from '../../../shared/pipes/provider-image.pipe';
 import { ProviderActionSheetComponent } from '../../../shared/components/provider-action-sheet/provider-action-sheet.component';
 import { StateService, SelectedService } from '../../../shared/services/state.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { GeoLocationService } from '../../../shared/services/geo-location.service';
 import { Subject } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -61,7 +62,9 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private mapboxService: MapboxService,
     private modalCtrl: ModalController,
-    private alertCtrl: AlertController) {}
+    private alertCtrl: AlertController,
+    private loadingCtrl: LoadingController,
+    private geoLocationService: GeoLocationService) {}
 
   get activeLocationLabel(): string {
     const alt = this.stateService.getAlternateLocation();
@@ -122,8 +125,24 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     this.userLocation = this.stateService.getUserLocation();
     if (this.userLocation) {
       this.loadProviders();
-    } else {
-      this.presentToast('No se pudo obtener tu ubicación', 'danger');
+      return;
+    }
+
+    // Fallback: request GPS directly (same pattern as service-map)
+    const loading = await this.loadingCtrl.create({ message: 'Obteniendo tu ubicación...' });
+    await loading.present();
+    try {
+      const position = await this.geoLocationService.getCurrentLocation();
+      this.userLocation = { latitude: position.latitude, longitude: position.longitude, timestamp: Date.now() };
+      this.stateService.setUserLocation(this.userLocation);
+      await loading.dismiss();
+      this.loadProviders();
+    } catch (error) {
+      await loading.dismiss();
+      // Use default Santiago coordinates so the search still runs
+      this.userLocation = { latitude: -33.4489, longitude: -70.6693, timestamp: Date.now() };
+      this.presentToast('Usando ubicación por defecto (Santiago)', 'warning');
+      this.loadProviders();
     }
   }
 
@@ -181,9 +200,23 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
       this.hasMore = newCount >= this.PAGE_SIZE;
       this.currentSkip += this.PAGE_SIZE;
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error cargando proveedores:', error);
-      this.presentToast('Error al cargar proveedores', 'danger');
+      // ✅ Mensaje más informativo para el usuario
+      let errorMsg = 'Error al cargar proveedores';
+      if (error?.status === 0) {
+        errorMsg = 'Conectando al servidor... Esto puede tardar hasta 30 segundos si el servidor está iniciándose.';
+        // ✅ Reintento automático después de 5 segundos
+        setTimeout(() => {
+          if (this.providers.length === 0) {
+            this.presentToast('Reintentando conexión...', 'warning');
+            this.loadProviders();
+          }
+        }, 5000);
+      } else if (error?.error?.detail) {
+        errorMsg = error.error.detail;
+      }
+      this.presentToast(errorMsg, 'danger');
     } finally {
       this.isLoading = false;
     }
