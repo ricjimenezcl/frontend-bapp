@@ -49,17 +49,14 @@ export class ClientProfilePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
-    const userId = typeof user?.id === 'string'
-      ? parseInt(user?.id, 10)
-      : user?.id as number;
-    this.clientService.getClientById(userId).subscribe(profile => {
+    this.clientService.getMyProfile().subscribe(profile => {
       this.fullName = profile?.full_name || (user as any)?.full_name || '';
       this.phone = profile?.phone || (user as any)?.phone || '';
       this.email = profile?.email || user?.email || '';
       this.bio = profile?.bio || '';
       this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
     });
-    
+
     console.log('Perfil obtenido en clientProfilePage:', user);
   }
 
@@ -74,14 +71,10 @@ export class ClientProfilePage implements OnInit, OnDestroy {
 
     // Luego cargar datos frescos y completos (incluyendo bio) desde el nuevo endpoint
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser?.id) return;
-
-    const userId = typeof currentUser.id === 'string'
-      ? parseInt(currentUser.id, 10)
-      : currentUser.id as number;
+    if (!currentUser) return;
 
     this.isLoading = true;
-    this.clientService.getClientById(userId)
+    this.clientService.getMyProfile()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -115,10 +108,7 @@ export class ClientProfilePage implements OnInit, OnDestroy {
 
   private loadUserData() {
     const user = this.authService.getCurrentUser();
-    const userId = typeof user?.id === 'string'
-      ? parseInt(user?.id, 10)
-      : user?.id as number;
-    this.clientService.getClientById(userId).subscribe(profile => {
+    this.clientService.getMyProfile().subscribe(profile => {
       this.fullName = profile?.full_name || (user as any)?.full_name || '';
       this.phone = profile?.phone || (user as any)?.phone || '';
       this.email = profile?.email || user?.email || '';

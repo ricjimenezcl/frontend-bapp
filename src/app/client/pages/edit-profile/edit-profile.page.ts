@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
-import { IonicModule, ModalController, AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -50,8 +49,6 @@ export class EditProfilePage implements OnInit {
     private http: HttpClient,
     private toastCtrl: ToastController,
     private clientService: ClientService,
-    private modalController: ModalController,
-
     private alertCtrl: AlertController,
     private cameraService: CameraService,
     private loadingCtrl: LoadingController,
@@ -60,19 +57,23 @@ export class EditProfilePage implements OnInit {
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
-    const userId = typeof user?.id === 'string'
-      ? parseInt(user?.id, 10)
-      : user?.id as number;
-    this.clientService.getClientById(userId).subscribe(profile => {
-      this.fullName = profile?.full_name || (user as any)?.full_name || '';
-      this.phone = profile?.phone || (user as any)?.phone || '';
-      this.email = profile?.email || user?.email || '';
-      this.bio = profile?.bio || '';
-      this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
-      this.saveOriginalData();
+    this.clientService.getMyProfile().subscribe({
+      next: (profile) => {
+        this.fullName = profile?.full_name || (user as any)?.full_name || '';
+        this.phone = profile?.phone || (user as any)?.phone || '';
+        this.email = profile?.email || user?.email || '';
+        this.bio = profile?.bio || '';
+        this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
+        this.isLoading = false;
+        this.saveOriginalData();
+      },
+      error: () => {
+        this.fullName = (user as any)?.full_name || '';
+        this.email = user?.email || '';
+        this.isLoading = false;
+        this.saveOriginalData();
+      }
     });
-
-    console.log('Perfil obtenido en EditProfilePage:', user);
   }
 
   private async loadUserData() {
@@ -127,7 +128,7 @@ export class EditProfilePage implements OnInit {
 
 
   goBack() {
-    this.router.navigate(['/client/tabs/profile']);
+    this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
   }
 
   onPhotoSelect(event: Event) {
@@ -172,9 +173,8 @@ export class EditProfilePage implements OnInit {
           avatar: this.avatarChanged ? this.avatarPreview : (existing?.avatar ?? undefined)
         });
         this.isSaving = false;
-        this.presentToast('Perfil actualizado correctamente', 'success').then(() => {
-          this.router.navigate(['/client/tabs/profile']);
-        });
+        this.presentToast('Perfil actualizado correctamente', 'success');
+        this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
       },
       error: () => {
         this.isSaving = false;
@@ -226,7 +226,7 @@ export class EditProfilePage implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/client/tabs/profile']);
+    this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
   }
 
   updateField(fieldName: string, event: any) {
@@ -343,17 +343,8 @@ export class EditProfilePage implements OnInit {
       this.saveOriginalData();
       this.isEditing = false;
 
-      this.modalController.dismiss({
-        success: true,
-        data: {
-          fullName: this.fullName,
-          email: this.email,
-          phone: this.phone,
-          avatar: this.avatar
-        }
-      }, 'confirm');
-
-      await this.presentAlert('Éxito', 'Perfil actualizado correctamente');
+      await this.presentToast('Perfil actualizado correctamente', 'success');
+      this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
 
     } catch (error: any) {
       console.error('Error actualizando perfil:', error);

@@ -22,6 +22,10 @@ export class ClientService {
     private _clientProfile = signal<ClientProfile | null>(null);
   constructor(private http: HttpClient) {}
 
+  getMyProfile(): Observable<ClientProfile> {
+    return this.http.get<ClientProfile>(`${environment.apiUrl}/clients/me`);
+  }
+
   getClientById(clientId: number): Observable<ClientProfile> {
     return this.http.get<ClientProfile>(`${environment.apiUrl}/clients/${clientId}`);
   }
