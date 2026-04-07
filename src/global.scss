@@ -47,6 +47,32 @@
 @import 'theme/typography';
 // 4. Componentes Ionic sobreescritos (ion-button, ion-card, ion-input, etc.)
 @import 'theme/components';
+// 5. Provider tab bar — global para evitar scoping de ViewEncapsulation en producción
+app-provider-tabs ion-tab-bar {
+  --background: var(--bapp-bg-card, #232323);
+  --color: var(--bapp-text-tertiary, rgba(255,255,255,0.38));
+  --color-selected: var(--bapp-color-primary, #FDD735);
+  height: 60px;
+  border-top: 1px solid var(--bapp-border, rgba(255,255,255,0.08));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+}
+app-provider-tabs ion-tab-bar ion-tab-button {
+  --background: transparent;
+  --background-focused: transparent;
+}
+app-provider-tabs ion-tab-bar ion-tab-button ion-icon {
+  font-size: 22px;
+}
+app-provider-tabs ion-tab-bar ion-tab-button ion-label {
+  font-size: 11px;
+  margin-top: 4px;
+}
+@media screen and (max-width: 768px) {
+  app-provider-tabs ion-tab-bar {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+  }
+}
 
 /**
  * Ionic Dark Mode

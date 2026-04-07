@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -15,6 +15,7 @@ import { DocumentUploadService } from '../../../shared/services/document-upload.
   templateUrl: './provider-home.page.html',
   styleUrls: ['./provider-home.page.scss'],
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, IonicModule]
 })
 export class ProviderHomePage implements OnInit, OnDestroy {

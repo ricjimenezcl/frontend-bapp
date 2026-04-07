@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
   templateUrl: './tabs.page.html',
   styleUrls: ['./tabs.page.scss'],
   standalone: true,
+  encapsulation: ViewEncapsulation.None,
   imports: [IonicModule]
 })
 export class ProviderTabsPage {}
