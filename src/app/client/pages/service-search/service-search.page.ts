@@ -307,15 +307,15 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
   }
 
   async openProviderDetails(provider: any) {
+    // ✅ Sin breakpoints: modal full-screen igual que service-map.
+    // Con breakpoints + handle el sheet arranca muy abajo y oculta hero/tabs/content.
     const modal = await this.modalCtrl.create({
       component: ProviderActionSheetComponent,
       componentProps: {
         provider,
         serviceId: provider.service_id ?? provider.serviceId
       },
-      initialBreakpoint: 1,
-      breakpoints: [0, 0.5, 0.9, 1],
-      handle: true
+      cssClass: 'provider-profile-modal'
     });
     await modal.present();
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 
 // Interfaces
 export interface User {
@@ -170,9 +170,19 @@ export class StateService {
   private loadState(): AppState {
     try {
       const saved = localStorage.getItem(this.STORAGE_KEY);
-      if (saved) {
-        return { ...this.initialState, ...JSON.parse(saved) };
+      const base = saved ? { ...this.initialState, ...JSON.parse(saved) } : { ...this.initialState };
+
+      // ✅ CORRECCIÓN MOBILE: sincronizar token desde AuthService si StateService no lo tiene.
+      // AuthService guarda el token en 'token', StateService en 'app-state'.
+      // Si hay token en 'token' pero no en 'app-state', cargar el de AuthService.
+      if (!base.token) {
+        const authToken = localStorage.getItem('token');
+        if (authToken) {
+          base.token = authToken;
+        }
       }
+
+      return base;
     } catch (error) {
       console.error('Error loading state from localStorage:', error);
     }

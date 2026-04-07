@@ -1,9 +1,10 @@
 // src/app/app.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Platform, IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { Platform, IonApp, IonRouterOutlet, AlertController } from '@ionic/angular/standalone';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { SqliteService } from './core/storage/sqlite.service';
 import { NotificationRealtimeService } from './core/services/notification-realtime.service';
 import { AuthService } from './auth/services/auth.service';
@@ -27,7 +28,9 @@ export class AppComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private sqliteService: SqliteService,
     private notificationService: NotificationRealtimeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router,
+    private alertCtrl: AlertController
   ) {
     this.initializeApp();
   }
@@ -50,6 +53,39 @@ export class AppComponent implements OnInit, OnDestroy {
         this.stopKeepAlive();
       }
     });
+
+    // ✅ FIX SESIÓN MOBILE: verificar token al volver de background
+    // Evita que el primer request falle con 401 y borre la sesión de forma inesperada
+    this.platform.resume.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      console.log('📱 [AppComponent] App resumed from background');
+      if (!this.authService.isAuthenticated()) return; // no hay sesión, ignorar
+
+      if (!this.authService.isTokenValid()) {
+        console.warn('⚠️ [AppComponent] Token expirado al volver de background → redirigiendo a login');
+        this.handleSessionExpiredOnResume();
+      } else {
+        console.log('✅ [AppComponent] Token válido al volver de background');
+      }
+    });
+  }
+
+  private async handleSessionExpiredOnResume(): Promise<void> {
+    // Limpiar solo el token (no user_data) para que el login pueda pre-cargar datos
+    localStorage.removeItem('token');
+    this.authService.logout();
+
+    const alert = await this.alertCtrl.create({
+      header: 'Sesión expirada',
+      message: 'Tu sesión ha expirado por inactividad. Por favor inicia sesión nuevamente.',
+      backdropDismiss: false,
+      buttons: [{
+        text: 'Iniciar sesión',
+        handler: () => {
+          this.router.navigate(['/auth/login'], { replaceUrl: true, queryParams: { sessionExpired: 'true' } });
+        }
+      }]
+    });
+    await alert.present();
   }
 
   ngOnDestroy() {

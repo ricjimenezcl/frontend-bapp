@@ -35,6 +35,7 @@ import { ClientChatsPage } from '../client-chats/client-chats.page';
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
   @ViewChild(ServiceMapPage) serviceMapPage?: ServiceMapPage;
+  @ViewChild(ClientProfilePage) clientProfilePage?: ClientProfilePage;
 
   selectedServices: any[] = [];
   activeTab: string = 'service-search';
@@ -57,6 +58,12 @@ export class ClientTabsPage implements OnInit, OnDestroy {
 
     console.log('TabsPage ngOnInit');
 
+    // Restore tab from router state (e.g. navigating back from edit-profile)
+    const navState = history.state;
+    if (navState?.activeTab) {
+      this.activeTab = navState.activeTab;
+    }
+
     // Actualizar pestaña activa basada en URL
     this.router.events
       .pipe(
@@ -74,6 +81,13 @@ export class ClientTabsPage implements OnInit, OnDestroy {
   // triggers Ionic v8's ResizeObserver. Uses cdr.detectChanges() for
   // synchronous CD + setTimeout to guarantee the browser commits the
   // layout change before restoring.
+  ionViewWillEnter() {
+    // Refresh embedded profile component when navigating back to tabs
+    if (this.activeTab === 'client-profile') {
+      this.clientProfilePage?.refreshProfile();
+    }
+  }
+
   ionViewDidEnter() {
     const tab = this.activeTab || 'service-search';
     this.activeTab = '';
@@ -114,7 +128,7 @@ export class ClientTabsPage implements OnInit, OnDestroy {
       this.activeTab = 'bookings';
     } else if (url.includes('chats')) {
       this.activeTab = 'chats';
-    } else if (url.includes('client-profile')) {
+    } else if (url.includes('client-profile') || url.includes('/tabs/profile')) {
       this.activeTab = 'client-profile';
     } else if (url.includes('tabs')) {
       // URL is /client/tabs with no specific tab segment (e.g. navigating

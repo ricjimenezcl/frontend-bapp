@@ -37,16 +37,15 @@
         <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
           <ion-input
             type="text"
-            [value]="fullName"
+            [(ngModel)]="fullName"
             [disabled]="!isEditing"
             placeholder="Tu nombre completo"
-            (ionChange)="updateField('name', $event)"
-            (ionBlur)="onFieldBlur('name')">
+            (ionBlur)="onFieldBlur('fullName')">
           </ion-input>
         </div>
-        <div class="ep-error" *ngIf="fieldTouched['name'] && fieldErrors['name']">
+        <div class="ep-error" *ngIf="fieldTouched['fullName'] && fieldErrors['fullName']">
           <ion-icon name="alert-circle-outline"></ion-icon>
-          {{ fieldErrors['name'] }}
+          {{ fieldErrors['fullName'] }}
         </div>
       </div>
 
@@ -59,7 +58,7 @@
         <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
           <ion-input
             type="tel"
-            [value]="phone"
+            [(ngModel)]="phone"
             [disabled]="!isEditing"
             maxlength="17"
             placeholder="+56 9 1234 5678"
@@ -79,19 +78,13 @@
           <ion-icon name="mail-outline"></ion-icon>
           Email
         </label>
-        <div class="ep-input-wrap" [class.ep-input-disabled]="!isEditing">
+        <div class="ep-input-wrap ep-input-disabled">
           <ion-input
             type="email"
             [value]="email"
-            [disabled]="!isEditing"
-            placeholder="correo@ejemplo.com"
-            (ionChange)="updateField('email', $event)"
-            (ionBlur)="onFieldBlur('email')">
+            [disabled]="true"
+            placeholder="correo@ejemplo.com">
           </ion-input>
-        </div>
-        <div class="ep-error" *ngIf="fieldTouched['email'] && fieldErrors['email']">
-          <ion-icon name="alert-circle-outline"></ion-icon>
-          {{ fieldErrors['email'] }}
         </div>
       </div>
 
@@ -104,10 +97,9 @@
         <div class="ep-input-wrap ep-textarea-wrap" [class.ep-input-disabled]="!isEditing">
           <ion-input
             type="text"
-            [value]="bio"
+            [(ngModel)]="bio"
             [disabled]="!isEditing"
             placeholder="Cuéntanos algo sobre ti..."
-            (ionChange)="updateField('bio', $event)"
             (ionBlur)="onFieldBlur('bio')">
           </ion-input>
         </div>

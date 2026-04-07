@@ -65,6 +65,10 @@ export class ClientProfilePage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  refreshProfile() {
+    this.loadUserData();
+  }
+
   ionViewWillEnter() {
     // Mostrar datos de caché inmediatamente
     this.loadUserData();

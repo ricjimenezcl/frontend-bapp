@@ -669,17 +669,18 @@ ion-content.map-content {
   .style-selector-container {
     bottom: 70px !important;
     left: 12px !important;
-    right: 12px !important;
+    // No right: auto-width to keep buttons horizontal
   }
 
   .style-selector {
-    width: 100% !important;
-    justify-content: center !important;
+    display: flex !important;
+    flex-direction: row !important;
+    width: auto !important;
 
     ion-segment-button {
       min-height: 28px !important;
-      min-width: 50px !important;
-      flex: 1 !important;
+      min-width: 52px !important;
+      flex-shrink: 0 !important;
 
       ion-label {
         font-size: 10px !important;

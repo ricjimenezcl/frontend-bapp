@@ -1,6 +1,6 @@
 <ion-header class="bk-header">
   <ion-toolbar class="bk-toolbar">
-    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)" class="bk-segment">
+    <ion-segment [value]="selectedSegment" (ionChange)="segmentChanged($event)" class="bk-segment">
       <ion-segment-button value="upcoming">
         <ion-label>Próximas</ion-label>
       </ion-segment-button>

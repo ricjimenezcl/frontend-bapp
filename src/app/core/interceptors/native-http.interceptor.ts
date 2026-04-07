@@ -44,6 +44,14 @@ async function nativeRequest(req: any): Promise<HttpResponse<any>> {
     headers['Content-Type'] = 'application/json';
   }
 
+  // Debug: verificar que el token está presente antes de enviar
+  const hasAuth = !!(headers['Authorization'] || headers['authorization']);
+  console.log(`[NativeHTTP] → ${req.method} ${req.urlWithParams}`, {
+    hasAuth,
+    authPrefix: hasAuth ? (headers['Authorization'] || headers['authorization'])?.substring(0, 20) + '...' : 'MISSING ❌',
+    headerKeys: Object.keys(headers)
+  });
+
   let response: any;
   try {
     response = await CapacitorHttp.request({

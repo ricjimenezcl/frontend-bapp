@@ -10,6 +10,7 @@ import { ChatService } from '../../../core/services/chat.service';
 import { ConversationUI, NotificationType } from '../../../core/models/chat.model';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { NotificationRealtimeService } from '../../../core/services/notification-realtime.service';
 
 @Component({
   selector: 'app-client-chats',
@@ -61,7 +62,8 @@ export class ClientChatsPage implements OnInit, OnDestroy {
     private readonly chatService: ChatService,
     private readonly router: Router,
     private readonly webSocketService: WebSocketService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly notificationService: NotificationRealtimeService
   ) { }
 
   ngOnInit(): void {
@@ -141,42 +143,29 @@ export class ClientChatsPage implements OnInit, OnDestroy {
 
   private setupRealtimeSync(): void {
     if (!this.authService.isTokenValid()) {
-      console.warn('ClientChatsPage: token inválido o expirado, omitiendo conexión WS');
+      console.warn('ClientChatsPage: token inválido o expirado, omitiendo suscripción WS');
       return;
     }
 
-    this.webSocketService.getAuthExpired$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        console.warn('ClientChatsPage: sesión expirada detectada por WS, redirigiendo a login');
-        this.authService.clearAllData();
-        this.router.navigate(['/auth/login'], { replaceUrl: true, queryParams: { sessionExpired: 'true' } });
-      });
-
-    this.webSocketService.connectToNotifications().catch(error =>
-      console.error('ClientChatsPage: error connecting to notifications socket', error)
-    );
-
-    this.webSocketService.getNotifications$()
+    // Usar NotificationRealtimeService — ya conectado desde AppComponent.
+    // NO llamar connectToNotifications() aquí para evitar conexiones duplicadas al servidor.
+    this.notificationService.notification$
       .pipe(takeUntil(this.destroy$))
       .subscribe(notification => {
-        const type = (notification.notificationType || '').toLowerCase();
-        if (type === NotificationType.MESSAGE || type === 'chat_message') {
-          const conversationId = notification.relatedEntityId;
+        const type = (notification.notification_type || '').toLowerCase();
+        if (type === 'chat_message' || type === NotificationType.MESSAGE) {
+          const conversationId = (notification.data as any)?.conversation_id ?? null;
           if (conversationId == null) {
-            // Sin conversationId en el payload — HTTP como fallback
             this.refreshConversations(undefined, { silent: true });
             return;
           }
           const current = this.conversations();
           const idx = current.findIndex(c => c.id === conversationId);
           if (idx === -1) {
-            // Conversación no en lista local — HTTP como fallback
             this.refreshConversations(undefined, { silent: true });
             return;
           }
-          // Actualizar local — sin HTTP
-          const preview = notification.content ?? '';
+          const preview = notification.message ?? '';
           const updated = current.map(c =>
             c.id !== conversationId ? c : { ...c, unreadCount: (c.unreadCount ?? 0) + 1, lastMessagePreview: preview || c.lastMessagePreview, updatedAt: new Date() }
           );

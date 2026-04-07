@@ -12,7 +12,7 @@
 
     <!-- Filter segment -->
     <div class="filter-row">
-      <ion-segment (ionChange)="onFilterChange($event)" class="filter-segment">
+      <ion-segment [value]="selectedFilter" (ionChange)="onFilterChange($event)" class="filter-segment">
         <ion-segment-button *ngFor="let f of filters" [value]="f.value">
           <ion-label>{{ f.label }}</ion-label>
         </ion-segment-button>

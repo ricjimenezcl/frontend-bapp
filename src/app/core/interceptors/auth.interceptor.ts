@@ -95,9 +95,25 @@ let refreshToken$ = new BehaviorSubject<string | null>(null);
 let isShowingSessionAlert = false;
 
 /**
- * Realiza el refresh del token y lo almacena. Retorna el nuevo token o null si falla.
+ * Verifica si el token JWT almacenado está expirado (decodificación client-side, no criptográfica).
  */
-async function attemptTokenRefresh(http: HttpClient, storageService: StorageService): Promise<string | null> {
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now();
+  } catch {
+    return true; // Si no se puede decodificar, asumimos expirado
+  }
+}
+
+/**
+ * Realiza el refresh del token y lo almacena.
+ * Retorna:
+ *   - string  → nuevo token válido
+ *   - null    → token expirado y refresh falló (mostrar alert de sesión)
+ *   - 'skip'  → endpoint de refresh no existe (404/405) — NO cerrar sesión
+ */
+async function attemptTokenRefresh(http: HttpClient, storageService: StorageService): Promise<string | null | 'skip'> {
   const currentToken = localStorage.getItem('token');
   if (!currentToken) return null;
   try {
@@ -112,8 +128,19 @@ async function attemptTokenRefresh(http: HttpClient, storageService: StorageServ
       await storageService.setAccessToken(newToken);
       return newToken;
     }
-  } catch {
-    // Refresh falló — el token está completamente expirado
+  } catch (err: any) {
+    const status = err?.status ?? 0;
+    // 404/405 → el backend no tiene endpoint de refresh → no forzar logout
+    if (status === 404 || status === 405) {
+      console.warn('⚠️ [Auth] /auth/refresh no existe en el backend. Verificando expiración del token...');
+      // Si el token NO está expirado, el 401 original puede ser un error transitorio
+      if (!isTokenExpired(currentToken)) {
+        console.warn('⚠️ [Auth] Token aún válido — omitiendo logout por 401 transitorio');
+        return 'skip';
+      }
+    }
+    // Para cualquier otro error (401, 500, red), el token está inválido → mostrar alert
+    console.error('❌ [Auth] Refresh falló con status:', status);
   }
   return null;
 }
@@ -154,19 +181,30 @@ export const errorInterceptor: HttpInterceptorFn = (
         refreshToken$.next(null);
 
         return from(attemptTokenRefresh(http, storageService)).pipe(
-          switchMap(newToken => {
+          switchMap(result => {
             isRefreshing = false;
-            if (newToken) {
-              refreshToken$.next(newToken);
-              const retried = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
+            if (typeof result === 'string' && result !== 'skip') {
+              // Refresh exitoso — reintentar la request original con el nuevo token
+              refreshToken$.next(result);
+              const retried = req.clone({ setHeaders: { Authorization: `Bearer ${result}` } });
               return next(retried);
             }
+            if (result === 'skip') {
+              // Endpoint de refresh no existe Y token aún válido → relanzar error sin logout
+              refreshToken$.next(null);
+              return throwError(() => error);
+            }
+            // null → token verdaderamente expirado → mostrar alert y limpiar sesión
             return from(showSessionExpiredAlert(alertController, storageService, router)).pipe(
               switchMap(() => throwError(() => error))
             );
           }),
           catchError(refreshErr => {
             isRefreshing = false;
+            // Si es el error original relanzado (skip), no mostrar alert
+            if (refreshErr === error) {
+              return throwError(() => refreshErr);
+            }
             return from(showSessionExpiredAlert(alertController, storageService, router)).pipe(
               switchMap(() => throwError(() => refreshErr))
             );

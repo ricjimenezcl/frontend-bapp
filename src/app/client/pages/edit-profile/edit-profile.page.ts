@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, AlertController, LoadingController, ActionSheetController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
@@ -51,27 +51,56 @@ export class EditProfilePage implements OnInit {
     private clientService: ClientService,
     private alertCtrl: AlertController,
     private cameraService: CameraService,
-    private loadingCtrl: LoadingController,
     private actionSheetCtrl: ActionSheetController
   ) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
+    if (!user) {
+      this.isLoading = false;
+      return;
+    }
+
+    // ✅ Usar /clients/me (endpoint basado en token, no en ID)
+    // ⚠️ CORRECCIÓN: user.id = user_id (no client_id). getClientById(user_id) falla en mobile
+    // porque el backend espera el client profile ID, no el auth user ID.
     this.clientService.getMyProfile().subscribe({
       next: (profile) => {
-        this.fullName = profile?.full_name || (user as any)?.full_name || '';
-        this.phone = profile?.phone || (user as any)?.phone || '';
+        this.fullName = profile?.full_name || '';
+        this.phone = profile?.phone || '';
         this.email = profile?.email || user?.email || '';
         this.bio = profile?.bio || '';
-        this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
+        
+        // ✅ Manejo robusto de avatar
+        if (profile?.avatar) {
+          if (profile.avatar.startsWith('http') || profile.avatar.startsWith('data:')) {
+            this.avatar = profile.avatar;
+          } else if (this.isValidBase64(profile.avatar)) {
+            this.avatar = 'data:image/jpeg;base64,' + profile.avatar;
+          } else {
+            this.avatar = DEFAULT_AVATAR_URL;
+          }
+        } else {
+          this.avatar = DEFAULT_AVATAR_URL;
+        }
+        
+        this.avatarPreview = this.avatar ?? DEFAULT_AVATAR_URL;
         this.isLoading = false;
         this.saveOriginalData();
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ [EditProfile] Error loading profile:', err);
+        // ✅ Fallback a datos del token
         this.fullName = (user as any)?.full_name || '';
+        this.phone = (user as any)?.phone || '';
         this.email = user?.email || '';
+        this.avatar = (user as any)?.avatar || DEFAULT_AVATAR_URL;
+        this.avatarPreview = this.avatar ?? DEFAULT_AVATAR_URL;
         this.isLoading = false;
         this.saveOriginalData();
+        
+        // ✅ Toast informativo
+        this.presentToast('Usando datos básicos del perfil', 'warning');
       }
     });
   }
@@ -85,12 +114,8 @@ export class EditProfilePage implements OnInit {
     }
 
     try {
-      const user = this.authService.getCurrentUser();
-    const userId = typeof user?.id === 'string'
-      ? parseInt(user?.id, 10)
-      : user?.id as number;
-    
-      const dataprov = await this.clientService.getClientById(userId).toPromise();
+      // ✅ CORRECCIÓN: usar /clients/me en lugar de /clients/{user_id}
+      const dataprov = await this.clientService.getMyProfile().toPromise();
       console.log('dataprov', dataprov);
 
       if (dataprov) {
@@ -128,7 +153,7 @@ export class EditProfilePage implements OnInit {
 
 
   goBack() {
-    this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
+    this.router.navigate(['/client/tabs'], { state: { activeTab: 'client-profile' } });
   }
 
   onPhotoSelect(event: Event) {
@@ -174,7 +199,7 @@ export class EditProfilePage implements OnInit {
         });
         this.isSaving = false;
         this.presentToast('Perfil actualizado correctamente', 'success');
-        this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
+        this.router.navigate(['/client/tabs'], { state: { activeTab: 'client-profile' } });
       },
       error: () => {
         this.isSaving = false;
@@ -226,7 +251,7 @@ export class EditProfilePage implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
+    this.router.navigate(['/client/tabs'], { state: { activeTab: 'client-profile' } });
   }
 
   updateField(fieldName: string, event: any) {
@@ -292,15 +317,26 @@ export class EditProfilePage implements OnInit {
     this.isEditing = true;
   }
 
-  cancelEdit() {
-    this.fullName = this.originalName;
-    this.phone = this.originalFono;
-    this.email = this.originalEmail;
-
-    this.bio = this.originalBio;
-    this.avatar = this.originalAvatar;
-
-    this.isEditing = false;
+  async cancelEdit() {
+    const alert = await this.alertCtrl.create({
+      header: 'Descartar cambios',
+      message: '¿Estás seguro de que quieres descartar los cambios?',
+      buttons: [
+        { text: 'Seguir editando', role: 'cancel' },
+        {
+          text: 'Descartar',
+          handler: () => {
+            this.fullName = this.originalName;
+            this.phone = this.originalFono;
+            this.email = this.originalEmail;
+            this.bio = this.originalBio;
+            this.avatar = this.originalAvatar;
+            this.isEditing = false;
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async confirmEdit() {
@@ -308,49 +344,50 @@ export class EditProfilePage implements OnInit {
       this.presentAlert('Validación', 'Por favor corrige los errores antes de continuar');
       return;
     }
-    await this.putProviderEdit();
+    const alert = await this.alertCtrl.create({
+      header: 'Guardar cambios',
+      message: '¿Confirmas los cambios en tu perfil?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Guardar',
+          handler: () => { this.putProviderEdit(); }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   private async putProviderEdit() {
     if (this.isUpdating) return;
     this.isUpdating = true;
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Actualizando perfil...'
-    });
-    await loading.present();
-
     try {
       const updateData: Partial<ClientProfile> = {
-        full_name: this.fullName,
+        full_name: this.fullName.trim(),
         phone: this.phone,
-        email: this.email,
         bio: this.bio
       };
 
-      // Incluir avatar solo si fue cambiado (es data URI de cámara/galería)
       if (this.avatar && this.avatar.startsWith('data:')) {
         updateData.avatar = this.avatar;
       }
 
-      console.log('Enviando datos de actualización:', {
-        ...updateData,
-        avatarLength: updateData.avatar?.length || 0
-      });
-
+      console.log('[EditProfile] Sending PATCH...', updateData);
       await this.clientService.updateClientProfile(undefined, updateData).toPromise();
+      console.log('[EditProfile] PATCH success!');
 
       this.saveOriginalData();
       this.isEditing = false;
 
       await this.presentToast('Perfil actualizado correctamente', 'success');
-      this.router.navigate(['/client/tabs/profile'], { replaceUrl: true });
+      this.router.navigate(['/client/tabs'], { state: { activeTab: 'client-profile' } });
 
     } catch (error: any) {
-      console.error('Error actualizando perfil:', error);
-      await this.presentAlert('Error', error.message || 'No se pudo actualizar el perfil');
+      console.error('[EditProfile] Error en PATCH:', error);
+      const msg = (error?.error?.detail) || (error?.message) || 'No se pudo actualizar el perfil';
+      await this.presentToast(msg, 'danger');
     } finally {
-      await loading.dismiss().catch(() => {});
       this.isUpdating = false;
     }
   }
@@ -464,7 +501,7 @@ export class EditProfilePage implements OnInit {
   }
 
   validateAllFields(): boolean {
-    const fields = ['fullName', 'phone', 'email', 'run', 'bio'];
+    const fields = ['fullName', 'phone', 'bio'];
     let allValid = true;
     for (const field of fields) {
       this.fieldTouched[field] = true;
@@ -477,12 +514,8 @@ export class EditProfilePage implements OnInit {
 
   get isFormValid(): boolean {
     const nameValid = !!this.fullName && this.fullName.trim().length >= 2;
-    const emailValid = !!this.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email);
     const phoneValid = !this.phone || this.phone.trim().length === 0 || /^(56)?9\d{8}$/.test(this.phone.replace(/\D/g, ''));
-    
-    let runValid = true;
-
     const bioValid = !this.bio || this.bio.length <= 500;
-    return nameValid && emailValid && phoneValid && runValid && bioValid;
+    return nameValid && phoneValid && bioValid;
   }
 }

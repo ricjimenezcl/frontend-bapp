@@ -91,6 +91,13 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    // Diagnóstico: mostrar exactamente qué IDs están disponibles y cuál se usa
+    console.log('📋 [ClientBookings] IDs disponibles:', {
+      client_id: currentUser.client_id,
+      user_id: currentUser.user_id,
+      id: currentUser.id,
+      usandoId: currentUser.client_id ?? currentUser.user_id ?? currentUser.id
+    });
     const clientId = Number(currentUser.client_id || currentUser.user_id || currentUser.id);
     console.log('📋 [ClientBookings] Solicitando bookings para client_id:', clientId);
     this.coreService.getClientBookings(clientId).subscribe({
@@ -131,20 +138,21 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
       const status = (booking.status || '').toUpperCase();
 
       if (this.selectedSegment === 'upcoming') {
-        // Próximas: confirmadas o en progreso (futuras o sin fecha)
+        // Próximas: pendientes + confirmadas + en progreso
         if (status === 'CANCELLED') return false;
-        if (status === 'PENDING') return false;
+        if (status === 'COMPLETED') return false;
+        if (status === 'PENDING') return true;
         if (!booking.scheduled_date) return status === 'CONFIRMED' || status === 'IN_PROGRESS';
         const bookingDate = new Date(booking.scheduled_date);
-        return bookingDate >= now && (status === 'CONFIRMED' || status === 'IN_PROGRESS');
+        return bookingDate >= now;
       } else if (this.selectedSegment === 'past') {
-        // Pendientes + Completadas + pasadas
+        // Completadas + pasadas
         if (status === 'CANCELLED') return false;
-        if (status === 'PENDING') return true;
+        if (status === 'PENDING') return false;
         if (status === 'COMPLETED') return true;
         if (!booking.scheduled_date) return false;
         const bookingDate = new Date(booking.scheduled_date);
-        return bookingDate < now;
+        return bookingDate < now && status !== 'PENDING';
       } else {
         // Canceladas
         return status === 'CANCELLED';
