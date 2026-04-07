@@ -1,28 +1,63 @@
-<ion-tabs>
-  <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="home">
-      <ion-icon name="home-outline"></ion-icon>
-      <ion-label>Inicio</ion-label>
-    </ion-tab-button>
+<div class="tabs-content">
+  <div class="tab-container" [class.tab-active]="activeTab === 'home'">
+    <app-provider-home></app-provider-home>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'service-details'">
+    <app-provider-service-details></app-provider-service-details>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'inbox'">
+    <app-provider-inbox></app-provider-inbox>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'bookings'">
+    <app-provider-bookings></app-provider-bookings>
+  </div>
+  <div class="tab-container" [class.tab-active]="activeTab === 'profile'">
+    <app-provider-profile></app-provider-profile>
+  </div>
+</div>
 
-    <ion-tab-button tab="service-details">
-      <ion-icon name="briefcase-outline"></ion-icon>
-      <ion-label>Servicios</ion-label>
-    </ion-tab-button>
+<ion-footer class="pt-footer">
+  <div class="pt-tab-bar">
 
-    <ion-tab-button tab="inbox">
-      <ion-icon name="chatbubbles-outline"></ion-icon>
-      <ion-label>Chat</ion-label>
-    </ion-tab-button>
+    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'home'"
+            (click)="changeTab('home')" type="button">
+      <div class="pt-icon-wrap">
+        <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
+      </div>
+      <span class="pt-label">Inicio</span>
+    </button>
 
-    <ion-tab-button tab="bookings">
-      <ion-icon name="calendar-outline"></ion-icon>
-      <ion-label>Reservas</ion-label>
-    </ion-tab-button>
+    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'service-details'"
+            (click)="changeTab('service-details')" type="button">
+      <div class="pt-icon-wrap">
+        <ion-icon [name]="activeTab === 'service-details' ? 'briefcase' : 'briefcase-outline'"></ion-icon>
+      </div>
+      <span class="pt-label">Servicios</span>
+    </button>
 
-    <ion-tab-button tab="profile">
-      <ion-icon name="person-outline"></ion-icon>
-      <ion-label>Perfil</ion-label>
-    </ion-tab-button>
-  </ion-tab-bar>
-</ion-tabs>
+    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'inbox'"
+            (click)="changeTab('inbox')" type="button">
+      <div class="pt-icon-wrap">
+        <ion-icon [name]="activeTab === 'inbox' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
+      </div>
+      <span class="pt-label">Chat</span>
+    </button>
+
+    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'bookings'"
+            (click)="changeTab('bookings')" type="button">
+      <div class="pt-icon-wrap">
+        <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
+      </div>
+      <span class="pt-label">Reservas</span>
+    </button>
+
+    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'profile'"
+            (click)="changeTab('profile')" type="button">
+      <div class="pt-icon-wrap">
+        <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
+      </div>
+      <span class="pt-label">Perfil</span>
+    </button>
+
+  </div>
+</ion-footer>

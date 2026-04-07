@@ -1,56 +1,128 @@
-// ─── Provider Tabs ─────────────────────────────────────────────────────────
-@import '../../../../theme/mixins';
+// ─── Provider Tabs — Custom Div Architecture (same pattern as client tabs) ─────
+// Mirrors the client tabs approach that works on Android APK.
+// ion-tabs is NOT used to avoid shadow-DOM scoping issues in production builds.
 
-ion-tab-bar {
-  --background: var(--bapp-bg-card);
-  height: 60px;
-  border-top: 1px solid var(--bapp-border);
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+:host {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
 
-  ion-tab-button {
-    --color: var(--bapp-text-tertiary);
-    --color-selected: var(--bapp-color-primary);
-    --background: transparent;
-    --background-focused: transparent;
-    position: relative;
+// ── Content area ──────────────────────────────────────────────────────────────
+.tabs-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  background: var(--bapp-bg-page, #1a1a1a);
+}
 
-    ion-icon {
-      font-size: 22px;
-      transition: color var(--bapp-transition-fast);
-    }
+// ── Tab containers (show/hide via CSS) ────────────────────────────────────────
+.tab-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  flex-direction: column;
 
-    ion-label {
-      font-size: var(--bapp-text-xs);
-      font-weight: var(--bapp-font-medium);
-      margin-top: 4px;
-      transition: color var(--bapp-transition-fast);
-    }
+  &.tab-active {
+    display: flex;
+  }
 
-    &.tab-selected {
-      ion-label {
-        font-weight: var(--bapp-font-semibold);
-      }
-
-      // Active state: gradient pill indicator
-      &::before {
-        content: '';
-        position: absolute;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 28px;
-        border-radius: var(--bapp-radius-xl);
-        background: linear-gradient(135deg, rgba(253,215,53,0.22) 0%, rgba(240,165,0,0.12) 100%);
-        pointer-events: none;
-      }
-    }
+  // Force embedded page components to fill the container
+  > * {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 }
 
-@media screen and (max-width: 768px) {
-  ion-tab-bar {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
+// ── Footer / Tab bar ──────────────────────────────────────────────────────────
+ion-footer.pt-footer {
+  flex-shrink: 0;
+  background: var(--bapp-bg-card, #232323);
+  border-top: 1px solid var(--bapp-border, rgba(255,255,255,0.08));
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.30);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-tab-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 60px;
+  width: 100%;
+}
+
+.pt-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px 4px;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 24px;
+    height: 3px;
+    background: var(--bapp-color-accent, #0EA5E9);
+    border-radius: 0 0 3px 3px;
+    transition: transform 200ms ease;
+  }
+
+  &.pt-tab-btn-active::before {
+    transform: translateX(-50%) scaleX(1);
+  }
+}
+
+.pt-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+
+  ion-icon {
+    font-size: 22px;
+    color: var(--bapp-text-tertiary, rgba(255,255,255,0.38));
+    transition: color 200ms ease;
+  }
+}
+
+.pt-label {
+  font-size: 10px;
+  font-family: 'medium', sans-serif;
+  color: var(--bapp-text-tertiary, rgba(255,255,255,0.38));
+  transition: color 200ms ease;
+}
+
+.pt-tab-btn-active {
+  .pt-icon-wrap ion-icon {
+    color: var(--bapp-color-accent, #0EA5E9);
+  }
+  .pt-label {
+    color: var(--bapp-color-accent, #0EA5E9);
+    font-family: 'semi-bold', sans-serif;
   }
 }

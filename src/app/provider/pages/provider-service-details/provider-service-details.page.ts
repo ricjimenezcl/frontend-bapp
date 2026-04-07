@@ -1,5 +1,5 @@
 // src/app/provider/pages/provider-service-details/provider-service-details.page.ts
-import { Component, ViewEncapsulation, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component,  OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonCard, IonBadge, IonToggle, IonRow, IonCol, IonIcon, IonLabel, IonSpinner, IonBackButton, AlertController, LoadingController, ModalController, ToastController, NavController } from '@ionic/angular/standalone';
@@ -16,7 +16,6 @@ import { DocumentUploadService } from '../../../shared/services/document-upload.
   templateUrl: './provider-service-details.page.html',
   styleUrls: ['./provider-service-details.page.scss'],
   standalone: true,
-  encapsulation: ViewEncapsulation.None,
   imports: [
     CommonModule,
     RouterModule,

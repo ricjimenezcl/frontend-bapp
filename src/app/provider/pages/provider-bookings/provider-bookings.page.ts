@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, OnDestroy } from '@angular/core';
+import { Component,  OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
@@ -14,7 +14,6 @@ import { RouterModule } from '@angular/router';
   templateUrl: './provider-bookings.page.html',
   styleUrls: ['./provider-bookings.page.scss'],
   standalone: true,
-  encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, FormsModule, IonicModule, RouterModule]
 })
 export class ProviderBookingsPage implements OnInit, OnDestroy {

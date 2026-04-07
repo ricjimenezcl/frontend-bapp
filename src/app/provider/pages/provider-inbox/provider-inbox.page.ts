@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component,  OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, RefresherCustomEvent } from '@ionic/angular';
@@ -15,7 +15,6 @@ import { AuthService } from '../../../auth/services/auth.service';
   templateUrl: './provider-inbox.page.html',
   styleUrls: ['./provider-inbox.page.scss'],
   standalone: true,
-  encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, FormsModule, IonicModule]
 })
 export class ProviderInboxPage implements OnInit, OnDestroy {

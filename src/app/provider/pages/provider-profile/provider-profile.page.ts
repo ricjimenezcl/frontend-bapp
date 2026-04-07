@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, OnDestroy } from '@angular/core';
+import { Component,  OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonicModule, ModalController, AlertController, ToastController, NavController } from '@ionic/angular';
@@ -15,7 +15,6 @@ import { MonetizationComponentsModule } from '../../../components/monetization-c
   templateUrl: './provider-profile.page.html',
   styleUrls: ['./provider-profile.page.scss'],
   standalone: true,
-  encapsulation: ViewEncapsulation.None,
   imports: [CommonModule, IonicModule, MonetizationComponentsModule]
 })
 export class ProviderProfilePage implements OnInit, OnDestroy {
