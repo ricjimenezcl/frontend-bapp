@@ -186,6 +186,10 @@ export class ClientProfilePage implements OnInit, OnDestroy {
     this.router.navigate(['/transactions']);
   }
 
+  goToTerms() {
+    this.router.navigate(['/terms']);
+  }
+
   goToCatalog() {
     this.router.navigate(['/product-catalog']);
   }

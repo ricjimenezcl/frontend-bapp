@@ -310,11 +310,24 @@ export class CoreService {
   }
 
   updateBookingStatus(bookingId: number, status: string): Observable<Booking> {
-    return this.http.patch<Booking>(`${this.apiUrl}/bookings/${bookingId}`, { status });
+    return this.http.put<Booking>(`${this.apiUrl}/bookings/${bookingId}/status`, { status }).pipe(
+      catchError(error => {
+        console.error('Error updating booking status:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  cancelBooking(bookingId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/bookings/${bookingId}`);
+  cancelBooking(bookingId: number, reason: string = 'CLIENT_REQUEST', reasonComment?: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/bookings/${bookingId}/cancel`, {
+      reason,
+      reason_comment: reasonComment ?? null
+    }).pipe(
+      catchError(error => {
+        console.error('Error cancelling booking:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   // ==================== REVIEWS ====================
