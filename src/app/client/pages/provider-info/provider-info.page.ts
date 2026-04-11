@@ -210,54 +210,41 @@ export class ProviderInfoPage implements OnInit {
   loadProvider(providerId: number, serviceId: number | null = null) {
     this.isLoading = true;
 
-    const providerData$ = serviceId
-      ? this.coreService.getProviderService(providerId, serviceId)
-      : this.coreService.getProviderById(providerId);
-
+    // Siempre usar /detailed para obtener email + address + servicios completos
     forkJoin({
-      providerData: providerData$.pipe(catchError(() => of(null))),
+      providerData: this.coreService.getProviderById(providerId).pipe(catchError(() => of(null))),
       reviews: this.coreService.getProviderReviews(providerId).pipe(catchError(() => of([])))
     }).subscribe({
       next: ({ providerData, reviews }) => {
         if (providerData) {
-          if (serviceId) {
-            const serviceData: any = providerData;
+          const pd: any = providerData;
+          const services: any[] = pd.services || [];
+
+          // Buscar el servicio específico o usar el primero disponible
+          const targetService = serviceId
+            ? (services.find((s: any) => s.service_id === serviceId || s.id === serviceId) || services[0])
+            : services[0];
+
+          if (targetService) {
             this.provider = {
-              ...serviceData,
-              rating: serviceData.rating_avg || serviceData.rating || 0,
-              total_reviews: serviceData.total_reviews || 0
+              ...targetService,
+              provider_id: targetService.provider_id || pd.id,
+              user_id: pd.user_id || targetService.user_id,
+              avatar: pd.avatar || targetService.avatar,
+              rating: pd.rating_avg || targetService.rating_avg || 0,
+              total_reviews: pd.total_reviews || targetService.total_reviews || 0,
+              email: pd.email || '',
+              phone: targetService.phone,
+              business_name: targetService.business_name,
+              address: targetService.address,
+              description: targetService.description,
+              hourly_rate: targetService.hourly_rate
             } as ServiceProvider;
 
-            if (serviceData.service_id) {
-              this.selectedServiceId = Number(serviceData.service_id);
-            } else if (serviceData.service_category_id) {
-              this.selectedServiceId = Number(serviceData.service_category_id);
-            }
+            const svcId = targetService.service_id || targetService.service_category_id || targetService.id;
+            if (svcId) this.selectedServiceId = Number(svcId);
           } else {
-            const pd: any = providerData;
-            if (pd.services && pd.services.length > 0) {
-              const firstService = pd.services[0];
-              this.provider = {
-                ...firstService,
-                user_id: pd.user_id || firstService.user_id,
-                avatar: pd.avatar || firstService.avatar,
-                rating: pd.rating_avg || pd.rating || firstService.rating || 0,
-                total_reviews: pd.total_reviews || firstService.total_reviews || 0,
-                email: pd.email,
-                phone: firstService.phone,
-                business_name: firstService.business_name,
-                address: firstService.address,
-                description: firstService.description,
-                hourly_rate: firstService.hourly_rate
-              } as ServiceProvider;
-
-              if (this.selectedServiceId <= 1) {
-                const svcId = firstService.service_id || firstService.service_category_id || firstService.id;
-                if (svcId) this.selectedServiceId = Number(svcId);
-              }
-            } else {
-              this.provider = pd;
-            }
+            this.provider = { ...pd, email: pd.email || '' } as ServiceProvider;
           }
         }
 

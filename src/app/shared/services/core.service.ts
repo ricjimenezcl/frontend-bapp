@@ -29,6 +29,10 @@ export interface ServiceProvider {
   provider_id: number;  // ✅ OPCIÓN B: Added for provider ID mapping
   user_id: number;
   business_name: string;
+  full_name?: string;
+  run?: string;
+  status?: string;
+  bio?: string;
   description?: string;
   avatar?: string;
   phone?: string;
@@ -37,10 +41,12 @@ export interface ServiceProvider {
   lat?: number;
   lng?: number;
   rating?: number;
+  rating_avg?: number;
   total_reviews?: number;
   hourly_rate?: number;
   is_available?: boolean;
   is_verified?: boolean;
+  validation_status?: string;
   distance?: number;
   services?: ServiceCategory[];
 }
@@ -310,11 +316,24 @@ export class CoreService {
   }
 
   updateBookingStatus(bookingId: number, status: string): Observable<Booking> {
-    return this.http.patch<Booking>(`${this.apiUrl}/bookings/${bookingId}`, { status });
+    return this.http.put<Booking>(`${this.apiUrl}/bookings/${bookingId}/status`, { status }).pipe(
+      catchError(error => {
+        console.error('Error updating booking status:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  cancelBooking(bookingId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/bookings/${bookingId}`);
+  cancelBooking(bookingId: number, reason: string = 'CLIENT_REQUEST', reasonComment?: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/bookings/${bookingId}/cancel`, {
+      reason,
+      reason_comment: reasonComment ?? null
+    }).pipe(
+      catchError(error => {
+        console.error('Error cancelling booking:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
   // ==================== REVIEWS ====================

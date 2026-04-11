@@ -99,7 +99,7 @@ ion-content.map-content {
 // IMPORTANTE: Debe estar ENCIMA del footer del tabs (56px + margen)
 .style-selector-container {
   position: absolute !important;
-  bottom: 70px !important; // Encima del footer del tabs
+  bottom: 12px !important; // Encima del footer del tabs
   left: 16px !important;
   z-index: 100 !important;
 }
@@ -561,7 +561,7 @@ ion-content.map-content {
 // ============ Leyenda inferior ============
 .map-legend {
   position: absolute !important;
-  bottom: 130px !important; // encima del style-selector (70px) + espacio
+  bottom: 60px !important; // encima del style-selector (12px) + su altura (~36px) + margen
   left: 16px !important;
   right: 16px !important;
   z-index: 100 !important;
@@ -667,7 +667,7 @@ ion-content.map-content {
   }
 
   .style-selector-container {
-    bottom: 70px !important;
+    bottom: 12px !important;
     left: 12px !important;
     // No right: auto-width to keep buttons horizontal
   }
@@ -711,7 +711,7 @@ ion-content.map-content {
   }
 
   .map-legend {
-    bottom: 125px !important;
+    bottom: 60px !important;
     left: 12px !important;
     right: 12px !important;
   }
@@ -720,10 +720,10 @@ ion-content.map-content {
 // ============ Safe area para dispositivos con notch ============
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .style-selector-container {
-    bottom: calc(70px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
   }
 
   .map-legend {
-    bottom: calc(130px + env(safe-area-inset-bottom)) !important;
+    bottom: calc(60px + env(safe-area-inset-bottom)) !important;
   }
 }
