@@ -29,6 +29,10 @@ export interface ServiceProvider {
   provider_id: number;  // ✅ OPCIÓN B: Added for provider ID mapping
   user_id: number;
   business_name: string;
+  full_name?: string;
+  run?: string;
+  status?: string;
+  bio?: string;
   description?: string;
   avatar?: string;
   phone?: string;
@@ -37,10 +41,12 @@ export interface ServiceProvider {
   lat?: number;
   lng?: number;
   rating?: number;
+  rating_avg?: number;
   total_reviews?: number;
   hourly_rate?: number;
   is_available?: boolean;
   is_verified?: boolean;
+  validation_status?: string;
   distance?: number;
   services?: ServiceCategory[];
 }
