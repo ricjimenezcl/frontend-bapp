@@ -8,8 +8,8 @@ import { CoreService, ServiceProvider } from '../../../shared/services/core.serv
 import { SelectionService } from '../../../shared/services/selection.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { StateService } from '../../../shared/services/state.service';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { Subject, forkJoin, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { MapboxService } from '../../../shared/services/mapbox.service';
 
 // New Service & Models
@@ -209,19 +209,15 @@ export class ProviderInfoPage implements OnInit {
   loadProvider(providerId: number, serviceId: number | null = null) {
     this.isLoading = true;
 
-    // ÚNICA FUENTE DE DATOS: /providers/{id}/detailed
-    // Este endpoint retorna:
-    // - provider info (id, full_name, email, status, bio, avatar, run, rating_avg, total_reviews)
-    // - services array con detalles de cada servicio
-    // - reviews array con reseñas del proveedor
-    this.coreService.getProviderById(providerId).subscribe({
-      next: (providerData) => {
+    // Siempre usar /detailed para obtener email + address + servicios completos
+    forkJoin({
+      providerData: this.coreService.getProviderById(providerId).pipe(catchError(() => of(null))),
+      reviews: this.coreService.getProviderReviews(providerId).pipe(catchError(() => of([])))
+    }).subscribe({
+      next: ({ providerData, reviews }) => {
         if (providerData) {
           const pd: any = providerData;
-          console.log('[PROVIDER-INFO] Datos completos recibidos de /providers/{id}/detailed:', pd);
-          
           const services: any[] = pd.services || [];
-          console.log('[PROVIDER-INFO] Servicios disponibles:', services.length);
 
           // Buscar el servicio específico o usar el primero disponible
           const targetService = serviceId
@@ -231,63 +227,30 @@ export class ProviderInfoPage implements OnInit {
           if (targetService) {
             this.provider = {
               ...targetService,
-              // IDs
               provider_id: targetService.provider_id || pd.id,
               user_id: pd.user_id || targetService.user_id,
-              // Datos del proveedor (nivel raíz de /providers/{id}/detailed)
-              full_name: pd.full_name || targetService.full_name,
-              run: pd.run,
-              status: pd.status,
-              bio: pd.bio || '',
-              email: pd.email || '',
               avatar: pd.avatar || targetService.avatar,
-              phone: targetService.phone || pd.phone,
-              // Rating y reviews (desde nivel raíz del endpoint)
               rating: pd.rating_avg || targetService.rating_avg || 0,
-              rating_avg: pd.rating_avg || targetService.rating_avg || 0,
               total_reviews: pd.total_reviews || targetService.total_reviews || 0,
-              // Datos del servicio seleccionado
+              email: pd.email || '',
+              phone: targetService.phone,
               business_name: targetService.business_name,
               address: targetService.address,
               description: targetService.description,
-              hourly_rate: targetService.hourly_rate,
-              is_available: targetService.is_available,
-              validation_status: targetService.validation_status,
-              lat: targetService.latitude,
-              lng: targetService.longitude,
-              distance: targetService.distance
+              hourly_rate: targetService.hourly_rate
             } as ServiceProvider;
-
-            console.log('[PROVIDER-INFO] Provider mappeado:', this.provider);
 
             const svcId = targetService.service_id || targetService.service_category_id || targetService.id;
             if (svcId) this.selectedServiceId = Number(svcId);
           } else {
-            this.provider = { 
-              ...pd, 
-              email: pd.email || '',
-              avatar: pd.avatar || '',
-              status: pd.status,
-              bio: pd.bio || '',
-              full_name: pd.full_name,
-              run: pd.run
-            } as ServiceProvider;
-          }
-
-          // VALIDACIÓN: Reviews SIEMPRE del endpoint /providers/{id}/detailed
-          if (pd.reviews && Array.isArray(pd.reviews)) {
-            this.reviews = (pd.reviews) as Review[];
-            console.log('[PROVIDER-INFO] Reviews obtenidas de /providers/{id}/detailed:', this.reviews.length, 'reseñas');
-          } else {
-            this.reviews = [];
-            console.warn('[PROVIDER-INFO] No hay reviews en la respuesta de /providers/{id}/detailed');
+            this.provider = { ...pd, email: pd.email || '' } as ServiceProvider;
           }
         }
 
+        this.reviews = reviews as Review[];
         this.isLoading = false;
       },
-      error: (error) => {
-        console.error('[PROVIDER-INFO] Error cargando datos de /providers/{id}/detailed:', error);
+      error: () => {
         this.isLoading = false;
         this.showToast('Error al cargar información del proveedor');
       }
