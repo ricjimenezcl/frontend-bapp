@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { Subject, forkJoin, of } from 'rxjs';
-import { takeUntil, switchMap, map, catchError } from 'rxjs/operators';
+import { takeUntil, catchError } from 'rxjs/operators';
 import { ProviderBookingService } from '../../services/provider-booking.service';
 import { BookingResponse, BookingStatus } from '../../../core/models/booking.model';
 import { ClientService } from '../../../client/services/client.service';
@@ -33,8 +33,8 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // La carga inicial ocurre en ionViewWillEnter — evita doble HTTP
-    // cuando ion-tabs dispara ngOnInit + ionViewWillEnter en la primera visita
+    // CSS-based tabs — ionViewWillEnter nunca se dispara en este contexto
+    this.loadBookings();
   }
 
   ngOnDestroy(): void {
@@ -48,49 +48,48 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
 
   loadBookings() {
     this.isLoading = true;
-    this.bookingService.getBookings().pipe(
-      takeUntil(this.destroy$),
-      switchMap(bookings => {
-        if (!bookings.length) return of(bookings);
-        const uniqueIds = [...new Set(bookings.map(b => b.client_id))];
-        const clientRequests = uniqueIds.reduce((acc, id) => {
-          acc[id] = this.clientService.getClientById(id).pipe(catchError(() => of(null)));
-          return acc;
-        }, {} as Record<number, any>);
-        return forkJoin(clientRequests).pipe(
-          map(clientMap => bookings.map(b => ({
-            ...b,
-            client_name: (clientMap as any)[b.client_id]?.full_name ?? undefined,
-            client_avatar: (clientMap as any)[b.client_id]?.avatar ?? undefined
-          })))
-        );
-      })
-    ).subscribe({
-      next: (res) => {
-        this.bookings = res;
-        this.filterBookings();
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        console.error('❌ [ProviderBookings] Error cargando bookings:', err);
-        // ✅ Manejo mejorado de errores
-        let errorMsg = 'Error cargando reservas';
-        if (err?.status === 0) {
-          errorMsg = 'Conectando al servidor... Puede tardar hasta 60 segundos.';
-          // ✅ Reintento automático
-          setTimeout(() => {
-            if (this.bookings.length === 0) {
-              console.log('🔄 [ProviderBookings] Reintentando...');
-              this.loadBookings();
-            }
-          }, 5000);
-        } else if (err?.error?.detail) {
-          errorMsg = err.error.detail;
+    this.bookingService.getBookings()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (bookings) => {
+          this.bookings = bookings;
+          this.filterBookings();
+          this.isLoading = false;
+          // Enriquecer con datos del cliente en background — no bloquea la vista
+          this.enrichWithClientData(bookings);
+        },
+        error: (err: any) => {
+          console.error('❌ [ProviderBookings] status:', err?.status, 'body:', err?.error);
+          let errorMsg = 'Error cargando reservas';
+          if (err?.status === 0) {
+            errorMsg = 'Conectando al servidor...';
+          } else if (err?.error?.detail) {
+            errorMsg = err.error.detail;
+          }
+          this.showToast(errorMsg, 'danger');
+          this.isLoading = false;
         }
-        this.showToast(errorMsg, 'danger');
-        this.isLoading = false;
-      }
+      });
+  }
+
+  private enrichWithClientData(bookings: BookingResponse[]) {
+    if (!bookings.length) return;
+    const uniqueIds = [...new Set(bookings.map(b => b.client_id))];
+    const clientRequests: { [key: string]: any } = {};
+    uniqueIds.forEach(id => {
+      clientRequests[id] = this.clientService.getClientById(Number(id)).pipe(catchError(() => of(null)));
     });
+
+    forkJoin(clientRequests)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(clientMap => {
+        this.bookings = this.bookings.map(b => ({
+          ...b,
+          client_name: (clientMap as any)[b.client_id]?.full_name ?? b.client_name,
+          client_avatar: (clientMap as any)[b.client_id]?.avatar ?? b.client_avatar
+        }));
+        this.filterBookings();
+      });
   }
 
   segmentChanged(event: any) {
@@ -118,7 +117,7 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
     const loading = await this.loadingCtrl.create({ message: 'Confirmando...' });
     await loading.present();
 
-    this.bookingService.acceptBooking(booking.id)
+    this.bookingService.acceptBooking(Number(booking.id))
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: async () => {
@@ -150,7 +149,7 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
             const loading = await this.loadingCtrl.create({ message: 'Rechazando...' });
             await loading.present();
 
-            this.bookingService.rejectBooking(booking.id)
+            this.bookingService.rejectBooking(Number(booking.id))
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: async () => {

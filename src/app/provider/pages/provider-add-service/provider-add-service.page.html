@@ -200,7 +200,21 @@
             >
             </ion-textarea>
           </ion-item>
+        </div>
 
+        <!-- Tarifa por hora -->
+        <div class="input-with-suggestions">
+          <ion-item lines="none">
+            <ion-icon name="cash-outline" slot="start" color="primary"></ion-icon>
+            <ion-input
+              type="number"
+              formControlName="hourly_rate"
+              placeholder="TARIFA POR HORA $ (opcional)"
+              name="hourly_rate"
+              min="0"
+            >
+            </ion-input>
+          </ion-item>
         </div>
 
         <!-- Campos ocultos para dirección, lat y lng -->

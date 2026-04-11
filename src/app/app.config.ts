@@ -139,6 +139,7 @@ import {
   keyOutline,
   logIn,
   navigateOutline,
+  briefcase,
   navigate
 
 
@@ -282,6 +283,7 @@ addIcons({
   logIn,
   storefrontOutline,
   navigateOutline,
+  briefcase,
   list: listOutline
 });
 

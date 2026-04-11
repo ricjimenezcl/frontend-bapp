@@ -1,15 +1,16 @@
 // src/app/provider/pages/provider-add-service/provider-add-service.page.ts
-import { Component, OnInit, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
 import { IonicModule, ModalController, AlertController, LoadingController, ToastController } from '@ionic/angular';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MapboxService } from '../../../shared/services/mapbox.service';
 import { ProviderModalServicePage } from '../provider-modal-service/provider-modal-service.page';
 import { CoreService } from '../../../shared/services/core.service';
 import { AuthService } from '../../../auth/services/auth.service';
+import { ProviderService } from '../../services/provider.service';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -57,9 +58,11 @@ export interface ServiceCategory {
     IonicModule
   ]
 })
-export class ProviderAddServicePage implements OnInit {
+export class ProviderAddServicePage implements OnInit, OnDestroy {
   // Guard para evitar apertura múltiple del modal
   private isServiceModalOpen = false;
+  private readonly destroy$ = new Subject<void>();
+  private providerProfile: any = null;
 
   // Inyectar servicios
   private fb = inject(FormBuilder);
@@ -70,6 +73,7 @@ export class ProviderAddServicePage implements OnInit {
   private mapboxService = inject(MapboxService);
   private coreService = inject(CoreService);
   private authService = inject(AuthService);
+  private providerService = inject(ProviderService);
 
   // Recibir datos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -127,23 +131,45 @@ export class ProviderAddServicePage implements OnInit {
       servicio: ['', [Validators.required]],
       categoria: ['', [Validators.required]],
       nombre_prestador: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(45)]],
-        fono: ['', [Validators.required, CustomValidators.phone()]],
+      fono: ['', [Validators.required, CustomValidators.phone()]],
       detalle: ['', [Validators.maxLength(100)]],
+      hourly_rate: [null],
       direccion: ['', [Validators.required]],
       lat: ['', [Validators.required]],
       lng: ['', [Validators.required]]
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   async ngOnInit() {
-    console.log("add service init, currentUser:", this.currentUser);
-    
     // Verificar autenticación
     if (!this.currentUser || typeof this.currentUser !== 'object' || !this.currentUser.id) {
       this.presentToast('Debe iniciar sesión para agregar servicios', 'danger');
       this.cancel();
       return;
     }
+
+    // Cargar perfil del proveedor para obtener providers.id garantizado
+    this.providerService.getMyProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (profile) => {
+          this.providerProfile = profile;
+          // Pre-check: verificar límite de servicios activos
+          const activeCount = this.providerService.providerServices().filter(s => s.is_available).length;
+          if (activeCount >= 2) {
+            this.presentAlert(
+              'Plan requerido',
+              'Ya tienes 2 servicios activos. Para agregar más debes activar un plan de publicación.'
+            ).then(() => this.cancel());
+          }
+        },
+        error: () => { /* no-critical — id_contacto usará fallback */ }
+      });
 
     // Si se proporcionan datos del proveedor, llenar automáticamente algunos campos
     if (this.providerData) {
@@ -155,10 +181,10 @@ export class ProviderAddServicePage implements OnInit {
 
     // Configurar autocompletado de direcciones
     this.setupAutocomplete();
-    
+
     // Inicializar mapa con ubicación por defecto (Santiago, Chile)
-    await this.initMap(-33.4489, -70.6693); // Ubicación de Santiago
-    
+    await this.initMap(-33.4489, -70.6693);
+
     // Si hay categorías, seleccionar la primera
     if (this.mainCategories && this.mainCategories.length > 0) {
       this.selectMainCategory(this.mainCategories[0]);
@@ -640,7 +666,8 @@ debugState() {
           direccion: formData.direccion,
           lat: parseFloat(formData.lat),
           lng: parseFloat(formData.lng),
-          id_contacto: this.currentUser.id
+          hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
+          id_contacto: this.providerProfile?.id ?? this.currentUser.id
         };
 
         console.log('Enviando datos al backend:', serviceData);
@@ -714,7 +741,6 @@ debugState() {
     for (const day of activeDays) {
       try {
         await this.coreService.upsertServiceSchedule(providerId, spId, {
-          service_id: spId,
           day_of_week: day.dayOfWeek,
           start_time: day.startTime,
           end_time: day.endTime,

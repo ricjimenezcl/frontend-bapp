@@ -274,23 +274,29 @@ export const loggingInterceptor: HttpInterceptorFn = (
  * Interceptor que agrega headers comunes
  */
 export const headersInterceptor: HttpInterceptorFn = (
-  req: HttpRequest<unknown>, 
+  req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
+  // No agregar headers propios a APIs externas públicas
+  const isExternal = EXTERNAL_DOMAINS.some(domain => req.url.includes(domain));
+  if (isExternal) {
+    return next(req);
+  }
+
   if (req.headers.has('Content-Type')) {
     return next(req);
   }
-  
+
   if (req.body instanceof FormData) {
     return next(req);
   }
-  
+
   const modifiedReq = req.clone({
     setHeaders: {
       'Accept': 'application/json'
     }
   });
-  
+
   return next(modifiedReq);
 };
 

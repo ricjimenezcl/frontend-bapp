@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonCard, IonBadge, IonToggle, IonRow, IonCol, IonIcon, IonLabel, IonSpinner, IonBackButton, AlertController, LoadingController, ModalController, ToastController, NavController } from '@ionic/angular/standalone';
 import { Subject, firstValueFrom } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, switchMap } from 'rxjs/operators';
 import { ProviderService, ProviderServices } from '../../services/provider.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CoreService } from '../../../shared/services/core.service';
@@ -47,6 +47,8 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   ngOnInit() {
     // Datos estáticos de sesión: se cargan una sola vez en la vida del componente
     this.loadUserData();
+    // CSS-based tabs — ionViewWillEnter nunca se dispara en este contexto
+    this.loadServicios();
   }
 
   ngOnDestroy(): void {
@@ -76,27 +78,27 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   loadServicios() {
     if (!this.currentUser) return;
     this.isLoading = true;
-    this.providerService
-      .getProviderServices(this.currentUser.id.toString())
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (services) => {
-          this.servicios = services || [];
-          this.isLoading = false;
-          // Si venimos de pago exitoso, abrir modal directamente (omitir pre-chequeo de límite)
-          if (this.pendingOpenModal) {
-            this.pendingOpenModal = false;
-            this.verificarYAbrirModal();
-          }
-        },
-        error: (error: any) => {
-          console.error('Error al cargar servicios:', error);
-          this.isLoading = false;
-          this.servicios = [];
+    this.providerService.getMyProfile().pipe(
+      switchMap(profile => this.providerService.getProviderServices(profile.id.toString())),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (services) => {
+        this.servicios = services || [];
+        this.isLoading = false;
+        // Si venimos de pago exitoso, abrir modal directamente (omitir pre-chequeo de límite)
+        if (this.pendingOpenModal) {
           this.pendingOpenModal = false;
-          this.presentAlert('Error', 'No se pudieron cargar los servicios');
+          this.verificarYAbrirModal();
         }
-      });
+      },
+      error: (error: any) => {
+        console.error('Error al cargar servicios:', error);
+        this.isLoading = false;
+        this.servicios = [];
+        this.pendingOpenModal = false;
+        this.presentAlert('Error', 'No se pudieron cargar los servicios');
+      }
+    });
   }
 
   getEstadoServicio(servicio: ProviderServices): string {

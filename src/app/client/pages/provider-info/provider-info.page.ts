@@ -71,6 +71,7 @@ export class ProviderInfoPage implements OnInit {
 
   // Validación de reserva
   bookingAttempted = false;
+  isBookingLoading = false;
 
   get isBookingValid(): boolean {
     return !!this.selectedDate && !!this.selectedTime && !!this.locationAddress;
@@ -469,15 +470,12 @@ export class ProviderInfoPage implements OnInit {
       return;
     }
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Confirmando reserva...'
-    });
-    await loading.present();
+    this.isBookingLoading = true;
 
     try {
       // Extract date part (YYYY-MM-DD format)
-      const datePart = this.selectedDate.includes('T') 
-        ? this.selectedDate.split('T')[0] 
+      const datePart = this.selectedDate.includes('T')
+        ? this.selectedDate.split('T')[0]
         : this.selectedDate;
 
       // Ensure time format is HH:mm:ss (exact format backend expects)
@@ -486,41 +484,36 @@ export class ProviderInfoPage implements OnInit {
         timePart = `${timePart}:00`;
       }
 
-      const duration = 60; // Default 1 hour in minutes
-      const totalPrice = (this.provider?.hourly_rate || 0) * (duration / 60); // Calculate price
+      const duration = 60;
+      const totalPrice = (this.provider?.hourly_rate || 0) * (duration / 60);
 
-      // Resolve provider_id with fallback chain
       const resolvedProviderId = Number(
         this.provider.provider_id || this.provider.id || 0
       );
 
-      // Resolve service_id: use selectedServiceId if set from queryParams, otherwise try provider data
       const providerAny = this.provider as any;
       const resolvedServiceId = this.selectedServiceId > 1
         ? this.selectedServiceId
         : Number(providerAny.service_id || providerAny.service_category_id || this.selectedServiceId);
 
-      // Validate required fields before sending
       if (!resolvedProviderId || resolvedProviderId <= 0) {
-        loading.dismiss();
+        this.isBookingLoading = false;
         this.showToast('Error: No se pudo identificar al proveedor', 'danger');
         console.error('provider_id is invalid:', { provider_id: this.provider.provider_id, id: this.provider.id });
         return;
       }
 
       if (!resolvedServiceId || resolvedServiceId <= 0) {
-        loading.dismiss();
+        this.isBookingLoading = false;
         this.showToast('Error: No se pudo identificar el servicio', 'danger');
         console.error('service_id is invalid:', { selectedServiceId: this.selectedServiceId, provider: this.provider });
         return;
       }
 
-      // Resolve service_provider_id (the service_providers table row)
       const resolvedServiceProviderId = Number(
         (this.provider as any).service_provider_id || this.provider.id || 0
       );
 
-      // Resolve service_category name (ensure it's a string, not an object)
       const rawCategory = (this.provider as any).service_category_name
         || (this.provider as any).category_name
         || (this.provider as any).service_category;
@@ -528,67 +521,46 @@ export class ProviderInfoPage implements OnInit {
         ? rawCategory.name
         : (typeof rawCategory === 'string' ? rawCategory : 'GENERAL');
 
-      // Build booking payload exactly as backend expects
       const bookingData: BookingCreate = {
-        provider_id: resolvedProviderId,                                    // Provider ID (providers.id)
-        service_id: resolvedServiceId,                                      // Service ID (service_categories.id)
-        service_provider_id: resolvedServiceProviderId > 0 ? resolvedServiceProviderId : undefined, // service_providers.id
-        scheduled_date: datePart,                                           // YYYY-MM-DD
-        scheduled_time: timePart,                                           // HH:mm:ss
-        duration: duration,                                                 // minutes (int)
-        total_price: totalPrice,                                            // numeric value
-        description: this.description || 'Sin descripción',                 // optional string
-        location_address: this.locationAddress || 'Mi ubicación actual',   // Client location address
-        location_lat: this.userLocation?.lat || undefined,                 // Client location latitude
-        location_lng: this.userLocation?.lng || undefined,                 // Client location longitude
-        service_category: resolvedServiceCategory                          // Category name string
+        provider_id: resolvedProviderId,
+        service_id: resolvedServiceId,
+        service_provider_id: resolvedServiceProviderId > 0 ? resolvedServiceProviderId : undefined,
+        scheduled_date: datePart,
+        scheduled_time: timePart,
+        duration: duration,
+        total_price: totalPrice,
+        description: this.description || 'Sin descripción',
+        location_address: this.locationAddress || 'Mi ubicación actual',
+        location_lat: this.userLocation?.lat || undefined,
+        location_lng: this.userLocation?.lng || undefined,
+        service_category: resolvedServiceCategory
       };
 
       console.log('📤 Sending booking data:', JSON.stringify(bookingData, null, 2));
-      console.log('🔍 Provider debug:', {
-        'provider.id': this.provider.id,
-        'provider.provider_id': this.provider.provider_id,
-        'provider.service_id': (this.provider as any).service_id,
-        'provider.service_category_id': (this.provider as any).service_category_id,
-        'selectedServiceId': this.selectedServiceId,
-        'resolvedProviderId': resolvedProviderId,
-        'resolvedServiceId': resolvedServiceId
-      });
 
       this.clientBookingService.createBooking(bookingData).subscribe({
         next: (response) => {
-          loading.dismiss();
+          this.isBookingLoading = false;
           console.log('✅ Booking created successfully:', response);
           this.showToast('¡Reserva enviada exitosamente!', 'success');
-          
-          // Cerrar el modal antes de navegar
           this.showBookingModal = false;
           this.bookingAttempted = false;
-          
           this.selectionService.clearAll();
           setTimeout(() => this.router.navigate(['/client/tabs']), 1000);
         },
         error: (err) => {
-          loading.dismiss();
+          this.isBookingLoading = false;
           console.error('❌ Booking error:', err);
-          console.error('Error response:', err.error);
-          
-          // Extract detailed error message
           let errorMsg = 'Error al crear la reserva';
-          if (err.error?.detail) {
-            errorMsg = err.error.detail;
-          } else if (err.error?.message) {
-            errorMsg = err.error.message;
-          } else if (typeof err.error === 'string') {
-            errorMsg = err.error;
-          }
-          
+          if (err.error?.detail) errorMsg = err.error.detail;
+          else if (err.error?.message) errorMsg = err.error.message;
+          else if (typeof err.error === 'string') errorMsg = err.error;
           this.showToast(errorMsg, 'danger');
         }
       });
 
     } catch (e) {
-      loading.dismiss();
+      this.isBookingLoading = false;
       console.error('❌ Exception:', e);
       this.showToast('Error procesando la solicitud', 'danger');
     }

@@ -22,19 +22,21 @@ export interface BookingCreate {
 }
 
 export interface BookingResponse {
-    id: number;
-    client_id: number;
-    provider_id: number;
-    service_category: string;
+    id: string;
+    client_id: string;
+    provider_id: string;
+    service_id?: string;
+    service_category?: string;
     status: BookingStatus;
-    location_address: string;
+    location_address?: string;
     scheduled_date: string;
-    price?: number;
+    scheduled_time?: string;
+    total_price?: number;
     duration?: number;
     created_at: string;
-    location_lat: string;
-    location_lng: string;
-    description: string;
+    location_lat?: number;
+    location_lng?: number;
+    description?: string;
     client_name?: string;
     client_avatar?: string;
 }

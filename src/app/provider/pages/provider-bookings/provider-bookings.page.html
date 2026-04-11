@@ -9,7 +9,7 @@
 
   <!-- Filter pills (segment → pill tabs) -->
   <ion-toolbar class="filter-toolbar">
-    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)"
+    <ion-segment [value]="selectedSegment" [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)"
                  scrollable class="filter-segment">
       <ion-segment-button value="pending">
         <ion-label>Pendientes</ion-label>

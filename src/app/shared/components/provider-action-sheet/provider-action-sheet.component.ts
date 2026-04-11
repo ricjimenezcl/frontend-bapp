@@ -67,6 +67,8 @@ export class ProviderActionSheetComponent implements OnInit {
   showAddressSuggestions = false;
   isSearching = false;
   isStartingChat = false;
+  isConfirmingBooking = false;
+  providerEmail = '';
   activeDetailTab: string = 'profile';
   userLocation: { lat: number; lng: number } | null = null;
 
@@ -114,7 +116,7 @@ export class ProviderActionSheetComponent implements OnInit {
   }
 
   get providerMail(): string {
-    return this.provider?.email ?? 'No disponible';
+    return this.providerEmail || this.provider?.email || '';
   }
 
   get providerAddress(): string {
@@ -144,9 +146,24 @@ export class ProviderActionSheetComponent implements OnInit {
       this.userLocation = { lat: savedLoc.latitude, lng: savedLoc.longitude };
     }
 
+    this.loadProviderEmail();
     this.loadProviderWorkingHours();
     this.setupAutocomplete();
     this.loadReviews();
+  }
+
+  private loadProviderEmail() {
+    const providerId = Number(this.provider?.provider_id ?? this.provider?.id ?? 0);
+    if (!providerId) return;
+
+    this.coreService.getProviderById(providerId).pipe(
+      catchError(() => of(null))
+    ).subscribe(data => {
+      if (data) {
+        const pd: any = data;
+        this.providerEmail = pd.email || '';
+      }
+    });
   }
 
   private loadProviderWorkingHours() {
@@ -525,8 +542,7 @@ export class ProviderActionSheetComponent implements OnInit {
       return;
     }
 
-    const loading = await this.loadingCtrl.create({ message: 'Confirmando reserva...' });
-    await loading.present();
+    this.isConfirmingBooking = true;
 
     try {
       const datePart = this.selectedDate.includes('T') ? this.selectedDate.split('T')[0] : this.selectedDate;
@@ -534,8 +550,6 @@ export class ProviderActionSheetComponent implements OnInit {
       if (timePart.length === 5) timePart = `${timePart}:00`;
 
       const prov = this.provider;
-      // provider_id = providers.id (el ID real del proveedor)
-      // id = service_providers.id (puede ser diferente)
       const resolvedProviderId = Number(prov?.provider_id ?? prov?.id ?? 0);
       const resolvedServiceId = this.serviceId
         ?? Number(prov?.service_id ?? prov?.service_category_id ?? 0);
@@ -547,13 +561,13 @@ export class ProviderActionSheetComponent implements OnInit {
         : (typeof rawCategory === 'string' ? rawCategory : 'GENERAL');
 
       if (!resolvedProviderId || resolvedProviderId <= 0) {
-        loading.dismiss();
+        this.isConfirmingBooking = false;
         this.showToast('Error: No se pudo identificar al proveedor', 'danger');
         return;
       }
 
       if (!resolvedServiceId || resolvedServiceId <= 0) {
-        loading.dismiss();
+        this.isConfirmingBooking = false;
         this.showToast('Error: No se pudo identificar el servicio', 'danger');
         return;
       }
@@ -578,13 +592,13 @@ export class ProviderActionSheetComponent implements OnInit {
 
       this.clientBookingService.createBooking(bookingData).subscribe({
         next: () => {
-          loading.dismiss();
+          this.isConfirmingBooking = false;
           this.showToast('¡Reserva enviada exitosamente!', 'success');
           this.showBookingModal = false;
           this.modalCtrl.dismiss({ action: 'booked' });
         },
         error: (err) => {
-          loading.dismiss();
+          this.isConfirmingBooking = false;
           let errorMsg = 'Error al crear la reserva';
           if (err.error?.detail) errorMsg = err.error.detail;
           else if (err.error?.message) errorMsg = err.error.message;
@@ -592,7 +606,7 @@ export class ProviderActionSheetComponent implements OnInit {
         }
       });
     } catch {
-      loading.dismiss();
+      this.isConfirmingBooking = false;
       this.showToast('Error procesando la solicitud', 'danger');
     }
   }

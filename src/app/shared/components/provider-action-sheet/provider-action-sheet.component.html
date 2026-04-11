@@ -299,10 +299,11 @@
         color="primary"
         size="large"
         (click)="confirmBooking()"
-        [disabled]="!isBookingValid"
+        [disabled]="!isBookingValid || isConfirmingBooking"
       >
-        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-        Confirmar Reserva
+        <ion-spinner *ngIf="isConfirmingBooking" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
+        <ion-icon *ngIf="!isConfirmingBooking" name="checkmark-circle" slot="start"></ion-icon>
+        {{ isConfirmingBooking ? 'Confirmando...' : 'Confirmar Reserva' }}
       </ion-button>
       <ion-button
         expand="block"
