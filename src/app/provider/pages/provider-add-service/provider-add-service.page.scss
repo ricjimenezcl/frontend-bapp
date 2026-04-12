@@ -283,6 +283,94 @@ ion-footer {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+// ─── ion-select visual improvement ────────────────────────────────────────
+// Ion-select inside form-section: make it look selectable (not just plain text)
+.input-with-suggestions ion-item ion-select {
+  --color: var(--bapp-text-primary);
+  --placeholder-color: var(--bapp-text-tertiary);
+  --padding-start: 0;
+  font-size: var(--bapp-text-md);
+  width: 100%;
+
+  &::part(placeholder) {
+    color: var(--bapp-text-tertiary);
+    font-size: var(--bapp-text-md);
+  }
+
+  &::part(text) {
+    font-size: var(--bapp-text-md);
+    color: var(--bapp-text-primary);
+    font-weight: var(--bapp-font-medium);
+  }
+
+  &::part(icon) {
+    color: var(--bapp-color-primary);
+    opacity: 1;
+  }
+}
+
+// Separador visual entre paso 1 (categoría) y paso 2 (servicio)
+.form-section > .input-with-suggestions + .input-with-suggestions {
+  border-top: 1px solid var(--bapp-border);
+  position: relative;
+
+  &::before {
+    content: 'Paso 2';
+    position: absolute;
+    top: calc(-1 * var(--bapp-text-xs) / 2 - 1px);
+    left: var(--bapp-space-4);
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
+    background: var(--bapp-bg-card);
+    padding: 0 var(--bapp-space-2);
+    letter-spacing: 0.04em;
+  }
+}
+
+// Loading state for subcategories
+.input-with-suggestions ion-item ion-label[color="medium"],
+.input-with-suggestions ion-item ion-label {
+  --color: var(--bapp-text-secondary);
+  font-size: var(--bapp-text-sm);
+}
+
+// ─── Schedule section header ───────────────────────────────────────────────
+.schedule-section-header {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  margin-top: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-2);
+  padding: 0 var(--bapp-space-1);
+
+  .schedule-section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--bapp-radius-md);
+    background: var(--bapp-color-primary-subtle);
+    @include flex-center;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 18px;
+      color: var(--bapp-color-primary);
+    }
+  }
+
+  .schedule-section-title {
+    font-size: var(--bapp-text-md);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+  }
+}
+
+.schedule-subtitle {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  padding: 0 var(--bapp-space-1);
+  margin: 0 0 var(--bapp-space-3);
+  line-height: var(--bapp-leading-relaxed);
+}
+
 // ─── Schedule day card (dark theme) ───────────────────────────────────────
 .schedule-day-card {
   background: var(--bapp-bg-card-raised);

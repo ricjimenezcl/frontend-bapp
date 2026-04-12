@@ -294,19 +294,28 @@ export class ProviderEditServicePage implements OnInit {
     }
   }
 
-  formatPhone(event: any) {
+  formatPhone(event: any): void {
     let value = event.target.value.replace(/\D/g, '');
-    
-    // Si tiene 11 dígitos y empieza con 56 (formato chileno sin +)
-    if (value.startsWith('56') && value.length === 11) {
-      value = value.substring(2); // Quitar el 56
+
+    // Eliminar código de país si está al inicio
+    if (value.startsWith('56')) {
+      value = value.substring(2);
     }
-    
-    // Formatear a +56 9 XXXX XXXX
-    if (value.startsWith('9') && value.length === 9) {
-      value = `+56 ${value.substring(0, 1)} ${value.substring(1, 5)} ${value.substring(5)}`;
+
+    // Limitar a 9 dígitos (9 + 8 dígitos reales)
+    value = value.substring(0, 9);
+
+    // Formatear progresivamente: +56 9 XXXX XXXX
+    if (value.length > 0) {
+      if (value.length <= 1) {
+        value = `+56 9 ${value}`;
+      } else if (value.length <= 5) {
+        value = `+56 9 ${value.substring(1, 5)}`;
+      } else {
+        value = `+56 9 ${value.substring(1, 5)} ${value.substring(5, 9)}`;
+      }
     }
-    
+
     this.servicioForm.patchValue({ phone: value });
   }
 

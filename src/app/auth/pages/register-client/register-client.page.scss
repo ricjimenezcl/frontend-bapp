@@ -1,87 +1,274 @@
+// src/app/auth/pages/register-client/register-client.page.scss
+@import '../../../../theme/mixins';
+
+:host {
+  display: block;
+  height: 100%;
+}
+
 ion-content {
   --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
+// ── Back button ────────────────────────────────────────────────────────────────
+.back-row {
+  width: 100%;
+
+  .auth-back-btn {
+    --color: var(--bapp-text-secondary);
+    --icon-font-size: 22px;
   }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
+}
+
+// ── Outer layout ───────────────────────────────────────────────────────────────
+.login-bg {
+  min-height: 100%;
+  @include flex-column-center;
+  padding: var(--bapp-space-6) var(--bapp-space-4);
+}
+
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+  @include flex-column-center;
+  gap: var(--bapp-space-5);
+}
+
+// ── Logo section ───────────────────────────────────────────────────────────────
+.login-logo {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  text-align: center;
+
+  .logo-img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
   }
-  
+
+  .titulo-img {
+    width: 160px;
+    height: auto;
+    object-fit: contain;
+  }
+}
+
+.login-subtitle {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: rgba(255, 255, 255, 0.75);
+  text-align: center;
+}
+
+// ── Card ───────────────────────────────────────────────────────────────────────
+.login-card {
+  width: 100%;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  padding: var(--bapp-space-6);
+  @include flex-column;
+  gap: var(--bapp-space-4);
+}
+
+.login-card-title {
+  margin: 0 0 var(--bapp-space-1);
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+// ── Form ───────────────────────────────────────────────────────────────────────
+.login-form {
+  @include flex-column;
+  gap: var(--bapp-space-4);
+}
+
+.form-group {
+  @include flex-column;
+  gap: var(--bapp-space-1);
+}
+
+.form-label {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-text-secondary);
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bapp-bg-input);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  padding: 0 var(--bapp-space-3);
+  transition: border-color var(--bapp-transition-fast);
+
+  &:focus-within {
+    border-color: var(--bapp-color-primary);
+    box-shadow: 0 0 0 2px rgba(253, 215, 53, 0.15);
+  }
+
+  &.input-wrap-error {
+    border-color: var(--bapp-color-danger);
+  }
+
+  .input-icon {
+    font-size: 18px;
+    color: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+    margin-right: var(--bapp-space-2);
+  }
+
   ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
+    flex: 1;
+    --color: var(--bapp-text-primary);
+    --placeholder-color: var(--bapp-text-tertiary);
+    --background: transparent;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 10px;
+    --padding-bottom: 10px;
+    font-size: var(--bapp-text-sm);
 
     input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
+      caret-color: var(--bapp-color-primary);
 
       &:-webkit-autofill,
       &:-webkit-autofill:hover,
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
+        -webkit-text-fill-color: var(--bapp-text-primary) !important;
+        -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+        box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+        caret-color: var(--bapp-color-primary);
         transition: background-color 99999s ease-in-out 0s;
       }
     }
   }
 }
 
-// Estilos para la sección de avatar
-.avatar-section {
-  text-align: center;
-  padding: 16px 0;
+.form-error {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+  padding-left: var(--bapp-space-1);
 }
 
-.avatar-preview {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--ion-color-dark);
-  margin-bottom: 16px;
-}
-
-.avatar-actions {
+// ── Checkbox items ─────────────────────────────────────────────────────────────
+.checkbox-wrap {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 20px;
-}
+  align-items: flex-start;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-1) 0;
 
-.no-avatar-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 20px 0;
-  
-  ion-button {
-    margin: 0;
+  .bapp-checkbox {
+    --background-checked: var(--bapp-color-primary);
+    --border-color: var(--bapp-border-medium);
+    --border-color-checked: var(--bapp-color-primary);
+    --checkmark-color: var(--bapp-color-on-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .checkbox-label {
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-secondary);
+    line-height: 1.5;
+
+    a.terms-link {
+      color: var(--bapp-color-primary);
+      text-decoration: none;
+      font-weight: var(--bapp-font-medium);
+    }
   }
 }
 
-.avatar-subtitle {
-  font-size: 0.8em;
-  color: var(--ion-color-medium);
-  margin: 4px 0 0 0;
-  font-weight: normal;
+// ── Submit button ──────────────────────────────────────────────────────────────
+.submit-btn {
+  margin-top: var(--bapp-space-1);
+  --border-radius: var(--bapp-radius-full);
+  --background: var(--bapp-color-primary);
+  --color: var(--bapp-color-on-primary);
+  --background-activated: var(--bapp-color-primary-dark);
+  font-weight: var(--bapp-font-semibold);
+  height: var(--bapp-button-h-md);
 }
 
-// Elimina o modifica la clase .no-avatar si ya no la usas
+// ── Divider ────────────────────────────────────────────────────────────────────
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--bapp-border);
+}
+
+.divider-text {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  white-space: nowrap;
+}
+
+// ── Social buttons ─────────────────────────────────────────────────────────────
+.social-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bapp-space-3);
+}
+
+.social-btn {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  height: 44px;
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  color: var(--bapp-text-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-medium);
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast);
+
+  &:active { background: rgba(255, 255, 255, 0.08); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Login link ─────────────────────────────────────────────────────────────────
+.register-links {
+  @include flex-column-center;
+  gap: var(--bapp-space-1);
+  text-align: center;
+}
+
+.register-text {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+}
+
+.register-link {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-color-primary);
+  text-decoration: none;
+}
+
+// ── Terms footer ───────────────────────────────────────────────────────────────
+.terms-text {
+  margin: 0;
+  font-size: var(--bapp-text-xs);
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+}
+
+.terms-link-footer {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: underline;
+}

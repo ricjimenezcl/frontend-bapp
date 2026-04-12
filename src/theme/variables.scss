@@ -188,14 +188,14 @@ $bp-xl: 1280px;
   --bapp-font-display: 'Good Times', 'NotoSans', system-ui, sans-serif; // brand headings
   --bapp-font-mono:    'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
 
-  // Escala de tamaños (mobile-first, base 15px)
-  --bapp-text-xs:   11px;  // labels diminutos, captions de tabla
-  --bapp-text-sm:   13px;  // body secundario, metadata
-  --bapp-text-md:   15px;  // body principal (base)
-  --bapp-text-lg:   17px;  // body destacado, subtítulos
-  --bapp-text-xl:   20px;  // subtítulos de sección
-  --bapp-text-2xl:  24px;  // títulos de card
-  --bapp-text-3xl:  28px;  // títulos de página
+  // Escala de tamaños (mobile-first, alineada con referencia handyservice)
+  --bapp-text-xs:   12px;  // labels pequeños, captions (hs: 12px)
+  --bapp-text-sm:   14px;  // body principal — estándar (hs: 14px)
+  --bapp-text-md:   16px;  // títulos, labels grandes (hs: 16px)
+  --bapp-text-lg:   18px;  // subtítulos de sección (hs: 18px)
+  --bapp-text-xl:   20px;  // subtítulos mayores
+  --bapp-text-2xl:  24px;  // títulos de card (hs: 24px)
+  --bapp-text-3xl:  30px;  // títulos de página (hs: 30px)
   --bapp-text-4xl:  32px;  // headings grandes
   --bapp-text-5xl:  40px;  // display / hero
 

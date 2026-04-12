@@ -7,7 +7,6 @@ import { IonicModule, ModalController, AlertController, LoadingController, Toast
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MapboxService } from '../../../shared/services/mapbox.service';
-import { ProviderModalServicePage } from '../provider-modal-service/provider-modal-service.page';
 import { CoreService } from '../../../shared/services/core.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ProviderService } from '../../services/provider.service';
@@ -59,42 +58,39 @@ export interface ServiceCategory {
   ]
 })
 export class ProviderAddServicePage implements OnInit, OnDestroy {
-  // Guard para evitar apertura múltiple del modal
-  private isServiceModalOpen = false;
   private readonly destroy$ = new Subject<void>();
   private providerProfile: any = null;
 
-  // Inyectar servicios
-  private fb = inject(FormBuilder);
-  private modalCtrl = inject(ModalController);
-  private alertCtrl = inject(AlertController);
-  private loadingCtrl = inject(LoadingController);
-  private toastCtrl = inject(ToastController);
+  // Servicios inyectados
+  private fb           = inject(FormBuilder);
+  private modalCtrl    = inject(ModalController);
+  private alertCtrl    = inject(AlertController);
+  private loadingCtrl  = inject(LoadingController);
+  private toastCtrl    = inject(ToastController);
   private mapboxService = inject(MapboxService);
-  private coreService = inject(CoreService);
-  private authService = inject(AuthService);
+  private coreService  = inject(CoreService);
+  private authService  = inject(AuthService);
   private providerService = inject(ProviderService);
 
-  // Recibir datos del componente padre
+  // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
   @Input() currentUser: any;
   @Input() providerData: any;
 
   servicioForm: FormGroup;
 
-  // Variables para la selección
+  // Selección de categoría / servicio (2 pasos inline)
   selectedMainCategoryId: number = 0;
-  categorias: ServiceCategory[] = [];
-  activeCategory: MainCategory | null = null;
-  selectedService: ServiceCategory | null = null;
   selectedServiceId: number = 0;
+  selectedService: ServiceCategory | null = null;
+  subServices: ServiceCategory[] = [];
+  loadingSubServices = false;
 
-  // ── Disponibilidad (horarios por día) ──────────────────────────────────────
+  // Disponibilidad (horarios)
   timeOptions = TIME_OPTIONS;
   schedules: DaySchedule[] = [];
 
-  // Variables para geolocalización
-  isLoading: boolean = false;
+  // Dirección autocomplete
   selectedAddressText: string = '';
   selectedAddressObject: any = null;
   address: any = { place: '', set: false };
@@ -103,7 +99,6 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   showAddressSuggestions: boolean = false;
   private searchTerms = new Subject<string>();
   isSearching: boolean = false;
-  selectedAddress: string = '';
 
   constructor() {
     this.servicioForm = this.createForm();
@@ -184,178 +179,42 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
     // Inicializar mapa con ubicación por defecto (Santiago, Chile)
     await this.initMap(-33.4489, -70.6693);
-
-    // Si hay categorías, seleccionar la primera
-    if (this.mainCategories && this.mainCategories.length > 0) {
-      this.selectMainCategory(this.mainCategories[0]);
-    }
   }
 
-  // Seleccionar categoría principal
-  selectMainCategory(category: MainCategory) {
-    this.activeCategory = category;
-    this.selectedMainCategoryId = category.id;
-    this.servicioForm.patchValue({ servicio: category.id.toString() });
-    this.loadSubcategories(category.id);
-  }
+  // ── Selección inline 2 pasos (reemplaza flujo modal) ─────────────────
 
-// Cargar subcategorías
-async loadSubcategories(mainCategoryId: number) {
-    this.isLoading = true;
-    
-    if (this.coreService) {
-      this.coreService.getMainCategoryWithServices(mainCategoryId).subscribe({
-        next: (subcategories: ServiceCategory[]) => {
-          this.categorias = subcategories || [];
-          this.isLoading = false;
-          
-          // Si ya hay un servicio seleccionado, actualizarlo
-          if (this.selectedServiceId) {
-            const selectedService = this.categorias.find(s => s.id === this.selectedServiceId);
-            if (selectedService) {
-              this.selectedService = selectedService;
-            }
-          }
+  /** Paso 1: usuario cambia categoría principal → cargar subcategorías */
+  onMainCategoryChange(event: any): void {
+    const id = Number(event?.detail?.value ?? 0);
+    this.selectedMainCategoryId = id;
+    // Resetear selección de servicio
+    this.servicioForm.patchValue({ categoria: '' });
+    this.selectedServiceId = 0;
+    this.selectedService = null;
+    this.subServices = [];
+    if (!id) return;
+
+    this.loadingSubServices = true;
+    this.coreService.getMainCategoryWithServices(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (services: ServiceCategory[]) => {
+          this.subServices = services || [];
+          this.loadingSubServices = false;
         },
-        error: (error) => {
-          console.error('Error loading subcategories:', error);
-          this.categorias = [];
-          this.isLoading = false;
+        error: () => {
+          this.subServices = [];
+          this.loadingSubServices = false;
           this.presentToast('Error al cargar servicios', 'danger');
         }
       });
-    }
   }
 
-// Método para depurar (puedes llamarlo desde el HTML o consola)
-debugState() {
-  console.log('=== DEBUG STATE ===');
-  console.log('selectedService:', this.selectedService);
-  console.log('selectedServiceId:', this.selectedServiceId);
-  console.log('selectedMainCategoryId:', this.selectedMainCategoryId);
-  console.log('activeCategory:', this.activeCategory);
-  console.log('categorias:', this.categorias);
-  console.log('servicioForm.categoria value:', this.servicioForm.get('categoria')?.value);
-  console.log('servicioForm.valid:', this.servicioForm.valid);
-  console.log('servicioForm.errors:', this.servicioForm.errors);
-  console.log('=== END DEBUG ===');
-}
-
-  // Datos de prueba para subcategorías
-  private getMockSubcategories(mainCategoryId: number): ServiceCategory[] {
-    const mockServices: Record<number, ServiceCategory[]> = {
-      1: [ // Hogar
-        { id: 101, name: 'Electricista', description: 'Servicios eléctricos', main_category_id: 1, icon: 'flash', is_active: true, created_at: '' },
-        { id: 102, name: 'Fontanería', description: 'Reparación de tuberías', main_category_id: 1, icon: 'water', is_active: true, created_at: '' },
-        { id: 103, name: 'Carpintería', description: 'Trabajos en madera', main_category_id: 1, icon: 'construct', is_active: true, created_at: '' }
-      ],
-      2: [ // Belleza
-        { id: 201, name: 'Peluquería', description: 'Cortes de cabello', main_category_id: 2, icon: 'cut', is_active: true, created_at: '' },
-        { id: 202, name: 'Manicure', description: 'Cuidado de uñas', main_category_id: 2, icon: 'hand-left', is_active: true, created_at: '' },
-        { id: 203, name: 'Maquillaje', description: 'Maquillaje profesional', main_category_id: 2, icon: 'color-palette', is_active: true, created_at: '' }
-      ],
-      3: [ // Salud
-        { id: 301, name: 'Masajes', description: 'Terapia de masajes', main_category_id: 3, icon: 'body', is_active: true, created_at: '' },
-        { id: 302, name: 'Fisioterapia', description: 'Rehabilitación física', main_category_id: 3, icon: 'fitness', is_active: true, created_at: '' }
-      ]
-    };
-    
-    return mockServices[mainCategoryId] || [];
-  }
-
-  // Seleccionar servicio
-  selectService(service: ServiceCategory) {
-    this.selectedService = service;
-    this.selectedServiceId = service.id;
-    this.servicioForm.patchValue({
-      categoria: service.id.toString()
-    });
-  }
-
-  // Abrir modal para seleccionar servicio
-  async openServiceModal() {
-    // Guard: evita crear múltiples instancias si el evento se dispara 2 veces
-    if (this.isServiceModalOpen) return;
-    this.isServiceModalOpen = true;
-
-    const modal = await this.modalCtrl.create({
-      component: ProviderModalServicePage,
-      cssClass: 'fullscreen-modal',
-      componentProps: {
-        mainCategories: this.mainCategories,
-        coreService: this.coreService,
-        mapboxService: this.mapboxService,
-        authService: this.authService,
-        currentUser: this.currentUser
-      }
-    });
-    
-    modal.onDidDismiss().then(async (result) => {
-      this.isServiceModalOpen = false;
-      if (result.role === 'confirm' && result.data) {
-        const selectedData = result.data;
-        this.selectedMainCategoryId = parseInt(selectedData.servicio);
-        this.selectedServiceId = parseInt(selectedData.categoria);
-        
-        // Buscar categoría principal
-        const selectedCategory = this.mainCategories.find(c => c.id === this.selectedMainCategoryId);
-        if (selectedCategory) {
-          this.activeCategory = selectedCategory;
-        }
-
-         // Actualizar el formulario con los nuevos valores
-      this.servicioForm.patchValue({
-      servicio: this.selectedMainCategoryId.toString(),
-      categoria: this.selectedServiceId.toString()
-    }, { emitEvent: true });
-      
-        
-        // Cargar subcategorías y luego buscar el servicio
-       await  this.loadSubcategories(this.selectedMainCategoryId);
-        setTimeout(() => {
-          const selectedService = this.categorias.find(s => s.id === this.selectedServiceId);
-          if (selectedService) {
-            this.selectedService = selectedService;
-          }
-        }, 500);
-      }
-    });
-    
-    await modal.present();
-  }
-
- 
-
-  // Limpiar selección de servicio
-  clearServiceSelection() {
-    this.servicioForm.patchValue({
-      servicio: '',
-      categoria: ''
-    });
-    this.selectedMainCategoryId = 0;
-    this.selectedServiceId = 0;
-    this.activeCategory = null;
-    this.selectedService = null;
-    this.categorias = [];
-  }
-
-  // Confirmar eliminación de servicio
-  async onConfirmDelete() {
-    const alert = await this.alertCtrl.create({
-      header: 'Eliminar servicio',
-      message: '¿Está seguro de eliminar este servicio?',
-      buttons: [
-        { text: 'Cancelar', role: 'cancel' },
-        { 
-          text: 'Eliminar', 
-          handler: () => {
-            this.clearServiceSelection();
-          }
-        }
-      ]
-    });
-    
-    await alert.present();
+  /** Paso 2: usuario selecciona servicio específico */
+  onServiceChange(event: any): void {
+    const id = Number(event?.detail?.value ?? 0);
+    this.selectedServiceId = id;
+    this.selectedService = this.subServices.find(s => s.id === id) ?? null;
   }
 
   // Configurar autocompletado de direcciones
@@ -418,7 +277,6 @@ debugState() {
   onAddressInput(event: any) {
     const query = event.target.value;
     this.selectedAddressText = query;
-    this.selectedAddress = query;
     
     if (this.selectedAddressObject && query !== this.getSuggestionDisplayText(this.selectedAddressObject)) {
       this.selectedAddressObject = null;
@@ -443,7 +301,6 @@ debugState() {
     setTimeout(() => {
       if (this.selectedAddressObject && !this.selectedAddressText) {
         this.selectedAddressText = this.getSuggestionDisplayText(this.selectedAddressObject);
-        this.selectedAddress = this.selectedAddressText;
       }
       this.showAddressSuggestions = false;
     }, 200);
@@ -452,7 +309,6 @@ debugState() {
   selectAddressSuggestion(suggestion: any) {
     this.selectedAddressObject = suggestion;
     this.selectedAddressText = this.getSuggestionDisplayText(suggestion);
-    this.selectedAddress = this.selectedAddressText;
     this.address.place = this.selectedAddressText;
     this.address.set = true;
     
@@ -482,7 +338,6 @@ debugState() {
 
   clearAddress() {
     this.selectedAddressText = '';
-    this.selectedAddress = '';
     this.selectedAddressObject = null;
     this.address.place = '';
     this.address.set = false;
@@ -499,14 +354,28 @@ debugState() {
     return CustomValidators.getErrorMessage(control);
   }
 
-  formatPhone(event: any) {
+  formatPhone(event: any): void {
     let value = event.target.value.replace(/\D/g, '');
-    if (value.startsWith('56') && value.length === 11) {
+
+    // Eliminar código de país si está al inicio
+    if (value.startsWith('56')) {
       value = value.substring(2);
     }
-    if (value.startsWith('9') && value.length === 9) {
-      value = `+56 ${value.substring(0, 1)} ${value.substring(1, 5)} ${value.substring(5)}`;
+
+    // Limitar a 9 dígitos (9 + 8 dígitos reales)
+    value = value.substring(0, 9);
+
+    // Formatear progresivamente: +56 9 XXXX XXXX
+    if (value.length > 0) {
+      if (value.length <= 1) {
+        value = `+56 9 ${value}`;
+      } else if (value.length <= 5) {
+        value = `+56 9 ${value.substring(1, 5)}`;
+      } else {
+        value = `+56 9 ${value.substring(1, 5)} ${value.substring(5, 9)}`;
+      }
     }
+
     this.servicioForm.patchValue({ fono: value });
   }
 

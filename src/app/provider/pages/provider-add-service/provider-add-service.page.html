@@ -26,68 +26,68 @@
     <!-- Formulario -->
     <form [formGroup]="servicioForm" class="form-container">
       
-      <!-- Selección de Servicio -->
+      <!-- Selección de Servicio (inline 2 pasos) -->
       <div class="form-section">
-        <!-- Botón para abrir modal de selección de servicio -->
-        <div class="input-with-suggestions" *ngIf="!(selectedMainCategoryId && selectedServiceId)">
-          <ion-item lines="none" button (click)="openServiceModal()">
+
+        <!-- Paso 1: Categoría principal -->
+        <div class="input-with-suggestions">
+          <ion-item lines="none">
             <ion-icon name="globe-outline" slot="start" color="primary"></ion-icon>
-            <ion-label color="medium">Seleccionar Servicio</ion-label>
-            <ion-icon name="chevron-forward" slot="end" color="medium"></ion-icon>
+            <ion-select
+              formControlName="servicio"
+              placeholder="Categoría principal"
+              interface="action-sheet"
+              cancelText="Cancelar"
+              (ionChange)="onMainCategoryChange($event)"
+            >
+              <ion-select-option *ngFor="let cat of mainCategories" [value]="cat.id">
+                {{ cat.name }}
+              </ion-select-option>
+            </ion-select>
           </ion-item>
           <div class="error-message" *ngIf="servicioForm.get('servicio')?.touched && servicioForm.get('servicio')?.errors?.['required']">
-            Debes seleccionar un servicio
+            Selecciona una categoría
           </div>
         </div>
 
-        <!-- Servicio seleccionado -->
-        <div *ngIf="selectedMainCategoryId && selectedServiceId" class="selected-service-container">
-          <div class="input-with-suggestions">
-            <ion-item lines="none">
-              <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
-              <ion-label>
-                <h3>Servicio seleccionado</h3>
-              </ion-label>
-              <ion-button
-                slot="end"
-                fill="clear"
-                size="small"
-                (click)="onConfirmDelete()"
-              >
-                <ion-icon name="close" slot="icon-only"></ion-icon>
-              </ion-button>
-            </ion-item>
-          </div>
-
-          <!-- Categoría principal -->
-          <div class="input-with-suggestions">
-            <ion-item lines="none">
-              <ion-icon name="globe-outline" slot="start" color="primary"></ion-icon>
-              <ion-input 
-                type="text" 
-                readonly
-              >{{activeCategory?.name}}</ion-input>
-            </ion-item>
-          </div>
-
-          <!-- Servicio -->
-          <div class="input-with-suggestions">
-            <ion-item lines="none">
-              <ion-icon name="construct" slot="start" color="primary"></ion-icon>
-              <ion-input 
-                type="text" 
-                readonly
-              >{{selectedService?.name}}</ion-input>
-            </ion-item>
-          </div>
-
-          <ion-item>
-          <ion-input type="text" formControlName="servicio" name="servicio" [value]="activeCategory?.id"></ion-input>
-          </ion-item>
-          <ion-item>
-          <ion-input type="text" formControlName="categoria" name="categoria" [value]="selectedService?.id"></ion-input>
+        <!-- Cargando subcategorías -->
+        <div class="input-with-suggestions" *ngIf="loadingSubServices">
+          <ion-item lines="none">
+            <ion-spinner name="crescent" slot="start" color="primary"></ion-spinner>
+            <ion-label color="medium">Cargando servicios...</ion-label>
           </ion-item>
         </div>
+
+        <!-- Paso 2: Servicio (dependiente de categoría) -->
+        <div class="input-with-suggestions" *ngIf="!loadingSubServices && subServices.length > 0">
+          <ion-item lines="none">
+            <ion-icon name="construct-outline" slot="start" color="primary"></ion-icon>
+            <ion-select
+              formControlName="categoria"
+              placeholder="Seleccionar servicio"
+              interface="action-sheet"
+              cancelText="Cancelar"
+              (ionChange)="onServiceChange($event)"
+            >
+              <ion-select-option *ngFor="let svc of subServices" [value]="svc.id">
+                {{ svc.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <div class="error-message" *ngIf="servicioForm.get('categoria')?.touched && servicioForm.get('categoria')?.errors?.['required']">
+            Selecciona un servicio
+          </div>
+        </div>
+
+        <!-- Sin servicios en la categoría -->
+        <div class="input-with-suggestions"
+             *ngIf="!loadingSubServices && selectedMainCategoryId && subServices.length === 0">
+          <ion-item lines="none">
+            <ion-icon name="alert-circle-outline" slot="start" color="medium"></ion-icon>
+            <ion-label color="medium">Sin servicios en esta categoría</ion-label>
+          </ion-item>
+        </div>
+
       </div>
 
       <!-- Ubicación -->
@@ -226,11 +226,13 @@
       </div>
 
       <!-- ── Disponibilidad (horarios por día) ─────────────────────────── -->
-      <ion-item lines="none" style="margin-top: 16px;">
-        <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
-        <ion-label><strong>Horarios disponibles</strong></ion-label>
-      </ion-item>
-      <p style="padding: 0 16px; font-size: 13px; color: var(--ion-color-medium);">
+      <div class="schedule-section-header">
+        <div class="schedule-section-icon">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <span class="schedule-section-title">Horarios disponibles</span>
+      </div>
+      <p class="schedule-subtitle">
         Activa los días en que ofreces este servicio y define el horario.
       </p>
 

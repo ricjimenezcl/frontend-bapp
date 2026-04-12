@@ -178,12 +178,12 @@ export class CustomValidators {
       return 'Email inválido';
     }
 
-    if (errors['minLength']) {
-      return `Mínimo ${errors['minLength'].requiredLength} caracteres`;
+    if (errors['minlength']) {
+      return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
     }
 
-    if (errors['maxLength']) {
-      return `Máximo ${errors['maxLength'].requiredLength} caracteres`;
+    if (errors['maxlength']) {
+      return `Máximo ${errors['maxlength'].requiredLength} caracteres`;
     }
 
     if (errors['pattern']) {

@@ -5,7 +5,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, catchError, shareReplay } from 'rxjs/operators';
+import { map, catchError, switchMap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 // Bounding box de Chile continental + isla de Pascua
@@ -39,43 +39,37 @@ export class MapboxService {
   constructor(private readonly http: HttpClient) {}
 
   // ── Autocompletado de direcciones (Chile) ──────────────────────────────
-  // Photon: sin API key, sin costo, OSM-based, ~50ms desde Chile
+  // Cadena de fallback: 1º backend proxy (Geoapify) → 2º Nominatim OSM
+  // El backend protege la API key y evita restricciones de CORS/rate-limit en cliente
   autocompleteChile(query: string): Observable<GeocodingFeature[]> {
-    if (!query || query.length < 2) return of([]);
+    const sanitized = query?.trim();
+    if (!sanitized || sanitized.length < 3) return of([]);
 
-    // ✅ Cache: Normalizar query y verificar cache
-    const cacheKey = query.toLowerCase().trim();
+    const cacheKey = sanitized.toLowerCase();
     const cached = this.autocompleteCache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.AUTOCOMPLETE_CACHE_TTL) {
-      console.log('[Cache HIT] Autocomplete:', cacheKey);
       return of(cached.data);
     }
 
-    console.log('[Cache MISS] Autocomplete:', cacheKey);
-    const url = `${PHOTON_BASE}/?q=${encodeURIComponent(query)}&lat=-33.45&lon=-70.65&lang=es&limit=8`;
+    // 1º intento: backend proxy — sin restricciones CORS ni rate-limit en cliente
+    const backendUrl = `${environment.apiUrl}/providers/geocoding/search?q=${encodeURIComponent(sanitized)}&country=cl`;
+    // 2º fallback: Nominatim directo (ya excluido del headersInterceptor)
+    const nominatimUrl = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(sanitized)}&countrycodes=cl&format=json&limit=8&addressdetails=1`;
 
-    return this.http.get<any>(url).pipe(
-      map(response => {
-        const features = this.normalizePhotonFeatures(response?.features || []);
-        
-        // ✅ Guardar en cache
-        this.autocompleteCache.set(cacheKey, {
-          data: features,
-          timestamp: Date.now()
-        });
-        
-        // ✅ Cleanup: LRU simple - eliminar entrada más antigua si excede límite
-        if (this.autocompleteCache.size > this.MAX_CACHE_SIZE) {
-          const firstKey = this.autocompleteCache.keys().next().value;
-          this.autocompleteCache.delete(firstKey);
-        }
-        
-        return features;
+    return this.http.get<any[]>(backendUrl).pipe(
+      catchError(() => {
+        console.warn('[Geocoding] Backend proxy falló, usando Nominatim...');
+        return this.http.get<any[]>(nominatimUrl).pipe(
+          catchError(err => {
+            console.error('[Geocoding] Nominatim también falló:', err);
+            return of([]);
+          })
+        );
       }),
-      shareReplay(1), // ✅ Compartir para requests simultáneos idénticos
-      catchError(err => {
-        console.error('Error geocoding Photon:', err);
-        return of([]);
+      map((results: any[]) => {
+        const features = this.normalizeSearchResults(Array.isArray(results) ? results : []);
+        this.setAutocompleteCache(cacheKey, features);
+        return features;
       })
     );
   }
@@ -164,28 +158,46 @@ export class MapboxService {
     return deg * (Math.PI / 180);
   }
 
-  // ── Normalizar respuesta Photon → formato compatible con código existente ──
+  // ── Normalizar resultados (Nominatim / backend proxy) ────────────────
+  // Ambos endpoints retornan formato Nominatim: array con display_name, lat, lon
+  private normalizeSearchResults(results: any[]): GeocodingFeature[] {
+    return results
+      .filter(r => r && (r.lat || r.latitude) && (r.lon || r.longitude || r.lng))
+      .map(r => {
+        const lat = parseFloat(r.lat ?? r.latitude ?? 0);
+        const lon = parseFloat(r.lon ?? r.longitude ?? r.lng ?? 0);
+        const displayName: string = r.display_name ?? r.formatted ?? '';
+        const parts = displayName.split(',');
+        const text = (parts[0]?.trim()) || r.name || 'Lugar';
+        const place_name = displayName || text;
+        return { place_name, center: [lon, lat] as [number, number], text };
+      });
+  }
+
+  // ── Helper cache con LRU simple ───────────────────────────────────────
+  private setAutocompleteCache(key: string, data: GeocodingFeature[]): void {
+    this.autocompleteCache.set(key, { data, timestamp: Date.now() });
+    if (this.autocompleteCache.size > this.MAX_CACHE_SIZE) {
+      const firstKey = this.autocompleteCache.keys().next().value;
+      this.autocompleteCache.delete(firstKey);
+    }
+  }
+
+  // Mantenido por compatibilidad con reverseGeocode (usa Photon properties)
   private normalizePhotonFeatures(features: any[]): GeocodingFeature[] {
     return features.map(f => {
       const p = f.properties || {};
       const [lng, lat] = f.geometry?.coordinates || [0, 0];
-
       const parts: string[] = [];
-      if (p.housenumber && p.street) {
-        parts.push(`${p.street} ${p.housenumber}`);
-      } else if (p.street) {
-        parts.push(p.street);
-      } else if (p.name) {
-        parts.push(p.name);
-      }
+      if (p.housenumber && p.street) parts.push(`${p.street} ${p.housenumber}`);
+      else if (p.street) parts.push(p.street);
+      else if (p.name)   parts.push(p.name);
       if (p.district && p.district !== p.city) parts.push(p.district);
-      if (p.city)     parts.push(p.city);
+      if (p.city)    parts.push(p.city);
       if (p.state && p.state !== p.city) parts.push(p.state);
-      if (p.country)  parts.push(p.country);
-
+      if (p.country) parts.push(p.country);
       const place_name = parts.filter(Boolean).join(', ') || 'Dirección sin nombre';
       const text = p.name || p.street || p.city || place_name;
-
       return { place_name, center: [lng, lat] as [number, number], text };
     });
   }

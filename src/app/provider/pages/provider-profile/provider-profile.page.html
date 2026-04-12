@@ -1,132 +1,148 @@
-<ion-content>
-  <div class="settings-content">
-    <!-- Profile hero -->
-    <ion-item lines="none" class="avatar-item">
-      <ion-avatar slot="start" (click)="onPage('account-info')">
-        <img [src]="providerProfile?.avatar || 'assets/images/default-avatar.png'"
-             [alt]="providerProfile?.full_name || 'Avatar'" />
-      </ion-avatar>
-      <ion-label (click)="onPage('account-info')">
-        <p class="title">{{ providerProfile?.full_name || 'Provider Name' }}</p>
-        <p class="sub-title">{{ providerProfile?.status || 'Always Available' }}</p>
-      </ion-label>
-    </ion-item>
+<ion-content class="profile-content">
 
-    <!-- Service Slots Component -->
-    <app-service-slots 
-      [providerId]="providerProfile?.id"
-      [compactMode]="false">
-    </app-service-slots>
+  <div class="profile-wrapper">
 
-    <!-- Premium Badge Component -->
-    <app-premium-badge 
-      [userId]="providerProfile?.user_id"
-      [compactMode]="false">
-    </app-premium-badge>
+    <!-- ── Profile hero ─────────────────────────────────────────────── -->
+    <div class="profile-hero">
+      <div class="hero-bg-orb"></div>
 
-    <!-- Account section -->
-    <div class="profile-section-card">
-      <ion-item
-        lines="inset"
-        class="content-item"
-        button
-        detail
-        (click)="onPage('/provider/provider-account-info')"
-      >
-        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
-        <ion-label>Cuenta</ion-label>
-      </ion-item>
+      <div class="profile-avatar-wrap" (click)="onPage('account-info')">
+        <img
+          class="profile-avatar"
+          [src]="providerProfile?.avatar || 'assets/images/default-avatar.png'"
+          [alt]="providerProfile?.full_name || 'Avatar'"
+          (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+      </div>
 
-      <ion-item
-        lines="none"
-        class="content-item"
-        button
-        detail
-        (click)="onPage('/provider/provider-validation')"
-      >
-        <ion-icon slot="start" name="shield-checkmark-outline" color="primary"></ion-icon>
-        <ion-label>Validación Biométrica</ion-label>
-      </ion-item>
+      <h2 class="profile-name" (click)="onPage('account-info')">
+        {{ providerProfile?.full_name || 'Proveedor' }}
+      </h2>
+      <p class="profile-status">{{ providerProfile?.status || 'Siempre disponible' }}</p>
     </div>
 
-    <!-- Preferences section -->
-    <div class="profile-section-card">
-      <ion-item
-        lines="inset"
-        class="content-item"
-        detail=""
-        (click)="onPage('languages')"
-      >
-        <ion-icon slot="start" name="language-outline" color="primary"></ion-icon>
-        <ion-label>Languages</ion-label>
-      </ion-item>
-
-      <ion-item lines="none" class="content-item">
-        <ion-icon slot="start" name="contrast" color="primary"></ion-icon>
-        <ion-label>Dark Mode</ion-label>
-        <ion-toggle slot="end" mode="md"></ion-toggle>
-      </ion-item>
+    <!-- ── Service Slots Component ──────────────────────────────────── -->
+    <div class="component-wrap">
+      <app-service-slots
+        [providerId]="providerProfile?.id"
+        [compactMode]="false">
+      </app-service-slots>
     </div>
 
-    <!-- Support section -->
-    <div class="profile-section-card">
-      <ion-item
-        lines="inset"
-        class="content-item"
-        detail=""
-        (click)="goToTransactions()"
-      >
-        <ion-icon slot="start" name="receipt-outline" color="primary"></ion-icon>
-        <ion-label>Mis Compras</ion-label>
-      </ion-item>
-
-      <ion-item
-        lines="inset"
-        class="content-item"
-        detail=""
-        (click)="goToCatalog()"
-      >
-        <ion-icon slot="start" name="cart-outline" color="primary"></ion-icon>
-        <ion-label>Tienda Premium</ion-label>
-      </ion-item>
-
-      <ion-item
-        lines="inset"
-        class="content-item"
-        detail=""
-        (click)="onPage('help')"
-      >
-        <ion-icon slot="start" name="information-circle-outline" color="primary"></ion-icon>
-        <ion-label>Centro de ayuda</ion-label>
-      </ion-item>
-
-      <ion-item
-        lines="inset"
-        class="content-item"
-        detail=""
-        (click)="onPage('help')"
-      >
-        <ion-icon slot="start" name="information-circle-outline" color="primary"></ion-icon>
-        <ion-label>Terminos y condiciones</ion-label>
-      </ion-item>
-
-      <ion-item
-        lines="none"
-        class="content-item"
-        detail=""
-        (click)="onPage('invite-friends')"
-      >
-        <ion-icon slot="start" name="gift-outline" color="primary"></ion-icon>
-        <ion-label>Invite Friends</ion-label>
-      </ion-item>
+    <!-- ── Premium Badge Component ──────────────────────────────────── -->
+    <div class="component-wrap">
+      <app-premium-badge
+        [userId]="providerProfile?.user_id"
+        [compactMode]="false">
+      </app-premium-badge>
     </div>
 
-    <!-- Logout -->
-    <div class="profile-section-card">
-      <ion-item lines="none" class="content-item" (click)="goSalir()">
-        <ion-icon slot="start" name="log-out-outline" color="danger"></ion-icon>
-        <ion-label class="lbl-red">Logout</ion-label>
-      </ion-item>
+    <!-- ── Sección: Cuenta ───────────────────────────────────────────── -->
+    <div class="menu-section">
+      <p class="menu-section-label">Cuenta</p>
+      <div class="menu-list">
+
+        <button class="menu-item" (click)="onPage('/provider/provider-account-info')" type="button">
+          <div class="menu-icon menu-icon-blue">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Cuenta</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="onPage('/provider/provider-validation')" type="button">
+          <div class="menu-icon menu-icon-green">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Validación Biométrica</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+      </div>
     </div>
+
+    <!-- ── Sección: Preferencias ─────────────────────────────────────── -->
+    <div class="menu-section">
+      <p class="menu-section-label">Preferencias</p>
+      <div class="menu-list">
+
+        <button class="menu-item" (click)="onPage('languages')" type="button">
+          <div class="menu-icon menu-icon-slate">
+            <ion-icon name="language-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Idiomas</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <div class="menu-item menu-item-toggle">
+          <div class="menu-icon menu-icon-slate">
+            <ion-icon name="contrast-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Modo oscuro</span>
+          <ion-toggle mode="md" class="bapp-toggle"></ion-toggle>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Sección: Soporte ──────────────────────────────────────────── -->
+    <div class="menu-section">
+      <p class="menu-section-label">Soporte</p>
+      <div class="menu-list">
+
+        <button class="menu-item" (click)="goToTransactions()" type="button">
+          <div class="menu-icon menu-icon-green">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Mis Compras</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="goToCatalog()" type="button">
+          <div class="menu-icon menu-icon-gold">
+            <ion-icon name="cart-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Tienda Premium</span>
+          <div class="menu-tag">Premium</div>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="onPage('help')" type="button">
+          <div class="menu-icon menu-icon-blue">
+            <ion-icon name="information-circle-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Centro de ayuda</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="onPage('help')" type="button">
+          <div class="menu-icon menu-icon-orange">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Términos y condiciones</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+        <button class="menu-item" (click)="onPage('invite-friends')" type="button">
+          <div class="menu-icon menu-icon-violet">
+            <ion-icon name="gift-outline"></ion-icon>
+          </div>
+          <span class="menu-label">Invitar amigos</span>
+          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- ── Cerrar sesión ─────────────────────────────────────────────── -->
+    <div class="logout-wrap">
+      <button class="logout-btn" (click)="goSalir()" type="button">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+
+    <div class="profile-footer-spacer"></div>
+
   </div>
+
 </ion-content>

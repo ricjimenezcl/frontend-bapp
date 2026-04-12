@@ -1,290 +1,224 @@
-<!--
-  Authors : initappz (Rahul Jograna)
-  Website : https://initappz.com/
-  App Name : Salon Locks & Lashes This App Template Source code is licensed as per the
-  terms found in the Website https://initappz.com/license
-  Copyright and Good Faith Purchasers © 2025-present initappz.
--->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start"> </ion-buttons>
-    <ion-title>Registro de Proveedor</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="login-bg">
+    <div class="login-wrap">
 
-<ion-content class="ion-padding">
-  <div class="login-screen">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Foto de Perfil</ion-card-title>
-        <p class="avatar-subtitle">Opcional - Puedes agregarla después</p>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="avatar-section" *ngIf="avatarPreview; else noAvatar">
-          <img [src]="avatarPreview" class="avatar-preview" />
-          <div class="avatar-actions">
-            <ion-button
-              fill="clear"
-              color="primary"
-              (click)="takePhoto()"
-              [disabled]="isTakingPhoto"
-            >
-              <ion-icon name="camera" slot="start"></ion-icon>
-              Cambiar
-            </ion-button>
-            <ion-button fill="clear" color="danger" (click)="removeAvatar()">
-              <ion-icon name="trash" slot="start"></ion-icon>
-              Eliminar
-            </ion-button>
+      <!-- Logo -->
+      <div class="login-logo">
+        <img src="assets/imgs/logo.png" alt="logo" class="logo-img">
+        <img src="assets/imgs/titulo.png" alt="titulo" class="titulo-img">
+        <p class="login-subtitle">Conecta con proveedores de servicios</p>
+      </div>
+
+      <!-- Card -->
+      <div class="login-card">
+        <h2 class="login-card-title">Crear cuenta de Proveedor</h2>
+
+        <!-- Avatar upload section -->
+        <div class="avatar-upload-section">
+          <p class="avatar-section-label">Foto de perfil <span class="avatar-optional">(opcional)</span></p>
+
+          <div class="avatar-preview-wrap" *ngIf="avatarPreview; else noAvatar">
+            <img [src]="avatarPreview" class="avatar-preview-img" alt="Vista previa" />
+            <div class="avatar-preview-actions">
+              <button type="button" class="avatar-action-btn avatar-action-change"
+                (click)="takePhoto()" [disabled]="isTakingPhoto">
+                <ion-icon name="camera-outline"></ion-icon>
+                <span>Cambiar</span>
+              </button>
+              <button type="button" class="avatar-action-btn avatar-action-remove"
+                (click)="removeAvatar()">
+                <ion-icon name="trash-outline"></ion-icon>
+                <span>Eliminar</span>
+              </button>
+            </div>
           </div>
+
+          <ng-template #noAvatar>
+            <button type="button" class="avatar-upload-placeholder" (click)="takePhoto()">
+              <div class="avatar-upload-icon">
+                <ion-icon name="camera-outline"></ion-icon>
+              </div>
+              <span class="avatar-upload-label">Agregar foto</span>
+              <span class="avatar-upload-hint">Toca para seleccionar</span>
+            </button>
+          </ng-template>
         </div>
 
-        <ng-template #noAvatar>
-          <div class="no-avatar" (click)="takePhoto()">
-            <ion-icon name="camera" size="large"></ion-icon>
-            <p>Agregar foto de perfil</p>
-            <small>Opcional</small>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
+
+          <!-- Nombre Completo -->
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('fullName')?.invalid && registerForm.get('fullName')?.touched">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="text"
+                formControlName="fullName"
+                placeholder="Ingresa tu nombre completo">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['required']">El nombre es requerido</span>
+            <span class="form-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
           </div>
-        </ng-template>
-      </ion-card-content>
-    </ion-card>
-    <ion-label class="title">Create Your Account</ion-label>
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <!-- Nombre Completo -->
-      <ion-item lines="none" class="input-item">
-        <ion-icon slot="start" name="person" color="medium"></ion-icon>
-        <ion-input
-          placeholder="Ingresa tu nombre completo"
-          type="text"
-          formControlName="fullName"
-        ></ion-input>
-      </ion-item>
-      <div
-        class="error-message"
-        *ngIf="
-          registerForm.get('fullName')?.touched &&
-          registerForm.get('fullName')?.errors
-        "
-      >
-        <span *ngIf="registerForm.get('fullName')?.errors?.['required']"
-          >El nombre es requerido</span
-        >
-        <span *ngIf="registerForm.get('fullName')?.errors?.['minlength']"
-          >El nombre debe tener al menos 2 caracteres</span
-        >
-      </div>
-      <!-- RUT -->
-      <ion-item lines="none" class="input-item">
-        <ion-icon slot="start" name="finger-print" color="medium"></ion-icon>
-        <ion-input
-          type="text"
-          formControlName="run"
-          maxlength="12"
-          placeholder="RUT (ej: 12.345.678-5)"
-          (ionInput)="formatRUT($event)"
-          (ionBlur)="onRUTBlur()"
-        >
-        </ion-input>
-      </ion-item>
 
-      <div
-        class="error-message"
-        *ngIf="registerForm.get('run')?.touched && registerForm.get('run')?.errors"
-      >
-        <span *ngIf="registerForm.get('run')?.errors?.['required']"
-          >El RUT es requerido</span
-        >
-        <span *ngIf="registerForm.get('run')?.errors?.['rutFormat']"
-          >Formato de RUT inválido (ej: 12.345.678-5)</span
-        >
-        <span *ngIf="registerForm.get('run')?.errors?.['rutInvalid']"
-          >El RUT ingresado no es válido</span
-        >
-      </div>
+          <!-- RUT -->
+          <div class="form-group">
+            <label class="form-label">RUT</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('run')?.invalid && registerForm.get('run')?.touched">
+              <ion-icon name="finger-print-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="text"
+                formControlName="run"
+                maxlength="12"
+                placeholder="Ej: 12.345.678-5"
+                (ionInput)="formatRUT($event)"
+                (ionBlur)="onRUTBlur()">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('run')?.touched && registerForm.get('run')?.errors?.['required']">El RUT es requerido</span>
+            <span class="form-error" *ngIf="registerForm.get('run')?.touched && registerForm.get('run')?.errors?.['rutFormat']">Formato de RUT inválido (ej: 12.345.678-5)</span>
+            <span class="form-error" *ngIf="registerForm.get('run')?.touched && registerForm.get('run')?.errors?.['rutInvalid']">El RUT ingresado no es válido</span>
+          </div>
 
-      <!-- Teléfono -->
+          <!-- Teléfono -->
+          <div class="form-group">
+            <label class="form-label">Teléfono</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
+              <ion-icon name="call-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="tel"
+                formControlName="phone"
+                placeholder="+56 9 1234 5678"
+                maxlength="17"
+                (ionInput)="formatPhone($event)">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.errors?.['required']">El teléfono es requerido</span>
+            <span class="form-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.errors?.['phoneLength']">El teléfono debe tener 9 dígitos (ej: +56 9 1234 5678)</span>
+            <span class="form-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.errors?.['phoneFormat']">El teléfono debe comenzar con 9</span>
+            <span class="form-error" *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.errors?.['pattern']">Formato de teléfono chileno inválido</span>
+          </div>
 
-      <ion-item lines="none" class="input-item">
-        <ion-icon slot="start" name="call" color="medium"></ion-icon>
-        <ion-input
-          type="tel"
-          formControlName="phone"
-          placeholder="+56 9 1234 5678"
-          maxlength="17"
-          (ionInput)="formatPhone($event)"
-        >
-        </ion-input>
-      </ion-item>
+          <!-- Email -->
+          <div class="form-group">
+            <label class="form-label">Correo electrónico</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="email"
+                formControlName="email"
+                placeholder="tu@email.com"
+                autocomplete="email">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.errors?.['required']">El email es requerido</span>
+            <span class="form-error" *ngIf="registerForm.get('email')?.touched && (registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['strictEmail'])">Ingresa un email válido (ej: usuario&#64;dominio.com)</span>
+          </div>
 
-      <div
-        class="error-message"
-        *ngIf="
-          registerForm.get('phone')?.touched &&
-          registerForm.get('phone')?.errors
-        "
-      >
-        <span *ngIf="registerForm.get('phone')?.errors?.['required']"
-          >El teléfono es requerido</span
-        >
-        <span *ngIf="registerForm.get('phone')?.errors?.['phoneLength']"
-          >El teléfono debe tener 9 dígitos (ej: +56 9 1234 5678)</span
-        >
-        <span *ngIf="registerForm.get('phone')?.errors?.['phoneFormat']"
-          >El teléfono debe comenzar con 9 (ej: +56 9 1234 5678)</span
-        >
-        <span *ngIf="registerForm.get('phone')?.errors?.['pattern']"
-          >Formato de teléfono chileno inválido (ej: +56 9 1234 5678)</span
-        >
-      </div>
+          <!-- Contraseña -->
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="password"
+                formControlName="password"
+                placeholder="Mín. 8 caracteres, mayúscula y número">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
+            <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
+            <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['uppercaseRequired']">Debe contener al menos una mayúscula</span>
+            <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['numberRequired']">Debe contener al menos un número</span>
+          </div>
 
-      <!-- Email -->
-      <ion-item lines="none" class="input-item">
-        <ion-icon slot="start" name="mail-outline" color="medium"></ion-icon>
-        <ion-input
-          type="email"
-          formControlName="email"
-          placeholder="tu@email.com"
-        ></ion-input>
-      </ion-item>
+          <!-- Confirmar Contraseña -->
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+              <ion-input
+                type="password"
+                formControlName="confirmPassword"
+                placeholder="Repite tu contraseña">
+              </ion-input>
+            </div>
+            <span class="form-error" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['required']">Confirma tu contraseña</span>
+            <span class="form-error" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['mismatch']">Las contraseñas no coinciden</span>
+          </div>
 
-      <div
-        class="error-message"
-        *ngIf="
-          registerForm.get('email')?.touched &&
-          registerForm.get('email')?.errors
-        "
-      >
-        <span *ngIf="registerForm.get('email')?.errors?.['required']"
-          >El email es requerido</span
-        >
-        <span *ngIf="registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['strictEmail']"
-          >Ingresa un email válido (ej: usuario&#64;dominio.com)</span
-        >
-      </div>
+          <!-- Términos y Condiciones -->
+          <div class="checkbox-wrap">
+            <ion-checkbox formControlName="termsAccepted" class="bapp-checkbox"></ion-checkbox>
+            <span class="checkbox-label">
+              Acepto los <a routerLink="/terms" target="_blank" class="terms-link">Términos y Condiciones</a>
+              y la <a routerLink="/privacy" target="_blank" class="terms-link">Política de Privacidad</a> *
+            </span>
+          </div>
+          <span class="form-error" *ngIf="registerForm.get('termsAccepted')?.touched && registerForm.get('termsAccepted')?.errors?.['required']">Debes aceptar los términos para continuar</span>
 
-      <!-- Contraseña -->
-      <ion-item lines="none" class="input-item">
-        <ion-icon
-          slot="start"
-          name="lock-closed-outline"
-          color="medium"
-        ></ion-icon>
-        <ion-input
-          type="password"
-          formControlName="password"
-          placeholder="Mínimo 8 caracteres, con mayúscula y número"
-        >
-        </ion-input>
-      </ion-item>
-      <div
-        class="error-message"
-        *ngIf="
-          registerForm.get('password')?.touched &&
-          registerForm.get('password')?.errors
-        "
-      >
-        <span *ngIf="registerForm.get('password')?.errors?.['required']"
-          >La contraseña es requerida</span
-        >
-        <span *ngIf="registerForm.get('password')?.errors?.['minlength']"
-          >Mínimo 8 caracteres</span
-        >
-        <span
-          *ngIf="registerForm.get('password')?.errors?.['uppercaseRequired']"
-          >Debe contener al menos una mayúscula</span
-        >
-        <span *ngIf="registerForm.get('password')?.errors?.['numberRequired']"
-          >Debe contener al menos un número</span
-        >
-      </div>
+          <!-- Consentimiento emails -->
+          <div class="checkbox-wrap">
+            <ion-checkbox formControlName="emailOptIn" class="bapp-checkbox"></ion-checkbox>
+            <span class="checkbox-label">Deseo recibir ofertas y novedades de BAPP Search por email (opcional)</span>
+          </div>
 
-      <ion-item lines="none" class="input-item">
-        <ion-icon
-          slot="start"
-          name="lock-closed-outline"
-          color="medium"
-        ></ion-icon>
-        <ion-input
-          type="password"
-          formControlName="confirmPassword"
-          placeholder="Repite tu contraseña"
-        >
-        </ion-input>
-      </ion-item>
+          <!-- Submit -->
+          <ion-button
+            type="submit"
+            expand="block"
+            class="submit-btn"
+            [disabled]="!registerForm.valid || isLoading || isTakingPhoto">
+            <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
+            <span>{{ isLoading ? "Registrando..." : "Registrarse" }}</span>
+          </ion-button>
 
-      <div
-        class="error-message"
-        *ngIf="
-          registerForm.get('confirmPassword')?.touched &&
-          registerForm.get('confirmPassword')?.errors
-        "
-      >
-        <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']"
-          >Confirma tu contraseña</span
-        >
-        <span *ngIf="registerForm.get('confirmPassword')?.errors?.['mismatch']"
-          >Las contraseñas no coinciden</span
-        >
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span class="divider-line"></span>
+          <span class="divider-text">o regístrate con</span>
+          <span class="divider-line"></span>
+        </div>
+
+        <!-- Social buttons -->
+        <div class="social-btns">
+          <button type="button" class="social-btn" (click)="registerWithGoogle()" [disabled]="isLoading">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Google
+          </button>
+          <button type="button" class="social-btn" (click)="registerWithFacebook()" [disabled]="isLoading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+            </svg>
+            Facebook
+          </button>
+        </div>
+
+        <!-- Exit link -->
+        <div class="register-links">
+          <button type="button" class="exit-link" (click)="showConfirmExit()">
+            <ion-icon name="log-out-outline"></ion-icon>
+            Salir del registro
+          </button>
+        </div>
+
       </div>
 
-      <!-- Términos y Condiciones (obligatorio) -->
-      <ion-item lines="none" class="checkbox-item">
-        <ion-checkbox formControlName="termsAccepted" slot="start"></ion-checkbox>
-        <ion-label class="ion-text-wrap">
-          Acepto los <a routerLink="/terms" target="_blank">Términos y Condiciones</a>
-          y la <a routerLink="/privacy" target="_blank">Política de Privacidad</a> *
-        </ion-label>
-      </ion-item>
-      <div class="error-message" *ngIf="registerForm.get('termsAccepted')?.touched && registerForm.get('termsAccepted')?.errors?.['required']">
-        <span>Debes aceptar los términos para continuar</span>
-      </div>
+      <!-- Terms footer -->
+      <p class="terms-text">
+        Al registrarte, aceptas nuestros
+        <a routerLink="/terms" class="terms-link-footer">Términos</a> y
+        <a routerLink="/privacy" class="terms-link-footer">Política de privacidad</a>
+      </p>
 
-      <!-- Consentimiento emails (opcional) -->
-      <ion-item lines="none" class="checkbox-item">
-        <ion-checkbox formControlName="emailOptIn" slot="start"></ion-checkbox>
-        <ion-label class="ion-text-wrap">
-          Deseo recibir ofertas y novedades de BAPP Search por email (opcional)
-        </ion-label>
-      </ion-item>
-
-      <!-- Botón de Registro -->
-      <ion-button
-        expand="block"
-        type="submit"
-        [disabled]="!registerForm.valid || isLoading || isTakingPhoto"
-        class="submit-button"
-      >
-        <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
-        <ion-icon *ngIf="!isLoading" name="person-add" slot="start"></ion-icon>
-        {{ isLoading ? "Registrando..." : "Registrarse" }}
-      </ion-button>
-    </form>
-    <!-- Separador o continuar con -->
-    <div class="or-separator">
-      <div class="line"></div>
-      <ion-label class="or-label">o regístrate con</ion-label>
-      <div class="line"></div>
     </div>
-
-    <!-- Botones de registro social -->
-    <div class="social-login">
-      <ion-button fill="outline" color="medium" (click)="registerWithFacebook()" [disabled]="isLoading">
-        <ion-icon slot="icon-only" name="logo-facebook" color="secondary"></ion-icon>
-      </ion-button>
-      <ion-button fill="outline" color="medium" (click)="registerWithGoogle()" [disabled]="isLoading">
-        <ion-icon slot="icon-only" name="logo-google" color="danger"></ion-icon>
-      </ion-button>
-    </div>
-
-    <ion-button
-      expand="block"
-      fill="clear"
-      color="medium"
-      (click)="showConfirmExit()"
-      class="exit-button"
-    >
-      <ion-icon name="log-out" slot="start"></ion-icon>
-      Salir
-    </ion-button>
   </div>
 </ion-content>
