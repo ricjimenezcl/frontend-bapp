@@ -111,7 +111,7 @@ ion-title {
   --color: var(--ion-color-light);
   font-family: 'bold';
   text-transform: capitalize;
-  font-size: 14px;
+  font-size: var(--bapp-text-sm);
 }
 
 ion-segment {
@@ -131,13 +131,13 @@ ion-button {
   border-radius: 10px;
 
   .lbl {
-    font-size: 12px;
+    font-size: var(--bapp-text-xs);
     font-family: 'regular';
     color: var(--ion-color-medium);
   }
 
   .search-icon {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'regular';
   }
 }
@@ -220,7 +220,7 @@ ion-modal.bookmark-modal {
     }
 
     .title {
-      font-size: 1.5rem;
+      font-size: var(--bapp-text-2xl);
       font-family: 'bold';
       color: var(--ion-color-dark);
       margin: 10px 0px;
@@ -250,7 +250,7 @@ ion-modal.bookmark-modal {
   }
 
   .title {
-    font-size: 18px;
+    font-size: var(--bapp-text-lg);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-align: center;
@@ -275,7 +275,7 @@ ion-modal.bookmark-modal {
     }
 
     .or-lbl {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'semi-bold';
       color: var(--ion-color-medium);
       text-align: center;
@@ -283,13 +283,13 @@ ion-modal.bookmark-modal {
   }
 
   .register-btn {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
 
     .register-text {
       color: var(--ion-color-primary);
       font-family: 'bold';
       margin: 0px 5px;
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
     }
   }
 }
@@ -310,7 +310,7 @@ ion-modal.bookmark-modal {
   .title {
     margin: 20px 0px;
     font-family: 'bold';
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     text-align: center;
   }
 
@@ -324,7 +324,7 @@ ion-modal.bookmark-modal {
     ion-input {
       --background: #222428;
       font-family: 'bold';
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
     }
   }
 
@@ -332,7 +332,7 @@ ion-modal.bookmark-modal {
     --padding-start: 5px;
 
     ion-label {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
     }
   }
 
@@ -341,12 +341,12 @@ ion-modal.bookmark-modal {
 
     .register-lbl-gray {
       color: var(--ion-color-medium);
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
     }
 
     .register-lbl-bold {
       color: var(--ion-color-primary);
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
       font-family: 'bold';
     }
   }
@@ -366,7 +366,7 @@ ion-modal.bookmark-modal {
     }
 
     .lbl {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'regular';
       color: var(--ion-color-medium);
       text-align: center;
@@ -392,7 +392,7 @@ ion-modal.bookmark-modal {
     }
 
     .title {
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
       font-family: 'bold';
       color: var(--ion-color-dark);
       text-align: start;
@@ -419,7 +419,7 @@ ion-modal.bookmark-modal {
         border-radius: 50%;
 
         ion-icon {
-          font-size: 2rem;
+          font-size: var(--bapp-text-4xl);
         }
       }
 
@@ -431,14 +431,14 @@ ion-modal.bookmark-modal {
         align-items: flex-start;
 
         .small-text {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'regular';
           color: var(--ion-color-medium);
           text-align: start;
         }
 
         .bold-text {
-          font-size: 16px;
+          font-size: var(--bapp-text-md);
           font-family: 'bold';
           color: var(--ion-color-dark);
           text-align: start;
@@ -454,7 +454,7 @@ ion-modal.bookmark-modal {
     align-items: center;
 
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'semi-bold';
       color: var(--ion-color-medium);
       text-align: center;
@@ -470,13 +470,13 @@ ion-modal.bookmark-modal {
     }
 
     .resend {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'regular';
       color: var(--ion-color-medium);
       margin: 10px 0px;
 
       .active {
-        font-size: 16px;
+        font-size: var(--bapp-text-md);
         font-family: 'bold';
         color: var(--ion-color-primary);
       }
@@ -493,7 +493,7 @@ ion-modal.bookmark-modal {
     }
 
     .title {
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
       font-family: 'bold';
       color: var(--ion-color-dark);
       text-align: start;
@@ -536,8 +536,20 @@ ion-modal.bookmark-modal {
 
   .input-content {
     --padding-start: 0px;
-    border-radius: 5px;
-    --background: #222428;
+    border-radius: var(--bapp-radius-md) !important;
+    --border-color: var(--ion-color-primary);
+    --background: #272822;
+    width: 100%;
+    margin: 10px 0px;
+    --inner-padding-start: 10px;
+    color:  #f3f3f3;
+  }
+
+  .select-content {
+    --padding-start: 0px;
+    border-radius: var(--bapp-radius-md) !important;
+    --border-color: var(--ion-color-primary);
+    --background: #272822;
     width: 100%;
     margin: 10px 0px;
     --inner-padding-start: 10px;
@@ -564,7 +576,7 @@ ion-modal.bookmark-modal {
   }
 
   .title {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'bold';
     color: var(--ion-color-primary);
     text-align: center;
@@ -572,7 +584,7 @@ ion-modal.bookmark-modal {
   }
 
   .sub-title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'semi-bold';
     color: var(--ion-color-medium);
     text-align: center;
@@ -683,14 +695,14 @@ ion-modal.bookmark-modal {
 
   @media (max-width: 500px) {
     h1 {
-      font-size: 30px;
+      font-size: var(--bapp-text-3xl);
     }
   }
 }
 
 .home_screen {
   .greeting-title {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'bold';
   }
 
@@ -724,20 +736,20 @@ ion-modal.bookmark-modal {
             align-items: flex-start;
 
             .title {
-              font-size: 14px;
+              font-size: var(--bapp-text-sm);
               font-family: 'bold';
               color: var(--ion-color-light);
             }
 
             .sub-title {
-              font-size: 16px;
+              font-size: var(--bapp-text-md);
               font-family: 'bold';
               color: var(--ion-color-light);
             }
           }
 
           .off-title {
-            font-size: 2rem;
+            font-size: var(--bapp-text-4xl);
             font-family: 'bold';
             color: var(--ion-color-light);
           }
@@ -746,7 +758,7 @@ ion-modal.bookmark-modal {
         .desc {
           padding: 10px;
           text-align: start;
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'semi-bold';
           color: var(--ion-color-light);
         }
@@ -775,7 +787,7 @@ ion-modal.bookmark-modal {
       }
 
       .name {
-        font-size: 10px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-light);
         text-align: center;
@@ -799,7 +811,7 @@ ion-modal.bookmark-modal {
     align-items: center;
 
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
       text-align: start;
@@ -807,7 +819,7 @@ ion-modal.bookmark-modal {
   }
 
   .segment-content {
-   
+
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
@@ -828,14 +840,14 @@ ion-modal.bookmark-modal {
 
   .name-content {
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
       text-align: start;
     }
 
     .address {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'semi-bold';
       color: var(--ion-color-medium);
       text-align: start;
@@ -859,14 +871,14 @@ ion-modal.bookmark-modal {
         align-items: center;
 
         .title {
-          font-size: 10px;
+          font-size: var(--bapp-text-xs);
           font-family: 'bold';
           color: var(--ion-color-medium);
           margin: 0px 5px;
         }
 
         ion-icon {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
         }
       }
     }
@@ -875,7 +887,7 @@ ion-modal.bookmark-modal {
 
 .notification-screen {
   .title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-align: start;
@@ -905,14 +917,14 @@ ion-modal.bookmark-modal {
       margin: 0px 10px;
 
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
       }
 
       .sub-title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
         text-align: start;
@@ -994,7 +1006,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .title {
-        font-size: 18px;
+        font-size: var(--bapp-text-lg);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
@@ -1002,7 +1014,7 @@ ion-modal.bookmark-modal {
       }
 
       .options {
-        font-size: 10px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-light);
         background-color: var(--ion-color-primary);
@@ -1013,7 +1025,7 @@ ion-modal.bookmark-modal {
     }
 
     .address {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'regular';
       color: var(--ion-color-medium);
       margin: 5px 0px;
@@ -1045,7 +1057,7 @@ ion-modal.bookmark-modal {
       }
 
       .title {
-        font-size: 10px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: center;
@@ -1069,7 +1081,7 @@ ion-modal.bookmark-modal {
     padding: 0px 16px;
 
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
       text-align: start;
@@ -1101,14 +1113,14 @@ ion-modal.bookmark-modal {
       }
 
       .title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-dark);
         margin: 5px 0px;
       }
 
       .sub-title {
-        font-size: 8px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
       }
@@ -1130,14 +1142,14 @@ ion-modal.bookmark-modal {
     padding: 0px 16px;
 
     .desc {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'regular';
       color: var(--ion-color-medium);
       margin: 10px 0px;
     }
 
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
       margin: 10px 0px;
@@ -1145,33 +1157,33 @@ ion-modal.bookmark-modal {
 
     .hours {
       .name {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
       }
 
       .separate {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
       }
 
       .time {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
       }
     }
 
     .contact-number {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'bold';
       color: var(--ion-color-primary);
       margin: 10px 0px;
     }
 
     .map-address {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'bold';
       color: var(--ion-color-medium);
       margin: 10px 0px;
@@ -1195,7 +1207,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
@@ -1223,7 +1235,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
@@ -1251,7 +1263,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
@@ -1278,7 +1290,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
@@ -1320,7 +1332,7 @@ ion-modal.bookmark-modal {
         }
 
         .name {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'bold';
           color: var(--ion-color-dark);
           text-align: start;
@@ -1335,7 +1347,7 @@ ion-modal.bookmark-modal {
         align-items: center;
 
         .rate {
-          font-size: 10px;
+          font-size: var(--bapp-text-xs);
           font-family: 'bold';
           color: var(--ion-color-primary);
           border: 1px solid var(--ion-color-primary);
@@ -1345,13 +1357,13 @@ ion-modal.bookmark-modal {
         }
 
         .more-icon {
-          font-size: 24px;
+          font-size: var(--bapp-text-2xl);
         }
       }
     }
 
     .desc {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'regular';
       color: var(--ion-color-medium);
       margin: 10px 0px;
@@ -1371,11 +1383,11 @@ ion-modal.bookmark-modal {
         align-items: center;
 
         ion-icon {
-          font-size: 24px;
+          font-size: var(--bapp-text-2xl);
         }
 
         .name {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'semi-bold';
           color: var(--ion-color-medium);
           margin: 0px 5px;
@@ -1410,7 +1422,7 @@ ion-modal.bookmark-modal {
   padding: 10px;
 
   .name {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-transform: capitalize;
@@ -1423,14 +1435,14 @@ ion-modal.bookmark-modal {
     align-items: center;
 
     .types {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-medium);
       margin: 0px 5px;
     }
 
     ion-icon {
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
     }
   }
 }
@@ -1440,7 +1452,7 @@ ion-modal.bookmark-modal {
     .item-content {
       .lbl {
         .title {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'bold';
           color: var(--ion-color-dark);
           text-align: start;
@@ -1448,14 +1460,14 @@ ion-modal.bookmark-modal {
         }
 
         .booked {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'semi-bold';
           color: var(--ion-color-medium);
           text-align: start;
         }
 
         .price {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'bold';
           color: var(--ion-color-primary);
           text-align: start;
@@ -1478,14 +1490,14 @@ ion-modal.bookmark-modal {
 
     .name-content {
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
       }
 
       .sub-title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
         text-align: start;
@@ -1510,13 +1522,13 @@ ion-modal.bookmark-modal {
 
   .name-content-item {
     .name {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
     }
 
     .desc {
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
       font-family: 'regular';
       margin: 5px 0px;
       color: var(--ion-color-medium);
@@ -1529,7 +1541,7 @@ ion-modal.bookmark-modal {
       align-items: center;
 
       .price {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-primary);
       }
@@ -1549,7 +1561,7 @@ ion-modal.bookmark-modal {
   }
 
   .title {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-align: start;
@@ -1557,21 +1569,21 @@ ion-modal.bookmark-modal {
   }
 
   .sub-title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'regular';
     color: var(--ion-color-medium);
     text-align: start;
   }
 
   .desc {
-    font-size: 12px;
+    font-size: var(--bapp-text-xs);
     font-family: 'regular';
     color: var(--ion-color-medium);
     margin: 10px 0px;
   }
 
   .bold-title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-align: start;
@@ -1579,7 +1591,7 @@ ion-modal.bookmark-modal {
   }
 
   .service-name {
-    font-size: 12px;
+    font-size: var(--bapp-text-xs);
     font-family: 'semi-bold';
     color: var(--ion-color-dark);
     text-align: start;
@@ -1593,7 +1605,7 @@ ion-modal.bookmark-modal {
 
 .slot-screen {
   .title {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'bold';
     color: var(--ion-color-dark);
     margin: 10px 0px;
@@ -1637,14 +1649,14 @@ ion-modal.bookmark-modal {
       }
 
       .title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-dark);
         margin: 5px 0px;
       }
 
       .sub-title {
-        font-size: 8px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
       }
@@ -1671,14 +1683,14 @@ ion-modal.bookmark-modal {
       padding: 10px;
 
       .title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'semi-bold';
         color: var(--ion-color-medium);
         text-align: start;
       }
 
       .title-bold {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: end;
@@ -1801,7 +1813,7 @@ ion-modal.bookmark-modal {
         align-items: flex-start;
 
         .title {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'regular';
           color: var(--ion-color-medium);
           text-align: start;
@@ -1812,7 +1824,7 @@ ion-modal.bookmark-modal {
         }
 
         .sub-title {
-          font-size: 16px;
+          font-size: var(--bapp-text-md);
           font-family: 'bold';
           color: var(--ion-color-dark);
           text-align: start;
@@ -1842,7 +1854,7 @@ ion-modal.bookmark-modal {
         padding-bottom: 10px;
 
         .date {
-          font-size: 10px;
+          font-size: var(--bapp-text-xs);
           font-family: 'bold';
           color: var(--ion-color-dark);
           text-align: start;
@@ -1855,7 +1867,7 @@ ion-modal.bookmark-modal {
           align-items: center;
 
           .remind {
-            font-size: 10px;
+            font-size: var(--bapp-text-xs);
             font-family: 'bold';
             color: var(--ion-color-medium);
             text-align: start;
@@ -1867,7 +1879,7 @@ ion-modal.bookmark-modal {
             color: var(--ion-color-light);
             border-radius: 5px;
             padding: 3px;
-            font-size: 10px;
+            font-size: var(--bapp-text-xs);
             font-family: 'bold';
           }
 
@@ -1876,7 +1888,7 @@ ion-modal.bookmark-modal {
             color: var(--ion-color-light);
             border-radius: 5px;
             padding: 3px;
-            font-size: 10px;
+            font-size: var(--bapp-text-xs);
             font-family: 'bold';
           }
         }
@@ -1896,14 +1908,14 @@ ion-modal.bookmark-modal {
 
         .name-content {
           .title {
-            font-size: 12px;
+            font-size: var(--bapp-text-xs);
             font-family: 'bold';
             color: var(--ion-color-dark);
             text-align: start;
           }
 
           .address {
-            font-size: 10px;
+            font-size: var(--bapp-text-xs);
             font-family: 'semi-bold';
             color: var(--ion-color-medium);
             text-align: start;
@@ -1911,7 +1923,7 @@ ion-modal.bookmark-modal {
           }
 
           .service-title {
-            font-size: 10px;
+            font-size: var(--bapp-text-xs);
             font-family: 'semi-bold';
             color: var(--ion-color-dark);
             text-align: start;
@@ -1921,7 +1933,7 @@ ion-modal.bookmark-modal {
             margin: 5px 0px;
 
             .name {
-              font-size: 10px;
+              font-size: var(--bapp-text-xs);
               color: var(--ion-color-primary);
               font-family: 'semi-bold';
             }
@@ -1940,14 +1952,14 @@ ion-modal.bookmark-modal {
 
 .cancel-modal-screen {
   .title {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     font-family: 'bold';
     color: var(--ion-color-dark);
     text-align: center;
   }
 
   .sub-title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'semi-bold';
     color: var(--ion-color-medium);
     text-align: center;
@@ -2014,13 +2026,13 @@ ion-modal.bookmark-modal {
         padding: 0px 10px;
 
         .name {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'bold';
           text-align: start;
         }
 
         .last-message {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'regular';
           text-align: start;
         }
@@ -2029,14 +2041,14 @@ ion-modal.bookmark-modal {
 
     .last {
       .time {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'semi-bold';
         color: var(--ion-color-medium);
         text-align: end;
       }
 
       .time-bold {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: end;
@@ -2065,7 +2077,7 @@ ion-modal.bookmark-modal {
           padding: 10px;
           border-radius: 15px 15px 15px 0px;
           color: var(--ion-color-dark);
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
         }
       }
     }
@@ -2089,7 +2101,7 @@ ion-modal.bookmark-modal {
           padding: 10px;
           border-radius: 15px 15px 0px 15px;
           color: #fff;
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
         }
       }
     }
@@ -2103,7 +2115,7 @@ ion-modal.bookmark-modal {
     --border-radius: 50px;
 
     ion-textarea {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'semi-bold';
     }
   }
@@ -2128,14 +2140,14 @@ ion-modal.bookmark-modal {
 
     .lbl {
       .title {
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'bold';
         color: var(--ion-color-dark);
         text-align: start;
       }
 
       .sub-title {
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'regular';
         color: var(--ion-color-medium);
         text-align: start;
@@ -2151,7 +2163,7 @@ ion-modal.bookmark-modal {
   }
 
   .lbl-title {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'regular';
     color: var(--ion-color-medium);
     text-align: start;
@@ -2162,17 +2174,17 @@ ion-modal.bookmark-modal {
     --padding-start: 0px;
 
     ion-icon {
-      font-size: 16px;
+      font-size: var(--bapp-text-md);
     }
 
     .lbl {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'semi-bold';
       color: var(--ion-color-dark);
     }
 
     .lbl-red {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'semi-bold';
       color: var(--ion-color-danger);
     }
@@ -2199,16 +2211,16 @@ ion-modal.bookmark-modal {
       --background: var(--ion-color-dark);
       color: #fdd735; // Color primario de tu tema
       font-family: 'bold';
-      font-size: 18px;
+      font-size: var(--bapp-text-lg);
       text-align: center;
     }
   }
-  
+
   .alert-message {
     --background: var(--ion-color-dark);
     color: #cccccc; // Color del texto del mensaje
     font-family: 'regular';
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     text-align: center;
     padding: 0 20px 20px 20px;
     line-height: 1.5;
@@ -2229,7 +2241,7 @@ ion-modal.bookmark-modal {
     border-bottom: 1px solid #444444;
     color: #ffffff;
     font-family: 'semi-bold';
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     text-transform: none;
     height: 56px;
     
@@ -2448,7 +2460,7 @@ ion-card {
 ion-badge {
   border-radius: var(--bapp-radius-full) !important;
   padding: 4px 10px !important;
-  font-size: 11px !important;
+  font-size: var(--bapp-text-xs) !important;
   font-weight: 600 !important;
   letter-spacing: 0.3px !important;
 }
@@ -2457,7 +2469,7 @@ ion-badge {
 ion-button {
   --border-radius: var(--bapp-radius-full) !important;
   letter-spacing: 0.2px !important;
-  font-size: 14px !important;
+  font-size: var(--bapp-text-sm) !important;
 }
 
 // ─── Premium ion-segment ────────────────────────────────────────────
@@ -2475,7 +2487,7 @@ ion-segment {
     min-height: 34px;
 
     ion-label {
-      font-size: 13px !important;
+      font-size: var(--bapp-text-sm) !important;
       font-family: 'semi-bold';
     }
   }
@@ -2484,12 +2496,13 @@ ion-segment {
 // ─── ion-item global ────────────────────────────────────────────────
 ion-item {
   --background: var(--ion-color-dark);
-  --background-activated: rgba(255,255,255,0.05);
+  --background-activated: rgba(233, 19, 19, 0.05);
   --background-focused: rgba(255,255,255,0.05);
-  --border-color: rgba(255,255,255,0.12);
+  --border-color: rgba(232, 18, 18, 0.12);
   --color: #ffffff;
   --placeholder-color: rgba(255,255,255,0.4);
   --highlight-color-focused: var(--ion-color-primary);
+  border-radius: var(--bapp-radius-md) !important;
 }
 
 // ─── ion-input global ───────────────────────────────────────────────
@@ -2498,7 +2511,7 @@ ion-input {
   --color: #ffffff !important;
   --placeholder-color: rgba(255,255,255,0.35) !important;
   --highlight-color: var(--ion-color-primary) !important;
-  --border-color: rgba(255,255,255,0.15) !important;
+  --border-color: rgba(234, 28, 28, 0.15) !important;
   --padding-start: 12px !important;
   --padding-end: 12px !important;
   --padding-top: 10px !important;
@@ -2524,16 +2537,16 @@ ion-input {
 
 // ─── ion-textarea global ────────────────────────────────────────────
 ion-textarea {
+  --padding-start: var(--bapp-space-2);
   --background: var(--ion-color-dark) !important;
   --color: #ffffff !important;
   --placeholder-color: rgba(255,255,255,0.35) !important;
   --highlight-color: var(--ion-color-primary) !important;
   --border-color: rgba(255,255,255,0.15) !important;
-  --padding-start: 12px !important;
   --padding-end: 12px !important;
   --padding-top: 10px !important;
   --padding-bottom: 10px !important;
-  border-radius: 10px;
+   border-radius: var(--bapp-radius-md) !important;
 
   textarea {
     color: #ffffff !important;
@@ -2546,10 +2559,33 @@ ion-select {
   --background: var(--ion-color-dark) !important;
   --color: #ffffff !important;
   --placeholder-color: rgba(255,255,255,0.35) !important;
-  --icon-color: rgba(255,255,255,0.5) !important;
-  color: #ffffff !important;
+  --highlight-color: var(--ion-color-primary) !important;
+  --border-color: rgba(255,255,255,0.15) !important;
+  --padding-start: 12px !important;
+  --padding-end: 12px !important;
+  --padding-top: 10px !important;
+  --padding-bottom: 10px !important;
   border-radius: 10px;
+
+  select {
+    color: #ffffff !important;
+    caret-color: var(--ion-color-primary) !important;
+
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-text-fill-color: #ffffff !important;
+      -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+      box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+      caret-color: var(--ion-color-primary);
+      transition: background-color 99999s ease-in-out 0s;
+    }
+  }
+
 }
+
+
 
 // ─── ion-searchbar global ───────────────────────────────────────────
 ion-searchbar {
@@ -2566,9 +2602,10 @@ ion-searchbar {
 // ─── ion-item con ion-input/textarea embebidos: borde visible ────────
 ion-item.item-interactive {
   --border-width: 0 !important;
-  border: 1px solid rgba(255,255,255,0.14) !important;
-  border-radius: 10px !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: var(--bapp-radius-md) !important;
   margin-bottom: 12px;
+  --background: var(--ion-color-dark);
 
   &.item-has-focus {
     border-color: var(--ion-color-primary) !important;
@@ -2583,7 +2620,7 @@ ion-header ion-toolbar {
 
   ion-title {
     font-family: 'semi-bold';
-    font-size: 16px !important;
+    font-size: var(--bapp-text-md) !important;
     color: var(--bapp-text-primary) !important;
     letter-spacing: 0.1px;
   }
@@ -2593,8 +2630,57 @@ ion-header ion-toolbar {
 .input-content {
   --background: var(--bapp-surface-03) !important;
   border-radius: var(--bapp-radius-md) !important;
+  border-color: var(--ion-color-primary) !important;
   margin-bottom: 12px !important;
-  border: 1px solid var(--bapp-border) !important;
+  
+}
+
+.select-content {
+  --padding-start: 0px;
+  --padding-end: 0px;
+  --background: var(--bapp-surface-03) !important;
+  border-radius: var(--bapp-radius-md) !important;
+  border-color: var(--ion-color-primary) !important;
+  margin-bottom: 12px !important;
+
+  &.item-has-focus {
+    border-color: var(--ion-color-primary) !important;
+    box-shadow: 0 0 0 2px rgba(253,215,53,0.15) !important;
+  }
+}
+
+
+// ─── Padding interno de ion-textarea dentro de ion-item ─────────────
+// Se pone en global.scss porque la encapsulación de Angular impide que
+// el override desde el SCSS del componente alcance el shadow DOM interno.
+ion-item.input-content ion-textarea,
+ion-item.select-content ion-textarea {
+  --padding-top: 0px !important;
+  --padding-bottom: 0px !important;
+  --padding-start: var(--bapp-space-2);
+  --padding-end: 0px !important;
+  --background: var(--ion-color-dark);
+}
+
+// ─── Centrado horizontal de placeholder/texto en form items ─────────
+ion-item.input-content ion-input::part(native),
+ion-item.select-content ion-input::part(native) {
+  text-align: center;
+}
+
+ion-item.input-content ion-textarea::part(native),
+ion-item.select-content ion-textarea::part(native) {
+  text-align: center;
+}
+
+ion-item.input-content ion-select::part(placeholder),
+ion-item.select-content ion-select::part(placeholder) {
+  text-align: center;
+}
+
+ion-item.input-content ion-select::part(text),
+ion-item.select-content ion-select::part(text) {
+  text-align: center;
 }
 
 // ─── Premium ion-list ───────────────────────────────────────────────
@@ -2658,25 +2744,27 @@ ion-badge[color="medium"] {
   overflow: hidden;
 
   ion-item {
-    --background: transparent;
+    --background: var(--ion-color-dark);
     --border-color: var(--bapp-border);
     --padding-start: var(--bapp-space-md);
     --inner-padding-end: var(--bapp-space-md);
+    border-radius: var(--bapp-radius-md) !important;
+
 
     ion-icon {
       color: var(--ion-color-primary);
-      font-size: 20px;
+      font-size: var(--bapp-text-xl);
       margin-right: 12px;
     }
 
     ion-label {
-      font-size: 15px;
+      font-size: var(--bapp-text-md);
       font-family: 'medium';
       color: var(--bapp-text-primary);
     }
 
     ion-note {
-      font-size: 13px;
+      font-size: var(--bapp-text-sm);
       color: var(--bapp-text-secondary);
     }
   }
@@ -2705,14 +2793,14 @@ ion-badge[color="medium"] {
   }
 
   .profile-name {
-    font-size: 20px;
+    font-size: var(--bapp-text-xl);
     font-family: 'bold';
     color: var(--bapp-text-primary);
     margin: 0;
   }
 
   .profile-email {
-    font-size: 13px;
+    font-size: var(--bapp-text-sm);
     color: var(--bapp-text-secondary);
     margin: 0;
   }
@@ -2736,13 +2824,13 @@ ion-alert {
   .alert-title {
     color: var(--ion-color-primary) !important;
     font-family: 'bold', sans-serif !important;
-    font-size: 17px !important;
+    font-size: var(--bapp-text-lg) !important;
   }
 
   .alert-sub-title,
   .alert-message {
     color: rgba(255,255,255,0.75) !important;
-    font-size: 14px !important;
+    font-size: var(--bapp-text-sm) !important;
     line-height: 1.5 !important;
   }
 
@@ -2792,7 +2880,7 @@ ion-action-sheet {
 
   .action-sheet-title {
     color: rgba(255,255,255,0.5) !important;
-    font-size: 13px !important;
+    font-size: var(--bapp-text-sm) !important;
     background: var(--ion-color-dark) !important;
   }
 
@@ -2800,7 +2888,7 @@ ion-action-sheet {
     background: var(--ion-color-dark) !important;
     color: #fff !important;
     border-bottom: 1px solid rgba(255,255,255,0.07) !important;
-    font-size: 16px !important;
+    font-size: var(--bapp-text-md) !important;
 
     &:last-child { border-bottom: none !important; }
 
@@ -2834,7 +2922,7 @@ ion-loading {
 
   .loading-content {
     color: rgba(255,255,255,0.8) !important;
-    font-size: 14px !important;
+    font-size: var(--bapp-text-sm) !important;
     margin-top: 12px !important;
   }
 }
@@ -2854,8 +2942,8 @@ ion-popover {
   ion-list, ion-item {
     --background: var(--ion-color-dark) !important;
     --color: #fff !important;
-    --border-color: rgba(255,255,255,0.08) !important;
-  }
+    --border-color: rgba(255, 255, 255, 0.08) !important;
+border-radius: var(--bapp-radius-md) !important;  }
 }
 
 // ── ion-modal ──────────────────────────────────────────────────────────────────
@@ -2867,23 +2955,23 @@ ion-modal {
   ion-item {
     --background: var(--ion-color-dark);
     --border-radius: 12px;
-    border-radius: 12px;
-    margin-bottom: 12px;
+    border-radius: var(--bapp-radius-md) !important;
+    margin-bottom: 0px;
     border: 1px solid var(--ion-color-primary);
     
     ion-icon {
       color: var(--ion-color-primary);
       margin-right: 16px;
-      font-size: 24px;
+      font-size: var(--bapp-text-2xl);
     }
-    
+
     ion-label {
       font-weight: 500;
       color: #fff;
     }
     
     ion-input {
-      --padding-start: 8px;
+      --padding-start: 0px;
       --color: #fff;
       --background: var(--ion-color-dark);
       --placeholder-color: rgba(255,255,255,0.4);
@@ -2902,6 +2990,48 @@ ion-modal {
           caret-color: var(--ion-color-primary);
           transition: background-color 99999s ease-in-out 0s;
         }
+      }
+    }
+
+    // ion-select ocupa el mismo ancho que ion-input
+    ion-select {
+      --padding-start: 0px;
+      
+      --color: #fff;
+      --background: var(--ion-color-dark);
+      --placeholder-color: rgba(255,255,255,0.4);
+      select {
+        color: #fff !important;
+        caret-color: var(--ion-color-primary);
+
+        &:-webkit-autofill,
+        &:-webkit-autofill:hover,
+        &:-webkit-autofill:focus,
+        &:-webkit-autofill:active {
+          -webkit-text-fill-color: #fff !important;
+          -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+          box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
+          caret-color: var(--ion-color-primary);
+          transition: background-color 99999s ease-in-out 0s;
+        }
+      }
+    }
+
+    // ion-textarea no supera la altura del ion-item estándar (~52px)
+    ion-textarea {
+      --padding-start: 8px;
+      --color: #fff;
+      --background: var(--ion-color-dark);
+      --placeholder-color: rgba(255,255,255,0.4);
+      align-self: center;
+      max-height: 52px;
+      overflow: hidden;
+
+      textarea {
+        max-height: 52px;
+        overflow: auto !important;
+        color: #fff !important;
+        caret-color: var(--ion-color-primary);
       }
     }
   }

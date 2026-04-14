@@ -1,16 +1,7 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <!-- Título + subtítulo -->
-    <div class="header-content">
-      <h2 class="page-title">Gestión de Reservas</h2>
-      <p class="page-subtitle">{{ bookings.length }} reservas en total</p>
-    </div>
-  </ion-toolbar>
-
-  <!-- Filter pills (segment → pill tabs) -->
-  <ion-toolbar class="filter-toolbar">
-    <ion-segment [value]="selectedSegment" [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)"
-                 scrollable class="filter-segment">
+<ion-header class="bk-header">
+  <ion-toolbar class="bk-toolbar">
+    <!-- Filter pills (segment → pill tabs) -->
+    <ion-segment [value]="selectedSegment" (ionChange)="segmentChanged($event)" class="bk-segment">
       <ion-segment-button value="pending">
         <ion-label>Pendientes</ion-label>
       </ion-segment-button>
@@ -24,77 +15,82 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content class="bk-content">
 
   <!-- Loading -->
-  <div class="loading-state" *ngIf="isLoading">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Cargando reservas...</p>
+  <div class="bk-loading" *ngIf="isLoading">
+    <div class="booking-skeleton" *ngFor="let n of [0,1,2]">
+      <div class="skel-row">
+        <div class="skel-title"></div>
+        <div class="skel-badge"></div>
+      </div>
+      <div class="skel-line skel-long"></div>
+      <div class="skel-line skel-short"></div>
+    </div>
   </div>
 
   <!-- Empty -->
-  <div class="empty-state" *ngIf="!isLoading && filteredBookings.length === 0">
-    <span class="empty-emoji">📅</span>
-    <p class="empty-title">Sin reservas</p>
-    <p class="empty-sub">No hay reservas en esta categoría</p>
+  <div class="bk-empty" *ngIf="!isLoading && filteredBookings.length === 0">
+    <div class="bk-empty-icon-wrap">
+      <ion-icon name="calendar-outline"></ion-icon>
+    </div>
+    <p class="bk-empty-title">Sin reservas</p>
+    <p class="bk-empty-sub">No hay reservas en esta categoría</p>
   </div>
 
   <!-- Booking cards -->
-  <div class="bookings-list" *ngIf="!isLoading && filteredBookings.length > 0">
+  <div class="bk-list" *ngIf="!isLoading && filteredBookings.length > 0">
 
     <div class="booking-card" *ngFor="let booking of filteredBookings">
 
-      <!-- Client row -->
-      <div class="client-row">
-        <div class="client-avatar">
+      <!-- Client row (card header) -->
+      <div class="bk-card-head">
+        <div class="bk-service-icon">
           <img *ngIf="booking.client_avatar" [src]="booking.client_avatar" alt="avatar" class="avatar-img">
-          <ion-icon *ngIf="!booking.client_avatar" name="person-circle-outline" class="avatar-icon"></ion-icon>
+          <ion-icon *ngIf="!booking.client_avatar" name="person-circle-outline"></ion-icon>
         </div>
-        <div class="client-info">
-          <div class="client-header">
-            <span class="client-name">{{ booking.client_name || 'Cliente #' + booking.client_id }}</span>
-            <span class="status-badge"
-              [class.badge-pending]="(booking.status | lowercase) === 'pending'"
-              [class.badge-confirmed]="(booking.status | lowercase) === 'confirmed' || (booking.status | lowercase) === 'in_progress'"
-              [class.badge-completed]="(booking.status | lowercase) === 'completed'"
-              [class.badge-cancelled]="(booking.status | lowercase) === 'cancelled'">
-              {{ booking.status | uppercase }}
-            </span>
-          </div>
-          <span class="client-service">{{ booking.description || 'Reserva de servicio' }}</span>
+        <div class="bk-service-info">
+          <span class="bk-service-name">{{ booking.client_name || 'Cliente #' + booking.client_id }}</span>
+          <span class="bk-service-label">{{ booking.description || 'Reserva de servicio' }}</span>
+        </div>
+        <div class="bk-status-badge" [attr.data-status]="booking.status">
+          {{ booking.status | uppercase }}
         </div>
       </div>
 
-      <!-- Info rows -->
-      <div class="info-row">
-        <ion-icon name="calendar-outline" class="info-icon"></ion-icon>
-        <span class="info-text">{{ booking.scheduled_date | date:'short' }}</span>
-      </div>
+      <div class="bk-divider"></div>
 
-      <div class="info-row" *ngIf="booking.location_address">
-        <ion-icon name="location-outline" class="info-icon"></ion-icon>
-        <span class="info-text truncate">{{ booking.location_address }}</span>
-      </div>
+      <!-- Details -->
+      <div class="bk-details">
 
-      <!-- Description quote -->
-      <div class="description-box" *ngIf="booking.description">
-        <span class="desc-text">"{{ booking.description }}"</span>
+        <div class="bk-detail-row" *ngIf="booking.scheduled_date">
+          <ion-icon name="calendar-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text">
+            {{ booking.scheduled_date | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+        <div class="bk-detail-row" *ngIf="booking.location_address">
+          <ion-icon name="location-outline" class="bk-detail-icon"></ion-icon>
+          <span class="bk-detail-text bk-desc">{{ booking.location_address }}</span>
+        </div>
+
       </div>
 
       <!-- Action buttons for pending -->
-      <div class="card-actions" *ngIf="(booking.status | lowercase) === 'pending'">
-        <button class="btn-accept" (click)="acceptBooking(booking)">
+      <div class="bk-actions" *ngIf="(booking.status | lowercase) === 'pending'">
+        <button class="bk-btn bk-btn-chat" (click)="acceptBooking(booking)" type="button">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
-          Aceptar
+          <span>Aceptar</span>
         </button>
-        <button class="btn-reject" (click)="rejectBooking(booking)">
-          <ion-icon name="close-circle-outline"></ion-icon>
-          Rechazar
+        <button class="bk-btn bk-btn-cancel" (click)="rejectBooking(booking)" type="button">
+          <ion-icon name="close-outline"></ion-icon>
+          <span>Rechazar</span>
         </button>
       </div>
 
     </div><!-- end booking-card -->
 
-  </div><!-- end bookings-list -->
+  </div><!-- end bk-list -->
 
 </ion-content>

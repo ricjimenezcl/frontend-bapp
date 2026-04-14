@@ -24,48 +24,44 @@
     </div>
 
     <!-- Formulario -->
-    <form [formGroup]="servicioForm" class="form-container">
+    <form [formGroup]="servicioForm">
       
       <!-- Selección de Servicio (inline 2 pasos) -->
-      <div class="form-section">
-
-        <!-- Paso 1: Categoría principal -->
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+  
+          <ion-item lines="none" class="select-content">
             <ion-icon name="globe-outline" slot="start" color="primary"></ion-icon>
-            <ion-select
+            <ion-select 
               formControlName="servicio"
               placeholder="Categoría principal"
-              interface="action-sheet"
+             
               cancelText="Cancelar"
               (ionChange)="onMainCategoryChange($event)"
             >
-              <ion-select-option *ngFor="let cat of mainCategories" [value]="cat.id">
+              <ion-select-option  *ngFor="let cat of mainCategories" [value]="cat.id">
                 {{ cat.name }}
               </ion-select-option>
             </ion-select>
-          </ion-item>
+          </ion-item >
           <div class="error-message" *ngIf="servicioForm.get('servicio')?.touched && servicioForm.get('servicio')?.errors?.['required']">
             Selecciona una categoría
           </div>
-        </div>
+        
 
         <!-- Cargando subcategorías -->
-        <div class="input-with-suggestions" *ngIf="loadingSubServices">
-          <ion-item lines="none">
+        <div  *ngIf="loadingSubServices">
+          <ion-item lines="none" class="select-content">
             <ion-spinner name="crescent" slot="start" color="primary"></ion-spinner>
             <ion-label color="medium">Cargando servicios...</ion-label>
           </ion-item>
         </div>
 
         <!-- Paso 2: Servicio (dependiente de categoría) -->
-        <div class="input-with-suggestions" *ngIf="!loadingSubServices && subServices.length > 0">
-          <ion-item lines="none">
+        <div *ngIf="!loadingSubServices && subServices.length > 0">
+          <ion-item lines="none"  class="select-content">
             <ion-icon name="construct-outline" slot="start" color="primary"></ion-icon>
             <ion-select
               formControlName="categoria"
               placeholder="Seleccionar servicio"
-              interface="action-sheet"
               cancelText="Cancelar"
               (ionChange)="onServiceChange($event)"
             >
@@ -80,20 +76,20 @@
         </div>
 
         <!-- Sin servicios en la categoría -->
-        <div class="input-with-suggestions"
+        <div
              *ngIf="!loadingSubServices && selectedMainCategoryId && subServices.length === 0">
-          <ion-item lines="none">
+          <ion-item lines="none" class="select-content">
             <ion-icon name="alert-circle-outline" slot="start" color="medium"></ion-icon>
             <ion-label color="medium">Sin servicios en esta categoría</ion-label>
           </ion-item>
         </div>
 
-      </div>
+      
 
       <!-- Ubicación -->
-      <div class="form-section">
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+      <div>
+
+          <ion-item lines="none" class="input-content">
             <ion-icon name="location-outline" slot="start" color="primary"></ion-icon>
             <ion-input
               type="text"
@@ -143,20 +139,20 @@
           <div class="error-message" *ngIf="servicioForm.get('direccion')?.touched && servicioForm.get('lat')?.errors?.['required']">
             Selecciona una dirección de la lista de sugerencias
           </div>
-        </div>
+
       </div>
 
       <!-- Información del Proveedor -->
-      <div class="form-section">
+      <div>
         <!-- Nombre del Prestador -->
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+        <div>
+          <ion-item class="input-content">
             <ion-icon name="person" slot="start" color="primary"></ion-icon>
             <ion-input
               type="text"
               formControlName="nombre_prestador"
               name="nombre_prestador"
-              placeholder="NOMBRE O RAZÓN SOCIAL"
+              placeholder="Nombre del prestador"
             >
             </ion-input>
           </ion-item>
@@ -169,8 +165,8 @@
         </div>
 
         <!-- Teléfono -->
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+
+          <ion-item lines="none" class="input-content">
             <ion-icon name="call" slot="start" color="primary"></ion-icon>
             <ion-input
               type="tel"
@@ -185,26 +181,26 @@
           <div class="error-message" *ngIf="servicioForm.get('fono')?.errors && servicioForm.get('fono')?.touched">
             {{ getError('fono') }}
           </div>
-        </div>
+
 
         <!-- Detalle del Servicio -->
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+
+          <ion-item lines="none" class="input-content">
             <ion-icon name="information-circle" slot="start" color="primary"></ion-icon>
             <ion-textarea
               formControlName="detalle"
-              placeholder="DETALLE DEL SERVICIO (opcional)"
+              placeholder="Detalle del servicio (opcional)"
               rows="3"
               maxlength="100"
               name="detalle"
             >
             </ion-textarea>
           </ion-item>
-        </div>
+
 
         <!-- Tarifa por hora -->
-        <div class="input-with-suggestions">
-          <ion-item lines="none">
+
+          <ion-item lines="none" class="input-content">
             <ion-icon name="cash-outline" slot="start" color="primary"></ion-icon>
             <ion-input
               type="number"
@@ -215,7 +211,7 @@
             >
             </ion-input>
           </ion-item>
-        </div>
+
 
         <!-- Campos ocultos para dirección, lat y lng -->
         <div style="display: none;">

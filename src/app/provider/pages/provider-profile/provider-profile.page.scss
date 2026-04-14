@@ -127,7 +127,7 @@ ion-content.profile-content {
   }
 
   .menu-tag {
-    font-size: 10px;
+    font-size: var(--bapp-text-xs);
     font-weight: var(--bapp-font-bold);
     letter-spacing: 0.06em;
     text-transform: uppercase;

@@ -77,6 +77,7 @@ import {
   closeCircle,
   chevronForward,
   fingerPrint,
+  fingerPrintOutline,
   informationCircle,
   save,
   call,
@@ -284,6 +285,7 @@ addIcons({
   storefrontOutline,
   navigateOutline,
   briefcase,
+  fingerPrintOutline,
   list: listOutline
 });
 

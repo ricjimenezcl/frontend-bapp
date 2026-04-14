@@ -212,7 +212,7 @@ ion-chip {
   border: 1px solid var(--bapp-border);
   transition: all var(--bapp-transition-fast);
 
-  ion-icon { font-size: 14px; }
+  ion-icon { font-size: var(--bapp-text-sm); }
 
   &.chip-active, &.selected {
     --background: var(--bapp-color-primary);
@@ -315,12 +315,12 @@ ion-tab-bar {
     --background-focused: transparent;
     --padding-top: var(--bapp-space-2);
     --padding-bottom: var(--bapp-space-2);
-    font-size: 10px;
+    font-size: var(--bapp-text-xs);
     font-weight: var(--bapp-weight-medium);
     transition: color var(--bapp-transition-fast);
 
     ion-icon {
-      font-size: 22px;
+      font-size: var(--bapp-text-xl);
       margin-bottom: 2px;
     }
 
@@ -529,7 +529,7 @@ ion-list {
     color: var(--bapp-color-primary);
     font-weight: var(--bapp-font-semibold);
 
-    ion-icon { font-size: 12px; }
+    ion-icon { font-size: var(--bapp-text-xs); }
   }
 
   .provider-card-price {
@@ -622,7 +622,7 @@ ion-list {
   gap: 2px;
 
   ion-icon {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
 
     &.star-full  { color: var(--bapp-color-primary); }
     &.star-empty { color: var(--bapp-border-subtle); }
@@ -649,7 +649,7 @@ ion-list {
   border-radius: var(--bapp-radius-full);
   background: var(--bapp-color-primary);
   color: var(--bapp-color-on-primary);
-  font-size: 10px;
+  font-size: var(--bapp-text-xs);
   font-weight: var(--bapp-weight-bold);
   @include flex-center;
   padding: 0 5px;

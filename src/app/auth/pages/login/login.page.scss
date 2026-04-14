@@ -83,7 +83,7 @@ ion-content {
   font-size: var(--bapp-text-sm);
 
   ion-icon {
-    font-size: 16px;
+    font-size: var(--bapp-text-md);
     flex-shrink: 0;
     margin-top: 1px;
   }

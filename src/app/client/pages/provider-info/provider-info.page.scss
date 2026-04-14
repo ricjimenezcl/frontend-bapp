@@ -121,7 +121,7 @@ ion-datetime {
       align-items: center;
 
       .title {
-        font-size: 18px;
+        font-size: var(--bapp-text-lg);
         font-family: 'bold';
         color: #fff;
         text-align: start;
@@ -130,7 +130,7 @@ ion-datetime {
       }
 
       .options {
-        font-size: 10px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: var(--ion-color-light);
         background-color: var(--ion-color-primary);
@@ -142,7 +142,7 @@ ion-datetime {
     }
 
     .address {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'regular';
       color: var(--ion-color-medium);
       margin: 5px 0px;
@@ -185,12 +185,12 @@ ion-datetime {
         }
 
         ion-icon {
-          font-size: 20px;
+          font-size: var(--bapp-text-xl);
         }
       }
 
       .title {
-        font-size: 10px;
+        font-size: var(--bapp-text-xs);
         font-family: 'bold';
         color: #fff;
         text-align: center;
@@ -217,7 +217,7 @@ ion-datetime {
     margin-bottom: 12px;
 
     .title {
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: #fff;
       text-align: start;
@@ -225,13 +225,13 @@ ion-datetime {
 
     ion-button {
       margin: 0;
-      font-size: 12px;
+      font-size: var(--bapp-text-xs);
     }
   }
 
   /* Description */
   .desc {
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'regular';
     color: #fff;
     padding: 0px 16px;
@@ -254,7 +254,7 @@ ion-datetime {
 
       .price-label {
         display: block;
-        font-size: 12px;
+        font-size: var(--bapp-text-xs);
         font-family: 'semi-bold';
         color: rgba(255, 255, 255, 0.9);
         text-transform: uppercase;
@@ -289,7 +289,7 @@ ion-datetime {
 
       ion-icon {
         flex-shrink: 0;
-        font-size: 20px;
+        font-size: var(--bapp-text-xl);
         margin-top: 2px;
       }
 
@@ -300,13 +300,13 @@ ion-datetime {
         flex: 1;
 
         .label {
-          font-size: 12px;
+          font-size: var(--bapp-text-xs);
           font-family: 'semi-bold';
           color: #fff;
         }
 
         .value {
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-family: 'semi-bold';
           color: #fff;
         }
@@ -322,7 +322,7 @@ ion-datetime {
 
     .form-label {
       display: block;
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       font-family: 'bold';
       color: var(--ion-color-dark);
       margin-bottom: 8px;
@@ -333,14 +333,14 @@ ion-datetime {
       --padding-end: 12px;
       height: auto;
       min-height: 44px;
-      font-size: 14px;
+      font-size: var(--bapp-text-sm);
       text-align: left;
       margin: 0;
     }
 
     .error-hint {
       color: var(--ion-color-danger);
-      font-size: 0.8em;
+      font-size: var(--bapp-text-xs);
       margin: 8px 0 0 0;
     }
   }
@@ -390,7 +390,7 @@ ion-datetime {
           flex-shrink: 0;
           margin-right: 12px;
           margin-top: 2px;
-          font-size: 18px;
+          font-size: var(--bapp-text-lg);
         }
 
         .suggestion-text {
@@ -398,14 +398,14 @@ ion-datetime {
           min-width: 0;
 
           .suggestion-main {
-            font-size: 14px;
+            font-size: var(--bapp-text-sm);
             font-weight: 500;
             color: #333;
             word-break: break-word;
           }
 
           .suggestion-details {
-            font-size: 12px;
+            font-size: var(--bapp-text-xs);
             color: #999;
             margin-top: 4px;
             word-break: break-word;
@@ -476,7 +476,7 @@ ion-datetime {
 
       h2 {
         margin: 0;
-        font-size: 18px;
+        font-size: var(--bapp-text-lg);
         font-weight: 600;
       }
 
@@ -496,7 +496,7 @@ ion-datetime {
 
         label {
           display: block;
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
           font-weight: 600;
           margin-bottom: 8px;
           color: #333;
@@ -526,7 +526,7 @@ ion-datetime {
 /* Error Hint */
 .error-hint {
   color: var(--ion-color-danger);
-  font-size: 0.8em;
+  font-size: var(--bapp-text-xs);
   margin: 4px 16px 8px 16px;
   padding: 0;
 }
@@ -563,7 +563,7 @@ ion-datetime {
     margin: 0;
     --border-radius: 8px;
     height: 48px;
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
     font-family: 'bold';
     text-transform: none;
 
@@ -638,7 +638,7 @@ ion-modal.booking-modal {
       --color: #fff;
       
       ion-title {
-        font-size: 18px;
+        font-size: var(--bapp-text-lg);
         font-family: 'bold';
       }
     }
@@ -675,13 +675,13 @@ ion-modal.booking-modal {
         gap: 4px;
 
         strong {
-          font-size: 15px;
+          font-size: var(--bapp-text-md);
           font-family: 'bold';
           color: var(--ion-color-light);
         }
 
         .provider-rate {
-          font-size: 13px;
+          font-size: var(--bapp-text-sm);
           color: var(--ion-color-primary);
           font-family: 'semi-bold';
         }
@@ -695,13 +695,13 @@ ion-modal.booking-modal {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'semi-bold';
         color: var(--ion-color-light);
         margin-bottom: 10px;
 
         ion-icon {
-          font-size: 18px;
+          font-size: var(--bapp-text-lg);
         }
       }
 
@@ -709,7 +709,7 @@ ion-modal.booking-modal {
         --padding-start: 16px;
         --padding-end: 16px;
         height: 52px;
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         text-align: left;
         margin: 0;
         --border-radius: 12px;
@@ -720,12 +720,12 @@ ion-modal.booking-modal {
         align-items: center;
         gap: 6px;
         color: var(--ion-color-danger);
-        font-size: 0.75em;
+        font-size: var(--bapp-text-xs);
         margin: 8px 0 0 0;
         padding-left: 4px;
 
         ion-icon {
-          font-size: 16px;
+          font-size: var(--bapp-text-md);
         }
       }
 
@@ -777,7 +777,7 @@ ion-modal.booking-modal {
               flex-shrink: 0;
               margin-right: 12px;
               margin-top: 2px;
-              font-size: 18px;
+              font-size: var(--bapp-text-lg);
             }
 
             .suggestion-text {
@@ -785,14 +785,14 @@ ion-modal.booking-modal {
               min-width: 0;
 
               .suggestion-main {
-                font-size: 14px;
+                font-size: var(--bapp-text-sm);
                 font-weight: 500;
                 color: #333;
                 word-break: break-word;
               }
 
               .suggestion-details {
-                font-size: 12px;
+                font-size: var(--bapp-text-xs);
                 color: #999;
                 margin-top: 4px;
                 word-break: break-word;
@@ -816,7 +816,7 @@ ion-modal.booking-modal {
           --padding-end: 12px;
           --padding-top: 12px;
           --padding-bottom: 12px;
-          font-size: 14px;
+          font-size: var(--bapp-text-sm);
         }
       }
 
@@ -831,7 +831,7 @@ ion-modal.booking-modal {
         display: block;
         
         ::part(calendar-day) {
-          font-size: 13px;
+          font-size: var(--bapp-text-sm);
           height: 32px;
           width: 32px;
         }
@@ -844,7 +844,7 @@ ion-modal.booking-modal {
         --padding-end: 12px;
         --padding-top: 12px;
         --padding-bottom: 12px;
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         border: 1px solid var(--ion-color-step-200, #3a3a3a);
         border-radius: 8px;
       }
@@ -858,7 +858,7 @@ ion-modal.booking-modal {
       .confirm-button {
         --border-radius: 12px;
         height: 52px;
-        font-size: 15px;
+        font-size: var(--bapp-text-md);
         font-family: 'bold';
         text-transform: none;
         margin-bottom: 10px;
@@ -871,7 +871,7 @@ ion-modal.booking-modal {
       .cancel-button {
         --border-radius: 12px;
         height: 44px;
-        font-size: 14px;
+        font-size: var(--bapp-text-sm);
         font-family: 'semi-bold';
         text-transform: none;
       }

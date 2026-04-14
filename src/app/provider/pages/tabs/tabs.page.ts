@@ -65,6 +65,11 @@ export class ProviderTabsPage implements OnInit, OnDestroy {
     this.activeTab = tab;
   }
 
+  goToAddService() {
+    // Navigate to add service modal - uses existing routing
+    this.router.navigate(['/provider/provider-add-service']);
+  }
+
   private updateTabFromUrl(url: string) {
     if (url.includes('/home')) {
       this.activeTab = 'home';

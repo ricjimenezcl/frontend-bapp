@@ -1,3 +1,20 @@
+<ion-header class="tabs-header">
+  <ion-toolbar class="tabs-toolbar">
+
+    <!-- Dynamic title -->
+    <div slot="start" class="tabs-title-wrap">
+      <span class="tabs-title" *ngIf="activeTab === 'home'">Inicio</span>
+      <span class="tabs-title" *ngIf="activeTab === 'service-details'">Mis Servicios</span>
+      <span class="tabs-title" *ngIf="activeTab === 'inbox'">Mensajes</span>
+      <span class="tabs-title" *ngIf="activeTab === 'bookings'">Reservas</span>
+      <span class="tabs-title" *ngIf="activeTab === 'profile'">Mi Perfil</span>
+    </div>
+
+ 
+
+  </ion-toolbar>
+</ion-header>
+
 <div class="tabs-content">
   <div class="tab-container" [class.tab-active]="activeTab === 'home'">
     <app-provider-home></app-provider-home>
@@ -14,50 +31,67 @@
   <div class="tab-container" [class.tab-active]="activeTab === 'profile'">
     <app-provider-profile></app-provider-profile>
   </div>
+  <router-outlet></router-outlet>
 </div>
 
-<ion-footer class="pt-footer">
-  <div class="pt-tab-bar">
+<!-- ── Bottom Tab Bar ──────────────────────────────────────────────── -->
+<ion-footer class="tabs-footer">
+    <div class="tab-bar">
 
-    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'home'"
-            (click)="changeTab('home')" type="button">
-      <div class="pt-icon-wrap">
-        <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
-      </div>
-      <span class="pt-label">Inicio</span>
-    </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn-active]="activeTab === 'home'"
+        (click)="changeTab('home')"
+        type="button">
+        <div class="tab-icon-wrap">
+          <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
+        </div>
+        <span class="tab-label">Inicio</span>
+      </button>
 
-    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'service-details'"
-            (click)="changeTab('service-details')" type="button">
-      <div class="pt-icon-wrap">
-        <ion-icon [name]="activeTab === 'service-details' ? 'briefcase' : 'briefcase-outline'"></ion-icon>
-      </div>
-      <span class="pt-label">Servicios</span>
-    </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn-active]="activeTab === 'service-details'"
+        (click)="changeTab('service-details')"
+        type="button">
+        <div class="tab-icon-wrap">
+          <ion-icon [name]="activeTab === 'service-details' ? 'briefcase' : 'briefcase-outline'"></ion-icon>
+        </div>
+        <span class="tab-label">Servicios</span>
+      </button>
 
-    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'inbox'"
-            (click)="changeTab('inbox')" type="button">
-      <div class="pt-icon-wrap">
-        <ion-icon [name]="activeTab === 'inbox' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
-      </div>
-      <span class="pt-label">Chat</span>
-    </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn-active]="activeTab === 'inbox'"
+        (click)="changeTab('inbox')"
+        type="button">
+        <div class="tab-icon-wrap">
+          <ion-icon [name]="activeTab === 'inbox' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
+        </div>
+        <span class="tab-label">Chat</span>
+      </button>
 
-    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'bookings'"
-            (click)="changeTab('bookings')" type="button">
-      <div class="pt-icon-wrap">
-        <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
-      </div>
-      <span class="pt-label">Reservas</span>
-    </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn-active]="activeTab === 'bookings'"
+        (click)="changeTab('bookings')"
+        type="button">
+        <div class="tab-icon-wrap">
+          <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
+        </div>
+        <span class="tab-label">Reservas</span>
+      </button>
 
-    <button class="pt-tab-btn" [class.pt-tab-btn-active]="activeTab === 'profile'"
-            (click)="changeTab('profile')" type="button">
-      <div class="pt-icon-wrap">
-        <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
-      </div>
-      <span class="pt-label">Perfil</span>
-    </button>
+      <button
+        class="tab-btn"
+        [class.tab-btn-active]="activeTab === 'profile'"
+        (click)="changeTab('profile')"
+        type="button">
+        <div class="tab-icon-wrap">
+          <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
+        </div>
+        <span class="tab-label">Perfil</span>
+      </button>
 
-  </div>
+    </div>
 </ion-footer>

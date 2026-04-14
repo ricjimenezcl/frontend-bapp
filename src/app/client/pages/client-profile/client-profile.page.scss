@@ -81,7 +81,7 @@ ion-content.profile-content { --background: var(--bapp-bg-page); }
   border-radius: var(--bapp-radius-xl);
 
   .info-icon {
-    font-size: 18px;
+    font-size: var(--bapp-text-xl);
     color: var(--bapp-color-primary);
     margin-bottom: 2px;
   }
@@ -153,7 +153,7 @@ ion-content.profile-content { --background: var(--bapp-bg-page); }
   }
 
   .menu-tag {
-    font-size: 10px;
+    font-size: var(--bapp-text-xs);
     font-weight: var(--bapp-weight-bold);
     letter-spacing: 0.06em;
     text-transform: uppercase;

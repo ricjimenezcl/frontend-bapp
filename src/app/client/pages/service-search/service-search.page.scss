@@ -31,7 +31,7 @@ ion-content.ss-content {
   gap: var(--bapp-space-2);
   margin-bottom: var(--bapp-space-3);
 
-  .loc-icon { font-size: 15px; color: var(--bapp-color-primary); flex-shrink: 0; }
+  .loc-icon { font-size: var(--bapp-text-sm); color: var(--bapp-color-primary); flex-shrink: 0; }
   .loc-text {
     font-size: var(--bapp-text-xs);
     font-weight: var(--bapp-font-medium);
@@ -70,7 +70,7 @@ ion-content.ss-content {
   gap: var(--bapp-space-1);
   padding: var(--bapp-space-2) 0 var(--bapp-space-3);
 
-  .results-icon { font-size: 13px; color: var(--bapp-text-tertiary); }
+  .results-icon { font-size: var(--bapp-text-xs); color: var(--bapp-text-tertiary); }
   .results-text { font-size: var(--bapp-text-xs); color: var(--bapp-text-tertiary); }
   .service-tag {
     font-size: var(--bapp-text-xs);
@@ -235,8 +235,8 @@ ion-content.ss-content {
   font-size: var(--bapp-text-xs);
   color: var(--bapp-text-secondary);
 
-  .star-icon { color: var(--bapp-color-primary); font-size: 12px; }
-  .dist-icon { color: var(--bapp-color-danger);  font-size: 12px; }
+  .star-icon { color: var(--bapp-color-primary); font-size: var(--bapp-text-xs); }
+  .dist-icon { color: var(--bapp-color-danger);  font-size: var(--bapp-text-xs); }
   .meta-muted { color: var(--bapp-text-tertiary); }
 }
 
@@ -265,7 +265,7 @@ ion-content.ss-content {
 }
 
 .chip-service {
-  font-size: 11px;
+  font-size: var(--bapp-text-xs);
   font-weight: var(--bapp-font-semibold);
   color: var(--bapp-text-secondary);
   background: rgba(255, 255, 255, 0.06);

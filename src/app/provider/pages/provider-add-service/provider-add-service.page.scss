@@ -105,7 +105,7 @@ ion-header ion-toolbar {
 }
 
 .input-with-suggestions ion-item {
-  --background: transparent;
+  --background: var(--ion-color-dark);
   --border-color: transparent;
   --inner-border-width: 0;
   --padding-start: var(--bapp-space-3);
@@ -133,14 +133,6 @@ ion-header ion-toolbar {
   font-weight: var(--bapp-font-regular);
 }
 
-.input-with-suggestions ion-item ion-textarea {
-  --color: var(--bapp-text-primary);
-  --placeholder-color: var(--bapp-text-tertiary);
-  --padding-start: 0;
-  --background: transparent;
-  font-size: var(--bapp-text-md);
-  font-weight: var(--bapp-font-regular);
-}
 
 .selected-service-container {
   .input-with-suggestions ion-item ion-label h3 {
@@ -242,6 +234,111 @@ ion-spinner {
   display: block;
 }
 
+// ─── Unificación visual ion-select / ion-input ────────────────────────────
+// ion-select tiene 16px de padding fijo en su host (Shadow DOM de Ionic).
+// CSS custom properties no lo pueden remover desde afuera.
+// Solución: margin-inline-start negativo en ion-select (propiedad CSS regular,
+// sí funciona sobre el host desde SCSS externo) para cancelar esos 16px.
+// ion-input queda con --padding-start: 0 para que ambos arranquen igual.
+ion-item.input-content,
+ion-item.select-content {
+  --padding-start: var(--bapp-space-3);
+  --inner-padding-start: var(--bapp-space-2);
+  --inner-padding-end: var(--bapp-space-2);
+  --min-height: 52px;
+  --background: var(--ion-color-dark);
+
+  ion-icon[slot="start"] {
+    font-size: 20px;
+    color: var(--bapp-color-primary);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  ion-select {
+    align-self: center;
+    margin-inline-start: -16px !important;
+    margin-block: -12px !important;
+    width: calc(100% + 16px) !important;
+    font-size: var(--bapp-text-md);
+    --border-color: transparent !important;
+    --highlight-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    &::part(container) {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+      margin: 0;
+    }
+
+    &::part(placeholder) {
+      color: var(--bapp-text-tertiary);
+      font-size: var(--bapp-text-md);
+      font-weight: var(--bapp-font-regular);
+      flex: 1;
+      line-height: 1;
+      text-align: center;
+    }
+
+    &::part(text) {
+      color: var(--bapp-text-primary);
+      font-size: var(--bapp-text-md);
+      font-weight: var(--bapp-font-medium);
+      flex: 1;
+      line-height: 1;
+      text-align: center;
+    }
+
+    &::part(icon) {
+      color: var(--bapp-color-primary);
+      opacity: 1;
+      flex-shrink: 0;
+    }
+  }
+
+  ion-input {
+    align-self: center;
+    --padding-start: var(--bapp-space-2);
+    --padding-end: 0px !important;
+    --padding-top: 0px !important;
+    --padding-bottom: 0px !important;
+    --color: var(--bapp-text-primary) !important;
+    --placeholder-color: var(--bapp-text-tertiary) !important;
+    --border-color: transparent !important;
+    --highlight-color: transparent !important;
+    --highlight-color-focused: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: var(--bapp-text-md);
+
+  }
+
+  ion-textarea {
+    --padding-start: var(--bapp-space-2);
+    align-self: center;
+    --color: var(--bapp-text-primary) !important;
+    --placeholder-color: var(--bapp-text-tertiary) !important;
+    --border-color: transparent !important;
+    --highlight-color: transparent !important;
+    --highlight-color-focused: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: var(--bapp-text-md);
+
+  }
+
+  &:has(ion-textarea)::part(native) {
+    --padding-start: var(--bapp-space-2);
+    padding-top: var(--bapp-space-3);
+    padding-bottom: var(--bapp-space-3);
+  }
+}
+
 // ─── Footer ───────────────────────────────────────────────────────────────
 ion-footer {
   background: var(--bapp-bg-card);
@@ -283,31 +380,7 @@ ion-footer {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-// ─── ion-select visual improvement ────────────────────────────────────────
-// Ion-select inside form-section: make it look selectable (not just plain text)
-.input-with-suggestions ion-item ion-select {
-  --color: var(--bapp-text-primary);
-  --placeholder-color: var(--bapp-text-tertiary);
-  --padding-start: 0;
-  font-size: var(--bapp-text-md);
-  width: 100%;
 
-  &::part(placeholder) {
-    color: var(--bapp-text-tertiary);
-    font-size: var(--bapp-text-md);
-  }
-
-  &::part(text) {
-    font-size: var(--bapp-text-md);
-    color: var(--bapp-text-primary);
-    font-weight: var(--bapp-font-medium);
-  }
-
-  &::part(icon) {
-    color: var(--bapp-color-primary);
-    opacity: 1;
-  }
-}
 
 // Separador visual entre paso 1 (categoría) y paso 2 (servicio)
 .form-section > .input-with-suggestions + .input-with-suggestions {
