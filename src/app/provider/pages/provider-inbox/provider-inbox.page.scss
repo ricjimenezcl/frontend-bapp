@@ -1,6 +1,6 @@
 // provider-inbox.page.scss
-// Estilo basado en client-inbox.page.scss
 @import '../../../../theme/mixins';
+@import '../../../../theme/shared-ui';
 
 :host {
   display: block;
@@ -14,8 +14,8 @@ ion-content.inbox-content {
 
 // ── Hero section ───────────────────────────────────────────────────────────────
 .inbox-hero {
-  background: linear-gradient(135deg, rgba(253,215,53,0.15) 0%, rgba(240,165,0,0.08) 100%);
-  border: 1px solid var(--bapp-border-default);
+  background: linear-gradient(135deg, rgba(253, 215, 53, 0.15) 0%, rgba(240, 165, 0, 0.08) 100%);
+  border: 1px solid var(--bapp-border);
   border-radius: var(--bapp-radius-xl);
   padding: var(--bapp-space-6);
   display: flex;
@@ -35,7 +35,7 @@ ion-content.inbox-content {
 
 .inbox-hero h1 {
   font-size: var(--bapp-text-xl);
-  font-weight: var(--bapp-weight-bold);
+  font-weight: var(--bapp-font-bold);
   color: var(--bapp-text-primary);
   margin: 0 0 var(--bapp-space-1);
 }
@@ -46,7 +46,7 @@ ion-content.inbox-content {
 }
 
 .last-sync {
-  --background: var(--bapp-surface-elevated);
+  --background: var(--bapp-bg-card-raised);
   --color: var(--bapp-text-secondary);
   --border-radius: var(--bapp-radius-full);
 }
@@ -59,37 +59,12 @@ ion-content.inbox-content {
   margin-bottom: var(--bapp-space-4);
 }
 
-.stat-card {
-  background: var(--bapp-surface-card);
-  border: 1px solid var(--bapp-border-default);
-  border-radius: var(--bapp-radius-xl);
-  padding: var(--bapp-space-4);
-  text-align: center;
-
-  p {
-    font-size: var(--bapp-text-xs);
-    color: var(--bapp-text-tertiary);
-    margin: 0;
-  }
-
-  h2 {
-    font-size: var(--bapp-text-2xl);
-    font-weight: var(--bapp-weight-bold);
-    color: var(--bapp-text-primary);
-    margin: var(--bapp-space-2) 0 0;
-  }
-}
-
-.stat-card.highlight {
-  background: linear-gradient(135deg, rgba(253,215,53,0.2) 0%, rgba(240,165,0,0.1) 100%);
-  border-color: rgba(253,215,53,0.3);
-  box-shadow: 0 4px 16px rgba(253,215,53,0.15);
-}
+// .stat-card, .stat-card.highlight — en _shared-ui
 
 // ── Search card ────────────────────────────────────────────────────────────────
 .search-card {
-  background: var(--bapp-surface-card);
-  border: 1px solid var(--bapp-border-default);
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
   border-radius: var(--bapp-radius-xl);
   padding: var(--bapp-space-3);
   margin-bottom: var(--bapp-space-4);
@@ -97,7 +72,7 @@ ion-content.inbox-content {
 
 .filter-segment {
   margin-top: var(--bapp-space-2);
-  --background: var(--bapp-surface-elevated);
+  --background: var(--bapp-bg-card-raised);
   border-radius: var(--bapp-radius-md);
 }
 
@@ -107,8 +82,8 @@ ion-content.inbox-content {
   align-items: center;
   gap: var(--bapp-space-4);
   padding: var(--bapp-space-4);
-  background: var(--bapp-surface-card);
-  border: 1px dashed var(--bapp-border-subtle);
+  background: var(--bapp-bg-card);
+  border: 1px dashed var(--bapp-border);
   border-radius: var(--bapp-radius-xl);
   margin-bottom: var(--bapp-space-3);
 }
@@ -117,7 +92,7 @@ ion-content.inbox-content {
   width: 56px;
   height: 56px;
   border-radius: var(--bapp-radius-lg);
-  --background: var(--bapp-surface-elevated);
+  --background: var(--bapp-bg-card-raised);
 }
 
 .skeleton-text-block {
@@ -127,132 +102,13 @@ ion-content.inbox-content {
   gap: var(--bapp-space-2);
 }
 
-// ── State cards (error/empty) ───────────────────────────────────────────────────
-.state-card {
-  background: var(--bapp-surface-card);
-  border: 1px solid var(--bapp-border-default);
-  border-radius: var(--bapp-radius-xl);
-  padding: var(--bapp-space-8) var(--bapp-space-5);
-  text-align: center;
-  color: var(--bapp-text-secondary);
-  margin-top: var(--bapp-space-5);
-
-  ion-icon {
-    font-size: 48px;
-    color: var(--bapp-text-disabled);
-    margin-bottom: var(--bapp-space-3);
-  }
-
-  p {
-    font-size: var(--bapp-text-sm);
-    margin: 0;
-  }
-}
-
-.state-card.error {
-  border-color: rgba(239,68,68,0.4);
-}
-
-.state-card.empty {
-  border-style: dashed;
-}
-
-.muted {
-  color: var(--bapp-text-tertiary);
-  font-size: var(--bapp-text-xs);
-  margin-top: var(--bapp-space-2);
-}
-
-// ── Conversation cards ───────────────────────────────────────────────────────────
-.conversation-card {
-  width: 100%;
-  background: var(--bapp-surface-card);
-  border: 1px solid var(--bapp-border-default);
-  border-radius: var(--bapp-radius-xl);
-  padding: var(--bapp-space-4);
-  display: flex;
-  gap: var(--bapp-space-4);
-  align-items: center;
-  margin-bottom: var(--bapp-space-3);
-  text-align: left;
-  color: var(--bapp-text-primary);
-  cursor: pointer;
-  transition: transform var(--bapp-transition-fast), border-color var(--bapp-transition-fast);
-
-  &:active {
-    transform: translateY(2px);
-  }
-
-  &.unread {
-    border-color: rgba(253,215,53,0.5);
-    background: rgba(253,215,53,0.05);
-  }
-}
-
-.conversation-card .avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--bapp-radius-lg);
-  background: var(--bapp-surface-elevated);
-  border: 1px solid var(--bapp-border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.conversation-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.conversation-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--bapp-space-2);
-  margin-bottom: var(--bapp-space-1);
-
-  h2 {
-    font-size: var(--bapp-text-md);
-    font-weight: var(--bapp-weight-semibold);
-    color: var(--bapp-text-primary);
-    margin: 0;
-  }
-}
-
-.timestamp {
-  font-size: var(--bapp-text-xs);
-  color: var(--bapp-text-tertiary);
-  flex-shrink: 0;
-}
-
-.conversation-preview {
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-secondary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin: 0;
-}
-
-.conversation-meta {
-  margin-top: var(--bapp-space-2);
-  display: flex;
-  align-items: center;
-  gap: var(--bapp-space-2);
-}
+// .state-card, .state-card.error, .state-card.empty — en _shared-ui
+// .muted — en _shared-ui
+// .conversation-card, .avatar, .conversation-info, .conversation-header — en _shared-ui
+// .timestamp, .conversation-preview, .conversation-meta — en _shared-ui
 
 ion-badge[color="primary"] {
-  --background: rgba(253,215,53,0.2);
+  --background: rgba(253, 215, 53, 0.2);
   --color: var(--bapp-color-primary);
   --padding-start: var(--bapp-space-2);
   --padding-end: var(--bapp-space-2);
@@ -260,7 +116,7 @@ ion-badge[color="primary"] {
 }
 
 ion-badge[color="medium"] {
-  --background: rgba(255,255,255,0.1);
+  --background: rgba(255, 255, 255, 0.1);
   --color: var(--bapp-text-secondary);
   --padding-start: var(--bapp-space-2);
   --padding-end: var(--bapp-space-2);

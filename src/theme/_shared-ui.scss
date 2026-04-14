@@ -1,0 +1,279 @@
+// src/theme/_shared-ui.scss
+// BAPP Design System — Patrones UI compartidos entre client y provider
+// Importar en páginas que necesiten estos componentes.
+// Requiere: variables.scss cargado globalmente, mixins disponibles vía @import
+@import 'mixins';
+
+// ── Profile layout ─────────────────────────────────────────────────────────────
+
+.profile-wrapper {
+  @include flex-column;
+  padding-bottom: var(--bapp-space-8);
+}
+
+.profile-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--bapp-color-primary);
+  display: block;
+  box-shadow: 0 0 0 4px rgba(253, 215, 53, 0.15), var(--bapp-shadow-md);
+}
+
+.profile-name {
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-align: center;
+}
+
+.profile-footer-spacer { height: var(--bapp-space-8); }
+
+// ── Menu sections ─────────────────────────────────────────────────────────────
+
+.menu-section {
+  margin-bottom: var(--bapp-space-4);
+  padding: 0 var(--bapp-space-4);
+}
+
+.menu-section-label {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bapp-text-tertiary);
+  margin: 0 0 var(--bapp-space-2) var(--bapp-space-1);
+}
+
+.menu-list {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  overflow: hidden;
+}
+
+.menu-item {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  width: 100%;
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--bapp-border);
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast);
+  text-align: left;
+
+  &:last-child { border-bottom: none; }
+  &:active { background: var(--bapp-surface-hover); }
+
+  .menu-label {
+    flex: 1;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-medium);
+    color: var(--bapp-text-primary);
+  }
+
+  .menu-chevron {
+    font-size: 16px;
+    color: var(--bapp-text-disabled);
+    flex-shrink: 0;
+  }
+
+  .menu-tag {
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-bold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #C89800;
+    background: rgba(253, 215, 53, 0.15);
+    border: 1px solid rgba(253, 215, 53, 0.3);
+    border-radius: var(--bapp-radius-full);
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+}
+
+// Toggle menu item (sin chevron, sin cursor pointer)
+.menu-item-toggle {
+  cursor: default;
+  &:active { background: transparent; }
+}
+
+// ── Menu icon variants ────────────────────────────────────────────────────────
+
+.menu-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--bapp-radius-lg);
+  @include flex-center;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 17px; }
+}
+
+.menu-icon-blue   { background: rgba(14, 165, 233, 0.12);  ion-icon { color: var(--bapp-color-accent); } }
+.menu-icon-green  { background: rgba(16, 185, 129, 0.12);  ion-icon { color: var(--bapp-color-success); } }
+.menu-icon-gold   { background: rgba(253, 215, 53, 0.14);  ion-icon { color: #C89800; } }
+.menu-icon-slate  { background: rgba(100, 116, 139, 0.14); ion-icon { color: #94A3B8; } }
+.menu-icon-violet { background: rgba(168, 85, 247, 0.12);  ion-icon { color: #A855F7; } }
+.menu-icon-orange { background: rgba(249, 115, 22, 0.12);  ion-icon { color: #F97316; } }
+
+// ── Logout section ────────────────────────────────────────────────────────────
+
+.logout-wrap {
+  padding: var(--bapp-space-2) var(--bapp-space-4);
+}
+
+.logout-btn {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  height: 48px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1.5px solid rgba(239, 68, 68, 0.2);
+  border-radius: var(--bapp-radius-full);
+  color: var(--bapp-color-danger);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; }
+  &:active { background: rgba(239, 68, 68, 0.15); transform: scale(0.98); }
+}
+
+// ── Conversation card ─────────────────────────────────────────────────────────
+
+.conversation-card {
+  width: 100%;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-4);
+  display: flex;
+  gap: var(--bapp-space-4);
+  align-items: center;
+  margin-bottom: var(--bapp-space-3);
+  text-align: left;
+  color: var(--bapp-text-primary);
+  cursor: pointer;
+  transition: transform var(--bapp-transition-fast), border-color var(--bapp-transition-fast);
+
+  &:active { transform: translateY(2px); }
+
+  &.unread {
+    border-color: rgba(253, 215, 53, 0.5);
+    background: rgba(253, 215, 53, 0.05);
+  }
+
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--bapp-radius-lg);
+    background: var(--bapp-bg-card-raised);
+    border: 1px solid var(--bapp-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+}
+
+.conversation-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-1);
+
+  h2 {
+    font-size: var(--bapp-text-md);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+    margin: 0;
+  }
+}
+
+.timestamp {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  flex-shrink: 0;
+}
+
+.conversation-preview {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.conversation-meta {
+  margin-top: var(--bapp-space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+}
+
+// ── Stat card ─────────────────────────────────────────────────────────────────
+
+.stat-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-4);
+  text-align: center;
+
+  p { font-size: var(--bapp-text-xs); color: var(--bapp-text-tertiary); margin: 0; }
+
+  h2 {
+    font-size: var(--bapp-text-2xl);
+    font-weight: var(--bapp-font-bold);
+    color: var(--bapp-text-primary);
+    margin: var(--bapp-space-2) 0 0;
+  }
+
+  &.highlight {
+    background: linear-gradient(135deg, rgba(253, 215, 53, 0.2) 0%, rgba(240, 165, 0, 0.1) 100%);
+    border-color: rgba(253, 215, 53, 0.3);
+    box-shadow: 0 4px 16px rgba(253, 215, 53, 0.15);
+  }
+}
+
+// ── State card (vacío / error) ────────────────────────────────────────────────
+
+.state-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-8) var(--bapp-space-5);
+  text-align: center;
+  color: var(--bapp-text-secondary);
+  margin-top: var(--bapp-space-5);
+
+  ion-icon { font-size: 48px; color: var(--bapp-text-disabled); margin-bottom: var(--bapp-space-3); }
+  p { font-size: var(--bapp-text-sm); margin: 0; }
+
+  &.error { border-color: rgba(239, 68, 68, 0.4); }
+  &.empty { border-style: dashed; }
+}
+
+.muted {
+  color: var(--bapp-text-tertiary);
+  font-size: var(--bapp-text-xs);
+  margin-top: var(--bapp-space-2);
+}

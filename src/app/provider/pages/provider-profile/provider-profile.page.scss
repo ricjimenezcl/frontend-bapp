@@ -1,5 +1,6 @@
 // src/app/provider/pages/provider-profile/provider-profile.page.scss
 @import '../../../../theme/mixins';
+@import '../../../../theme/shared-ui';
 
 :host {
   display: flex;
@@ -9,11 +10,6 @@
 
 ion-content.profile-content {
   --background: var(--bapp-bg-page);
-}
-
-.profile-wrapper {
-  @include flex-column;
-  padding-bottom: var(--bapp-space-8);
 }
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
@@ -26,6 +22,7 @@ ion-content.profile-content {
   position: relative;
   overflow: hidden;
 
+  // Orbe decorativo — azul acento (rol proveedor)
   .hero-bg-orb {
     position: absolute;
     top: -40px;
@@ -44,25 +41,9 @@ ion-content.profile-content {
   cursor: pointer;
 }
 
-.profile-avatar {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--bapp-color-primary);
-  display: block;
-  box-shadow: 0 0 0 4px rgba(253, 215, 53, 0.15), var(--bapp-shadow-md);
-}
-
-.profile-name {
-  font-size: var(--bapp-text-xl);
-  font-weight: var(--bapp-font-bold);
-  color: var(--bapp-text-primary);
-  letter-spacing: -0.02em;
-  margin: 0;
-  text-align: center;
-  cursor: pointer;
-}
+// .profile-avatar — en _shared-ui
+// .profile-name  — en _shared-ui (provider añade cursor:pointer vía host component)
+.profile-name { cursor: pointer; }
 
 .profile-status {
   font-size: var(--bapp-text-xs);
@@ -76,94 +57,6 @@ ion-content.profile-content {
   padding: var(--bapp-space-3) var(--bapp-space-4) 0;
 }
 
-// ── Menu sections ─────────────────────────────────────────────────────────────
-.menu-section {
-  margin-bottom: var(--bapp-space-4);
-  padding: 0 var(--bapp-space-4);
-}
-
-.menu-section-label {
-  font-size: var(--bapp-text-xs);
-  font-weight: var(--bapp-font-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--bapp-text-tertiary);
-  margin: 0 0 var(--bapp-space-2) var(--bapp-space-1);
-}
-
-.menu-list {
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-xl);
-  overflow: hidden;
-}
-
-.menu-item {
-  @include flex-start;
-  gap: var(--bapp-space-3);
-  width: 100%;
-  padding: var(--bapp-space-3) var(--bapp-space-4);
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--bapp-border);
-  cursor: pointer;
-  transition: background var(--bapp-transition-fast);
-  text-align: left;
-
-  &:last-child { border-bottom: none; }
-  &:active { background: var(--bapp-surface-hover); }
-
-  .menu-label {
-    flex: 1;
-    font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-font-medium);
-    color: var(--bapp-text-primary);
-  }
-
-  .menu-chevron {
-    font-size: 16px;
-    color: var(--bapp-text-disabled);
-    flex-shrink: 0;
-  }
-
-  .menu-tag {
-    font-size: var(--bapp-text-xs);
-    font-weight: var(--bapp-font-bold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #C89800;
-    background: rgba(253, 215, 53, 0.15);
-    border: 1px solid rgba(253, 215, 53, 0.3);
-    border-radius: var(--bapp-radius-full);
-    padding: 2px 7px;
-    flex-shrink: 0;
-  }
-}
-
-// Toggle menu item (no es botón, no tiene chevron)
-.menu-item-toggle {
-  cursor: default;
-  &:active { background: transparent; }
-}
-
-// ── Menu icon variants ────────────────────────────────────────────────────────
-.menu-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--bapp-radius-lg);
-  @include flex-center;
-  flex-shrink: 0;
-
-  ion-icon { font-size: 17px; }
-}
-
-.menu-icon-blue   { background: rgba(14, 165, 233, 0.12);  ion-icon { color: var(--bapp-color-accent); } }
-.menu-icon-green  { background: rgba(16, 185, 129, 0.12);  ion-icon { color: var(--bapp-color-success); } }
-.menu-icon-gold   { background: rgba(253, 215, 53, 0.14);  ion-icon { color: #C89800; } }
-.menu-icon-slate  { background: rgba(100, 116, 139, 0.14); ion-icon { color: #94A3B8; } }
-.menu-icon-violet { background: rgba(168, 85, 247, 0.12);  ion-icon { color: #A855F7; } }
-.menu-icon-orange { background: rgba(249, 115, 22, 0.12);  ion-icon { color: #F97316; } }
-
 // ── Toggle ────────────────────────────────────────────────────────────────────
 .bapp-toggle {
   --handle-background: #fff;
@@ -171,27 +64,7 @@ ion-content.profile-content {
   margin-left: auto;
 }
 
-// ── Logout ────────────────────────────────────────────────────────────────────
-.logout-wrap {
-  padding: var(--bapp-space-2) var(--bapp-space-4);
-}
-
-.logout-btn {
-  @include flex-center;
-  gap: var(--bapp-space-2);
-  width: 100%;
-  height: 48px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1.5px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--bapp-radius-full);
-  color: var(--bapp-color-danger);
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
-  cursor: pointer;
-  transition: all var(--bapp-transition-fast);
-
-  ion-icon { font-size: 18px; }
-  &:active { background: rgba(239, 68, 68, 0.15); transform: scale(0.98); }
-}
-
-.profile-footer-spacer { height: var(--bapp-space-8); }
+// .menu-section, .menu-section-label, .menu-list — en _shared-ui
+// .menu-item, .menu-icon, .menu-icon-* — en _shared-ui
+// .logout-wrap, .logout-btn — en _shared-ui
+// .profile-footer-spacer — en _shared-ui
