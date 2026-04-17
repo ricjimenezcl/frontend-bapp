@@ -13,9 +13,10 @@ const PHOTON_BASE = 'https://photon.komoot.io/api';
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org';
 
 export interface GeocodingFeature {
-  place_name: string;      // Dirección completa para mostrar al usuario
-  center:     [number, number]; // [lng, lat]
-  text:       string;      // Nombre corto del lugar
+  place_name:  string;           // Dirección completa para mostrar al usuario
+  center:      [number, number]; // [lng, lat]
+  text:        string;           // Nombre corto del lugar
+  place_type?: string[];         // Tipos de lugar: ['address','place','poi','region','locality']
 }
 
 @Injectable({ providedIn: 'root' })
@@ -170,8 +171,26 @@ export class MapboxService {
         const parts = displayName.split(',');
         const text = (parts[0]?.trim()) || r.name || 'Lugar';
         const place_name = displayName || text;
-        return { place_name, center: [lon, lat] as [number, number], text };
+
+        // place_type: si viene del backend proxy (Mapbox-compat) úsalo directamente;
+        // si viene de Nominatim raw, derivarlo de class/type.
+        const place_type: string[] = r.place_type
+          ? (Array.isArray(r.place_type) ? r.place_type : [r.place_type])
+          : this.inferPlaceType(r.class ?? '', r.type ?? '');
+
+        return { place_name, center: [lon, lat] as [number, number], text, place_type };
       });
+  }
+
+  // Deriva place_type a partir de la taxonomía de Nominatim (class + type)
+  private inferPlaceType(cls: string, type: string): string[] {
+    if (cls === 'highway' || type === 'house' || type === 'residential') return ['address'];
+    if (cls === 'place') return ['place'];
+    if (cls === 'amenity' || cls === 'shop' || cls === 'tourism') return ['poi'];
+    if (cls === 'leisure' || cls === 'natural') return ['poi'];
+    if (cls === 'boundary' || type === 'administrative') return ['region'];
+    if (type === 'city' || type === 'town' || type === 'village') return ['locality'];
+    return ['place'];
   }
 
   // ── Helper cache con LRU simple ───────────────────────────────────────
