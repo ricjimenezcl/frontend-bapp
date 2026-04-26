@@ -220,7 +220,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   // Configurar autocompletado de direcciones
   private setupAutocomplete() {
     this.searchTerms.pipe(
-      debounceTime(300),
+      debounceTime(600),
       distinctUntilChanged(),
       switchMap((term: string) => {
         if (term.length < 3) {

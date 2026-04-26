@@ -152,7 +152,7 @@ export class ProviderEditServicePage implements OnInit {
 
   private setupAutocomplete() {
     this.searchTerms.pipe(
-      debounceTime(300),
+      debounceTime(600),
       distinctUntilChanged(),
       switchMap((term: string) => {
         if (term.length < 3) {

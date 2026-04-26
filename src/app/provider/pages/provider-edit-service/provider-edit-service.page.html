@@ -146,13 +146,29 @@
         </div>
         <span class="schedule-section-title">Horarios disponibles</span>
       </div>
-      <p class="schedule-subtitle">
-        Activa los días en que ofreces este servicio y define el horario.
-      </p>
 
-      <div class="schedule-day-card" *ngFor="let day of schedules" [class.active]="day.isActive">
-        <div class="schedule-day-header">
+      <div class="schedule-list">
+        <div class="schedule-row" *ngFor="let day of schedules" [class.active]="day.isActive">
           <span class="day-name" [class.day-active]="day.isActive">{{ day.dayName }}</span>
+
+          <div class="schedule-inline-times" *ngIf="day.isActive">
+            <ion-select
+              [(ngModel)]="day.startTime"
+              [ngModelOptions]="{standalone: true}"
+              interface="popover"
+              class="time-select-compact">
+              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+            </ion-select>
+            <span class="time-sep">—</span>
+            <ion-select
+              [(ngModel)]="day.endTime"
+              [ngModelOptions]="{standalone: true}"
+              interface="popover"
+              class="time-select-compact">
+              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+            </ion-select>
+          </div>
+
           <ion-toggle
             [(ngModel)]="day.isActive"
             [ngModelOptions]="{standalone: true}"
@@ -160,30 +176,6 @@
             mode="md">
           </ion-toggle>
         </div>
-        <div class="schedule-times" *ngIf="day.isActive">
-          <div class="time-group">
-            <span class="time-label">Desde</span>
-            <ion-select
-              [(ngModel)]="day.startTime"
-              [ngModelOptions]="{standalone: true}"
-              interface="popover"
-              class="time-select">
-              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
-            </ion-select>
-          </div>
-          <span class="time-separator">—</span>
-          <div class="time-group">
-            <span class="time-label">Hasta</span>
-            <ion-select
-              [(ngModel)]="day.endTime"
-              [ngModelOptions]="{standalone: true}"
-              interface="popover"
-              class="time-select">
-              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
-            </ion-select>
-          </div>
-        </div>
-        <span class="day-unavailable" *ngIf="!day.isActive">No disponible</span>
       </div>
       <!-- ── Fin disponibilidad ─────────────────────────────────────────────── -->
 

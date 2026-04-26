@@ -33,7 +33,7 @@ export class MapboxService {
     timestamp: number
   }>();
   
-  private readonly AUTOCOMPLETE_CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+  private readonly AUTOCOMPLETE_CACHE_TTL = 15 * 60 * 1000; // 15 minutos
   private readonly REVERSE_CACHE_TTL = 10 * 60 * 1000;     // 10 minutos
   private readonly MAX_CACHE_SIZE = 100;
 
@@ -58,18 +58,30 @@ export class MapboxService {
     const nominatimUrl = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(sanitized)}&countrycodes=cl&format=json&limit=8&addressdetails=1`;
 
     return this.http.get<any[]>(backendUrl).pipe(
-      catchError(() => {
+      catchError(err => {
+        // 429: rate limit del backend — no escalar a Nominatim para evitar cascada
+        if (err?.status === 429) {
+          console.warn('[Geocoding] Rate limit (429) — omitiendo fallback para no saturar');
+          return of([]);
+        }
         console.warn('[Geocoding] Backend proxy falló, usando Nominatim...');
         return this.http.get<any[]>(nominatimUrl).pipe(
-          catchError(err => {
-            console.error('[Geocoding] Nominatim también falló:', err);
+          catchError(nominatimErr => {
+            if (nominatimErr?.status === 429) {
+              console.warn('[Geocoding] Nominatim también con rate limit (429)');
+            } else {
+              console.error('[Geocoding] Nominatim también falló:', nominatimErr);
+            }
             return of([]);
           })
         );
       }),
       map((results: any[]) => {
         const features = this.normalizeSearchResults(Array.isArray(results) ? results : []);
-        this.setAutocompleteCache(cacheKey, features);
+        // Solo cachear si hay resultados reales (no cachear vacíos por 429)
+        if (features.length > 0) {
+          this.setAutocompleteCache(cacheKey, features);
+        }
         return features;
       })
     );

@@ -407,110 +407,106 @@ ion-footer {
   font-size: var(--bapp-text-sm);
 }
 
-// ─── Schedule section header ───────────────────────────────────────────────
+// ─── Schedule section header (compacto) ────────────────────────────────────
 .schedule-section-header {
   @include flex-start;
   gap: var(--bapp-space-3);
   margin-top: var(--bapp-space-4);
-  margin-bottom: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-3);
   padding: 0 var(--bapp-space-1);
 
   .schedule-section-icon {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--bapp-radius-md);
     background: var(--bapp-color-primary-subtle);
     @include flex-center;
     flex-shrink: 0;
 
     ion-icon {
-      font-size: 18px;
+      font-size: 16px;
       color: var(--bapp-color-primary);
     }
   }
 
   .schedule-section-title {
-    font-size: var(--bapp-text-md);
+    font-size: var(--bapp-text-sm);
     font-weight: var(--bapp-font-semibold);
     color: var(--bapp-text-primary);
   }
 }
 
-.schedule-subtitle {
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-secondary);
-  padding: 0 var(--bapp-space-1);
-  margin: 0 0 var(--bapp-space-3);
-  line-height: var(--bapp-leading-relaxed);
-}
-
-// ─── Schedule day card (dark theme) ───────────────────────────────────────
-.schedule-day-card {
+// ─── Schedule list (contenedor unificado) ──────────────────────────────────
+.schedule-list {
   background: var(--bapp-bg-card-raised);
   border-radius: var(--bapp-radius-lg);
-  padding: var(--bapp-space-3) var(--bapp-space-4);
-  margin-bottom: var(--bapp-space-2);
   border: 1.5px solid var(--bapp-border);
-  transition: border-color var(--bapp-transition-normal), background var(--bapp-transition-normal);
+  overflow: hidden;
+  margin-bottom: var(--bapp-space-4);
+}
+
+// ─── Schedule row (fila por día) ───────────────────────────────────────────
+.schedule-row {
+  @include flex-start;
+  align-items: center;
+  gap: var(--bapp-space-2);
+  padding: var(--bapp-space-2) var(--bapp-space-3);
+  min-height: 44px;
+  border-bottom: 1px solid var(--bapp-border);
+  transition: background var(--bapp-transition-fast);
+
+  &:last-child { border-bottom: none; }
 
   &.active {
-    border-color: var(--bapp-color-primary);
-    background: rgba(253, 215, 53, 0.06);
+    background: rgba(253, 215, 53, 0.04);
+    border-bottom-color: rgba(253, 215, 53, 0.15);
   }
 
-  .schedule-day-header {
-    @include flex-between;
-
-    .day-name {
-      font-weight: var(--bapp-font-medium);
-      font-size: var(--bapp-text-md);
-      color: var(--bapp-text-tertiary);
-      transition: color var(--bapp-transition-fast);
-
-      &.day-active {
-        color: var(--bapp-text-primary);
-        font-weight: var(--bapp-font-semibold);
-      }
-    }
-  }
-
-  .schedule-times {
-    @include flex-start;
-    gap: var(--bapp-space-2);
-    margin-top: var(--bapp-space-3);
-
-    .time-group {
-      @include flex-column;
-      flex: 1;
-
-      .time-label {
-        font-size: var(--bapp-text-xs);
-        color: var(--bapp-text-tertiary);
-        margin-bottom: 2px;
-      }
-
-      .time-select {
-        --background: var(--bapp-bg-input);
-        --padding-start: var(--bapp-space-2);
-        --padding-end: var(--bapp-space-1);
-        --color: var(--bapp-text-primary);
-        border-radius: var(--bapp-radius-sm);
-        font-size: var(--bapp-text-sm);
-      }
-    }
-
-    .time-separator {
-      color: var(--bapp-text-tertiary);
-      font-size: var(--bapp-text-lg);
-      margin-top: var(--bapp-space-4);
-    }
-  }
-
-  .day-unavailable {
-    display: block;
-    margin-top: var(--bapp-space-2);
-    font-size: var(--bapp-text-xs);
+  .day-name {
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-medium);
     color: var(--bapp-text-tertiary);
-    font-style: italic;
+    min-width: 78px;
+    flex-shrink: 0;
+    transition: color var(--bapp-transition-fast);
+
+    &.day-active {
+      color: var(--bapp-text-primary);
+      font-weight: var(--bapp-font-semibold);
+    }
   }
+
+  ion-toggle {
+    flex-shrink: 0;
+    margin-left: auto;
+    --handle-width: 18px;
+    --handle-height: 18px;
+    width: 44px;
+    height: 24px;
+  }
+}
+
+// ─── Selectores de tiempo inline ───────────────────────────────────────────
+.schedule-inline-times {
+  @include flex-start;
+  align-items: center;
+  gap: var(--bapp-space-1);
+  flex: 1;
+  margin-right: var(--bapp-space-2);
+}
+
+.time-select-compact {
+  --background: var(--bapp-bg-input);
+  --padding-start: var(--bapp-space-2);
+  --padding-end: var(--bapp-space-1);
+  --color: var(--bapp-text-primary);
+  border-radius: var(--bapp-radius-sm);
+  font-size: var(--bapp-text-xs);
+  min-width: 56px;
+}
+
+.time-sep {
+  color: var(--bapp-text-tertiary);
+  font-size: var(--bapp-text-sm);
+  flex-shrink: 0;
 }

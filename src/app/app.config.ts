@@ -141,6 +141,7 @@ import {
   logIn,
   navigateOutline,
   briefcase,
+  flag,
   navigate
 
 
@@ -286,6 +287,7 @@ addIcons({
   navigateOutline,
   briefcase,
   fingerPrintOutline,
+  flag,
   list: listOutline
 });
 
