@@ -1,5 +1,5 @@
 // src/app/client/pages/tabs/tabs.page.ts
-import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
@@ -8,109 +8,60 @@ import { MapService } from '../../../core/services/map.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 
-// Importa los componentes que usas en el template
-import { ServiceSearchPage } from '../service-search/service-search.page';
-import { ServiceMapPage } from '../service-map/service-map.page';
-import { ClientBookingsPage } from '../bookings/bookings.page';
-import { ClientProfilePage } from '../client-profile/client-profile.page';
-import { ClientChatsPage } from '../client-chats/client-chats.page';
-
 @Component({
   selector: 'app-client-tabs',
   templateUrl: './tabs.page.html',
   styleUrls: ['./tabs.page.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [
-    CommonModule,
-    IonicModule,
-    RouterModule,
-    // Agrega los componentes aquí
-    ServiceSearchPage,
-    ServiceMapPage,
-    ClientBookingsPage,
-    ClientProfilePage,
-    ClientChatsPage
-  ]
+  imports: [CommonModule, IonicModule, RouterModule]
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
-  @ViewChild(ServiceMapPage) serviceMapPage?: ServiceMapPage;
-  @ViewChild(ClientProfilePage) clientProfilePage?: ClientProfilePage;
-
   selectedServices: any[] = [];
   activeTab: string = 'service-search';
   private readonly destroy$ = new Subject<void>();
 
+  // Maps tab names to child route segments defined in app.routes.ts
+  private readonly tabRoutes: Record<string, string> = {
+    'service-search': 'service-search',
+    'service-map':    'service-map',
+    'bookings':       'bookings',
+    'chats':          'chats',
+    'client-profile': 'profile'
+  };
+
   constructor(
     private stateService: StateService,
     private router: Router,
-    private mapService: MapService,
-    private cdr: ChangeDetectorRef
+    private mapService: MapService
   ) {}
 
   ngOnInit() {
     this.stateService.selectedServices$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(services => {
-        this.selectedServices = services;
-        console.log('Servicios en tabs:', services);
-      });
+      .subscribe(services => { this.selectedServices = services; });
 
-    console.log('TabsPage ngOnInit');
-
-    // Restore tab from router state (e.g. navigating back from edit-profile)
-    const navState = history.state;
-    if (navState?.activeTab) {
-      this.activeTab = navState.activeTab;
-    }
-
-    // Actualizar pestaña activa basada en URL
+    // Derive activeTab from the URL on every navigation so the tab bar
+    // always reflects the current route.
     this.router.events
-      .pipe(
-        filter(event => event instanceof NavigationEnd),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((event: NavigationEnd) => {
-        this.updateActiveTabFromUrl(event.urlAfterRedirects || event.url);
+      .pipe(filter(e => e instanceof NavigationEnd), takeUntil(this.destroy$))
+      .subscribe((e: NavigationEnd) => {
+        this.updateActiveTabFromUrl(e.urlAfterRedirects || e.url);
       });
   }
 
-  // Ionic lifecycle — fires after the entrance animation completes.
-  // Ensures ion-content recalculates its scroll area by forcing a
-  // display:none → flex transition on the active tab container, which
-  // triggers Ionic v8's ResizeObserver. Uses cdr.detectChanges() for
-  // synchronous CD + setTimeout to guarantee the browser commits the
-  // layout change before restoring.
-  ionViewWillEnter() {
-    // Refresh embedded profile component when navigating back to tabs
-    if (this.activeTab === 'client-profile') {
-      this.clientProfilePage?.refreshProfile();
-    }
-  }
-
-  ionViewDidEnter() {
-    const tab = this.activeTab || 'service-search';
-    this.activeTab = '';
-    this.cdr.detectChanges();
-    setTimeout(() => { this.activeTab = tab; }, 0);
-  }
-
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   changeTab(tabName: string) {
-    this.activeTab = tabName;
+    const route = this.tabRoutes[tabName];
+    if (!route) return;
+    this.router.navigate(['/client/tabs', route]);
     if (tabName === 'service-map') {
-      this.serviceMapPage?.initMapIfNeeded();
-      setTimeout(() => this.mapService.resize(), 150);
+      setTimeout(() => this.mapService.resize(), 200);
     }
-  }
-
-  onSegmentChange(event: any) {
-    console.log('Segment changed:', event.detail.value);
-    this.activeTab = event.detail.value;
   }
 
   goToCategories() {
@@ -118,23 +69,10 @@ export class ClientTabsPage implements OnInit, OnDestroy {
   }
 
   private updateActiveTabFromUrl(url: string) {
-    if (url.includes('categories')) {
-      this.activeTab = '';
-    } else if (url.includes('service-search')) {
-      this.activeTab = 'service-search';
-    } else if (url.includes('service-map')) {
-      this.activeTab = 'service-map';
-    } else if (url.includes('bookings')) {
-      this.activeTab = 'bookings';
-    } else if (url.includes('chats')) {
-      this.activeTab = 'chats';
-    } else if (url.includes('client-profile') || url.includes('/tabs/profile')) {
-      this.activeTab = 'client-profile';
-    } else if (url.includes('tabs')) {
-      // URL is /client/tabs with no specific tab segment (e.g. navigating
-      // back from categories via router.navigate(['/client/tabs'])).
-      // Default to service-search so the container is visible.
-      this.activeTab = 'service-search';
-    }
+    if      (url.includes('/tabs/service-search')) this.activeTab = 'service-search';
+    else if (url.includes('/tabs/service-map'))    this.activeTab = 'service-map';
+    else if (url.includes('/tabs/bookings'))        this.activeTab = 'bookings';
+    else if (url.includes('/tabs/chats'))           this.activeTab = 'chats';
+    else if (url.includes('/tabs/profile'))         this.activeTab = 'client-profile';
   }
 }

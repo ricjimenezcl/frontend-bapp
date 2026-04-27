@@ -1,165 +1,227 @@
 // client-chats.page.scss
 @import '../../../../theme/mixins';
 
-:host { display: flex; flex-direction: column; height: 100%; }
-
-ion-content.chats-content { --background: var(--bapp-bg-page); }
-
-.chats-wrapper { @include flex-column; height: 100%; }
-
-// ── Intro ─────────────────────────────────────────────────────────────────────
-.chats-intro {
-  padding: var(--bapp-space-4) var(--bapp-space-4) var(--bapp-space-2);
-
-  .chats-title {
-    font-size: var(--bapp-text-2xl);
-    font-weight: var(--bapp-weight-bold);
-    color: var(--bapp-text-primary);
-    letter-spacing: -0.02em;
-    margin: 0 0 2px;
-  }
-
-  .chats-sub {
-    font-size: var(--bapp-text-xs);
-    color: var(--bapp-text-tertiary);
-    margin: 0;
-  }
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-// ── Search + filter ───────────────────────────────────────────────────────────
-.search-filter-row {
+ion-content.chats-content {
+  --background: var(--bapp-bg-page);
+  --padding-bottom: 0;
+}
+
+// ── Glow ambiental ────────────────────────────────────────────────────────────
+.chats-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 320px;
+  background: radial-gradient(circle at 50% -20%, rgba(253, 215, 53, 0.07), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+// ── Wrapper ───────────────────────────────────────────────────────────────────
+.chats-wrapper {
+  position: relative;
+  z-index: 1;
+  padding: var(--bapp-space-5) var(--bapp-space-4) var(--bapp-space-4);
+  @include flex-column;
+}
+
+// ── Action row ────────────────────────────────────────────────────────────────
+.chats-actions {
   @include flex-between;
-  gap: var(--bapp-space-2);
-  padding: 0 var(--bapp-space-4) var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-5);
+  // Right-align both icons
+  justify-content: flex-end;
+  gap: var(--bapp-space-3);
 }
 
-.chats-searchbar {
+.action-icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  @include flex-center;
+  cursor: pointer;
+  color: var(--bapp-color-primary);
+
+  ion-icon { font-size: 20px; }
+
+  &.action-icon-muted {
+    color: var(--bapp-text-secondary);
+  }
+}
+
+// ── Search area ───────────────────────────────────────────────────────────────
+.search-area {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 20px;
+  padding: 4px;
   @include flex-start;
   gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.search-pill {
   flex: 1;
-  background: var(--bapp-surface-elevated);
-  border: 1.5px solid var(--bapp-border-default);
-  border-radius: var(--bapp-radius-xl);
-  padding: var(--bapp-space-2) var(--bapp-space-3);
-  transition: border-color var(--bapp-transition-fast);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  padding: 12px var(--bapp-space-3);
+  @include flex-start;
+  gap: var(--bapp-space-3);
 
-  &:focus-within { border-color: var(--bapp-border-focus); }
-
-  .search-icon { font-size: 16px; color: var(--bapp-text-tertiary); flex-shrink: 0; }
+  .search-lead-icon {
+    font-size: 14px;
+    color: var(--bapp-color-primary);
+    flex-shrink: 0;
+  }
 
   .search-input {
     --background: transparent;
     --color: var(--bapp-text-primary);
     --placeholder-color: var(--bapp-text-disabled);
-    font-size: var(--bapp-text-sm);
-    font-family: var(--bapp-font-base);
     --padding-start: 0;
     --padding-end: 0;
     --padding-top: 0;
     --padding-bottom: 0;
+    font-size: var(--bapp-text-sm);
+    font-family: var(--bapp-font-base);
     flex: 1;
   }
 }
 
 .filter-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--bapp-radius-xl);
-  background: var(--bapp-surface-elevated);
-  border: 1.5px solid var(--bapp-border-default);
+  width: 48px;
+  height: 48px;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 16px;
   @include flex-center;
   cursor: pointer;
   flex-shrink: 0;
   transition: all var(--bapp-transition-fast);
 
-  ion-icon { font-size: 18px; color: var(--bapp-text-tertiary); }
+  ion-icon { font-size: 20px; color: var(--bapp-text-secondary); }
 
   &.filter-btn-active {
-    background: rgba(253,215,53,0.1);
-    border-color: rgba(253,215,53,0.35);
+    background: rgba(253, 215, 53, 0.1);
+    border-color: rgba(253, 215, 53, 0.3);
     ion-icon { color: var(--bapp-color-primary); }
   }
 }
 
 // ── Conversations area ────────────────────────────────────────────────────────
-.conversations-area {
-  flex: 1;
-  overflow-y: auto;
-  @include hide-scrollbar;
+.conversations-area { @include flex-column; }
+
+// ── Chat list ─────────────────────────────────────────────────────────────────
+.chat-list {
+  @include flex-column;
+  gap: var(--bapp-space-2);
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
-.chat-skeleton {
-  @include flex-start;
-  gap: var(--bapp-space-3);
-  padding: var(--bapp-space-3) var(--bapp-space-4);
-  border-bottom: 1px solid var(--bapp-border-subtle);
-
-  .skel-avatar  { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; @include skeleton; }
-  .skel-body    { @include flex-column; gap: var(--bapp-space-2); flex: 1; }
-  .skel-name    { height: 14px; width: 50%; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-preview { height: 12px; width: 80%; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-time    { height: 11px; width: 36px; border-radius: var(--bapp-radius-sm); align-self: flex-start; @include skeleton; }
-}
-
-// ── Chat item ─────────────────────────────────────────────────────────────────
 .chat-item {
   @include flex-start;
-  gap: var(--bapp-space-3);
-  padding: var(--bapp-space-3) var(--bapp-space-4);
+  gap: var(--bapp-space-4);
+  padding: var(--bapp-space-4);
+  border-radius: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   cursor: pointer;
-  border-bottom: 1px solid var(--bapp-border-subtle);
   transition: background var(--bapp-transition-fast);
+  background: transparent;
 
-  &:active { background: var(--bapp-surface-hover); }
-  &:last-child { border-bottom: none; }
+  &.chat-item-unread {
+    background: rgba(253, 215, 53, 0.03);
+    border-bottom-color: transparent;
+  }
+
+  &:active { background: var(--bapp-bg-card); }
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
 }
 
 .chat-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: var(--bapp-surface-elevated);
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+  background-color: var(--bapp-bg-card-raised);
   background-size: cover;
   background-position: center;
-  flex-shrink: 0;
+  border: 1px solid var(--bapp-border);
   @include flex-center;
-  position: relative;
 
   .avatar-initials {
     font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-weight-bold);
+    font-weight: var(--bapp-font-bold);
     color: var(--bapp-text-secondary);
     text-transform: uppercase;
   }
 }
 
-.chat-body {
-  @include flex-column;
-  gap: 4px;
-  flex: 1;
-  min-width: 0;
+.online-dot {
+  width: 14px;
+  height: 14px;
+  background: var(--bapp-color-success);
+  border: 3px solid var(--bapp-bg-page);
+  border-radius: 50%;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
 }
 
-.chat-row {
+// ── Chat content ──────────────────────────────────────────────────────────────
+.chat-content {
+  flex: 1;
+  min-width: 0;
+  @include flex-column;
+  gap: 4px;
+}
+
+.chat-header-row {
   @include flex-between;
   gap: var(--bapp-space-2);
-
-  &.chat-row-preview { align-items: center; }
+  margin-bottom: 2px;
 }
 
 .chat-name {
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-weight-semibold);
+  font-size: 15px;
+  font-weight: var(--bapp-font-bold);
   color: var(--bapp-text-primary);
+  letter-spacing: -0.3px;
   @include truncate-text(1);
+  flex: 1;
+  margin: 0;
 }
 
 .chat-time {
-  font-size: var(--bapp-text-2xs);
+  font-size: 11px;
   color: var(--bapp-text-tertiary);
   white-space: nowrap;
   flex-shrink: 0;
+
+  &.chat-time-unread {
+    color: var(--bapp-color-success);
+    font-weight: var(--bapp-font-bold);
+  }
+}
+
+.chat-preview-row {
+  @include flex-between;
+  gap: var(--bapp-space-2);
+  align-items: center;
 }
 
 .chat-preview {
@@ -169,85 +231,128 @@ ion-content.chats-content { --background: var(--bapp-bg-page); }
   flex: 1;
 
   &.chat-preview-unread {
-    color: var(--bapp-text-secondary);
-    font-weight: var(--bapp-weight-medium);
+    color: var(--bapp-text-primary);
+    font-weight: var(--bapp-font-medium);
   }
 }
 
-.chat-unread-badge {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
+.unread-badge {
   background: var(--bapp-color-primary);
   color: #000;
-  font-size: var(--bapp-text-xs);
-  font-weight: var(--bapp-weight-bold);
+  font-size: 10px;
+  font-weight: var(--bapp-font-bold);
+  min-width: 18px;
+  height: 18px;
   border-radius: var(--bapp-radius-full);
   @include flex-center;
+  padding: 0 5px;
   flex-shrink: 0;
 }
 
-.chat-read-icon {
+.read-receipt {
   font-size: 16px;
-  color: var(--bapp-color-accent);
+  color: var(--bapp-color-success);
   flex-shrink: 0;
+  opacity: 0.85;
 }
 
-// ── State cards ───────────────────────────────────────────────────────────────
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+.chat-skeleton {
+  @include flex-start;
+  gap: var(--bapp-space-4);
+  padding: var(--bapp-space-4);
+
+  .skel-avatar  { width: 56px; height: 56px; border-radius: 20px; flex-shrink: 0; @include skeleton; }
+  .skel-body    { @include flex-column; gap: var(--bapp-space-2); flex: 1; }
+  .skel-name    { height: 15px; width: 45%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-preview { height: 13px; width: 75%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-time    { height: 11px; width: 40px; border-radius: var(--bapp-radius-sm); align-self: flex-start; @include skeleton; }
+}
+
+// ── Empty state — Bappie Scout ────────────────────────────────────────────────
+.chats-empty {
+  @include flex-column-center;
+  padding: var(--bapp-space-10) var(--bapp-space-6);
+  gap: var(--bapp-space-2);
+}
+
+.scout-container {
+  width: 200px;
+  height: 150px;
+}
+
+.scout-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+// Scout animations (scoped to component via Angular's view encapsulation)
+.scout-body {
+  animation: scoutBreathe 4s ease-in-out infinite;
+  transform-origin: 120px 110px;
+}
+
+.scout-blink {
+  animation: scoutBlink 6s infinite;
+  transform-origin: center;
+}
+
+.scout-shine {
+  animation: scoutShine 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes scoutBreathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-6px) scale(1.01); }
+}
+
+@keyframes scoutBlink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95%            { transform: scaleY(0); }
+}
+
+@keyframes scoutShine {
+  0%   { transform: translateX(-30px) rotate(-45deg); opacity: 0; }
+  50%  { opacity: 0.18; }
+  100% { transform: translateX(30px) rotate(-45deg); opacity: 0; }
+}
+
+.empty-title {
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-secondary);
+  margin: var(--bapp-space-2) 0 0;
+}
+
+.empty-hint {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  margin: 0;
+}
+
+// ── Error state ───────────────────────────────────────────────────────────────
 .chats-state-card {
   @include flex-column-center;
   gap: var(--bapp-space-3);
   padding: var(--bapp-space-12) var(--bapp-space-6);
   text-align: center;
 
-  ion-icon { font-size: 44px; color: var(--bapp-text-disabled); opacity: 0.5; }
+  ion-icon { font-size: 44px; color: var(--bapp-color-danger); opacity: 0.7; }
   p { margin: 0; font-size: var(--bapp-text-sm); color: var(--bapp-text-secondary); }
-
-  &.chats-error ion-icon { color: var(--bapp-color-danger); opacity: 0.7; }
-}
-
-.empty-bubble {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--bapp-surface-elevated);
-  @include flex-center;
-
-  ion-icon { font-size: 36px; color: var(--bapp-text-disabled); opacity: 0.5; }
-}
-
-.empty-title {
-  font-size: var(--bapp-text-base);
-  font-weight: var(--bapp-weight-semibold);
-  color: var(--bapp-text-secondary);
-  margin: 0;
-}
-
-.empty-hint {
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-tertiary);
-  max-width: 240px;
-  line-height: 1.5;
-  margin: 0;
 }
 
 .retry-btn {
   padding: var(--bapp-space-2) var(--bapp-space-4);
-  background: rgba(14,165,233,0.1);
-  border: 1.5px solid rgba(14,165,233,0.3);
+  background: rgba(253, 215, 53, 0.08);
+  border: 1.5px solid rgba(253, 215, 53, 0.25);
   border-radius: var(--bapp-radius-full);
-  color: var(--bapp-color-accent);
+  color: var(--bapp-color-primary);
   font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-weight-semibold);
+  font-weight: var(--bapp-font-semibold);
   cursor: pointer;
   transition: all var(--bapp-transition-fast);
 
-  &:active { background: rgba(14,165,233,0.18); }
-}
-
-// ── FAB ───────────────────────────────────────────────────────────────────────
-ion-fab-button {
-  --background: var(--bapp-color-primary);
-  --color: #000;
-  --box-shadow: var(--bapp-shadow-lg);
+  &:active { background: rgba(253, 215, 53, 0.15); }
 }

@@ -36,7 +36,7 @@ ion-content {
     width: 48px;
     height: 48px;
     border-radius: var(--bapp-radius-lg);
-    background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+    background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%);
     border: none;
     @include flex-center;
     box-shadow: 0 4px 16px rgba(253, 215, 53, 0.35);
@@ -86,7 +86,7 @@ ion-content {
 
   ion-button {
     --border-radius: var(--bapp-radius-full);
-    --background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+    --background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%);
     --color: #000;
   }
 }

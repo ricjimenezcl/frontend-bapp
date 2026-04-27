@@ -118,7 +118,7 @@ ion-content.map-content {
     --padding-start: 12px !important;
     --padding-end: 12px !important;
     --background: transparent !important;
-    --background-checked: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+    --background-checked: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%) !important;
     --color: var(--bapp-text-secondary) !important;
     --color-checked: #000 !important;
     --indicator-color: transparent !important;
@@ -235,7 +235,7 @@ ion-content.map-content {
 
   ion-button {
     --border-radius: var(--bapp-radius-full) !important;
-    --background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+    --background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%) !important;
     --color: #000 !important;
     --box-shadow: 0 4px 12px rgba(253,215,53,0.3) !important;
     font-family: 'semi-bold', sans-serif !important;
@@ -289,7 +289,7 @@ ion-content.map-content {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 3px solid #fdd735;
+  border: 3px solid #FDE68A;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   background-color: #f0a500;
   display: flex;
@@ -488,7 +488,7 @@ ion-content.map-content {
   }
 
   .btn-details {
-    background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%);
+    background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%);
     color: #000;
     border: none;
     padding: 10px 16px;
@@ -603,7 +603,7 @@ ion-content.map-content {
       .legend-pin {
         width: 16px !important;
         height: 16px !important;
-        background: linear-gradient(135deg, #fdd735 0%, #f0a500 100%) !important;
+        background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%) !important;
         border-radius: 50% !important;
         display: flex !important;
         align-items: center !important;

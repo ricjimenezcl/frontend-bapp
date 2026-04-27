@@ -78,6 +78,15 @@ export const routes: Routes = [
           {
             path: 'profile',
             loadComponent: () => import('./client/pages/client-profile/client-profile.page').then(m => m.ClientProfilePage)
+          },
+          {
+            path: 'chats',
+            loadComponent: () => import('./client/pages/client-chats/client-chats.page').then(m => m.ClientChatsPage)
+          },
+          {
+            path: '',
+            redirectTo: 'service-search',
+            pathMatch: 'full'
           }
         ]
       },

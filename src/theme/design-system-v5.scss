@@ -1,0 +1,700 @@
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// BAPP DESIGN SYSTEM V5 - "NEO-MINIMAL DARK"
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// Concept: Fintech Luxury Dark - Full-screen, motion-first, gesture-based
+// Paleta: #000000 (bg) + #FDE68A (primary) + #0EA5E9 (accent)
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+@import 'variables';
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 1. TOKENS CORE
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+:root {
+  // Neo-Minimal Dark Palette
+  --neo-bg: #000000;
+  --neo-surface: #0a0a0a;
+  --neo-surface-elevated: #111111;
+  --neo-surface-glass: rgba(255,255,255,0.03);
+  
+  // Text hierarchy
+  --neo-text-primary: #FFFFFF;
+  --neo-text-secondary: rgba(255,255,255,0.7);
+  --neo-text-tertiary: rgba(255,255,255,0.4);
+  --neo-text-disabled: rgba(255,255,255,0.2);
+  
+  // Brand colors (CONSERVADAS)
+  --neo-primary: #FDE68A;
+  --neo-primary-dark: #f0a500;
+  --neo-accent: #FDE68A;
+  --neo-accent-dark: #FDE68A;
+  
+  // Spacing ultra-generous
+  --neo-space-xs: 8px;
+  --neo-space-sm: 12px;
+  --neo-space-md: 20px;
+  --neo-space-lg: 32px;
+  --neo-space-xl: 48px;
+  --neo-space-2xl: 64px;
+  
+  // Border radius
+  --neo-radius-sm: 8px;
+  --neo-radius-md: 16px;
+  --neo-radius-lg: 24px;
+  --neo-radius-xl: 32px;
+  --neo-radius-full: 9999px;
+  
+  // Shadows (subtle)
+  --neo-shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --neo-shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --neo-shadow-glow: 0 0 40px rgba(14,165,233,0.15);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 2. NEO-COMPONENTS - BASICS
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+// Full-screen container
+.neo-screen {
+  position: relative;
+  min-height: 100vh;
+  background: var(--neo-bg);
+  overflow: hidden;
+}
+
+// Ultra-generous padding
+.neo-container {
+  padding: 0 var(--neo-space-lg);
+  padding-top: calc(var(--neo-space-lg) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(var(--neo-space-lg) + env(safe-area-inset-bottom, 0px));
+}
+
+// Display typography
+.neo-display-xl {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--neo-text-primary);
+}
+
+.neo-display-lg {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--neo-text-primary);
+}
+
+.neo-display-md {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--neo-text-primary);
+}
+
+.neo-display-sm {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--neo-text-primary);
+}
+
+.neo-body-lg {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--neo-text-secondary);
+}
+
+.neo-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--neo-text-secondary);
+}
+
+.neo-caption {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neo-text-tertiary);
+}
+
+.neo-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--neo-text-tertiary);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 3. NEO-BUTTONS - Full-width, gesture-optimized
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: var(--neo-radius-lg);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 150ms ease;
+  
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.4; pointer-events: none; }
+  
+  ion-icon { font-size: 20px; }
+}
+
+.neo-btn-primary {
+  background: var(--neo-primary);
+  color: #000;
+  box-shadow: 0 4px 20px rgba(253,215,53,0.3);
+}
+
+.neo-btn-accent {
+  background: var(--neo-accent);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(14,165,233,0.3);
+}
+
+.neo-btn-ghost {
+  background: var(--neo-surface-glass);
+  color: var(--neo-text-primary);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.neo-btn-outline {
+  background: transparent;
+  color: var(--neo-primary);
+  border: 2px solid var(--neo-primary);
+}
+
+.neo-btn-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--neo-radius-full);
+  flex-shrink: 0;
+  
+  ion-icon { font-size: 22px; }
+}
+
+.neo-btn-sm {
+  height: 44px;
+  font-size: 14px;
+  border-radius: var(--neo-radius-md);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 4. NEO-INPUT - Minimal borders
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-input-wrap {
+  position: relative;
+  margin-bottom: var(--neo-space-md);
+}
+
+.neo-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--neo-text-tertiary);
+  font-size: 20px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.neo-input {
+  width: 100%;
+  height: 56px;
+  background: var(--neo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--neo-radius-md);
+  padding: 0 16px;
+  padding-left: 48px;
+  font-size: 16px;
+  color: var(--neo-text-primary);
+  outline: none;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::placeholder { color: var(--neo-text-disabled); }
+  
+  &:focus {
+    border-color: var(--neo-accent);
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+  }
+  
+  &.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+  }
+}
+
+.neo-input-lg { height: 64px; font-size: 18px; }
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 5. NEO-CARD - Full-bleed, no shadows
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-card {
+  background: var(--neo-surface);
+  border-radius: var(--neo-radius-lg);
+  padding: var(--neo-space-md);
+  transition: transform 150ms ease;
+  
+  &:active { transform: scale(0.98); }
+}
+
+.neo-card-glass {
+  background: var(--neo-surface-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--neo-radius-lg);
+}
+
+.neo-card-bordered {
+  background: var(--neo-surface);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--neo-radius-lg);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 6. NEO-AVATAR - With glow effect
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-avatar {
+  position: relative;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--neo-surface);
+  }
+  
+  .neo-avatar-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--neo-accent), rgba(14,165,233,0.3));
+    opacity: 0.4;
+    z-index: -1;
+    filter: blur(8px);
+  }
+  
+  .neo-avatar-badge {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    background: #10b981;
+    border: 2px solid var(--neo-bg);
+    border-radius: 50%;
+  }
+}
+
+.neo-avatar-sm { width: 40px; height: 40px; }
+.neo-avatar-md { width: 56px; height: 56px; }
+.neo-avatar-lg { width: 72px; height: 72px; }
+.neo-avatar-xl { width: 96px; height: 96px; }
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 7. NEO-BADGE - Minimal tags
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--neo-radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.neo-badge-primary {
+  background: rgba(253,215,53,0.15);
+  color: var(--neo-primary);
+}
+
+.neo-badge-accent {
+  background: rgba(14,165,233,0.15);
+  color: var(--neo-accent);
+}
+
+.neo-badge-success {
+  background: rgba(16,185,129,0.15);
+  color: #10b981;
+}
+
+.neo-badge-warning {
+  background: rgba(251,191,36,0.15);
+  color: #fbbf24;
+}
+
+.neo-badge-danger {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 8. NEO-TABS - Bottom nav style
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--neo-surface);
+  padding: 4px;
+  border-radius: var(--neo-radius-lg);
+  
+  .neo-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 8px;
+    border-radius: var(--neo-radius-md);
+    cursor: pointer;
+    transition: all 200ms ease;
+    
+    ion-icon { font-size: 22px; color: var(--neo-text-tertiary); }
+    span { font-size: 10px; font-weight: 600; color: var(--neo-text-tertiary); }
+    
+    &.active {
+      background: var(--neo-surface-glass);
+      
+      ion-icon { color: var(--neo-primary); }
+      span { color: var(--neo-text-primary); }
+    }
+  }
+}
+
+// Bottom fixed tabs
+.neo-tabs-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 16px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  background: rgba(0,0,0,0.9);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  z-index: 100;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 9. NEO-LIST - Clean rows
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.neo-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-space-md);
+  padding: var(--neo-space-md) 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: background 150ms ease;
+  
+  &:active { background: rgba(255,255,255,0.02); }
+  &:last-child { border-bottom: none; }
+}
+
+.neo-list-content { flex: 1; min-width: 0; }
+.neo-list-title { font-size: 16px; font-weight: 600; color: var(--neo-text-primary); margin-bottom: 2px; }
+.neo-list-subtitle { font-size: 14px; color: var(--neo-text-tertiary); }
+.neo-list-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 10. NEO-SKELETON - Loading shimmer
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+@keyframes neo-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.neo-skeleton {
+  background: linear-gradient(90deg, 
+    var(--neo-surface) 25%, 
+    var(--neo-surface-elevated) 50%, 
+    var(--neo-surface) 75%);
+  background-size: 200% 100%;
+  animation: neo-shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--neo-radius-sm);
+  
+  &.skeleton-circle { border-radius: 50%; }
+  &.skeleton-text { height: 16px; }
+  &.skeleton-title { height: 24px; width: 60%; }
+  &.skeleton-avatar { width: 56px; height: 56px; border-radius: 50%; }
+  &.skeleton-btn { height: 56px; border-radius: var(--neo-radius-lg); }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 11. NEO-EMPTY - Full-screen state
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--neo-space-2xl);
+  min-height: 60vh;
+  
+  .neo-empty-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--neo-surface-glass);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--neo-space-lg);
+    
+    ion-icon { font-size: 48px; color: var(--neo-text-disabled); }
+  }
+  
+  .neo-empty-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--neo-text-primary);
+    margin-bottom: var(--neo-space-sm);
+  }
+  
+  .neo-empty-subtitle {
+    font-size: 16px;
+    color: var(--neo-text-tertiary);
+    max-width: 280px;
+    line-height: 1.5;
+    margin-bottom: var(--neo-space-lg);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 12. NEO-ANIMATIONS - Entrance effects
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+@keyframes neo-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neo-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes neo-scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes neo-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.neo-animate-up { animation: neo-fade-up 400ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.neo-animate-in { animation: neo-fade-in 300ms ease forwards; }
+.neo-animate-scale { animation: neo-scale-in 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+// Stagger delays
+@for $i from 1 through 10 {
+  .neo-delay-#{$i} { animation-delay: #{$i * 50}ms; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 13. NEO-MODAL - Bottom sheet style
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  animation: neo-fade-in 200ms ease;
+}
+
+.neo-modal-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--neo-surface);
+  border-radius: var(--neo-radius-xl) var(--neo-radius-xl) 0 0;
+  padding: var(--neo-space-md);
+  padding-bottom: calc(var(--neo-space-md) + env(safe-area-inset-bottom, 0px));
+  z-index: 1001;
+  animation: neo-slide-up 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .neo-modal-handle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin: 0 auto var(--neo-space-md);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 14. NEO-HEADER - Transparent with gradient
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: var(--neo-space-md) var(--neo-space-lg);
+  padding-top: calc(var(--neo-space-md) + env(safe-area-inset-top, 0px));
+  background: linear-gradient(180deg, var(--neo-bg) 0%, transparent 100%);
+  
+  &.transparent { background: transparent; }
+  &.solid { background: var(--neo-bg); }
+}
+
+.neo-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.neo-header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--neo-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.neo-header-subtitle {
+  font-size: 14px;
+  color: var(--neo-text-tertiary);
+  margin-top: 2px;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 15. NEO-CHAT - WhatsApp inspired
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-chat-bubble {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.4;
+  
+  &.sent {
+    background: var(--neo-accent);
+    color: #fff;
+    border-bottom-right-radius: 6px;
+    margin-left: auto;
+  }
+  
+  &.received {
+    background: var(--neo-surface);
+    color: var(--neo-text-primary);
+    border-bottom-left-radius: 6px;
+  }
+}
+
+.neo-chat-time {
+  font-size: 10px;
+  color: var(--neo-text-disabled);
+  margin-top: 4px;
+  text-align: right;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 16. NEO-GRID - Ultra clean layout
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-grid {
+  display: grid;
+  gap: var(--neo-space-md);
+  
+  &.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  &.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  &.cols-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+.neo-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--neo-space-md);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 17. NEO-FOOTER - Fixed bottom CTA
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+.neo-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--neo-space-md) var(--neo-space-lg);
+  padding-bottom: calc(var(--neo-space-md) + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(to top, var(--neo-bg) 80%, transparent);
+  z-index: 50;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════════════
+// 18. IONIC OVERRIDES - Neo theme
+// ═══════════════════════════════════════════════════════════════════════════════════════
+
+ion-content {
+  --background: var(--neo-bg);
+  --color: var(--neo-text-primary);
+}
+
+ion-header {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+    --color: var(--neo-text-primary);
+  }
+}
+
+ion-footer {
+  ion-toolbar {
+    --background: transparent;
+    --border-width: 0;
+  }
+}
+
+ion-back-button {
+  --color: var(--neo-text-primary);
+}
+
+ion-spinner {
+  --color: var(--neo-accent);
+}
+
+// Remove Ionic defaults
+ion-card, ion-item, ion-toolbar, ion-tab-bar {
+  --background: transparent;
+  --border-color: transparent;
+  box-shadow: none;
+}

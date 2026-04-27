@@ -2209,7 +2209,7 @@ ion-modal.bookmark-modal {
     
     .alert-title {
       --background: var(--ion-color-dark);
-      color: #fdd735; // Color primario de tu tema
+      color: #FDE68A; // Color primario de tu tema
       font-family: 'bold';
       font-size: var(--bapp-text-lg);
       text-align: center;
@@ -2256,7 +2256,7 @@ ion-modal.bookmark-modal {
   
   // Estilos específicos para cada botón
   .camera-button {
-    color: #fdd735; // Color primario
+    color: #FDE68A; // Color primario
     
     &::before {
       content: '📸 ';

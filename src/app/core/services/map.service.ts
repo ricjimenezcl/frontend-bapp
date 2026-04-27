@@ -287,7 +287,7 @@ export class MapService {
       source: this.clusterSourceId,
       filter: ['has', 'point_count'],
       paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#FDD735', 10, '#f28cb1', 30, '#f1f075'],
+        'circle-color': ['step', ['get', 'point_count'], '#FDE68A', 10, '#f28cb1', 30, '#f1f075'],
         'circle-radius': ['step', ['get', 'point_count'], 22, 10, 32, 30, 42],
         'circle-stroke-width': 2,
         'circle-stroke-color': 'rgba(0,0,0,0.3)'
@@ -346,7 +346,7 @@ export class MapService {
       source: this.clusterSourceId,
       filter: ['has', 'point_count'],
       paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#FDD735', 10, '#f28cb1', 30, '#f1f075'],
+        'circle-color': ['step', ['get', 'point_count'], '#FDE68A', 10, '#f28cb1', 30, '#f1f075'],
         'circle-radius': ['step', ['get', 'point_count'], 22, 10, 32, 30, 42],
         'circle-stroke-width': 2,
         'circle-stroke-color': 'rgba(0,0,0,0.3)'

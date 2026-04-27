@@ -359,7 +359,7 @@ ion-content.mc-content {
   position: relative;
   margin: 0 var(--bapp-space-4) var(--bapp-space-5);
   padding: var(--bapp-space-5) var(--bapp-space-5);
-  background: linear-gradient(135deg, #FDD735 0%, #F0A500 100%);
+  background: linear-gradient(135deg, #FDE68A 0%, #F0A500 100%);
   border-radius: var(--bapp-radius-2xl);
   overflow: hidden;
 
@@ -453,7 +453,7 @@ ion-content.mc-content {
 
 // Tile color palette — 6 variants cycling with data-idx
 $tile-colors: (
-  0: (#FDD735, #F0A500, #111),       // primary gold
+  0: (#FDE68A, #F0A500, #111),       // primary gold
   1: (#0EA5E9, #0284C7, #fff),       // accent sky
   2: (#22C55E, #16A34A, #fff),       // emerald
   3: (#A855F7, #7C3AED, #fff),       // violet

@@ -403,7 +403,7 @@ ion-footer.tabs-footer {
 - Border: `var(--bapp-border)` (rgba(255,255,255,0.08))
 - Text primary: `var(--bapp-text-primary)` (#FFFFFF)
 - Text secondary: `var(--bapp-text-secondary)` (rgba(255,255,255,0.62))
-- Primary (amarillo): `var(--bapp-color-primary)` (#FDD735)
+- Primary (amarillo): `var(--bapp-color-primary)` (#FDE68A)
 
 ### Espaciados
 - xs: 8px, sm: 12px, md: 16px, lg: 24px, xl: 32px

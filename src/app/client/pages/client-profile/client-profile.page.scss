@@ -1,86 +1,148 @@
 // client-profile.page.scss
 @import '../../../../theme/mixins';
-@import '../../../../theme/shared-ui';
 
-:host { display: flex; flex-direction: column; height: 100%; }
+:host { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
 ion-content.profile-content { --background: var(--bapp-bg-page); }
 
-// .profile-wrapper — en _shared-ui
+.profile-wrapper {
+  padding: var(--bapp-space-8) var(--bapp-space-4) 0;
+  max-width: 440px;
+  margin: 0 auto;
+  @include flex-column;
+}
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
-.profile-hero {
+// ── Profile header ────────────────────────────────────────────────────────────
+.profile-header {
   @include flex-column-center;
-  gap: var(--bapp-space-2);
-  padding: var(--bapp-space-8) var(--bapp-space-4) var(--bapp-space-5);
-  background: var(--bapp-bg-card);
-  border-bottom: 1px solid var(--bapp-border);
-  position: relative;
-  overflow: hidden;
+  gap: var(--bapp-space-1);
+  margin-bottom: var(--bapp-space-6);
+  text-align: center;
+}
 
-  // Orbe decorativo — amarillo primario (rol cliente)
-  .hero-bg-orb {
-    position: absolute;
-    top: -40px;
-    right: -40px;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(253, 215, 53, 0.12) 0%, transparent 70%);
-    pointer-events: none;
+.avatar-wrap {
+  width: 100px;
+  height: 100px;
+  border-radius: 35px;
+  margin: 0 auto var(--bapp-space-3);
+  border: 3px solid var(--bapp-color-primary);
+  padding: 4px;
+  background: var(--bapp-bg-page);
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    object-fit: cover;
+    display: block;
   }
 }
 
-.profile-avatar-wrap {
-  position: relative;
-  margin-bottom: var(--bapp-space-1);
+.profile-name {
+  font-size: 22px;
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.5px;
+  margin: 0;
 }
-
-// .profile-avatar — en _shared-ui
-// .profile-name  — en _shared-ui
 
 .profile-email {
   font-size: var(--bapp-text-xs);
-  color: var(--bapp-text-tertiary);
+  color: var(--bapp-text-secondary);
   margin: 0;
-  text-align: center;
   @include truncate-text(1);
-  max-width: 240px;
+  max-width: 260px;
 }
 
-.premium-badge-wrap { margin-top: var(--bapp-space-2); }
+// ── Premium box ───────────────────────────────────────────────────────────────
+.premium-box {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 28px;
+  padding: var(--bapp-space-5);
+  margin-bottom: var(--bapp-space-4);
+}
 
-// ── Info quick cards ──────────────────────────────────────────────────────────
-.info-row {
+.premium-title {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  margin-bottom: var(--bapp-space-3);
+
+  .premium-icon {
+    font-size: 18px;
+    color: var(--bapp-color-primary);
+  }
+}
+
+.perk {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+  margin-bottom: var(--bapp-space-2);
+
+  .perk-check {
+    font-size: 12px;
+    color: var(--bapp-color-success);
+    flex-shrink: 0;
+  }
+}
+
+.btn-premium {
+  @include flex-center;
+  width: 100%;
+  padding: 16px;
+  background: var(--bapp-color-primary);
+  color: #000;
+  border: none;
+  border-radius: 18px;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  margin-top: var(--bapp-space-3);
+  cursor: pointer;
+  transition: opacity var(--bapp-transition-fast);
+  letter-spacing: 0.01em;
+
+  &:active { opacity: 0.85; }
+}
+
+// ── Stats row ─────────────────────────────────────────────────────────────────
+.stats-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--bapp-space-3);
-  padding: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-5);
 }
 
-.info-card {
-  @include flex-column;
-  gap: 3px;
-  padding: var(--bapp-space-3);
+.stat-card {
   background: var(--bapp-bg-card);
   border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-xl);
+  border-radius: 20px;
+  padding: var(--bapp-space-3);
+  @include flex-column;
+  gap: 3px;
 
-  .info-icon {
-    font-size: var(--bapp-text-xl);
+  .stat-icon {
+    font-size: 18px;
     color: var(--bapp-color-primary);
-    margin-bottom: 2px;
+    margin-bottom: var(--bapp-space-1);
   }
 
-  .info-label {
-    font-size: var(--bapp-text-xs);
-    font-weight: var(--bapp-font-semibold);
+  .stat-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
     color: var(--bapp-text-tertiary);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
+    margin-top: var(--bapp-space-1);
   }
 
-  .info-value {
+  .stat-value {
+    display: block;
     font-size: var(--bapp-text-xs);
     color: var(--bapp-text-secondary);
     font-weight: var(--bapp-font-medium);
@@ -88,7 +150,94 @@ ion-content.profile-content { --background: var(--bapp-bg-page); }
   }
 }
 
-// .menu-section, .menu-section-label, .menu-list — en _shared-ui
-// .menu-item, .menu-icon, .menu-icon-* — en _shared-ui
-// .logout-wrap, .logout-btn — en _shared-ui
-// .profile-footer-spacer — en _shared-ui
+// ── Section label ─────────────────────────────────────────────────────────────
+.section-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--bapp-text-tertiary);
+  margin: var(--bapp-space-5) 0 var(--bapp-space-3) var(--bapp-space-1);
+}
+
+// ── Menu group ────────────────────────────────────────────────────────────────
+.menu-group {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: var(--bapp-space-2);
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+  padding: 18px 20px;
+  border: none;
+  background: transparent;
+  border-bottom: 1px solid var(--bapp-border);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--bapp-transition-fast);
+
+  &:last-child { border-bottom: none; }
+  &:active { background: var(--bapp-bg-card-raised); }
+}
+
+.menu-item-icon {
+  font-size: 18px;
+  color: var(--bapp-text-secondary);
+  width: 22px;
+  flex-shrink: 0;
+
+  &.menu-item-icon-gold { color: var(--bapp-color-primary); }
+}
+
+.menu-item-label {
+  flex: 1;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.menu-chevron {
+  font-size: 12px;
+  color: var(--bapp-text-disabled);
+  flex-shrink: 0;
+}
+
+.menu-tag {
+  background: rgba(253, 215, 53, 0.1);
+  color: var(--bapp-color-primary);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: var(--bapp-radius-sm);
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(253, 215, 53, 0.2);
+  margin-right: var(--bapp-space-1);
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+.btn-logout {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: 18px;
+  background: transparent;
+  border: 1px solid rgba(252, 165, 165, 0.2);
+  border-radius: 20px;
+  color: var(--bapp-color-danger);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  margin-top: var(--bapp-space-6);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; }
+  &:active { background: rgba(252, 165, 165, 0.06); }
+}
+
+.profile-footer-spacer { height: 60px; }

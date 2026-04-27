@@ -96,7 +96,13 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     this.subscriptions.push(clusterSub);
   }
 
-  /** Llamar desde tabs.page.ts al activar este tab por primera vez */
+  // Ionic lifecycle — fires when this tab becomes visible via ion-router-outlet.
+  ionViewWillEnter() {
+    this.initMapIfNeeded();
+    setTimeout(() => this.mapService.resize(), 200);
+  }
+
+  /** Called by ionViewWillEnter; safe to call multiple times (guarded by mapInitialized). */
   initMapIfNeeded() {
     if (!this.mapInitialized) {
       setTimeout(() => this.initializeFlow(), 100);

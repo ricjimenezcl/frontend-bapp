@@ -1,118 +1,109 @@
 <ion-content class="profile-content">
-
   <div class="profile-wrapper">
 
     <!-- ── Profile header ────────────────────────────────────────────── -->
-    <div class="profile-hero">
-      <!-- Background decoration -->
-      <div class="hero-bg-orb"></div>
-
-      <!-- Avatar -->
-      <div class="profile-avatar-wrap">
+    <header class="profile-header">
+      <div class="avatar-wrap">
         <img
-          class="profile-avatar"
           [src]="avatar || 'assets/images/default-avatar.png'"
           alt="Avatar"
           (error)="$any($event.target).src='assets/images/default-avatar.png'" />
       </div>
-
-      <h2 class="profile-name">{{ fullName || 'Usuario' }}</h2>
+      <h1 class="profile-name">{{ fullName || 'Usuario' }}</h1>
       <p class="profile-email">{{ email }}</p>
+    </header>
 
-      <!-- Premium Badge -->
-      <div class="premium-badge-wrap">
-        <app-premium-badge
-          [userId]="user?.id"
-          [compactMode]="false">
-        </app-premium-badge>
+    <!-- ── Premium box ───────────────────────────────────────────────── -->
+    <div class="premium-box">
+      <h2 class="premium-title">
+        <ion-icon name="shield-half-outline" class="premium-icon"></ion-icon>
+        Cuenta Gratuita
+      </h2>
+      <div class="perk">
+        <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+        Acceso ilimitado a búsquedas
       </div>
-    </div>
-
-    <!-- ── Info quick cards ───────────────────────────────────────────── -->
-    <div class="info-row">
-      <div class="info-card">
-        <ion-icon name="call-outline" class="info-icon"></ion-icon>
-        <span class="info-label">Teléfono</span>
-        <span class="info-value">{{ phone || 'Sin registrar' }}</span>
+      <div class="perk">
+        <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+        Sin límites de servicios guardados
       </div>
-      <div class="info-card">
-        <ion-icon name="mail-outline" class="info-icon"></ion-icon>
-        <span class="info-label">Email</span>
-        <span class="info-value">{{ email }}</span>
+      <div class="perk">
+        <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+        Contacta proveedores ilimitados
       </div>
-    </div>
-
-    <!-- ── Menu: cuenta ──────────────────────────────────────────────── -->
-    <div class="menu-section">
-      <p class="menu-section-label">Cuenta</p>
-
-      <div class="menu-list">
-        <button class="menu-item" (click)="goToEditProfile()" type="button">
-          <div class="menu-icon menu-icon-blue">
-            <ion-icon name="person-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Editar perfil</span>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-
-        <button class="menu-item" (click)="goToTransactions()" type="button">
-          <div class="menu-icon menu-icon-green">
-            <ion-icon name="receipt-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Mis Compras</span>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-
-        <button class="menu-item" (click)="goToCatalog()" type="button">
-          <div class="menu-icon menu-icon-gold">
-            <ion-icon name="cart-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Tienda Premium</span>
-          <div class="menu-tag">Premium</div>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── Menu: preferencias ────────────────────────────────────────── -->
-    <div class="menu-section">
-      <p class="menu-section-label">Preferencias</p>
-
-      <div class="menu-list">
-        <button class="menu-item" (click)="goToSettings()" type="button">
-          <div class="menu-icon menu-icon-slate">
-            <ion-icon name="settings-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Configuración</span>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-
-        <button class="menu-item" (click)="inviteFriends()" type="button">
-          <div class="menu-icon menu-icon-violet">
-            <ion-icon name="gift-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Invitar amigos</span>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-        <button class="menu-item" (click)="goToTerms()" type="button">
-          <div class="menu-icon menu-icon-orange">
-            <ion-icon name="document-text-outline"></ion-icon>
-          </div>
-          <span class="menu-label">Términos y condiciones</span>
-          <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
-        </button>
-      </div>
-    </div>
-
-    <!-- ── Logout ─────────────────────────────────────────────────────── -->
-    <div class="logout-wrap">
-      <button class="logout-btn" (click)="goLogout()" type="button">
-        <ion-icon name="log-out-outline"></ion-icon>
-        <span>Cerrar sesión</span>
+      <button class="btn-premium" (click)="goToCatalog()" type="button">
+        Actualizar A Premium
       </button>
     </div>
 
+    <!-- ── Stats row ─────────────────────────────────────────────────── -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <ion-icon name="call" class="stat-icon"></ion-icon>
+        <span class="stat-label">Teléfono</span>
+        <span class="stat-value">{{ phone || 'Sin registrar' }}</span>
+      </div>
+      <div class="stat-card">
+        <ion-icon name="mail" class="stat-icon"></ion-icon>
+        <span class="stat-label">Email</span>
+        <span class="stat-value">{{ email }}</span>
+      </div>
+    </div>
+
+    <!-- ── Menu: Cuenta ───────────────────────────────────────────────── -->
+    <p class="section-label">Cuenta</p>
+    <div class="menu-group">
+
+      <button class="menu-item" (click)="goToEditProfile()" type="button">
+        <ion-icon name="person-outline" class="menu-item-icon"></ion-icon>
+        <span class="menu-item-label">Editar perfil</span>
+        <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+      </button>
+
+      <button class="menu-item" (click)="goToTransactions()" type="button">
+        <ion-icon name="receipt-outline" class="menu-item-icon"></ion-icon>
+        <span class="menu-item-label">Mis Compras</span>
+        <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+      </button>
+
+      <button class="menu-item" (click)="goToCatalog()" type="button">
+        <ion-icon name="storefront-outline" class="menu-item-icon menu-item-icon-gold"></ion-icon>
+        <span class="menu-item-label">Tienda Premium</span>
+        <div class="menu-tag">PREMIUM</div>
+      </button>
+
+    </div>
+
+    <!-- ── Menu: Preferencias ─────────────────────────────────────────── -->
+    <p class="section-label">Preferencias</p>
+    <div class="menu-group">
+
+      <button class="menu-item" (click)="goToSettings()" type="button">
+        <ion-icon name="settings-outline" class="menu-item-icon"></ion-icon>
+        <span class="menu-item-label">Configuración</span>
+        <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+      </button>
+
+      <button class="menu-item" (click)="inviteFriends()" type="button">
+        <ion-icon name="gift-outline" class="menu-item-icon"></ion-icon>
+        <span class="menu-item-label">Invitar amigos</span>
+        <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+      </button>
+
+      <button class="menu-item" (click)="goToTerms()" type="button">
+        <ion-icon name="document-text-outline" class="menu-item-icon"></ion-icon>
+        <span class="menu-item-label">Términos y condiciones</span>
+        <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
+      </button>
+
+    </div>
+
+    <!-- ── Logout ─────────────────────────────────────────────────────── -->
+    <button class="btn-logout" (click)="goLogout()" type="button">
+      <ion-icon name="power-outline"></ion-icon>
+      Cerrar sesión
+    </button>
+
     <div class="profile-footer-spacer"></div>
   </div>
-
 </ion-content>
