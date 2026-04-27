@@ -130,12 +130,12 @@ export const routes: Routes = [
         path: 'tabs',
         loadComponent: () => import('./provider/pages/tabs/tabs.page').then(m => m.ProviderTabsPage),
         children: [
-          { path: 'home',            children: [] },
-          { path: 'bookings',        children: [] },
-          { path: 'inbox',           children: [] },
-          { path: 'profile',         children: [] },
-          { path: 'service-details', children: [] },
-          { path: '',                redirectTo: 'home', pathMatch: 'full' }
+          { path: 'home',            loadComponent: () => import('./provider/pages/provider-home/provider-home.page').then(m => m.ProviderHomePage) },
+          { path: 'bookings',        loadComponent: () => import('./provider/pages/provider-bookings/provider-bookings.page').then(m => m.ProviderBookingsPage) },
+          { path: 'inbox',          loadComponent: () => import('./provider/pages/provider-inbox/provider-inbox.page').then(m => m.ProviderInboxPage) },
+          { path: 'profile',         loadComponent: () => import('./provider/pages/provider-profile/provider-profile.page').then(m => m.ProviderProfilePage) },
+          { path: 'service-details', loadComponent: () => import('./provider/pages/provider-service-details/provider-service-details.page').then(m => m.ProviderServiceDetailsPage) },
+          { path: '',               redirectTo: 'home', pathMatch: 'full' }
         ]
       },
       {
