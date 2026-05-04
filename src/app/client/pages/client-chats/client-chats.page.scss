@@ -6,11 +6,11 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: var(--bapp-bg-page);
 }
 
 ion-content.chats-content {
   --background: var(--bapp-bg-page);
-  --padding-bottom: 0;
 }
 
 // ── Glow ambiental ────────────────────────────────────────────────────────────
@@ -20,8 +20,8 @@ ion-content.chats-content {
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
-  height: 320px;
-  background: radial-gradient(circle at 50% -20%, rgba(253, 215, 53, 0.07), transparent 70%);
+  height: 300px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(253, 215, 53, 0.08) 0%, transparent 65%);
   pointer-events: none;
   z-index: 0;
 }
@@ -30,20 +30,31 @@ ion-content.chats-content {
 .chats-wrapper {
   position: relative;
   z-index: 1;
-  padding: var(--bapp-space-5) var(--bapp-space-4) var(--bapp-space-4);
+  padding: var(--bapp-space-6) var(--bapp-space-4) var(--bapp-space-4);
   @include flex-column;
+  gap: 0;
 }
 
-// ── Action row ────────────────────────────────────────────────────────────────
-.chats-actions {
+// ── Header ────────────────────────────────────────────────────────────────────
+.chats-header {
   @include flex-between;
   margin-bottom: var(--bapp-space-5);
-  // Right-align both icons
-  justify-content: flex-end;
+}
+
+.chats-heading {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--bapp-text-primary);
+  letter-spacing: -0.05em;
+  margin: 0;
+}
+
+.header-actions {
+  @include flex-start;
   gap: var(--bapp-space-3);
 }
 
-.action-icon-btn {
+.icon-btn {
   width: 44px;
   height: 44px;
   border-radius: 14px;
@@ -52,55 +63,56 @@ ion-content.chats-content {
   @include flex-center;
   cursor: pointer;
   color: var(--bapp-color-primary);
+  transition: background var(--bapp-transition-fast);
 
   ion-icon { font-size: 20px; }
+  &:active { background: var(--bapp-bg-card-raised); }
 
-  &.action-icon-muted {
+  &.icon-btn-muted {
     color: var(--bapp-text-secondary);
   }
 }
 
 // ── Search area ───────────────────────────────────────────────────────────────
 .search-area {
+  @include flex-start;
+  gap: var(--bapp-space-2);
   background: var(--bapp-bg-card);
   border: 1px solid var(--bapp-border);
   border-radius: 20px;
   padding: 4px;
-  @include flex-start;
-  gap: var(--bapp-space-2);
   margin-bottom: var(--bapp-space-6);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 .search-pill {
   flex: 1;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 16px;
-  padding: 12px var(--bapp-space-3);
   @include flex-start;
   gap: var(--bapp-space-3);
-
-  .search-lead-icon {
-    font-size: 14px;
-    color: var(--bapp-color-primary);
-    flex-shrink: 0;
-  }
-
-  .search-input {
-    --background: transparent;
-    --color: var(--bapp-text-primary);
-    --placeholder-color: var(--bapp-text-disabled);
-    --padding-start: 0;
-    --padding-end: 0;
-    --padding-top: 0;
-    --padding-bottom: 0;
-    font-size: var(--bapp-text-sm);
-    font-family: var(--bapp-font-base);
-    flex: 1;
-  }
+  background: rgba(255, 255, 255, 0.025);
+  border-radius: 16px;
+  padding: 12px var(--bapp-space-3);
 }
 
-.filter-btn {
+.search-pill-icon {
+  font-size: 15px;
+  color: var(--bapp-color-primary);
+  flex-shrink: 0;
+}
+
+.search-input {
+  --background: transparent;
+  --color: var(--bapp-text-primary);
+  --placeholder-color: var(--bapp-text-disabled);
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  font-size: var(--bapp-text-sm);
+  flex: 1;
+}
+
+.filter-toggle {
   width: 48px;
   height: 48px;
   background: var(--bapp-bg-card);
@@ -113,11 +125,12 @@ ion-content.chats-content {
 
   ion-icon { font-size: 20px; color: var(--bapp-text-secondary); }
 
-  &.filter-btn-active {
+  &.filter-toggle-active {
     background: rgba(253, 215, 53, 0.1);
     border-color: rgba(253, 215, 53, 0.3);
     ion-icon { color: var(--bapp-color-primary); }
   }
+  &:active { opacity: 0.8; }
 }
 
 // ── Conversations area ────────────────────────────────────────────────────────
@@ -126,24 +139,24 @@ ion-content.chats-content {
 // ── Chat list ─────────────────────────────────────────────────────────────────
 .chat-list {
   @include flex-column;
-  gap: var(--bapp-space-2);
+  gap: 4px;
 }
 
+// ── Chat item ─────────────────────────────────────────────────────────────────
 .chat-item {
-  @include flex-start;
+  display: flex;
+  align-items: center;
   gap: var(--bapp-space-4);
-  padding: var(--bapp-space-4);
+  padding: var(--bapp-space-4) var(--bapp-space-2);
   border-radius: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   transition: background var(--bapp-transition-fast);
-  background: transparent;
 
-  &.chat-item-unread {
-    background: rgba(253, 215, 53, 0.03);
+  &--unread {
+    background: rgba(253, 215, 53, 0.035);
     border-bottom-color: transparent;
   }
-
   &:active { background: var(--bapp-bg-card); }
 }
 
@@ -162,18 +175,20 @@ ion-content.chats-content {
   background-position: center;
   border: 1px solid var(--bapp-border);
   @include flex-center;
+  overflow: hidden;
+}
 
-  .avatar-initials {
-    font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-font-bold);
-    color: var(--bapp-text-secondary);
-    text-transform: uppercase;
-  }
+.avatar-initials {
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .online-dot {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   background: var(--bapp-color-success);
   border: 3px solid var(--bapp-bg-page);
   border-radius: 50%;
@@ -187,18 +202,19 @@ ion-content.chats-content {
   flex: 1;
   min-width: 0;
   @include flex-column;
-  gap: 4px;
+  gap: 3px;
 }
 
-.chat-header-row {
+// Row 1: name + time
+.chat-row-top {
   @include flex-between;
+  align-items: center;
   gap: var(--bapp-space-2);
-  margin-bottom: 2px;
 }
 
 .chat-name {
   font-size: 15px;
-  font-weight: var(--bapp-font-bold);
+  font-weight: 700;
   color: var(--bapp-text-primary);
   letter-spacing: -0.3px;
   @include truncate-text(1);
@@ -212,16 +228,42 @@ ion-content.chats-content {
   white-space: nowrap;
   flex-shrink: 0;
 
-  &.chat-time-unread {
+  &--unread {
     color: var(--bapp-color-success);
     font-weight: var(--bapp-font-bold);
   }
 }
 
-.chat-preview-row {
-  @include flex-between;
-  gap: var(--bapp-space-2);
+// Row 2: rating
+.rating-row {
+  @include flex-start;
+  gap: 2px;
   align-items: center;
+}
+
+.star {
+  font-size: 12px;
+  color: var(--bapp-text-disabled);
+  line-height: 1;
+
+  &--filled {
+    color: var(--bapp-color-primary);
+  }
+}
+
+.rating-value {
+  font-size: 11px;
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-tertiary);
+  margin-left: 4px;
+  letter-spacing: 0.02em;
+}
+
+// Row 3: preview + badge
+.chat-row-bottom {
+  @include flex-between;
+  align-items: center;
+  gap: var(--bapp-space-2);
 }
 
 .chat-preview {
@@ -229,8 +271,9 @@ ion-content.chats-content {
   color: var(--bapp-text-tertiary);
   @include truncate-text(1);
   flex: 1;
+  margin: 0;
 
-  &.chat-preview-unread {
+  &--unread {
     color: var(--bapp-text-primary);
     font-weight: var(--bapp-font-medium);
   }
@@ -240,7 +283,7 @@ ion-content.chats-content {
   background: var(--bapp-color-primary);
   color: #000;
   font-size: 10px;
-  font-weight: var(--bapp-font-bold);
+  font-weight: 800;
   min-width: 18px;
   height: 18px;
   border-radius: var(--bapp-radius-full);
@@ -249,7 +292,7 @@ ion-content.chats-content {
   flex-shrink: 0;
 }
 
-.read-receipt {
+.read-check {
   font-size: 16px;
   color: var(--bapp-color-success);
   flex-shrink: 0;
@@ -258,48 +301,99 @@ ion-content.chats-content {
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
 .chat-skeleton {
-  @include flex-start;
+  display: flex;
+  align-items: flex-start;
   gap: var(--bapp-space-4);
-  padding: var(--bapp-space-4);
+  padding: var(--bapp-space-4) var(--bapp-space-2);
 
-  .skel-avatar  { width: 56px; height: 56px; border-radius: 20px; flex-shrink: 0; @include skeleton; }
-  .skel-body    { @include flex-column; gap: var(--bapp-space-2); flex: 1; }
-  .skel-name    { height: 15px; width: 45%; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-preview { height: 13px; width: 75%; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-time    { height: 11px; width: 40px; border-radius: var(--bapp-radius-sm); align-self: flex-start; @include skeleton; }
+  .skel-avatar  {
+    width: 56px;
+    height: 56px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    @include skeleton;
+  }
+
+  .skel-body {
+    @include flex-column;
+    gap: var(--bapp-space-2);
+    flex: 1;
+    padding-top: 2px;
+  }
+
+  .skel-row    { @include flex-between; gap: var(--bapp-space-2); }
+  .skel-name   { height: 15px; width: 45%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-time   { height: 11px; width: 40px; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-rating { height: 12px; width: 80px; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  .skel-preview{ height: 13px; width: 78%; border-radius: var(--bapp-radius-sm); @include skeleton; }
 }
 
-// ── Empty state — Bappie Scout ────────────────────────────────────────────────
-.chats-empty {
+// ── States ────────────────────────────────────────────────────────────────────
+.state-error,
+.state-empty {
   @include flex-column-center;
+  gap: var(--bapp-space-3);
   padding: var(--bapp-space-10) var(--bapp-space-6);
-  gap: var(--bapp-space-2);
+  text-align: center;
 }
 
-.scout-container {
-  width: 200px;
-  height: 150px;
+.state-icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  @include flex-center;
+  margin-bottom: var(--bapp-space-2);
+
+  ion-icon { font-size: 36px; }
+
+  &.state-icon-danger ion-icon { color: var(--bapp-color-danger); }
 }
 
-.scout-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+.state-title {
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-secondary);
+  margin: 0;
 }
 
-// Scout animations (scoped to component via Angular's view encapsulation)
-.scout-body {
+.state-sub {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  max-width: 260px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.retry-btn {
+  padding: var(--bapp-space-2) var(--bapp-space-5);
+  background: rgba(253, 215, 53, 0.08);
+  border: 1px solid rgba(253, 215, 53, 0.25);
+  border-radius: var(--bapp-radius-full);
+  color: var(--bapp-color-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast);
+
+  &:active { background: rgba(253, 215, 53, 0.14); }
+}
+
+// ── Bappie Scout SVG ──────────────────────────────────────────────────────────
+.scout-wrap  { width: 200px; height: 150px; }
+.scout-svg   { width: 100%; height: 100%; overflow: visible; }
+
+.scout-body  {
   animation: scoutBreathe 4s ease-in-out infinite;
   transform-origin: 120px 110px;
 }
-
 .scout-blink {
   animation: scoutBlink 6s infinite;
   transform-origin: center;
 }
-
 .scout-shine {
-  animation: scoutShine 3s ease-in-out infinite;
+  animation: scoutShine 3.5s ease-in-out infinite;
   transform-origin: center;
 }
 
@@ -307,52 +401,12 @@ ion-content.chats-content {
   0%, 100% { transform: translateY(0) scale(1); }
   50%       { transform: translateY(-6px) scale(1.01); }
 }
-
 @keyframes scoutBlink {
-  0%, 90%, 100% { transform: scaleY(1); }
-  95%            { transform: scaleY(0); }
+  0%, 88%, 100% { transform: scaleY(1); }
+  94%           { transform: scaleY(0); }
 }
-
 @keyframes scoutShine {
   0%   { transform: translateX(-30px) rotate(-45deg); opacity: 0; }
-  50%  { opacity: 0.18; }
+  50%  { opacity: 0.16; }
   100% { transform: translateX(30px) rotate(-45deg); opacity: 0; }
-}
-
-.empty-title {
-  font-size: var(--bapp-text-base);
-  font-weight: var(--bapp-font-semibold);
-  color: var(--bapp-text-secondary);
-  margin: var(--bapp-space-2) 0 0;
-}
-
-.empty-hint {
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-tertiary);
-  margin: 0;
-}
-
-// ── Error state ───────────────────────────────────────────────────────────────
-.chats-state-card {
-  @include flex-column-center;
-  gap: var(--bapp-space-3);
-  padding: var(--bapp-space-12) var(--bapp-space-6);
-  text-align: center;
-
-  ion-icon { font-size: 44px; color: var(--bapp-color-danger); opacity: 0.7; }
-  p { margin: 0; font-size: var(--bapp-text-sm); color: var(--bapp-text-secondary); }
-}
-
-.retry-btn {
-  padding: var(--bapp-space-2) var(--bapp-space-4);
-  background: rgba(253, 215, 53, 0.08);
-  border: 1.5px solid rgba(253, 215, 53, 0.25);
-  border-radius: var(--bapp-radius-full);
-  color: var(--bapp-color-primary);
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
-  cursor: pointer;
-  transition: all var(--bapp-transition-fast);
-
-  &:active { background: rgba(253, 215, 53, 0.15); }
 }
