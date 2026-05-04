@@ -3,13 +3,14 @@ import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } fr
 import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideIonicAngular } from '@ionic/angular/standalone';
+
 import {
   SocialLoginModule,
-  SOCIAL_AUTH_CONFIG,
   GoogleLoginProvider,
   FacebookLoginProvider,
 } from '@abacritt/angularx-social-login';
 import type { SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
+
 import { environment } from '../environments/environment';
 import { addIcons } from 'ionicons';
 import {
@@ -298,22 +299,24 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, nativeHttpInterceptor])),
     provideIonicAngular({ mode: 'ios' }),
     importProvidersFrom(SocialLoginModule),
-    {
-      provide: SOCIAL_AUTH_CONFIG,
-      useValue: {
-        autoLogin: false,
-        providers: [
-          {
-            id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider(environment.googleClientId),
-          },
-          {
-            id: FacebookLoginProvider.PROVIDER_ID,
-            provider: new FacebookLoginProvider(environment.facebookAppId),
-          },
-        ],
-        onError: (err: any) => console.error('[SocialAuth] Error:', err),
-      } as SocialAuthServiceConfig,
-    },
+    
+{
+  provide: 'SocialAuthServiceConfig',
+  useValue: {
+    autoLogin: false,
+    providers: [
+      {
+        id: GoogleLoginProvider.PROVIDER_ID,
+        provider: new GoogleLoginProvider(environment.googleClientId),
+      },
+      {
+        id: FacebookLoginProvider.PROVIDER_ID,
+        provider: new FacebookLoginProvider(environment.facebookAppId),
+      },
+    ],
+    onError: (err) => console.error('[SocialAuth] Error:', err),
+  } as SocialAuthServiceConfig,
+}
+,
   ]
 };
