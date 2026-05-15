@@ -163,10 +163,17 @@ export class MapPickerComponent implements OnInit, OnDestroy, AfterViewInit {
       this.currentLat = lat;
       this.currentLng = lng;
       this.updateAddressFromCoords(lat, lng);
-      this.loading.set(false);
     } catch (error) {
       console.error('Error obteniendo ubicación:', error);
-      this.locationError.set('No se pudo obtener tu ubicación');
+      this.locationError.set('No se pudo obtener tu ubicación. Selecciona una ubicación en el mapa.');
+      // Usar ubicación por defecto (Santiago Centro) para no bloquear el mapa
+      const defaultLat = -33.4489;
+      const defaultLng = -70.6693;
+      this.map?.setView([defaultLat, defaultLng], 13);
+      this.currentLat = defaultLat;
+      this.currentLng = defaultLng;
+      this.updateAddressFromCoords(defaultLat, defaultLng);
+    } finally {
       this.loading.set(false);
     }
   }

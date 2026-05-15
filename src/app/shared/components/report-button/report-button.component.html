@@ -1,0 +1,12 @@
+<ion-button
+  [fill]="buttonStyle === 'icon' ? 'clear' : 'outline'"
+  [color]="color"
+  [size]="size"
+  (click)="openReportModal()"
+  class="report-button">
+  <ion-icon 
+    [name]="buttonStyle === 'icon' ? 'flag-outline' : 'flag'" 
+    [slot]="buttonStyle === 'icon' ? 'icon-only' : 'start'">
+  </ion-icon>
+  <span *ngIf="buttonStyle !== 'icon'">Reportar</span>
+</ion-button>

@@ -3,48 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { PlatformDetectionService } from './platform-detection.service';
-import { Product } from './product.service';
 import { environment } from '../../environments/environment';
-
-/**
- * Payment verification response
- */
-export interface PaymentVerificationResponse {
-  success: boolean;
-  transaction_id?: number;
-  message: string;
-  expires_at?: string;
-  error?: string;
-}
-
-/**
- * Google Play purchase data
- */
-export interface GooglePlayPurchase {
-  productId: string;
-  purchaseToken: string;
-  orderId?: string;
-  packageName: string;
-  purchaseTime: number;
-  purchaseState: number;
-}
-
-/**
- * Apple IAP purchase data
- */
-export interface AppleIAPPurchase {
-  productId: string;
-  transactionId: string;
-  transactionReceipt: string;
-}
-
-/**
- * Transbank payment data
- */
-export interface TransbankPayment {
-  token: string;
-  url: string;
-}
+import {
+  PaymentVerificationResponse,
+  GooglePlayPurchase,
+  AppleIAPPurchase,
+  TransbankPayment,
+  CreateTransactionRequest,
+  CreateTransactionResponse,
+  CommitTransactionResponse,
+  TransactionStatusResponse,
+  Product,
+  ProductType
+} from '../core/models/payment.model';
 
 /**
  * Payment Service
@@ -177,7 +148,18 @@ export class PaymentService {
   }
 
   /**
-   * Create Transbank transaction
+   * Create Transbank transaction (from web project)
+   */
+  createTransaction(payload: CreateTransactionRequest): Observable<CreateTransactionResponse> {
+    return this.http.post<CreateTransactionResponse>(
+      `${this.apiUrl}/transbank/create`,
+      payload
+    );
+  }
+
+  /**
+   * Create Transbank transaction (legacy method with productSku)
+   * @deprecated Use createTransaction(payload) instead
    */
   createTransbankTransaction(productSku: string): Observable<TransbankPayment> {
     return this.http.post<TransbankPayment>(
@@ -189,11 +171,32 @@ export class PaymentService {
 
   /**
    * Verify Transbank payment (called from callback)
+   * @deprecated Use commitTransaction(token) instead for consistency with web
    */
   verifyTransbankPayment(token: string): Observable<PaymentVerificationResponse> {
     return this.http.post<PaymentVerificationResponse>(
       `${this.apiUrl}/verify/transbank`,
       { token }
+    );
+  }
+
+  /**
+   * Commit Transbank transaction (from web project)
+   * Confirms and validates a Transbank payment after redirect
+   */
+  commitTransaction(token: string): Observable<CommitTransactionResponse> {
+    return this.http.post<CommitTransactionResponse>(
+      `${this.apiUrl}/transbank/commit`,
+      { token }
+    );
+  }
+
+  /**
+   * Get transaction status by buy_order (from web project)
+   */
+  getTransactionStatus(buyOrder: string): Observable<TransactionStatusResponse> {
+    return this.http.get<TransactionStatusResponse>(
+      `${this.apiUrl}/transbank/status/${buyOrder}`
     );
   }
 
@@ -252,5 +255,57 @@ export class PaymentService {
       default:
         return '';
     }
+  }
+
+  /**
+   * Purchase product by type (unified method for web compatibility)
+   * @param productType Type of product from ProductType union
+   * @param amount Amount in CLP
+   * @returns Observable with payment flow result
+   */
+  purchaseByProductType(
+    productType: ProductType,
+    amount: number
+  ): Observable<PaymentVerificationResponse | CreateTransactionResponse> {
+    const platform = this.platformDetection.getPlatform();
+
+    // Web platform → use Transbank directly
+    if (platform === 'web') {
+      return this.createTransaction({ product_type: productType, amount }).pipe(
+        switchMap(response => {
+          // Redirect to Transbank
+          if (response.url && response.token) {
+            window.location.href = `${response.url}?token_ws=${response.token}`;
+          }
+          return new Observable<CreateTransactionResponse>(observer => {
+            observer.next(response);
+            observer.complete();
+          });
+        })
+      );
+    }
+
+    // Native platforms → use IAP (if implemented)
+    return throwError(() => new Error(
+      'Native IAP not yet configured for this product type. Use purchaseProduct() with Product object.'
+    ));
+  }
+
+  /**
+   * Get readable name for product type
+   * @param productType Product type
+   * @returns Human-readable name in Spanish
+   */
+  getProductTypeName(productType: ProductType): string {
+    const labels: Record<ProductType, string> = {
+      CLIENT_UNLOCK_7: 'Desbloqueo 7 días',
+      CLIENT_UNLOCK_30: 'Desbloqueo 30 días',
+      PROVIDER_SERVICE_30: 'Publicación servicio 30 días',
+      PROVIDER_SERVICE_YEAR: 'Publicación servicio 1 año',
+      PROVIDER_LEADS_7: 'Leads premium 7 días',
+      PROVIDER_LEADS_30: 'Leads premium 30 días',
+      PROVIDER_PREMIUM_MONTHLY: 'Premium mensual',
+    };
+    return labels[productType] || productType;
   }
 }

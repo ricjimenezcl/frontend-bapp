@@ -1,0 +1,103 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Reportar {{ getEntityLabel() }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" fill="clear">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="reportForm">
+    
+    <!-- Intro Message -->
+    <div class="report-intro ion-margin-bottom">
+      <ion-icon name="shield-checkmark-outline" color="primary"></ion-icon>
+      <p>
+        Tu reporte es confidencial y nos ayuda a mantener una comunidad segura.
+        Revisaremos tu solicitud en las próximas 24-48 horas.
+      </p>
+    </div>
+
+    <!-- Report Type Selection -->
+    <ion-item lines="full">
+      <ion-label position="stacked">
+        Motivo del reporte *
+      </ion-label>
+      <ion-select
+        formControlName="reportType"
+        interface="action-sheet"
+        placeholder="Selecciona un motivo"
+        [interfaceOptions]="{
+          header: 'Selecciona el motivo',
+          subHeader: '¿Por qué reportas este ' + getEntityLabel() + '?'
+        }">
+        <ion-select-option 
+          *ngFor="let type of reportTypes" 
+          [value]="type.value">
+          {{ type.label }}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Selected Type Description -->
+    <div class="type-description ion-margin-bottom" *ngIf="selectedReportType">
+      <ion-note color="medium">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        {{ getSelectedTypeDescription() }}
+      </ion-note>
+    </div>
+
+    <!-- Description -->
+    <ion-item lines="full" class="ion-margin-top">
+      <ion-label position="stacked">
+        Descripción (opcional)
+      </ion-label>
+      <ion-textarea
+        formControlName="description"
+        placeholder="Describe el problema con más detalle..."
+        rows="5"
+        maxlength="500">
+      </ion-textarea>
+    </ion-item>
+    <p class="char-count ion-text-end ion-padding-horizontal">
+      {{ (reportForm.value.description?.length || 0) }}/500
+    </p>
+
+    <!-- Privacy Notice -->
+    <div class="privacy-notice ion-margin-vertical">
+      <ion-icon name="lock-closed-outline" color="medium"></ion-icon>
+      <ion-text color="medium">
+        <small>
+          Tu identidad permanecerá oculta. El usuario reportado no sabrá quién envió el reporte.
+        </small>
+      </ion-text>
+    </div>
+
+    <!-- Submit Button -->
+    <ion-button
+      expand="block"
+      color="danger"
+      [disabled]="!reportForm.valid || isSubmitting"
+      (click)="submitReport()"
+      class="ion-margin-top">
+      <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+      <ion-icon *ngIf="!isSubmitting" name="flag" slot="start"></ion-icon>
+      <span *ngIf="!isSubmitting">Enviar reporte</span>
+    </ion-button>
+
+    <!-- Cancel Button -->
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="medium"
+      (click)="dismiss()"
+      [disabled]="isSubmitting"
+      class="ion-margin-top">
+      Cancelar
+    </ion-button>
+
+  </form>
+</ion-content>

@@ -207,7 +207,12 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
         });
       } catch (error) {
         console.error('Error obteniendo ubicación:', error);
-        // Navigation proceeds anyway; service-search will use the last saved location
+        // Usar ubicación por defecto de Santiago para no bloquear navegación
+        this.stateService.setUserLocation({
+          latitude: -33.4489,
+          longitude: -70.6693,
+          timestamp: Date.now()
+        });
       }
 
       // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)

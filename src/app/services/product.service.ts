@@ -2,64 +2,24 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import type {
+  Product,
+  ProductPlatform,
+  ProductCatalogResponse,
+  Transaction,
+  ProductTargetRole,
+  ProductPlatformType
+} from '../core/models/product.model';
 
-/**
- * Product from catalog
- */
-export interface Product {
-  id: number;
-  sku: string;
-  name: string;
-  description: string;
-  target_role: 'CLIENT' | 'PROVIDER' | 'ALL';
-  duration_days: number;
-  price_usd: number;
-  price_clp: number;
-  free_limit: number;
-  is_active: boolean;
-  metadata?: any;
-  platforms?: PlatformProduct[];
-}
-
-/**
- * Platform-specific product mapping
- */
-export interface PlatformProduct {
-  id: number;
-  platform: 'google_play' | 'apple_iap' | 'web';
-  platform_product_id: string;
-  platform_price?: string;
-  is_active: boolean;
-}
-
-/**
- * Product catalog response
- */
-export interface ProductCatalogResponse {
-  products: Product[];
-  total: number;
-}
-
-/**
- * Transaction
- */
-export interface Transaction {
-  id: number;
-  user_id: number;
-  product_id: number;
-  platform: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'expired';
-  transaction_id?: string;
-  external_transaction_id?: string;
-  platform_transaction_id?: string;
-  activated_at?: string;
-  expires_at?: string;
-  created_at: string;
-  updated_at: string;
-  product?: Product;
-}
+// Re-export types for backward compatibility
+export type {
+  Product,
+  ProductPlatform,
+  ProductCatalogResponse,
+  Transaction,
+  ProductTargetRole,
+  ProductPlatformType
+} from '../core/models/product.model';
 
 /**
  * Product API Service
@@ -77,8 +37,8 @@ export class ProductService {
    * Get product catalog
    */
   getCatalog(
-    platform?: 'google_play' | 'apple_iap' | 'web',
-    targetRole?: 'CLIENT' | 'PROVIDER' | 'ALL'
+    platform?: ProductPlatformType,
+    targetRole?: ProductTargetRole
   ): Observable<ProductCatalogResponse> {
     let params = new HttpParams();
     
@@ -107,7 +67,7 @@ export class ProductService {
    * Get all products
    */
   getAllProducts(
-    targetRole?: 'CLIENT' | 'PROVIDER' | 'ALL',
+    targetRole?: ProductTargetRole,
     includeInactive: boolean = false
   ): Observable<Product[]> {
     let params = new HttpParams();

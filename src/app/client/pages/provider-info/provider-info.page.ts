@@ -17,15 +17,20 @@ import { ClientBookingService } from '../../services/client-booking.service';
 import { BookingCreate } from '../../../core/models/booking.model';
 import { ChatService } from '../../../core/services/chat.service';
 import { Review, TimeSlot } from '../../../shared/services/core.service';
+import { ReportButtonComponent } from '../../../shared/components/report-button/report-button.component';
+import { ReportedEntityType } from '../../../core/models/report.model';
 
 @Component({
   selector: 'app-provider-info',
   templateUrl: './provider-info.page.html',
   styleUrls: ['./provider-info.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule]
+  imports: [CommonModule, FormsModule, IonicModule, ReportButtonComponent]
 })
 export class ProviderInfoPage implements OnInit {
+
+  // Exponer enum para el template
+  readonly ReportedEntityType = ReportedEntityType;
 
   provider: ServiceProvider | null = null;
   isLoading = true;

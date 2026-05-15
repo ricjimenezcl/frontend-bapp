@@ -331,6 +331,7 @@ export class EditProfilePage implements OnInit {
             this.email = this.originalEmail;
             this.bio = this.originalBio;
             this.avatar = this.originalAvatar;
+            this.avatarChanged = false;
             this.isEditing = false;
           }
         }
@@ -369,7 +370,8 @@ export class EditProfilePage implements OnInit {
         bio: this.bio
       };
 
-      if (this.avatar && this.avatar.startsWith('data:')) {
+      // Solo enviar avatar si fue modificado y es base64
+      if (this.avatarChanged && this.avatar && this.avatar.startsWith('data:')) {
         updateData.avatar = this.avatar;
       }
 
@@ -378,6 +380,7 @@ export class EditProfilePage implements OnInit {
       console.log('[EditProfile] PATCH success!');
 
       this.saveOriginalData();
+      this.avatarChanged = false;
       this.isEditing = false;
 
       await this.presentToast('Perfil actualizado correctamente', 'success');
@@ -394,7 +397,8 @@ export class EditProfilePage implements OnInit {
 
   async changeAvatar() {
     const actionSheet = await this.actionSheetCtrl.create({
-      header: 'Seleccionar avatar',
+      header: 'Cambiar foto de perfil',
+      subHeader: 'Selecciona una opción',
       buttons: [
         {
           text: 'Tomar foto',
@@ -443,14 +447,43 @@ export class EditProfilePage implements OnInit {
 
   private async processAvatar(base64Data: string) {
     try {
-      const compressedData = await this.cameraService.compressImageForBlob(base64Data);
+      // Comprimir imagen para optimizar el tamaño
+      const compressedData = await this.cameraService.compressImageForBlob(base64Data, 400, 0.7);
 
+      // Actualizar avatar y preview
       this.avatar = compressedData;
+      this.avatarChanged = true;
 
-      console.log('Avatar procesado correctamente');
+      console.log('✅ Avatar procesado correctamente');
+      
+      // Si no está en modo edición, ofrecer guardar automáticamente
+      if (!this.isEditing) {
+        const alert = await this.alertCtrl.create({
+          header: 'Foto actualizada',
+          message: '¿Deseas guardar el cambio ahora?',
+          buttons: [
+            {
+              text: 'Más tarde',
+              role: 'cancel',
+              handler: () => {
+                this.presentToast('Foto actualizada. Recuerda guardar los cambios', 'warning');
+              }
+            },
+            {
+              text: 'Guardar ahora',
+              handler: async () => {
+                await this.saveAvatarOnly();
+              }
+            }
+          ]
+        });
+        await alert.present();
+      } else {
+        await this.presentToast('Foto actualizada. Recuerda guardar los cambios', 'success');
+      }
     } catch (error) {
-      console.error('Error procesando avatar:', error);
-      this.presentAlert('Error', 'Error al procesar la imagen');
+      console.error('❌ Error procesando avatar:', error);
+      await this.presentToast('Error al procesar la imagen', 'danger');
     }
   }
 
@@ -517,5 +550,37 @@ export class EditProfilePage implements OnInit {
     const phoneValid = !this.phone || this.phone.trim().length === 0 || /^(56)?9\d{8}$/.test(this.phone.replace(/\D/g, ''));
     const bioValid = !this.bio || this.bio.length <= 500;
     return nameValid && phoneValid && bioValid;
+  }
+
+  /**
+   * Guardar solo el avatar sin entrar en modo edición
+   */
+  private async saveAvatarOnly() {
+    if (this.isUpdating) return;
+    this.isUpdating = true;
+
+    try {
+      const updateData: Partial<ClientProfile> = {};
+
+      if (this.avatarChanged && this.avatar && this.avatar.startsWith('data:')) {
+        updateData.avatar = this.avatar;
+      }
+
+      console.log('[EditProfile] Guardando solo avatar...');
+      await this.clientService.updateClientProfile(undefined, updateData).toPromise();
+      console.log('[EditProfile] Avatar guardado!');
+
+      this.originalAvatar = this.avatar;
+      this.avatarChanged = false;
+
+      await this.presentToast('Foto de perfil actualizada', 'success');
+
+    } catch (error: any) {
+      console.error('[EditProfile] Error guardando avatar:', error);
+      const msg = error?.error?.detail || error?.message || 'No se pudo actualizar la foto';
+      await this.presentToast(msg, 'danger');
+    } finally {
+      this.isUpdating = false;
+    }
   }
 }

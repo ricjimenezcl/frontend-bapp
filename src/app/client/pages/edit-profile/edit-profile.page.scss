@@ -46,6 +46,13 @@
 .ep-avatar-wrap {
   position: relative;
   display: inline-block;
+  
+  &.ep-avatar-editing {
+    .ep-avatar {
+      border-color: var(--bapp-color-primary);
+      box-shadow: 0 0 0 4px rgba(var(--bapp-color-primary-rgb), 0.1);
+    }
+  }
 }
 
 .ep-avatar {
@@ -57,24 +64,50 @@
   padding: 3px;
   background: var(--bapp-bg-page);
   display: block;
+  transition: all var(--bapp-transition-normal);
 }
 
 .ep-camera-btn {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--bapp-color-primary);
-  border: 2px solid var(--bapp-bg-page);
+  border: 3px solid var(--bapp-bg-page);
   @include flex-center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  transition: transform var(--bapp-transition-fast);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all var(--bapp-transition-fast);
+  z-index: 10;
+  
+  // Animación de pulso sutil
+  animation: camera-pulse 2s ease-in-out infinite;
 
-  ion-icon { font-size: 15px; color: #000; }
-  &:active { transform: scale(0.9); }
+  ion-icon { 
+    font-size: 20px; 
+    color: #000; 
+    font-weight: bold;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  &:active { 
+    transform: scale(0.95); 
+  }
+}
+
+@keyframes camera-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(var(--bapp-color-primary-rgb), 0.3);
+  }
 }
 
 .ep-avatar-hint {
@@ -82,6 +115,12 @@
   color: var(--bapp-text-tertiary);
   margin: 0;
   text-align: center;
+  @include flex-center;
+  gap: var(--bapp-space-1);
+  
+  ion-icon {
+    font-size: 14px;
+  }
 }
 
 // ── Form ──────────────────────────────────────────────────────────────────────

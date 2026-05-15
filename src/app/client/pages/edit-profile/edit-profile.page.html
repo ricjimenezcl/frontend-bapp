@@ -14,17 +14,24 @@
 
     <!-- ── Avatar ──────────────────────────────────────────────────── -->
     <div class="ep-avatar-section">
-      <div class="ep-avatar-wrap">
+      <div class="ep-avatar-wrap" [class.ep-avatar-editing]="isEditing">
         <img
           [src]="avatar || 'assets/images/default-avatar.png'"
           class="ep-avatar"
           alt="Avatar"
           (error)="$any($event.target).src='assets/images/default-avatar.png'" />
-        <button class="ep-camera-btn" *ngIf="isEditing" (click)="changeAvatar()" type="button">
+        <button 
+          class="ep-camera-btn" 
+          (click)="changeAvatar()" 
+          type="button"
+          aria-label="Cambiar foto de perfil">
           <ion-icon name="camera"></ion-icon>
         </button>
       </div>
-      <p class="ep-avatar-hint" *ngIf="isEditing">Toca la cámara para cambiar tu foto</p>
+      <p class="ep-avatar-hint">
+        <ion-icon name="camera-outline"></ion-icon>
+        Toca el ícono para cambiar tu foto
+      </p>
     </div>
 
     <!-- ── Form ──────────────────────────────────────────────────── -->

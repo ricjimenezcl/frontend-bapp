@@ -407,6 +407,20 @@ ion-alert {
     &.alert-button-confirm { color: var(--bapp-color-primary) !important; }
     &.alert-button-cancel  { color: var(--bapp-text-tertiary) !important; }
   }
+
+  // Estilos específicos para alertas de GPS
+  &.gps-alert {
+    .alert-title {
+      display: flex;
+      align-items: center;
+      gap: var(--bapp-space-2);
+    }
+
+    .alert-message {
+      line-height: 1.6;
+      margin: var(--bapp-space-3) 0;
+    }
+  }
 }
 
 // ── ion-toast ─────────────────────────────────────────────────────────────────

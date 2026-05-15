@@ -18,9 +18,19 @@
         <ion-button (click)="goBack()" fill="clear" color="light" size="small">
           <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
         </ion-button>
-        <ion-button fill="clear" color="light" size="small">
-          <ion-icon slot="icon-only" name="bookmark-outline"></ion-icon>
-        </ion-button>
+        <div class="header-right-buttons">
+          <ion-button fill="clear" color="light" size="small">
+            <ion-icon slot="icon-only" name="bookmark-outline"></ion-icon>
+          </ion-button>
+          <app-report-button
+            [entityType]="ReportedEntityType.USER"
+            [entityId]="provider.id"
+            [userId]="provider.id"
+            buttonStyle="icon"
+            color="light"
+            size="small">
+          </app-report-button>
+        </div>
       </div>
 
       <!-- Banner Image (Static) -->

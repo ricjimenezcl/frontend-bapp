@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { StateService, UserLocation } from './state.service';
 import { APP_CONSTANTS } from '../constants/app.constants';
+import { GpsValidationService } from '../../core/services/gps-validation.service';
 
 export interface GeolocationPosition {
   latitude: number;
@@ -16,18 +16,28 @@ export interface GeolocationPosition {
   providedIn: 'root'
 })
 export class GeoLocationService {
-  private locationSubject = new BehaviorSubject<GeolocationPosition | null>(null);
+  private readonly locationSubject = new BehaviorSubject<GeolocationPosition | null>(null);
   location$ = this.locationSubject.asObservable();
 
   private watchId: string | null = null;
+  private readonly gpsValidationService = inject(GpsValidationService);
 
-  constructor(private stateService: StateService) {}
+  constructor(private readonly stateService: StateService) {}
 
   /**
    * Obtiene la ubicación actual del usuario
+   * @param validateGPS Si es true, valida permisos y estado del GPS antes de obtener ubicación
    */
-  async getCurrentLocation(): Promise<GeolocationPosition> {
+  async getCurrentLocation(validateGPS = true): Promise<GeolocationPosition> {
     try {
+      // Validar GPS si se solicita
+      if (validateGPS) {
+        const isGPSReady = await this.gpsValidationService.validateAndRequestGPS();
+        if (!isGPSReady) {
+          throw new Error('GPS no disponible o permisos denegados');
+        }
+      }
+
       const coordinates = await Geolocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
@@ -43,7 +53,7 @@ export class GeoLocationService {
 
       this.locationSubject.next(position);
       this.updateStateLocation(position);
-
+      
       return position;
     } catch (error) {
       console.error('Error obteniendo ubicación:', error);
@@ -53,9 +63,18 @@ export class GeoLocationService {
 
   /**
    * Inicia el monitoreo continuo de ubicación
+   * @param validateGPS Si es true, valida permisos y estado del GPS antes de iniciar el monitoreo
    */
-  async watchLocation(): Promise<string> {
+  async watchLocation(validateGPS = true): Promise<string> {
     try {
+      // Validar GPS si se solicita
+      if (validateGPS) {
+        const isGPSReady = await this.gpsValidationService.validateAndRequestGPS();
+        if (!isGPSReady) {
+          throw new Error('GPS no disponible o permisos denegados');
+        }
+      }
+
       this.watchId = await Geolocation.watchPosition(
         {
           enableHighAccuracy: true,

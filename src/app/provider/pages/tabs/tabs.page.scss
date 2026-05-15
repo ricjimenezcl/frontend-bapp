@@ -88,9 +88,11 @@ ion-header.tabs-header {
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--bapp-border);
   border-radius: 26px;
-  padding: 8px 50px;
+  padding: 8px 12px; /* Reducido para expandir el ancho */
   display: flex;
-  gap: 6px;
+  justify-content: space-evenly; /* Distribuir uniformemente */
+  width: calc(100% - 24px); /* Expandir por todo el ancho con margen mínimo */
+  max-width: 500px; /* Límite máximo para pantallas grandes */
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
@@ -123,7 +125,7 @@ ion-header.tabs-header {
 }
 
 .dock-btn-active .dock-icon-wrap ion-icon {
-  color: #000;
+  color: #000 !important; /* Negro sólido cuando está activo */
   transform: scale(1.08);
 }
 

@@ -167,13 +167,13 @@ export class ServiceMapPage implements OnInit, OnDestroy {
         lng: savedLocation.longitude
       };
     } else {
-      try {
-        const loading = await this.loadingCtrl.create({ 
-          message: 'Obteniendo tu ubicación...',
-          cssClass: 'custom-loading'
-        });
-        await loading.present();
+      const loading = await this.loadingCtrl.create({ 
+        message: 'Obteniendo tu ubicación...',
+        cssClass: 'custom-loading'
+      });
+      await loading.present();
 
+      try {
         const position = await this.geoLocationService.getCurrentLocation();
         this.userLocation = { lat: position.latitude, lng: position.longitude };
 
@@ -182,12 +182,12 @@ export class ServiceMapPage implements OnInit, OnDestroy {
           longitude: position.longitude,
           timestamp: Date.now()
         });
-
-        await loading.dismiss();
       } catch (error) {
         console.error('Location error:', error);
         this.userLocation = { lat: -33.451060, lng: -70.591697 };
-        this.presentToast('Usando ubicación por defecto', 'warning');
+        this.presentToast('Usando ubicación por defecto (Santiago)', 'warning');
+      } finally {
+        await loading.dismiss();
       }
     }
   }
