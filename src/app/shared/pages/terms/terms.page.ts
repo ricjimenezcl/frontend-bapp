@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -10,4 +10,10 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, IonicModule, RouterModule],
 })
-export class TermsPage {}
+export class TermsPage {
+  constructor(private readonly navCtrl: NavController) {}
+
+  close(): void {
+    this.navCtrl.back();
+  }
+}

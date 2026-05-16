@@ -1,58 +1,66 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<ion-header class="ion-no-border legal-header">
+  <ion-toolbar class="legal-toolbar">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/"></ion-back-button>
+      <ion-button (click)="close()" class="close-btn">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
     </ion-buttons>
-    <ion-title>Términos y Condiciones</ion-title>
+    <ion-title class="legal-title">Términos y Condiciones</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding legal-page">
-  <h1>Términos y Condiciones de Uso</h1>
-  <p class="last-updated">Última actualización: marzo 2026</p>
+<ion-content class="legal-page">
+  <div class="legal-container">
+    <div class="legal-hero">
+      <h1 class="legal-hero-title">Términos y Condiciones de Uso</h1>
+      <p class="legal-last-updated">Última actualización: marzo 2026</p>
+    </div>
 
-  <section>
-    <h2>1. Aceptación de los Términos</h2>
-    <p>Al acceder y usar BAPP Search, aceptas quedar vinculado por estos Términos y Condiciones. Si no estás de acuerdo con alguna parte de estos términos, no podrás usar nuestros servicios.</p>
-  </section>
+    <div class="legal-content">
+      <section class="legal-section">
+        <h2 class="legal-section-title">1. Aceptación de los Términos</h2>
+        <p class="legal-section-text">Al acceder y usar BAPP Search, aceptas quedar vinculado por estos Términos y Condiciones. Si no estás de acuerdo con alguna parte de estos términos, no podrás usar nuestros servicios.</p>
+      </section>
 
-  <section>
-    <h2>2. Descripción del Servicio</h2>
-    <p>BAPP Search es una plataforma que conecta a clientes con proveedores de servicios. Actuamos como intermediario y no somos parte de la relación contractual entre cliente y proveedor.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">2. Descripción del Servicio</h2>
+        <p class="legal-section-text">BAPP Search es una plataforma que conecta a clientes con proveedores de servicios. Actuamos como intermediario y no somos parte de la relación contractual entre cliente y proveedor.</p>
+      </section>
 
-  <section>
-    <h2>3. Registro y Cuentas</h2>
-    <p>Para usar BAPP Search debes crear una cuenta con información verídica. Eres responsable de mantener la confidencialidad de tu contraseña y de todas las actividades realizadas desde tu cuenta.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">3. Registro y Cuentas</h2>
+        <p class="legal-section-text">Para usar BAPP Search debes crear una cuenta con información verídica. Eres responsable de mantener la confidencialidad de tu contraseña y de todas las actividades realizadas desde tu cuenta.</p>
+      </section>
 
-  <section>
-    <h2>4. Uso Aceptable</h2>
-    <p>Te comprometes a no usar la plataforma para actividades ilegales, fraudulentas o que dañen a otros usuarios. Nos reservamos el derecho a suspender cuentas que violen estas condiciones.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">4. Uso Aceptable</h2>
+        <p class="legal-section-text">Te comprometes a no usar la plataforma para actividades ilegales, fraudulentas o que dañen a otros usuarios. Nos reservamos el derecho a suspender cuentas que violen estas condiciones.</p>
+      </section>
 
-  <section>
-    <h2>5. Pagos y Tarifas</h2>
-    <p>Los pagos se procesan de forma segura a través de pasarelas de pago certificadas. BAPP Search puede cobrar una comisión por las transacciones realizadas a través de la plataforma.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">5. Pagos y Tarifas</h2>
+        <p class="legal-section-text">Los pagos se procesan de forma segura a través de pasarelas de pago certificadas. BAPP Search puede cobrar una comisión por las transacciones realizadas a través de la plataforma.</p>
+      </section>
 
-  <section>
-    <h2>6. Cancelaciones y Reembolsos</h2>
-    <p>Las políticas de cancelación pueden variar según el proveedor. En caso de disputas, BAPP Search actuará como mediador siguiendo nuestras políticas internas.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">6. Cancelaciones y Reembolsos</h2>
+        <p class="legal-section-text">Las políticas de cancelación pueden variar según el proveedor. En caso de disputas, BAPP Search actuará como mediador siguiendo nuestras políticas internas.</p>
+      </section>
 
-  <section>
-    <h2>7. Limitación de Responsabilidad</h2>
-    <p>BAPP Search no se responsabiliza por la calidad de los servicios prestados por los proveedores ni por daños directos o indirectos derivados del uso de la plataforma.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">7. Limitación de Responsabilidad</h2>
+        <p class="legal-section-text">BAPP Search no se responsabiliza por la calidad de los servicios prestados por los proveedores ni por daños directos o indirectos derivados del uso de la plataforma.</p>
+      </section>
 
-  <section>
-    <h2>8. Modificaciones</h2>
-    <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entran en vigencia al publicarse en la aplicación.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">8. Modificaciones</h2>
+        <p class="legal-section-text">Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios entran en vigencia al publicarse en la aplicación.</p>
+      </section>
 
-  <section>
-    <h2>9. Contacto</h2>
-    <p>Para consultas sobre estos términos, escríbenos a <strong>soporte&#64;bappsearch.com</strong>.</p>
-  </section>
+      <section class="legal-section">
+        <h2 class="legal-section-title">9. Contacto</h2>
+        <p class="legal-section-text">Para consultas sobre estos términos, escríbenos a <strong>soporte&#64;bappsearch.com</strong>.</p>
+      </section>
+    </div>
+  </div>
 </ion-content>
