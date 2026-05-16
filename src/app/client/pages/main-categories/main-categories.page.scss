@@ -276,22 +276,60 @@ ion-content.mc-content {
     border: none;
     border-bottom: 1px solid var(--bapp-border);
     cursor: pointer;
-    transition: background var(--bapp-transition-fast);
+    transition: background var(--bapp-transition-fast), transform var(--bapp-transition-fast);
 
     &:last-child { border-bottom: none; }
-    &:active { background: rgba(255,255,255,0.06); }
 
+    // 🔥 ICON BUBBLE — homologado con WEB
     .autocomplete-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: var(--bapp-radius-lg);
-      background: rgba(253, 215, 53, 0.1);
+      width: 64px;  // 36px → 64px
+      height: 64px; // 36px → 64px
+      border-radius: 20px;  // var(--bapp-radius-lg) → 20px exacto
+      background: var(--bapp-bg-card-raised);  // rgba(253, 215, 53, 0.1) → fondo oscuro
+      border: 1px solid var(--bapp-border);  // ✅ NUEVO: borde consistente
       @include flex-center;
       flex-shrink: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);  // ✅ Transición suave del web
+      position: relative;
+      overflow: hidden;
 
       ion-icon {
-        font-size: 18px;
-        color: var(--bapp-color-primary);
+        font-size: 26px;  // 18px → 26px (proporcional al tamaño)
+        color: var(--bapp-text-secondary);
+        transition: color 0.3s;
+      }
+    }
+
+    // ✅ ACTIVE STATE (mobile/touch)
+    &:active {
+      background: rgba(255,255,255,0.06);
+      transform: scale(0.98);
+
+      .autocomplete-icon-wrap {
+        transform: scale(0.95);
+        border-color: rgba(253, 215, 53, 0.3);
+
+        ion-icon {
+          color: var(--bapp-color-primary);
+        }
+      }
+    }
+
+    // ✅ HOVER STATE (desktop only) — homologado con WEB
+    @media (hover: hover) {
+      &:hover {
+        background: rgba(255, 255, 255, 0.04);
+
+        .autocomplete-icon-wrap {
+          transform: translateY(-4px);
+          background: rgba(255, 255, 255, 0.06);
+          border-color: rgba(253, 215, 53, 0.3);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+
+          ion-icon {
+            color: var(--bapp-color-primary);
+          }
+        }
       }
     }
 

@@ -65,44 +65,75 @@
           </div>
         </div>
 
-        <!-- Avatar -->
-        <div class="provider-avatar-wrap">
-          <img
-            class="provider-avatar"
-            [src]="provider.avatar | providerImage"
-            [alt]="provider.business_name || provider.full_name" />
-          <div class="online-dot"></div>
-        </div>
+        <!-- 🔥 SERVICE TAG (NUEVO) — categoría en la parte superior -->
+        <span class="service-tag" *ngIf="provider.serviceName">
+          {{ provider.serviceName }}
+        </span>
 
-        <!-- Info -->
-        <div class="provider-info">
-          <div class="provider-top">
-            <span class="provider-name">{{ provider.business_name || provider.full_name }}</span>
-            <span class="provider-rate" *ngIf="provider.hourly_rate">
-              ${{ provider.hourly_rate | number }}
-            </span>
+        <!-- 🔥 CARD MAIN — avatar + info horizontal (como web) -->
+        <div class="card-main">
+
+          <!-- Avatar -->
+          <div class="provider-avatar-wrap">
+            <img
+              class="provider-avatar"
+              [src]="provider.avatar | providerImage"
+              [alt]="provider.business_name || provider.full_name" />
+            <div class="online-dot"></div>
           </div>
 
-          <div class="provider-meta">
-            <div class="meta-item">
-              <ion-icon name="star" class="star-icon"></ion-icon>
-              <span>{{ provider.rating_avg || 'Nuevo' }}</span>
-              <span class="meta-muted">({{ provider.total_reviews || 0 }})</span>
+          <!-- Info -->
+          <div class="provider-info">
+            <!-- Name + Rate -->
+            <div class="provider-top">
+              <div class="provider-name-line">
+                <h3 class="provider-name">{{ provider.business_name || provider.full_name }}</h3>
+                
+                <!-- ✅ BADGE VERIFICADO - Verde con texto -->
+                <span class="verification-badge verified" *ngIf="provider.validation_status === 'approved'">
+                  <ion-icon name="shield-checkmark"></ion-icon>
+                  <span class="badge-text">Verificado</span>
+                </span>
+                
+                <!-- ❌ BADGE NO VERIFICADO - Rojo con texto -->
+                <span class="verification-badge rejected" *ngIf="provider.validation_status === 'rejected'">
+                  <ion-icon name="shield"></ion-icon>
+                  <span class="badge-text">No verificado</span>
+                </span>
+              </div>
+              
+              <span class="provider-rate" *ngIf="provider.hourly_rate">
+                ${{ provider.hourly_rate | number }}
+              </span>
             </div>
-            <div class="meta-dot"></div>
-            <div class="meta-item">
-              <ion-icon name="location-outline" class="dist-icon"></ion-icon>
-              <span>{{ provider.distance | number:'1.1-1' }} km</span>
+
+            <!-- 🔥 RATING — homologado con web (estrella + rating + reviews) -->
+            <div class="provider-meta">
+              <div class="meta-item">
+                <ion-icon name="star" class="star-icon"></ion-icon>
+                <span>{{ provider.rating_avg || 'Nuevo' }}</span>
+                <span class="meta-muted" *ngIf="provider.rating_avg">({{ provider.total_reviews || 0 }})</span>
+              </div>
             </div>
-          </div>
 
-          <p class="provider-desc" *ngIf="provider.description">
-            {{ provider.description.length > 80 ? provider.description.substring(0,80) + '…' : provider.description }}
-          </p>
+          </div><!-- end provider-info -->
 
-          <div class="provider-chips" *ngIf="provider.serviceName">
-            <span class="chip-service">{{ provider.serviceName }}</span>
-          </div>
+        </div><!-- end card-main -->
+
+        <!-- Description (opcional) -->
+        <p class="provider-desc" *ngIf="provider.description">
+          {{ provider.description.length > 80 ? provider.description.substring(0,80) + '…' : provider.description }}
+        </p>
+
+        <!-- 🔥 CARD FOOTER (NUEVO) — distancia + chevron (como web) -->
+        <div class="card-footer">
+          <span class="distance">
+            <ion-icon name="location"></ion-icon>
+            <span *ngIf="provider.distance">{{ provider.distance | number:'1.1-1' }} km</span>
+            <span *ngIf="!provider.distance && provider.hourly_rate">${{ provider.hourly_rate | number }}/hr</span>
+            <span *ngIf="!provider.distance && !provider.hourly_rate">Ver ubicación</span>
+          </span>
+          <ion-icon name="chevron-forward" class="card-chevron"></ion-icon>
         </div>
 
       </div><!-- end provider-card -->

@@ -116,25 +116,64 @@ ion-content.ss-content {
 // ── Provider list ─────────────────────────────────────────────────────────────
 .providers-list {
   @include flex-column;
-  gap: var(--bapp-space-3);
+  gap: var(--bapp-space-4);  // Aumentado de space-3 a space-4
   padding: var(--bapp-space-4);
 }
 
+// 🔥 PROVIDER CARD — HOMOLOGACIÓN TOTAL CON WEB
 .provider-card {
-  @include flex-start;
-  align-items: flex-start;
-  gap: var(--bapp-space-3);
+  display: flex;
+  flex-direction: column;  // 🔥 CAMBIADO: flex-start → flex-column (layout vertical como web)
+  gap: 0;  // 🔥 Layout sin gap global, espaciado controlado internamente
   padding: var(--bapp-space-4);
   background: var(--bapp-bg-card);
-  border: 1.5px solid var(--bapp-border);
+  border: 1px solid var(--bapp-border);  // 🔥 CAMBIADO: 1.5px → 1px (como web)
   border-radius: var(--bapp-radius-xl);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: border-color var(--bapp-transition-normal), box-shadow var(--bapp-transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);  // 🔥 Transición mejorada del web
+  animation: cardIn 0.3s ease both;  // ✅ Animación de entrada
 
-  &:active { transform: scale(0.99); box-shadow: none; }
-  &:hover  { border-color: var(--bapp-border-medium); box-shadow: var(--bapp-shadow-sm); }
+  // ✅ ACTIVE STATE (mobile/touch)
+  &:active {
+    transform: scale(0.98);
+    box-shadow: none;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  // ✅ HOVER STATE (desktop only) — homologado con web
+  @media (hover: hover) {
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.14);  // 🔥 Borde más claro al hover
+      transform: translateY(-2px);  // ✅ Efecto elevación
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  // ✅ Sombra dramática
+    }
+  }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ✅ SERVICE TAG (NUEVO) — categoría en la parte superior
+.service-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--bapp-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: var(--bapp-space-2);  // 6px → 8px
+}
+
+// 🔥 CARD MAIN — avatar + info horizontal (como web)
+.card-main {
+  display: flex;
+  gap: var(--bapp-space-4);  // 15px equivalente
+  align-items: flex-start;
+  margin-bottom: var(--bapp-space-3);  // 12px equivalente
 }
 
 // Lock overlay
@@ -162,24 +201,25 @@ ion-content.ss-content {
   }
 }
 
-// Avatar
+// 🔥 AVATAR — homologado con web
 .provider-avatar-wrap {
   position: relative;
   flex-shrink: 0;
 
   .provider-avatar {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 56px;   // 🔥 CAMBIADO: 64px → 56px (como web)
+    height: 56px;  // 🔥 CAMBIADO: 64px → 56px
+    border-radius: 12px;  // 🔥 CAMBIADO: 50% → 12px (redondeado, NO circular)
     object-fit: cover;
-    border: 2px solid var(--bapp-border);
+    border: 1.5px solid #FFF9C4;  // 🔥 CRÍTICO: borde amarillo destacado (no gris)
     display: block;
   }
 
+  // Online dot ajustado para avatar cuadrado
   .online-dot {
     position: absolute;
-    bottom: 2px;
-    right: 2px;
+    bottom: -2px;
+    right: -2px;
     width: 11px;
     height: 11px;
     border-radius: 50%;
@@ -191,7 +231,7 @@ ion-content.ss-content {
 // Info column
 .provider-info {
   @include flex-column;
-  gap: var(--bapp-space-1);
+  gap: 2px;  // 🔥 Reducido para compactar
   flex: 1;
   min-width: 0;
 }
@@ -200,15 +240,75 @@ ion-content.ss-content {
   @include flex-between;
   gap: var(--bapp-space-2);
   align-items: flex-start;
+  margin-bottom: 2px;  // ✅ Espaciado fino
+}
+
+// 🔥 PROVIDER NAME LINE (nombre + badge en una sola línea)
+.provider-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;  // Separación entre nombre y badge
+  flex: 1;
+  min-width: 0;  // Permite que el contenedor se comprima
 }
 
 .provider-name {
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
+  font-size: var(--bapp-text-md);  // 🔥 AUMENTADO: text-sm → text-md (16px como web)
+  font-weight: var(--bapp-font-bold);  // 🔥 CAMBIADO: semibold → bold (700)
   color: var(--bapp-text-primary);
   @include truncate-text(1);
-  flex: 1;
   line-height: 1.3;
+  margin: 0;
+  flex: 0 1 auto;  // ✅ Permite que se comprima si es necesario
+  max-width: calc(100% - 28px);  // ✅ Deja espacio para el badge
+}
+
+// 🛡️ VERIFICATION BADGE (icono + texto)
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;  // Separación entre icono y texto
+  padding: 3px 8px 3px 6px;  // Más padding a la derecha
+  border-radius: 12px;
+  font-size: var(--bapp-text-xs);  // 12px
+  font-weight: var(--bapp-font-semibold);  // 600
+  line-height: 1;
+  flex-shrink: 0;  // Nunca se comprime
+  white-space: nowrap;  // No rompe en varias líneas
+  transition: all 0.2s ease;
+  
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .badge-text {
+    margin-top: 1px;  // Ajuste visual para alineación perfecta
+  }
+}
+
+// ✅ VERDE: Identidad verificada
+.verification-badge.verified {
+  background: rgba(16, 185, 129, 0.15);  // Fondo verde translúcido
+  color: var(--bapp-color-success);  // Texto verde #10B981
+  border: 1px solid rgba(16, 185, 129, 0.35);  // Borde verde sutil
+  
+  ion-icon {
+    color: var(--bapp-color-success);
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6));
+  }
+}
+
+// ❌ ROJO: Identidad no verificada
+.verification-badge.rejected {
+  background: rgba(239, 68, 68, 0.15);  // Fondo rojo translúcido
+  color: var(--bapp-color-danger);  // Texto rojo #EF4444
+  border: 1px solid rgba(239, 68, 68, 0.35);  // Borde rojo sutil
+  
+  ion-icon {
+    color: var(--bapp-color-danger);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+  }
 }
 
 .provider-rate {
@@ -223,21 +323,32 @@ ion-content.ss-content {
   white-space: nowrap;
 }
 
+// 🔥 RATING — homologado con web (amarillo, estrella siempre visible)
 .provider-meta {
   @include flex-start;
-  gap: var(--bapp-space-2);
-  margin-top: 2px;
+  gap: 3px;  // 🔥 Reducido para compactar
+  margin: 0;  // Sin margin-top
 }
 
 .meta-item {
   @include flex-start;
-  gap: 3px;
+  gap: 4px;
   font-size: var(--bapp-text-xs);
-  color: var(--bapp-text-secondary);
+  font-weight: var(--bapp-font-bold);  // ✅ NUEVO: rating en negrita
+  color: var(--bapp-color-primary);  // 🔥 CAMBIADO: rating en amarillo (no gris)
 
-  .star-icon { color: var(--bapp-color-primary); font-size: var(--bapp-text-xs); }
-  .dist-icon { color: var(--bapp-color-danger);  font-size: var(--bapp-text-xs); }
-  .meta-muted { color: var(--bapp-text-tertiary); }
+  .star-icon { 
+    color: var(--bapp-color-primary); 
+    font-size: 13px;  // ✅ Tamaño exacto del web
+  }
+  .dist-icon { 
+    color: var(--bapp-color-danger);  
+    font-size: var(--bapp-text-xs); 
+  }
+  .meta-muted { 
+    color: var(--bapp-text-tertiary);
+    font-weight: var(--bapp-font-regular);  // ✅ Reviews count no bold
+  }
 }
 
 .meta-dot {
@@ -252,16 +363,45 @@ ion-content.ss-content {
   font-size: var(--bapp-text-xs);
   color: var(--bapp-text-tertiary);
   line-height: 1.5;
-  margin: 2px 0 0;
+  margin: var(--bapp-space-2) 0 0;
   @include truncate-text(2);
 }
 
-// Service chips
+// 🔥 CARD FOOTER (NUEVO) — distancia + chevron (como web)
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--bapp-space-3);  // ✅ Separación del contenido
+  font-size: var(--bapp-text-xs);
+}
+
+.distance {
+  color: var(--bapp-text-secondary);
+  font-weight: var(--bapp-font-semibold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  ion-icon {
+    font-size: 12px;
+    color: var(--bapp-color-danger);  // Pin rojo
+  }
+}
+
+.card-chevron {
+  width: 14px;
+  height: 14px;
+  color: rgba(255, 255, 255, 0.24);
+  flex-shrink: 0;
+}
+
+// Service chips (mantener)
 .provider-chips {
   @include flex-start;
   gap: var(--bapp-space-2);
   flex-wrap: wrap;
-  margin-top: var(--bapp-space-1);
+  margin-top: var(--bapp-space-2);
 }
 
 .chip-service {
