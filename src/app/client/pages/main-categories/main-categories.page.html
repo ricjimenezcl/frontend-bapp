@@ -158,8 +158,15 @@
             (click)="selectMainCategory(cat)"
             type="button">
             <div class="cat-tile-icon-wrap">
-              <img [src]="cat.icon" [alt]="cat.name" class="cat-tile-img">
-             
+              <!-- 🔥 Condicional: imagen o ion-icon (homologado con web) -->
+              <img *ngIf="isImageUrl(cat.icon)" 
+                   [src]="cat.icon" 
+                   [alt]="cat.name" 
+                   class="cat-tile-img"
+                   loading="lazy" />
+              <ion-icon *ngIf="!isImageUrl(cat.icon)" 
+                        [name]="cat.icon || 'construct-outline'" 
+                        class="cat-tile-icon"></ion-icon>
             </div>
             <span class="cat-tile-label">{{ cat.name }}</span>
           </button>

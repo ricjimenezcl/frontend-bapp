@@ -144,6 +144,7 @@ ion-content.chats-content {
 
 // ── Chat item ─────────────────────────────────────────────────────────────────
 .chat-item {
+  background: var(--bapp-bg-card);
   display: flex;
   align-items: center;
   gap: var(--bapp-space-4);

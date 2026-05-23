@@ -510,21 +510,32 @@ $tile-colors: (
 
   &:active { transform: scale(0.92); }
 
+  // 🔥 ICON BUBBLE — homologado con web (cat-icon-bubble)
   .cat-tile-icon-wrap {
-    width: 70%;
-    aspect-ratio: 1;
-    @include flex-center;
-    transition: all var(--bapp-transition-normal);
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: var(--bapp-bg-card);
+    border: 1px solid var(--bapp-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bapp-text-secondary);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
   .cat-tile-icon {
-    font-size: var(--bapp-text-sm);
-    transition: transform var(--bapp-transition-fast);
+    font-size: 26px;
+    color: inherit;
+    transition: color 0.3s;
   }
 
   .cat-tile-img {
-    width: 200%;
-    height: 200%;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
   }
 

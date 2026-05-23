@@ -278,6 +278,15 @@ export class CoreService {
     return this.http.get<ServiceProvider[]>(`${this.apiUrl}/providers/nearby/service/${serviceId}`);
   }
 
+  /**
+   * Obtiene todos los servicios de un proveedor específico
+   * @param providerId - ID del proveedor
+   * @returns Observable con array de servicios del proveedor
+   */
+  getProviderServices(providerId: number): Observable<ServiceProvider[]> {
+    return this.http.get<ServiceProvider[]>(`${this.apiUrl}/providers/${providerId}/services`);
+  }
+
   setSelectedProvider(provider: ServiceProvider): void {
     this._selectedProvider.set(provider);
   }

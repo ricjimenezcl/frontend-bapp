@@ -341,6 +341,13 @@ ion-content.ss-content {
     color: var(--bapp-color-primary); 
     font-size: 13px;  // ✅ Tamaño exacto del web
   }
+  .reviews-icon {
+    width: 12px;
+    height: 12px;
+    stroke: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+    margin-left: 2px;
+  }
   .dist-icon { 
     color: var(--bapp-color-danger);  
     font-size: var(--bapp-text-xs); 

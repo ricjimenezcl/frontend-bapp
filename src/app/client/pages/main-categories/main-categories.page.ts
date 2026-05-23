@@ -56,6 +56,19 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     private mapboxService: MapboxService
   ) {}
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // HELPER METHODS — homologado con web
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Verifica si el icono es una URL de imagen (http/https)
+   * Si no lo es, se asume que es un nombre de ion-icon
+   */
+  isImageUrl(icon: string | null | undefined): boolean {
+    if (!icon) return false;
+    return icon.startsWith('http://') || icon.startsWith('https://');
+  }
+
   ngOnInit() {
     this.loadMainCategories();
     this.coreService.getServiceCategories().subscribe({

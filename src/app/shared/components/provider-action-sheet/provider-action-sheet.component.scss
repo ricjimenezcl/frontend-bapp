@@ -288,6 +288,35 @@
   font-weight: var(--bapp-font-medium);
 }
 
+// ── Report button ──────────────────────────────────────────────────────────────
+.pas-report-section {
+  margin-top: var(--bapp-space-4);
+  padding-top: var(--bapp-space-4);
+  border-top: 1px solid var(--bapp-border);
+}
+
+.pas-report-btn {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: var(--bapp-space-3);
+  background: transparent;
+  border: 1px solid var(--bapp-border-medium);
+  border-radius: var(--bapp-radius-xl);
+  color: var(--bapp-color-danger);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 18px; }
+
+  &:active {
+    background: rgba(255, 0, 0, 0.05);
+    border-color: var(--bapp-color-danger);
+  }
+}
+
 // ── Sticky action bar ─────────────────────────────────────────────────────────
 .pas-action-bar {
   display: flex;
@@ -554,5 +583,283 @@
     font-weight: var(--bapp-font-bold);
     color: var(--bapp-color-danger);
     text-transform: uppercase;
+  }
+}
+
+// ══ PORTAFOLIO CAROUSEL (scroll horizontal nativo) ══════════════════════════
+.pas-portfolio-carousel {
+  margin-top: var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-3);
+  overflow: hidden;
+}
+
+.pas-portfolio-scroll {
+  display: flex;
+  gap: var(--bapp-space-3);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 var(--bapp-space-4);
+  margin: 0 calc(-1 * var(--bapp-space-4));
+
+  // Ocultar scrollbar pero mantener funcionalidad
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE/Edge
+
+  &::-webkit-scrollbar { display: none; } // Chrome/Safari
+}
+
+.pas-portfolio-item {
+  flex-shrink: 0;
+  width: 280px;
+  scroll-snap-align: start;
+}
+
+.pas-portfolio-card {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: var(--bapp-radius-2xl);
+  overflow: hidden;
+  box-shadow: var(--bapp-shadow-md);
+  cursor: pointer;
+  transition: transform var(--bapp-transition-normal), box-shadow var(--bapp-transition-normal);
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: var(--bapp-shadow-sm);
+  }
+}
+
+.pas-portfolio-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pas-portfolio-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0);
+  @include flex-center;
+  opacity: 0;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon {
+    font-size: 32px;
+    color: white;
+  }
+
+  .pas-portfolio-card:active & {
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 1;
+  }
+}
+
+.pas-portfolio-caption {
+  padding: var(--bapp-space-2) 0;
+  color: var(--bapp-text-secondary);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-medium);
+  text-align: center;
+  @include truncate-text(1);
+}
+
+.pas-hint {
+  @include flex-start;
+  gap: var(--bapp-space-1);
+  padding: 0 var(--bapp-space-4);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  line-height: var(--bapp-leading-normal);
+
+  ion-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ══ SERVICIOS LIST ═══════════════════════════════════════════════════════════
+.pas-services-list {
+  @include flex-column(var(--bapp-space-3));
+  margin-top: var(--bapp-space-3);
+}
+
+.pas-service-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-2xl);
+  padding: var(--bapp-space-4);
+  @include flex-column(var(--bapp-space-3));
+  transition: border-color var(--bapp-transition-fast);
+
+  &:active {
+    border-color: var(--bapp-color-primary);
+  }
+}
+
+.pas-service-header {
+  @include flex-between;
+  align-items: flex-start;
+  gap: var(--bapp-space-3);
+}
+
+.pas-service-info {
+  @include flex-column(var(--bapp-space-1));
+  flex: 1;
+}
+
+.pas-service-name {
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  margin: 0;
+  line-height: var(--bapp-leading-snug);
+}
+
+.pas-service-category {
+  @include flex-start;
+  gap: 4px;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-primary);
+  font-weight: var(--bapp-font-semibold);
+
+  ion-icon { font-size: 12px; }
+}
+
+.pas-service-price {
+  flex-shrink: 0;
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  text-align: right;
+
+  .pas-price-unit {
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-medium);
+    color: var(--bapp-text-tertiary);
+  }
+}
+
+.pas-service-desc {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  line-height: var(--bapp-leading-relaxed);
+  margin: 0;
+  @include truncate-text(2);
+}
+
+.pas-service-meta {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  flex-wrap: wrap;
+}
+
+.pas-service-address {
+  @include flex-start;
+  gap: 4px;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+
+  ion-icon { font-size: 12px; }
+}
+
+.pas-service-btn-locked {
+  position: relative;
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  height: var(--bapp-button-h-md);
+  background: linear-gradient(135deg, rgba(253, 215, 53, 0.08) 0%, rgba(253, 215, 53, 0.02) 100%);
+  border: 1.5px solid var(--bapp-color-primary);
+  border-radius: var(--bapp-radius-xl);
+  color: var(--bapp-color-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+  overflow: hidden;
+
+  ion-icon { font-size: 18px; }
+
+  &:active {
+    transform: scale(0.98);
+    background: linear-gradient(135deg, rgba(253, 215, 53, 0.12) 0%, rgba(253, 215, 53, 0.04) 100%);
+  }
+}
+
+.pas-premium-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  @include flex-center;
+  gap: 3px;
+  padding: 3px 10px;
+  background: var(--bapp-color-primary);
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 10px;
+  font-weight: var(--bapp-font-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--bapp-tracking-wide);
+  border-radius: 0 var(--bapp-radius-xl) 0 var(--bapp-radius-md);
+
+  ion-icon { font-size: 10px; }
+}
+
+.pas-paywall-info {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  margin-top: var(--bapp-space-4);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+  background: rgba(255, 193, 7, 0.08);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: var(--bapp-radius-xl);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+  line-height: var(--bapp-leading-relaxed);
+
+  ion-icon { 
+    font-size: 16px; 
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ══ CUSTOM ALERT STYLES (global scope) ══════════════════════════════════════
+::ng-deep {
+  .pas-image-viewer-alert {
+    .alert-wrapper {
+      max-width: 90vw;
+      max-height: 90vh;
+    }
+
+    .alert-message {
+      max-height: 70vh;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    }
+  }
+
+  .pas-premium-paywall-alert {
+    .alert-wrapper {
+      max-width: 400px;
+    }
+
+    .alert-button-premium {
+      font-weight: 700;
+      color: var(--ion-color-warning) !important;
+    }
   }
 }

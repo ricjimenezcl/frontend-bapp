@@ -40,6 +40,8 @@
 <div class="pas-tab-pills">
   <button class="pas-pill" [class.pas-pill--active]="activeDetailTab==='profile'" (click)="activeDetailTab='profile'" type="button">Perfil</button>
   <button class="pas-pill" [class.pas-pill--active]="activeDetailTab==='reviews'" (click)="activeDetailTab='reviews'" type="button">Reseñas</button>
+  <button class="pas-pill" [class.pas-pill--active]="activeDetailTab==='portfolio'" (click)="activeDetailTab='portfolio'" type="button">Portafolio</button>
+  <button class="pas-pill" [class.pas-pill--active]="activeDetailTab==='services'" (click)="activeDetailTab='services'" type="button">Servicios</button>
   <button class="pas-pill" [class.pas-pill--active]="activeDetailTab==='contact'" (click)="activeDetailTab='contact'" type="button">Contacto</button>
 </div>
 
@@ -72,6 +74,101 @@
     </div>
   </div>
 
+  <!-- ══ PORTAFOLIO TAB ══ -->
+  <div *ngIf="activeDetailTab==='portfolio'" class="pas-tab-body">
+    <p class="pas-section-title">Trabajos Anteriores</p>
+    
+    <!-- Loading state -->
+    <div *ngIf="isLoadingPortfolio" class="pas-loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+    
+    <!-- Empty state -->
+    <p *ngIf="!isLoadingPortfolio && portfolioImages.length === 0" class="pas-empty">
+      Sin fotos de trabajos anteriores
+    </p>
+    
+    <!-- Portfolio carousel (scroll horizontal nativo) -->
+    <div *ngIf="!isLoadingPortfolio && portfolioImages.length > 0" class="pas-portfolio-carousel">
+      <div class="pas-portfolio-scroll">
+        <div *ngFor="let img of portfolioImages; let i = index" class="pas-portfolio-item">
+          <div class="pas-portfolio-card" (click)="openImageViewer(img.url, i)">
+            <img [src]="img.url" [alt]="img.serviceName" class="pas-portfolio-img" />
+            <div class="pas-portfolio-overlay">
+              <ion-icon name="expand-outline"></ion-icon>
+            </div>
+          </div>
+          <div class="pas-portfolio-caption">{{ img.serviceName }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <p *ngIf="!isLoadingPortfolio && portfolioImages.length > 0" class="pas-hint">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      Toca una imagen para verla en pantalla completa
+    </p>
+  </div>
+
+  <!-- ══ SERVICIOS TAB ══ -->
+  <div *ngIf="activeDetailTab==='services'" class="pas-tab-body">
+    <p class="pas-section-title">Nuestros Servicios</p>
+    
+    <!-- Loading state -->
+    <div *ngIf="isLoadingServices" class="pas-loading">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+    
+    <!-- Empty state -->
+    <p *ngIf="!isLoadingServices && providerServices.length === 0" class="pas-empty">
+      Sin servicios disponibles
+    </p>
+    
+    <!-- Services list -->
+    <div *ngIf="!isLoadingServices && providerServices.length > 0" class="pas-services-list">
+      <div *ngFor="let svc of providerServices" class="pas-service-card">
+        <div class="pas-service-header">
+          <div class="pas-service-info">
+            <h4 class="pas-service-name">{{ svc.business_name }}</h4>
+            <span class="pas-service-category" *ngIf="svc.service_category">
+              <ion-icon name="pricetag-outline"></ion-icon>
+              {{ svc.service_category.name }}
+            </span>
+          </div>
+          <span class="pas-service-price" *ngIf="svc.hourly_rate">
+            ${{ svc.hourly_rate | number:'1.0-0' }}
+            <span class="pas-price-unit">/hr</span>
+          </span>
+        </div>
+        
+        <p class="pas-service-desc" *ngIf="svc.description">
+          {{ svc.description }}
+        </p>
+        
+        <div class="pas-service-meta">
+          <span class="pas-service-address" *ngIf="svc.address">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ svc.address }}
+          </span>
+        </div>
+        
+        <!-- PAYWALL: Reserva bloqueada (requiere Premium) -->
+        <button class="pas-service-btn-locked" (click)="showPremiumPaywall()" type="button">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span>Reservar este servicio</span>
+          <div class="pas-premium-badge">
+            <ion-icon name="diamond-outline"></ion-icon>
+            Premium
+          </div>
+        </button>
+      </div>
+    </div>
+    
+    <p *ngIf="!isLoadingServices && providerServices.length > 0" class="pas-paywall-info">
+      <ion-icon name="diamond-outline" color="warning"></ion-icon>
+      Hazte Premium para reservar múltiples servicios del mismo proveedor
+    </p>
+  </div>
+
   <!-- Contact tab -->
   <div *ngIf="activeDetailTab==='contact'" class="pas-tab-body">
     <div class="pas-contact-list">
@@ -101,6 +198,14 @@
           <span class="pas-contact-lbl">Dirección</span>
           <span class="pas-contact-val">{{ providerAddress }}</span>
         </div>
+      </div>
+      
+      <!-- ══ BOTÓN DENUNCIAR PERFIL ══ -->
+      <div class="pas-report-section">
+        <button class="pas-report-btn" (click)="reportProvider()" type="button">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>Denunciar perfil</span>
+        </button>
       </div>
     </div>
   </div>

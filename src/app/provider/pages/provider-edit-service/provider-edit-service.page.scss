@@ -371,3 +371,132 @@ ion-footer {
   font-size: var(--bapp-text-sm);
   flex-shrink: 0;
 }
+
+// ══ PORTFOLIO IMAGES SECTION ══════════════════════════════════════════════
+.portfolio-section {
+  margin-top: var(--bapp-space-5);
+  margin-bottom: var(--bapp-space-4);
+}
+
+.portfolio-header {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-3);
+  padding: 0 var(--bapp-space-1);
+
+  ion-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+}
+
+.portfolio-header-text {
+  @include flex-column(2px);
+}
+
+.portfolio-title {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.portfolio-subtitle {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+}
+
+.add-photo-btn {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: var(--bapp-space-3);
+  background: var(--bapp-bg-card);
+  border: 1.5px dashed var(--bapp-border-medium);
+  border-radius: var(--bapp-radius-xl);
+  color: var(--bapp-color-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  ion-icon { font-size: 20px; }
+
+  &:active:not(:disabled) {
+    background: var(--bapp-color-primary-subtle);
+    border-color: var(--bapp-color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--bapp-space-2);
+  margin-top: var(--bapp-space-3);
+}
+
+.portfolio-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--bapp-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bapp-border);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.portfolio-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  @include flex-center;
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  ion-icon {
+    font-size: 18px;
+    color: white;
+  }
+
+  &:active:not(:disabled) {
+    background: rgba(255, 0, 0, 0.8);
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.portfolio-hint {
+  @include flex-start;
+  gap: var(--bapp-space-1);
+  margin-top: var(--bapp-space-2);
+  padding: 0 var(--bapp-space-1);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  line-height: var(--bapp-leading-normal);
+
+  ion-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}

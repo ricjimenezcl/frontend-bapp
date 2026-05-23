@@ -3,13 +3,15 @@ import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
-import { IonicModule, ModalController, AlertController, LoadingController, ToastController } from '@ionic/angular';
+import { IonicModule, ModalController, AlertController, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MapboxService } from '../../../shared/services/mapbox.service';
 import { CoreService } from '../../../shared/services/core.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ProviderService } from '../../services/provider.service';
+import { DocumentUploadService } from '../../../shared/services/document-upload.service';
+import { CameraService } from '../../../shared/services/camera.service';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -99,6 +101,15 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   showAddressSuggestions: boolean = false;
   private searchTerms = new Subject<string>();
   isSearching: boolean = false;
+
+  // ══ PORTFOLIO IMAGES ══════════════════════════════════════════════
+  portfolioImages: { file: File | null; preview: string; url?: string }[] = [];
+  uploadingImages: boolean = false;
+  private documentUploadService = inject(DocumentUploadService);
+  private cameraService = inject(CameraService);
+  private actionSheetCtrl = inject(ActionSheetController);
+  readonly MAX_PORTFOLIO_IMAGES = 5;
+  // ═══════════════════════════════════════════════════════════════════
 
   constructor() {
     this.servicioForm = this.createForm();
@@ -523,10 +534,28 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       await loading.present();
 
       try {
+        // ══ SUBIR IMÁGENES DE PORTAFOLIO PRIMERO ═══════════════════════
+        let portfolioUrls: string[] = [];
+        
+        if (this.portfolioImages.length > 0) {
+          loading.message = 'Subiendo imágenes...';
+          try {
+            portfolioUrls = await this.uploadPortfolioImages();
+            console.log('Imágenes subidas:', portfolioUrls);
+          } catch (error) {
+            console.error('Error subiendo imágenes:', error);
+            await loading.dismiss();
+            await this.presentToast('Error al subir imágenes. Intenta nuevamente.', 'danger');
+            return;
+          }
+        }
+        // ═══════════════════════════════════════════════════════════════
+
+        loading.message = 'Guardando servicio...';
         const formData = this.servicioForm.value;
         const fono = formData.fono.replace(/\s/g, '');
 
-        const serviceData = {
+        const serviceData: any = {
           servicio: parseInt(formData.servicio),
           categoria: parseInt(formData.categoria),
           nombre_prestador: formData.nombre_prestador,
@@ -539,6 +568,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
           id_contacto: this.providerProfile?.id ?? this.currentUser.id
         };
 
+        // ══ INCLUIR PORTFOLIO IMAGES SI EXISTEN ════════════════════════
+        if (portfolioUrls.length > 0) {
+          serviceData.portfolio_images = portfolioUrls;
+        }
+        // ═══════════════════════════════════════════════════════════════
+
         console.log('Enviando datos al backend:', serviceData);
 
         if (this.coreService) {
@@ -548,6 +583,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
                 loading.dismiss();
                 this.presentToast('Servicio guardado correctamente', 'success');
                 this.servicioForm.reset();
+                this.portfolioImages = []; // Limpiar imágenes
                 this.modalCtrl.dismiss({ success: true, data: response }, 'confirm');
               });
             },
@@ -599,6 +635,205 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       this.presentToast('Por favor complete todos los campos requeridos', 'warning');
     }
   }
+
+  // ══ PORTFOLIO IMAGES METHODS ══════════════════════════════════════════════
+  
+  /**
+   * Muestra action sheet para elegir fuente de imagen
+   */
+  async selectImageSource(): Promise<void> {
+    if (this.portfolioImages.length >= this.MAX_PORTFOLIO_IMAGES) {
+      await this.presentToast(`Máximo ${this.MAX_PORTFOLIO_IMAGES} imágenes permitidas`, 'warning');
+      return;
+    }
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Seleccionar fuente',
+      buttons: [
+        {
+          text: 'Cámara',
+          icon: 'camera-outline',
+          handler: () => {
+            this.addImageFromCamera();
+          }
+        },
+        {
+          text: 'Galería',
+          icon: 'images-outline',
+          handler: () => {
+            this.addImageFromGallery();
+          }
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  /**
+   * Toma foto con la cámara
+   */
+  async addImageFromCamera(): Promise<void> {
+    try {
+      const base64Data = await this.cameraService.takePicture();
+      if (base64Data) {
+        await this.processAndAddImage(base64Data);
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      await this.presentToast('Error al tomar foto', 'danger');
+    }
+  }
+
+  /**
+   * Selecciona imagen desde galería
+   */
+  async addImageFromGallery(): Promise<void> {
+    try {
+      const base64Data = await this.cameraService.selectFromGallery();
+      if (base64Data) {
+        await this.processAndAddImage(base64Data);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      await this.presentToast('Error al seleccionar imagen', 'danger');
+    }
+  }
+
+  /**
+   * Procesa y valida la imagen antes de agregarla
+   */
+  private async processAndAddImage(base64Data: string): Promise<void> {
+    try {
+      // Convertir base64 a File para validación
+      const file = this.base64ToFile(base64Data, 'portfolio-image.jpg');
+      
+      // Validar imagen usando DocumentUploadService
+      const validation = await this.documentUploadService.validateImage(file);
+      
+      if (!validation.valid) {
+        await this.presentToast(validation.error || 'Imagen no válida', 'danger');
+        return;
+      }
+
+      // Agregar al array con preview
+      this.portfolioImages.push({
+        file: file,
+        preview: base64Data
+      });
+
+      await this.presentToast('Imagen agregada', 'success');
+      
+    } catch (error) {
+      console.error('Error procesando imagen:', error);
+      await this.presentToast('Error al procesar imagen', 'danger');
+    }
+  }
+
+  /**
+   * Convierte base64 a File
+   */
+  private base64ToFile(base64: string, filename: string): File {
+    // Extraer el tipo MIME y los datos
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, { type: mime });
+  }
+
+  /**
+   * Elimina una imagen del array
+   */
+  removeImage(index: number): void {
+    if (index >= 0 && index < this.portfolioImages.length) {
+      this.portfolioImages.splice(index, 1);
+      this.presentToast('Imagen eliminada', 'success');
+    }
+  }
+
+  /**
+   * Sube todas las imágenes del portafolio a Cloudinary
+   * Retorna array de URLs de Cloudinary
+   */
+  private async uploadPortfolioImages(): Promise<string[]> {
+    if (this.portfolioImages.length === 0) {
+      return [];
+    }
+
+    this.uploadingImages = true;
+    const uploadedUrls: string[] = [];
+
+    try {
+      // Subir cada imagen secuencialmente
+      for (let i = 0; i < this.portfolioImages.length; i++) {
+        const img = this.portfolioImages[i];
+        
+        if (!img.file) {
+          console.warn(`Imagen ${i} no tiene file, saltando`);
+          continue;
+        }
+
+        try {
+          // Generar firma de Cloudinary
+          const signature = await this.documentUploadService.generateUploadSignature('portfolio').toPromise();
+          
+          if (!signature) {
+            throw new Error('No se pudo generar firma de subida');
+          }
+
+          // Crear FormData para Cloudinary
+          const formData = new FormData();
+          formData.append('file', img.file);
+          formData.append('api_key', signature.api_key);
+          formData.append('timestamp', signature.timestamp.toString());
+          formData.append('signature', signature.signature);
+          formData.append('folder', 'portfolio');
+
+          // Subir a Cloudinary directamente
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${signature.cloud_name}/image/upload`,
+            {
+              method: 'POST',
+              body: formData
+            }
+          );
+
+          const data = await response.json();
+          
+          if (data.secure_url) {
+            uploadedUrls.push(data.secure_url);
+          } else {
+            console.error('Respuesta sin URL:', data);
+          }
+          
+        } catch (error) {
+          console.error(`Error subiendo imagen ${i}:`, error);
+        }
+      }
+
+      this.uploadingImages = false;
+      return uploadedUrls;
+      
+    } catch (error) {
+      this.uploadingImages = false;
+      console.error('Error general en upload:', error);
+      throw error;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
 
   // Guardar horarios activos para el servicio recién creado
   private async saveSchedules(serviceResponse: any): Promise<void> {

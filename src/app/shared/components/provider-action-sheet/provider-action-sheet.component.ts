@@ -40,6 +40,14 @@ export class ProviderActionSheetComponent implements OnInit {
   reviews: Review[] = [];
   isLoadingReviews = false;
 
+  // ══ PORTAFOLIO Y SERVICIOS ══════════════════════════════════════════
+  portfolioImages: { url: string; serviceName: string }[] = [];
+  isLoadingPortfolio = false;
+  providerServices: any[] = [];
+  isLoadingServices = false;
+
+  // ═════════════════════════════════════════════════════════════════════
+
   // Booking state
   showBookingModal = false;
   selectedDate = '';
@@ -150,6 +158,9 @@ export class ProviderActionSheetComponent implements OnInit {
     this.loadProviderWorkingHours();
     this.setupAutocomplete();
     this.loadReviews();
+    
+    // ══ CARGAR PORTAFOLIO Y SERVICIOS ══
+    this.loadProviderPortfolioAndServices();
   }
 
   private loadProviderEmail() {
@@ -225,6 +236,46 @@ export class ProviderActionSheetComponent implements OnInit {
       },
       error: () => {
         this.isLoadingReviews = false;
+      }
+    });
+  }
+
+  /**
+   * Carga portafolio y servicios del proveedor
+   * Extrae imágenes de portfolio_images de cada servicio y crea array flat
+   */
+  private loadProviderPortfolioAndServices() {
+    const providerId = this.provider?.provider_id ?? this.provider?.id;
+    if (!providerId) return;
+
+    this.isLoadingPortfolio = true;
+    this.isLoadingServices = true;
+
+    this.coreService.getProviderServices(providerId).pipe(
+      catchError(() => of([]))
+    ).subscribe({
+      next: (services: any[]) => {
+        this.providerServices = services;
+        this.isLoadingServices = false;
+
+        // Extraer portfolio_images de todos los servicios
+        this.portfolioImages = [];
+        services.forEach((svc: any) => {
+          if (svc.portfolio_images && Array.isArray(svc.portfolio_images)) {
+            svc.portfolio_images.forEach((img: any) => {
+              this.portfolioImages.push({
+                url: img.url || img,
+                serviceName: svc.business_name || svc.service_name || 'Servicio'
+              });
+            });
+          }
+        });
+
+        this.isLoadingPortfolio = false;
+      },
+      error: () => {
+        this.isLoadingPortfolio = false;
+        this.isLoadingServices = false;
       }
     });
   }
@@ -633,6 +684,138 @@ export class ProviderActionSheetComponent implements OnInit {
     } finally {
       this.isStartingChat = false;
     }
+  }
+
+  /**
+   * Denunciar perfil del proveedor
+   * Muestra un alert para confirmar la denuncia y enviar el reporte al backend
+   */
+  async reportProvider(): Promise<void> {
+    const providerId = this.provider?.provider_id || this.provider?.id;
+    if (!providerId) {
+      await this.showToast('Error: no se puede denunciar este perfil', 'danger');
+      return;
+    }
+
+    // Mostrar alert de confirmación con opciones de motivo
+    const alert = await this.alertCtrl.create({
+      header: 'Denunciar perfil',
+      message: '¿Por qué deseas denunciar este perfil?',
+      inputs: [
+        {
+          type: 'radio',
+          label: 'Comportamiento inapropiado',
+          value: 'inappropriate_behavior',
+          checked: true
+        },
+        {
+          type: 'radio',
+          label: 'Contenido engañoso o fraudulento',
+          value: 'fraud'
+        },
+        {
+          type: 'radio',
+          label: 'Spam o publicidad no deseada',
+          value: 'spam'
+        },
+        {
+          type: 'radio',
+          label: 'Suplantación de identidad',
+          value: 'impersonation'
+        },
+        {
+          type: 'radio',
+          label: 'Otro motivo',
+          value: 'other'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Denunciar',
+          handler: async (reason: string) => {
+            if (!reason) {
+              await this.showToast('Selecciona un motivo', 'warning');
+              return false;
+            }
+
+            // TODO: Implementar llamada al backend cuando esté disponible
+            // Ejemplo: this.reportService.reportProvider(providerId, reason).subscribe(...)
+            
+            // Por ahora, solo mostramos confirmación
+            await this.showToast('Denuncia enviada. Gracias por tu reporte.', 'success');
+            console.log(`Proveedor ${providerId} denunciado por: ${reason}`);
+            return true;
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  /**
+   * Abre el visor de imagen en pantalla completa
+   */
+  async openImageViewer(imageUrl: string, index: number): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: `Imagen ${index + 1} de ${this.portfolioImages.length}`,
+      message: `<img src="${imageUrl}" style="width:100%;border-radius:8px;margin-top:10px;">`,
+      cssClass: 'pas-image-viewer-alert',
+      buttons: ['Cerrar']
+    });
+    await alert.present();
+  }
+
+  /**
+   * Muestra el modal de paywall para desbloquear servicios premium
+   */
+  async showPremiumPaywall(): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: '💎 Hazte Premium',
+      message: `
+        <div style="text-align:center;padding:10px 0;">
+          <p style="font-size:14px;color:var(--ion-color-medium);margin-bottom:16px;">
+            Desbloquea la posibilidad de reservar múltiples servicios del mismo proveedor
+          </p>
+          <div style="background:rgba(255,193,7,0.1);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <p style="font-size:16px;font-weight:600;color:var(--ion-color-warning);margin:0;">
+              $9.990/mes
+            </p>
+            <p style="font-size:12px;color:var(--ion-color-medium);margin:4px 0 0;">
+              Cancela cuando quieras
+            </p>
+          </div>
+          <ul style="text-align:left;font-size:13px;color:var(--ion-color-dark);list-style:none;padding:0;">
+            <li style="margin:8px 0;">✓ Reserva ilimitada de servicios</li>
+            <li style="margin:8px 0;">✓ Soporte prioritario</li>
+            <li style="margin:8px 0;">✓ Sin comisiones adicionales</li>
+            <li style="margin:8px 0;">✓ Acceso anticipado a nuevas funciones</li>
+          </ul>
+        </div>
+      `,
+      cssClass: 'pas-premium-paywall-alert',
+      buttons: [
+        {
+          text: 'Ahora no',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Suscribirme',
+          cssClass: 'alert-button-premium',
+          handler: () => {
+            // TODO: Implementar navegación a pantalla de suscripción/pago
+            this.showToast('Próximamente: Suscripción Premium', 'warning');
+            // this.router.navigate(['/premium-subscription']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   async showToast(message: string, color: string = 'primary') {

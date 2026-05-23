@@ -112,11 +112,22 @@ export class RegisterClientPage {
       const { confirmPassword, ...data } = this.registerForm.value;
       const phone = data.phone.replace(/\s/g, '');
       
+      // ══ AVATAR POR DEFECTO ══════════════════════════════════════
+      // Si el usuario NO subió avatar, asignar automáticamente el avatar por defecto
+      const defaultAvatar = 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png';
+      const avatarToSend = data.avatar && data.avatar.trim() !== '' ? data.avatar : defaultAvatar;
+      
+      // ══ RATING INICIAL ═══════════════════════════════════════════
+      // Asignar rating inicial = 5 (el backend debe manejarlo, pero lo enviamos por compatibilidad)
+      const rating_avg = 5;
+      
       this.authService.registerClient({
         email: data.email,
         password: data.password,
         full_name: data.fullName,
         phone: phone,
+        avatar: avatarToSend,
+        rating_avg: rating_avg,
         terms_accepted: data.termsAccepted,
         email_opt_in: data.emailOptIn
       }).subscribe({

@@ -354,6 +354,15 @@ export class RegisterProviderPage implements OnInit {
       const runLimpio = formData.run.replace(/[\.\-\s]/g, '').toUpperCase();
       const run = `${runLimpio.slice(0, -1)}-${runLimpio.slice(-1)}`;
       
+      // ══ AVATAR POR DEFECTO ══════════════════════════════════════
+      // Si el usuario NO subió avatar, asignar automáticamente el avatar por defecto
+      const defaultAvatar = 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png';
+      const avatarToSend = formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : defaultAvatar;
+      
+      // ══ RATING INICIAL ═══════════════════════════════════════════
+      // Asignar rating inicial = 5 (el backend debe manejarlo, pero lo enviamos por compatibilidad)
+      const rating_avg = 5;
+      
       const providerData = {
         email: formData.email,
         password: formData.password,
@@ -361,7 +370,8 @@ export class RegisterProviderPage implements OnInit {
         phone: phone,
         run: run,
         bio: formData.bio || "",
-        avatar: formData.avatar || undefined,
+        avatar: avatarToSend,
+        rating_avg: rating_avg,
         terms_accepted: formData.termsAccepted,
         email_opt_in: formData.emailOptIn
       };

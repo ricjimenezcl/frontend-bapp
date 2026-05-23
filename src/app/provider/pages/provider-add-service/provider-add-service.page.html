@@ -213,6 +213,47 @@
           </ion-item>
 
 
+        <!-- ══ FOTOS DE TRABAJOS ANTERIORES (PORTAFOLIO) ══ -->
+        <div class="portfolio-section">
+          <div class="portfolio-header">
+            <ion-icon name="images-outline" color="primary"></ion-icon>
+            <div class="portfolio-header-text">
+              <span class="portfolio-title">Fotos de trabajos anteriores</span>
+              <span class="portfolio-subtitle">Opcional • Máximo {{ MAX_PORTFOLIO_IMAGES }} imágenes</span>
+            </div>
+          </div>
+
+          <!-- Botón para agregar fotos -->
+          <button
+            type="button"
+            class="add-photo-btn"
+            (click)="selectImageSource()"
+            [disabled]="portfolioImages.length >= MAX_PORTFOLIO_IMAGES || uploadingImages">
+            <ion-icon name="camera-outline"></ion-icon>
+            <span *ngIf="!uploadingImages">Agregar foto</span>
+            <span *ngIf="uploadingImages">Subiendo...</span>
+          </button>
+
+          <!-- Grid de previsualizaciones -->
+          <div class="portfolio-grid" *ngIf="portfolioImages.length > 0">
+            <div class="portfolio-item" *ngFor="let img of portfolioImages; let i = index">
+              <img [src]="img.preview" alt="Portfolio image" />
+              <button
+                type="button"
+                class="portfolio-remove-btn"
+                (click)="removeImage(i)"
+                [disabled]="uploadingImages">
+                <ion-icon name="close-circle"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <p class="portfolio-hint">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            Formatos: JPG, PNG, WEBP. Máximo 5 MB por imagen.
+          </p>
+        </div>
+
         <!-- Campos ocultos para dirección, lat y lng -->
         <div style="display: none;">
           <ion-input formControlName="direccion" name="direccion" type="text"></ion-input>

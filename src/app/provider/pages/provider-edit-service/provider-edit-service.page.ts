@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IonicModule, LoadingController, AlertController } from '@ionic/angular';
+import { IonicModule, LoadingController, AlertController, ActionSheetController } from '@ionic/angular';
 import { ProviderService, ServiceProviderData } from '../../services/provider.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CoreService } from '../../../shared/services/core.service';
 import { MapboxService } from '../../../shared/services/mapbox.service';
+import { CameraService } from '../../../shared/services/camera.service';
+import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
@@ -19,11 +21,19 @@ interface DaySchedule {
   endTime: string;
 }
 
+interface PortfolioImage {
+  file?: File;
+  preview: string;
+  url?: string;
+  isExisting?: boolean;
+}
+
 const TIME_OPTIONS: string[] = Array.from({ length: 24 }, (_, h) =>
   `${String(h).padStart(2, '0')}:00`
 );
 
 const DAY_NAMES_ES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const MAX_PORTFOLIO_IMAGES = 5;
 
 @Component({
   selector: 'app-provider-edit-service',
@@ -42,6 +52,14 @@ export class ProviderEditServicePage implements OnInit {
   isLoading: boolean = false;
   isSaving: boolean = false;
   serviceData: ServiceProviderData | null = null;
+
+  // Portfolio images
+  readonly MAX_PORTFOLIO_IMAGES = MAX_PORTFOLIO_IMAGES;
+  portfolioImages: PortfolioImage[] = [];
+  uploadingImages: boolean = false;
+  private actionSheetCtrl = inject(ActionSheetController);
+  private cameraService = inject(CameraService);
+  private documentUploadService = inject(DocumentUploadService);
 
   // ── Disponibilidad ──────────────────────────────────────────────────────
   timeOptions = TIME_OPTIONS;
@@ -236,6 +254,9 @@ export class ProviderEditServicePage implements OnInit {
       // Cargar horarios existentes del servicio
       this.loadExistingSchedules();
 
+      // Cargar imágenes de portafolio existentes
+      this.loadExistingPortfolioImages();
+
     } catch (error: any) {
       console.error('Error cargando servicio:', error);
       await this.presentAlert('Error', 'No se pudo cargar el servicio');
@@ -343,16 +364,48 @@ export class ProviderEditServicePage implements OnInit {
     try {
       this.isSaving = true;
 
+      // ══ SUBIR NUEVAS IMÁGENES DE PORTAFOLIO ═══════════════════════════
+      const existingUrls = this.portfolioImages
+        .filter(img => img.isExisting && img.url)
+        .map(img => img.url!);
+      
+      const newImages = this.portfolioImages.filter(img => !img.isExisting && img.file);
+      let newUploadedUrls: string[] = [];
+
+      if (newImages.length > 0) {
+        loading.message = 'Subiendo imágenes...';
+        try {
+          newUploadedUrls = await this.uploadPortfolioImages(newImages);
+        } catch (error) {
+          console.error('Error subiendo imágenes:', error);
+          await loading.dismiss();
+          await this.presentAlert('Error', 'Error al subir imágenes. Intenta nuevamente.');
+          this.isSaving = false;
+          return;
+        }
+      }
+
+      const allPortfolioUrls = [...existingUrls, ...newUploadedUrls];
+      // ══════════════════════════════════════════════════════════════════
+
+      loading.message = 'Actualizando servicio...';
       const formData = this.servicioForm.value;
-      const serviceData = {
+      const serviceData: any = {
         business_name: formData.business_name,
         description: formData.description,
         address: formData.address,
         latitude: parseFloat(formData.latitude),
         longitude: parseFloat(formData.longitude),
         phone: formData.phone
-        // Agrega otros campos si son necesarios para tu API
       };
+
+      // ══ INCLUIR PORTFOLIO IMAGES ══════════════════════════════════════
+      if (allPortfolioUrls.length > 0) {
+        serviceData.portfolio_images = allPortfolioUrls;
+      } else {
+        serviceData.portfolio_images = [];
+      }
+      // ══════════════════════════════════════════════════════════════════
 
       console.log('Datos a actualizar:', serviceData);
 
@@ -499,5 +552,224 @@ export class ProviderEditServicePage implements OnInit {
       buttons: ['OK']
     });
     await alert.present();
+  }
+
+  // ══ PORTFOLIO IMAGES METHODS ══════════════════════════════════════════════════════════════════
+
+  /**
+   * Muestra action sheet para elegir fuente de imagen
+   */
+  async selectImageSource(): Promise<void> {
+    if (this.portfolioImages.length >= this.MAX_PORTFOLIO_IMAGES) {
+      await this.presentToast(`Máximo ${this.MAX_PORTFOLIO_IMAGES} imágenes permitidas`, 'warning');
+      return;
+    }
+
+    const actionSheet = await this.actionSheetCtrl.create({
+      header: 'Seleccionar fuente',
+      buttons: [
+        {
+          text: 'Cámara',
+          icon: 'camera-outline',
+          handler: () => {
+            this.addImageFromCamera();
+          }
+        },
+        {
+          text: 'Galería',
+          icon: 'images-outline',
+          handler: () => {
+            this.addImageFromGallery();
+          }
+        },
+        {
+          text: 'Cancelar',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+
+    await actionSheet.present();
+  }
+
+  /**
+   * Toma foto con la cámara
+   */
+  async addImageFromCamera(): Promise<void> {
+    try {
+      const base64Data = await this.cameraService.takePicture();
+      if (base64Data) {
+        await this.processAndAddImage(base64Data);
+      }
+    } catch (error) {
+      console.error('Error al tomar foto:', error);
+      await this.presentToast('Error al tomar foto', 'danger');
+    }
+  }
+
+  /**
+   * Selecciona imagen desde galería
+   */
+  async addImageFromGallery(): Promise<void> {
+    try {
+      const base64Data = await this.cameraService.selectFromGallery();
+      if (base64Data) {
+        await this.processAndAddImage(base64Data);
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      await this.presentToast('Error al seleccionar imagen', 'danger');
+    }
+  }
+
+  /**
+   * Procesa y valida la imagen antes de agregarla
+   */
+  private async processAndAddImage(base64Data: string): Promise<void> {
+    try {
+      const file = this.base64ToFile(base64Data, 'portfolio-image.jpg');
+      
+      const validation = await this.documentUploadService.validateImage(file);
+      
+      if (!validation.valid) {
+        await this.presentToast(validation.error || 'Imagen no válida', 'danger');
+        return;
+      }
+
+      this.portfolioImages.push({
+        file: file,
+        preview: base64Data,
+        isExisting: false
+      });
+
+      await this.presentToast('Imagen agregada', 'success');
+      
+    } catch (error) {
+      console.error('Error procesando imagen:', error);
+      await this.presentToast('Error al procesar imagen', 'danger');
+    }
+  }
+
+  /**
+   * Convierte base64 a File
+   */
+  private base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, { type: mime });
+  }
+
+  /**
+   * Elimina una imagen del array
+   */
+  removeImage(index: number): void {
+    if (index >= 0 && index < this.portfolioImages.length) {
+      this.portfolioImages.splice(index, 1);
+      this.presentToast('Imagen eliminada', 'success');
+    }
+  }
+
+  /**
+   * Sube las nuevas imágenes del portafolio a Cloudinary
+   */
+  private async uploadPortfolioImages(newImages: PortfolioImage[]): Promise<string[]> {
+    if (newImages.length === 0) return [];
+
+    this.uploadingImages = true;
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < newImages.length; i++) {
+        const img = newImages[i];
+        
+        if (!img.file) {
+          console.warn(`Imagen ${i} no tiene file, saltando`);
+          continue;
+        }
+
+        try {
+          const signature = await this.documentUploadService.generateUploadSignature('portfolio').toPromise();
+          
+          if (!signature) {
+            throw new Error('No se pudo generar firma de subida');
+          }
+
+          const formData = new FormData();
+          formData.append('file', img.file);
+          formData.append('api_key', signature.api_key);
+          formData.append('timestamp', signature.timestamp.toString());
+          formData.append('signature', signature.signature);
+          formData.append('folder', 'portfolio');
+
+          const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${signature.cloud_name}/image/upload`,
+            {
+              method: 'POST',
+              body: formData
+            }
+          );
+
+          const data = await response.json();
+          
+          if (data.secure_url) {
+            uploadedUrls.push(data.secure_url);
+          } else {
+            console.error('Respuesta sin URL:', data);
+          }
+          
+        } catch (error) {
+          console.error(`Error subiendo imagen ${i}:`, error);
+        }
+      }
+
+      this.uploadingImages = false;
+      return uploadedUrls;
+      
+    } catch (error) {
+      this.uploadingImages = false;
+      console.error('Error general en upload:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Carga imágenes existentes del servicio
+   */
+  private loadExistingPortfolioImages() {
+    if (this.serviceData && (this.serviceData as any).portfolio_images) {
+      const images = (this.serviceData as any).portfolio_images;
+      
+      if (Array.isArray(images)) {
+        this.portfolioImages = images.map((img: any) => ({
+          url: typeof img === 'string' ? img : img.url,
+          preview: typeof img === 'string' ? img : img.url,
+          isExisting: true
+        }));
+      }
+    }
+  }
+
+  async presentToast(message: string, color: 'success' | 'danger' | 'warning' = 'success') {
+    const toast = document.createElement('ion-toast');
+    toast.message = message;
+    toast.duration = 2000;
+    toast.color = color;
+    toast.position = 'bottom';
+    
+    document.body.appendChild(toast);
+    await toast.present();
+    
+    setTimeout(() => {
+      toast.remove();
+    }, 2100);
   }
 }
