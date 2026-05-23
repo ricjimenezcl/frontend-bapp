@@ -588,6 +588,8 @@ export class AuthService {
     if (providerData.avatar) {
       formData.append('avatar', providerData.avatar);
     }
+    formData.append('terms_accepted', providerData.terms_accepted === true ? 'true' : 'false');
+    formData.append('email_opt_in', providerData.email_opt_in === true ? 'true' : 'false');
 
     return this.http.post(`${this.apiUrl}/auth/register-provider`, formData).pipe(
       tap((response: any) => {

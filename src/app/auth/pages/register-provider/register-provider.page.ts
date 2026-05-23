@@ -397,7 +397,14 @@ export class RegisterProviderPage implements OnInit {
           this.isLoading = false;
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
-          if (error.error?.detail) {
+          if (error.status === 422) {
+            const detail = error.error?.detail;
+            if (Array.isArray(detail)) {
+              errorMessage = detail.map((e: any) => `${e.loc?.join('.')}: ${e.msg}`).join('\n');
+            } else if (typeof detail === 'string') {
+              errorMessage = detail;
+            }
+          } else if (error.error?.detail) {
             errorMessage = error.error.detail;
           } else if (error.status === 400) {
             if (error.error.detail === 'Email already registered') {
