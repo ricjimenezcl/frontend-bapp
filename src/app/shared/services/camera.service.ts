@@ -15,12 +15,11 @@ export class CameraService {
     const image = await Camera.getPhoto({
       quality: 80,
       allowEditing: true,
-      resultType: CameraResultType.Uri,
+      resultType: CameraResultType.DataUrl,
       source: CameraSource.Camera
     });
 
-    const base64Data = await this.readAsBase64(image);
-    return base64Data;
+    return image.dataUrl!;
   }
 
     /**
@@ -55,12 +54,11 @@ export class CameraService {
     const image = await Camera.getPhoto({
       quality: 80,
       allowEditing: true,
-      resultType: CameraResultType.Uri,
+      resultType: CameraResultType.DataUrl,
       source: CameraSource.Photos
     });
 
-    const base64Data = await this.readAsBase64(image);
-    return base64Data;
+    return image.dataUrl!;
   }
 
   /**
