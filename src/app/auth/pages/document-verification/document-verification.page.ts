@@ -267,8 +267,13 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       ));
 
       if (result) {
-        this.state.selfieFacePreview = result.selfie_preview;
-        this.state.idFacePreview = result.id_preview;
+        // Convert base64 strings to Data URLs for proper display
+        this.state.selfieFacePreview = result.selfie_preview 
+          ? `data:image/jpeg;base64,${result.selfie_preview}` 
+          : null;
+        this.state.idFacePreview = result.id_preview 
+          ? `data:image/jpeg;base64,${result.id_preview}` 
+          : null;
 
         // Check if faces were detected successfully
         const facesDetected = result.success && 
