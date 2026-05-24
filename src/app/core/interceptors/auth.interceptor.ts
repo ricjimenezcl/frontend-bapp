@@ -164,6 +164,9 @@ export const errorInterceptor: HttpInterceptorFn = (
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       console.error('🔴 HTTP Error:', error.status, error.url);
+      if (error.status === 422) {
+        console.error('🔴 422 body:', JSON.stringify(error.error));
+      }
 
       if (error.status === 401 && !isAuthCall && !isExternal) {
         if (isRefreshing) {

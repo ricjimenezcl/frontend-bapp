@@ -280,7 +280,14 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
         } else {
           // No mostrar error si es problema de configuración de AWS
           const errorMsg = result.error || 'No se pudieron detectar rostros';
-          if (!errorMsg.includes('AWS_ACCESS_KEY_ID')) {
+          const isAwsConfigError = [
+            'AWS_ACCESS_KEY_ID',
+            'UnrecognizedClientException',
+            'security token',
+            'InvalidClientTokenId',
+            'ExpiredTokenException',
+          ].some(token => errorMsg.includes(token));
+          if (!isAwsConfigError) {
             this.state.facePreviewError = errorMsg;
           }
           console.warn('Face preview no disponible:', errorMsg);
@@ -290,7 +297,14 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       console.warn('Failed to load face preview:', error);
       // No mostrar error visual si es problema de AWS, solo en consola
       const errorMessage = error?.error?.detail || error?.message || 'Error';
-      if (!errorMessage.includes('AWS_ACCESS_KEY_ID')) {
+      const isAwsConfigError = [
+        'AWS_ACCESS_KEY_ID',
+        'UnrecognizedClientException',
+        'security token',
+        'InvalidClientTokenId',
+        'ExpiredTokenException',
+      ].some(token => errorMessage.includes(token));
+      if (!isAwsConfigError) {
         this.state.facePreviewError = `Error: ${errorMessage}`;
       }
     } finally {

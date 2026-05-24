@@ -582,12 +582,14 @@ export class AuthService {
     if (providerData.phone) {
       formData.append('phone', providerData.phone);
     }
-    if (providerData.bio) {
-      formData.append('bio', providerData.bio);
+    formData.append('bio', providerData.bio || '');
+    // El backend espera UploadFile para avatar, no string.
+    // Solo enviar si es base64 (foto cargada por el usuario), convertida a Blob.
+    if (providerData.avatar && providerData.avatar.startsWith('data:')) {
+      const blob = this.base64ToBlob(providerData.avatar);
+      formData.append('avatar', blob, 'avatar.jpg');
     }
-    if (providerData.avatar) {
-      formData.append('avatar', providerData.avatar);
-    }
+    // Si es URL (avatar por defecto), no enviar el campo — el backend asigna su propio default.
     formData.append('terms_accepted', providerData.terms_accepted === true ? 'true' : 'false');
     formData.append('email_opt_in', providerData.email_opt_in === true ? 'true' : 'false');
 
@@ -621,9 +623,21 @@ export class AuthService {
       }),
       catchError((error) => {
         console.error('Error en registerProvider:', error);
+        console.error('Error detail (422):', JSON.stringify(error.error));
         throw error;
       })
     );
+  }
+
+  private base64ToBlob(base64: string): Blob {
+    const parts = base64.split(';base64,');
+    const contentType = parts[0].split(':')[1] || 'image/jpeg';
+    const raw = window.atob(parts[1]);
+    const uInt8Array = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+    return new Blob([uInt8Array], { type: contentType });
   }
 
   /**

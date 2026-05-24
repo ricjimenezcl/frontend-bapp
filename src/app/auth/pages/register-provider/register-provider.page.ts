@@ -350,14 +350,15 @@ export class RegisterProviderPage implements OnInit {
       
       const { confirmPassword, ...formData } = this.registerForm.value;
       
-      const phone = formData.phone.replace(/\s/g, '');
+      // Normalizar teléfono: eliminar espacios y signo +, dejar solo dígitos con código de país
+      const phone = formData.phone.replace(/\D/g, '');
       const runLimpio = formData.run.replace(/[\.\-\s]/g, '').toUpperCase();
       const run = `${runLimpio.slice(0, -1)}-${runLimpio.slice(-1)}`;
       
-      // ══ AVATAR POR DEFECTO ══════════════════════════════════════
-      // Si el usuario NO subió avatar, asignar automáticamente el avatar por defecto
-      const defaultAvatar = 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png';
-      const avatarToSend = formData.avatar && formData.avatar.trim() !== '' ? formData.avatar : defaultAvatar;
+      // ══ AVATAR ══════════════════════════════════════════════════
+      // Si el usuario subió foto (base64), se envía como archivo.
+      // Si no subió foto, se omite el campo y el backend asigna su default.
+      const avatarToSend = formData.avatar && formData.avatar.startsWith('data:') ? formData.avatar : null;
       
       // ══ RATING INICIAL ═══════════════════════════════════════════
       // Asignar rating inicial = 5 (el backend debe manejarlo, pero lo enviamos por compatibilidad)

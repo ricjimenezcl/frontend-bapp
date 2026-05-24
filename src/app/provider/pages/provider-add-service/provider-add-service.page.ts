@@ -149,6 +149,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    // Liberar blob URLs de imágenes del portafolio
+    this.portfolioImages.forEach(img => {
+      if (img.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(img.preview);
+      }
+    });
   }
 
   async ngOnInit() {
@@ -721,10 +727,13 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
         return;
       }
 
-      // Agregar al array con preview
+      // Usar blob URL como preview para evitar errores 431 con base64 muy largo
+      // (Angular puede sanitizar data URLs con MIME genérico como application/octet-stream)
+      const blobPreview = URL.createObjectURL(file);
+
       this.portfolioImages.push({
         file: file,
-        preview: base64Data
+        preview: blobPreview
       });
 
       await this.presentToast('Imagen agregada', 'success');
@@ -758,6 +767,10 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
    */
   removeImage(index: number): void {
     if (index >= 0 && index < this.portfolioImages.length) {
+      const img = this.portfolioImages[index];
+      if (img.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(img.preview);
+      }
       this.portfolioImages.splice(index, 1);
       this.presentToast('Imagen eliminada', 'success');
     }
