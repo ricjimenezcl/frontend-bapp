@@ -18,10 +18,10 @@
         </p>
 
         <ol class="steps-list">
-          <li>Captura una selfie con tu cámara frontal</li>
+          <li>Captura una selfie con verificación de liveness (gira tu rostro)</li>
           <li>Sube una foto clara de tu documento de identidad</li>
-          <li>Confirma para análisis de rostro</li>
-          <li>Un administrador revisará y aprobará</li>
+          <li>Confirma para análisis de rostro automático</li>
+          <li>Espera la verificación del sistema</li>
         </ol>
       </ion-card-content>
     </ion-card>
@@ -336,4 +336,9 @@
 
   <!-- Spinner de carga durante análisis -->
   <ion-spinner *ngIf="state.step === 'WAITING'" name="crescent"></ion-spinner>
+
+  <!-- Componente de Captura de Selfie con Liveness Detection -->
+  <app-selfie-capture
+    (photoTaken)="onSelfieCaptured($event)"
+  ></app-selfie-capture>
 </ion-content>

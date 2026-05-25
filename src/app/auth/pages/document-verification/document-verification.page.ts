@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -14,15 +14,15 @@ import {
   IonIcon,
   IonProgressBar,
   IonSpinner,
-  LoadingController,
   ToastController,
 } from '@ionic/angular/standalone';
-import { Camera, CameraResultType, CameraSource, CameraDirection } from '@capacitor/camera';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { FeedbackService } from '../../../shared/services/feedback.service';
 import { AuthService } from '../../services/auth.service';
+import { SelfieCaptureComponent } from '../../../shared/components/selfie-capture/selfie-capture.component';
 import { addIcons } from 'ionicons';
-import { camera, checkmarkCircle, closeCircle, document } from 'ionicons/icons';
+import { camera, checkmarkCircle, closeCircle, document, cloudUpload, image, alertCircle, arrowForward, refresh } from 'ionicons/icons';
 import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -64,11 +64,14 @@ interface VerificationState {
     IonIcon,
     IonProgressBar,
     IonSpinner,
+    SelfieCaptureComponent,
   ],
   templateUrl: './document-verification.page.html',
   styleUrls: ['./document-verification.page.scss'],
 })
 export class DocumentVerificationPage implements OnInit, OnDestroy {
+  @ViewChild(SelfieCaptureComponent) selfieCaptureModal!: SelfieCaptureComponent;
+
   state: VerificationState = {
     selfieUrl: null,
     idDocumentUrl: null,
@@ -98,7 +101,7 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
     private readonly toastController: ToastController,
     private readonly authService: AuthService
   ) {
-    addIcons({ camera, checkmarkCircle, closeCircle, document });
+    addIcons({camera,checkmarkCircle,cloudUpload,document,image,alertCircle,arrowForward,closeCircle,refresh});
   }
 
   ngOnInit(): void {
@@ -115,25 +118,23 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Capturar selfie (cámara frontal)
+   * Capturar selfie con liveness detection
    */
   async captureSelfie(): Promise<void> {
     try {
-      const image = await Camera.getPhoto({
-        quality: 90,
-        allowEditing: false,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-        direction: CameraDirection.Front,
-      });
-
-      if (image.webPath) {
-        this.state.selfieUrl = image.webPath;
-      }
+      await this.selfieCaptureModal.open();
     } catch (error) {
-      console.error('Selfie capture failed:', error);
-      await this.showToast('Error al capturar selfie');
+      console.error('Error abriendo modal de captura:', error);
+      await this.showToast('Error al abrir la captura de selfie');
     }
+  }
+
+  /**
+   * Handler cuando se captura la selfie exitosamente
+   */
+  onSelfieCaptured(dataUrl: string): void {
+    this.state.selfieUrl = dataUrl;
+    this.showToast('✅ Selfie capturada con verificación de liveness');
   }
 
   /**

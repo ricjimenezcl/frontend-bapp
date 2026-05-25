@@ -1,0 +1,366 @@
+.selfie-capture-content {
+  --background: #f5f5f5;
+}
+
+.capture-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 20px;
+}
+
+// ========================================
+// ESTADO: READY
+// ========================================
+.ready-state {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+
+  .icon-placeholder {
+    margin-bottom: 20px;
+    
+    ion-icon {
+      font-size: 80px;
+    }
+  }
+
+  h2 {
+    color: var(--ion-color-dark);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  .instructions-list {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+    .instruction-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: var(--ion-color-medium);
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      ion-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  ion-button {
+    margin-top: 16px;
+  }
+}
+
+// ========================================
+// ESTADO: LIVENESS (Capturando)
+// ========================================
+.liveness-state {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  background: #000;
+}
+
+.video-stream {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); // Efecto espejo
+}
+
+.oval-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+
+  ellipse {
+    transition: stroke 0.3s ease, stroke-width 0.3s ease;
+  }
+
+  ellipse.pulse-green {
+    animation: pulse-green 1s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    stroke-opacity: 1;
+    stroke-width: 5;
+  }
+  50% {
+    stroke-opacity: 0.6;
+    stroke-width: 7;
+  }
+}
+
+.face-indicator {
+  animation: fade-in 0.3s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.hidden-canvas {
+  display: none;
+}
+
+.instruction-banner {
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: 100%;
+  max-width: 350px;
+  transition: background 0.3s ease;
+
+  &.warning {
+    background: var(--ion-color-warning);
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .warning-message {
+    margin: 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    animation: blink 1s ease-in-out infinite;
+  }
+
+  .turn-validation {
+    margin: 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    
+    &.pending {
+      background: #f57c00;
+      color: #000;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    &.detected {
+      background: #388e3c;
+      color: #fff;
+    }
+  }
+
+  .countdown {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 8px 0;
+    animation: countdown-pulse 1s ease-in-out;
+  }
+
+  .stable-time-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 12px;
+
+    .stable-time-fill {
+      height: 100%;
+      background: rgba(255, 255, 255, 0.5);
+      transition: width 0.1s linear;
+
+      &.active {
+        background: #10dc60; // Verde cuando detecta rostro
+      }
+
+      &.paused {
+        background: #ffce00; // Amarillo cuando está en período de gracia
+      }
+    }
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes countdown-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.liveness-progress {
+  width: 100%;
+  max-width: 350px;
+  height: 8px;
+  border-radius: 4px;
+}
+
+// ========================================
+// ESTADO: COMPLETE
+// ========================================
+.complete-state {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+
+  .preview-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto 20px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+
+    .captured-photo {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .overlay-check {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: white;
+      border-radius: 50%;
+      padding: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+
+      ion-icon {
+        font-size: 32px;
+        display: block;
+      }
+    }
+  }
+
+  .success-message {
+    color: var(--ion-color-success);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .info-badges {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 220, 96, 0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--ion-color-success);
+
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+}
+
+// ========================================
+// ESTADO: ERROR
+// ========================================
+.error-state {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  padding: 20px;
+
+  .error-icon {
+    margin-bottom: 20px;
+
+    ion-icon {
+      font-size: 80px;
+    }
+  }
+
+  .error-message {
+    color: var(--ion-color-danger);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+}
+
+// ========================================
+// RESPONSIVE
+// ========================================
+@media (max-width: 375px) {
+  .video-container {
+    max-width: 300px;
+  }
+
+  .instruction-banner h3 {
+    font-size: 16px;
+  }
+}

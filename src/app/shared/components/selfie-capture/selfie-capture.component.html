@@ -1,0 +1,215 @@
+<ion-modal #modal [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>Captura de Selfie</ion-title>
+        <ion-button slot="end" fill="clear" (click)="close()">
+          <ion-icon name="close"></ion-icon>
+        </ion-button>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="selfie-capture-content">
+      <div class="capture-container">
+        
+        <!-- ESTADO: READY - Instrucciones iniciales -->
+        <div *ngIf="state.currentStep === 'READY'" class="ready-state">
+          <div class="icon-placeholder">
+            <ion-icon name="camera" size="large" color="primary"></ion-icon>
+          </div>
+          
+          <h2>Verificación de Identidad</h2>
+          
+          <div class="instructions-list">
+            <p class="instruction-item">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Centra tu rostro en el óvalo
+            </p>
+            <p class="instruction-item">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Sigue las instrucciones en pantalla
+            </p>
+            <p class="instruction-item">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Gira tu cabeza cuando se te indique
+            </p>
+            <p class="instruction-item">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              Mantén buena iluminación
+            </p>
+          </div>
+
+          <ion-button 
+            expand="block" 
+            (click)="startLivenessCheck()"
+            color="primary"
+            size="large"
+          >
+            <ion-icon name="camera" slot="start"></ion-icon>
+            Iniciar Captura
+          </ion-button>
+        </div>
+
+        <!-- ESTADO: Proceso de liveness (INIT_CAMERA, CENTER, TURN_RIGHT, TURN_LEFT) -->
+        <div *ngIf="state.isCapturing || state.currentStep === 'INIT_CAMERA'" class="liveness-state">
+          <!-- Contenedor del video con óvalo -->
+          <div class="video-container">
+            <!-- Video stream en vivo -->
+            <video 
+              #videoElement 
+              class="video-stream" 
+              playsinline 
+              autoplay 
+              muted
+            ></video>
+
+            <!-- Óvalo guía superpuesto -->
+            <svg viewBox="0 0 300 400" class="oval-overlay">
+              <defs>
+                <mask id="oval-mask">
+                  <rect width="100%" height="100%" fill="white"/>
+                  <ellipse 
+                    [attr.cx]="150 + (state.ovalOffsetX * 0.5)" 
+                    [attr.cy]="200 + (state.ovalOffsetY * 0.5)" 
+                    rx="110" 
+                    ry="150" 
+                    fill="black"
+                  />
+                </mask>
+              </defs>
+              
+              <!-- Overlay oscuro con agujero oval -->
+              <rect width="100%" height="100%" fill="rgba(0,0,0,0.7)" mask="url(#oval-mask)"/>
+              
+              <!-- Borde del óvalo (se adapta al rostro detectado) -->
+              <ellipse 
+                [attr.cx]="150 + (state.ovalOffsetX * 0.5)" 
+                [attr.cy]="200 + (state.ovalOffsetY * 0.5)" 
+                rx="110" 
+                ry="150" 
+                fill="none" 
+                [attr.stroke]="state.faceDetected ? '#10dc60' : '#428cff'"
+                [attr.stroke-width]="state.faceDetected ? '5' : '3'"
+                [attr.class]="state.faceDetected ? 'pulse-green' : ''"
+                style="transition: cx 0.3s ease, cy 0.3s ease;"
+              />
+
+              <!-- Indicador de detección de rostro -->
+              <g *ngIf="state.faceDetected" class="face-indicator">
+                <circle [attr.cx]="150 + (state.ovalOffsetX * 0.5)" cy="80" r="15" fill="#10dc60"/>
+                <text [attr.x]="150 + (state.ovalOffsetX * 0.5)" y="85" text-anchor="middle" fill="white" font-size="20">✓</text>
+              </g>
+            </svg>
+
+            <!-- Canvas oculto para procesamiento -->
+            <canvas #canvasElement class="hidden-canvas"></canvas>
+          </div>
+
+          <!-- Instrucción actual -->
+          <div class="instruction-banner" [class.warning]="!state.faceDetected && state.isCapturing">
+            <h3>{{ state.instruction }}</h3>
+            
+            <!-- Mensaje de advertencia si no detecta rostro -->
+            <p class="warning-message" *ngIf="!state.faceDetected && state.isCapturing">
+              ⚠️ Mantén todo tu rostro dentro del óvalo
+            </p>
+
+            <!-- Mensaje para validación de giro de cabeza -->
+            <p class="turn-validation" 
+               *ngIf="state.faceDetected && state.isCapturing && (state.currentStep === 'TURN_RIGHT' || state.currentStep === 'TURN_LEFT')"
+               [class.detected]="state.headTurnDetected"
+               [class.pending]="!state.headTurnDetected">
+              <span *ngIf="!state.headTurnDetected">⚠️ Realiza el giro indicado</span>
+              <span *ngIf="state.headTurnDetected">✅ ¡Giro detectado! Mantén tu rostro visible</span>
+            </p>
+            
+            <!-- Countdown solo cuando el rostro está detectado -->
+            <div class="countdown" *ngIf="state.faceDetected && state.countdown > 0 && (state.currentStep === 'CENTER' || state.headTurnDetected)">
+              {{ state.countdown }}s
+            </div>
+
+            <!-- Barra de progreso del tiempo estable -->
+            <div class="stable-time-bar" *ngIf="state.isCapturing">
+              <div 
+                class="stable-time-fill" 
+                [style.width.%]="(state.faceStableTime / state.requiredStableTime) * 100"
+                [class.active]="state.faceDetected"
+                [class.paused]="!state.faceDetected && state.faceAbsentTime < state.gracePeriod && state.faceStableTime > 0"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Barra de progreso general -->
+          <ion-progress-bar 
+            [value]="progress" 
+            color="primary"
+            class="liveness-progress"
+          ></ion-progress-bar>
+        </div>
+
+        <!-- ESTADO: COMPLETE - Foto capturada -->
+        <div *ngIf="state.currentStep === 'COMPLETE'" class="complete-state">
+          <div class="preview-container">
+            <img [src]="state.finalImage" alt="Selfie capturada" class="captured-photo"/>
+            
+            <div class="overlay-check">
+              <ion-icon name="checkmark-circle" color="success" size="large"></ion-icon>
+            </div>
+          </div>
+
+          <h3 class="success-message">{{ state.instruction }}</h3>
+
+          <div class="info-badges">
+            <div class="badge">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <span>{{ state.capturedFrames.length }} frames capturados</span>
+            </div>
+            <div class="badge">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <span>Liveness verificado</span>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <ion-button 
+              expand="block" 
+              (click)="retryCapture()"
+              color="medium"
+              fill="outline"
+            >
+              Reintentar
+            </ion-button>
+            
+            <ion-button 
+              expand="block" 
+              (click)="confirmPhoto()"
+              color="success"
+            >
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Confirmar
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- ESTADO: ERROR -->
+        <div *ngIf="state.currentStep === 'ERROR'" class="error-state">
+          <div class="error-icon">
+            <ion-icon name="alert-circle" color="danger" size="large"></ion-icon>
+          </div>
+
+          <h3 class="error-message">{{ state.error || 'Ocurrió un error' }}</h3>
+
+          <ion-button 
+            expand="block" 
+            (click)="retryCapture()"
+            color="primary"
+          >
+            <ion-icon name="camera" slot="start"></ion-icon>
+            Intentar de Nuevo
+          </ion-button>
+        </div>
+
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
