@@ -1,158 +1,206 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+  EDIT-SERVICE (Mobile — adaptado de add-service)
+  Modal fullscreen con diseño modular
+  ═══════════════════════════════════════════════════════════════════ -->
+
 <ion-header class="ion-no-border">
-  <ion-toolbar mode="ios">
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/provider/tabs"></ion-back-button>
-    </ion-buttons>
-    <ion-title>Editar Servicio</ion-title>
+  <ion-toolbar mode="ios" class="as-toolbar">
+    <div class="as-topbar">
+      <div class="as-topbar-meta">
+        <span class="as-topbar-eyebrow">Panel de proveedor</span>
+        <h1 class="as-topbar-title">Editar servicio</h1>
+      </div>
+      <ion-buttons slot="end">
+        <ion-button (click)="goBack()" class="as-close-btn" aria-label="Cerrar">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" [scrollY]="true">
-
+  
   <!-- Loading -->
-  <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner color="primary"></ion-spinner>
-    <p>Cargando información del servicio...</p>
+  <div *ngIf="isLoading" class="as-loading-container">
+    <ion-spinner color="primary" name="crescent"></ion-spinner>
+    <p class="as-loading-text">Cargando información del servicio...</p>
   </div>
 
   <!-- Formulario -->
-  <div *ngIf="!isLoading" class="modal-container">
+  <div *ngIf="!isLoading" class="as-body">
 
-    <!-- Instrucciones -->
-    <div class="instructions">
-      <ion-label class="title">Edita la información de tu servicio</ion-label>
-      <ion-label class="sub-title">Actualiza los datos y la ubicación</ion-label>
-    </div>
+    <!-- ══ FORM ═══════════════════════════════════════════════════ -->
+    <form [formGroup]="servicioForm" class="as-form">
 
-    <!-- Mapa -->
-    <div class="map-container-centered" *ngIf="mapUrl">
-      <img [src]="mapUrl" alt="Mapa" class="static-map" />
-    </div>
+      <!-- ── Sección: Categoría ───────────────────────────────── -->
+      <div class="as-section">
+        <div class="as-section-header">
+          <div class="as-section-icon">
+            <ion-icon name="grid-outline"></ion-icon>
+          </div>
+          <h2 class="as-section-title">Categoría</h2>
+        </div>
 
-    <form [formGroup]="servicioForm">
-
-      <!-- Categoría (solo lectura) -->
-      <ion-item lines="none" class="input-content readonly-item">
-        <ion-icon name="construct-outline" slot="start" color="primary"></ion-icon>
-        <ion-input
-          type="text"
-          [value]="serviceCategoryName"
-          placeholder="Categoría del servicio"
-          readonly
-          disabled>
-        </ion-input>
-      </ion-item>
-
-      <!-- Dirección -->
-      <div>
-        <ion-item lines="none" class="input-content">
-          <ion-icon name="location-outline" slot="start" color="primary"></ion-icon>
+        <div class="as-field">
+          <label class="as-label">Categoría del servicio</label>
           <ion-input
             type="text"
-            placeholder="Ingrese su dirección"
-            (ionInput)="onAddressInput($event)"
-            (ionFocus)="onAddressFocus()"
-            (ionBlur)="onAddressBlur()"
-            [value]="selectedAddressText"
-            autocomplete="off">
+            [value]="serviceCategoryName"
+            placeholder="Categoría del servicio"
+            readonly
+            disabled
+            class="as-input as-input--readonly">
           </ion-input>
-          <ion-spinner *ngIf="isSearching" slot="end" name="crescent"></ion-spinner>
-          <ion-button
-            *ngIf="selectedAddressText"
-            slot="end"
-            fill="clear"
-            size="small"
-            (click)="clearAddress()"
-            (mousedown)="$event.preventDefault()">
-            <ion-icon name="close-circle" color="medium"></ion-icon>
-          </ion-button>
-        </ion-item>
-
-        <div class="suggestions-container" *ngIf="showAddressSuggestions && addressSuggestions.length > 0">
-          <div
-            class="suggestion-item"
-            *ngFor="let suggestion of addressSuggestions"
-            (click)="selectAddressSuggestion(suggestion)"
-            (mousedown)="$event.preventDefault()">
-            <ion-icon
-              [name]="getSuggestionIcon(suggestion)"
-              [color]="getSuggestionColor(suggestion)">
-            </ion-icon>
-            <div class="suggestion-text">
-              <div class="suggestion-main">{{ getSuggestionDisplayText(suggestion) }}</div>
-              <div class="suggestion-details" *ngIf="getSuggestionContext(suggestion)">
-                {{ getSuggestionContext(suggestion) }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="error-message" *ngIf="servicioForm.get('address')?.touched && servicioForm.get('latitude')?.errors?.['required']">
-          Selecciona una dirección de la lista de sugerencias
+          <p class="as-hint">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            La categoría no puede modificarse una vez creado el servicio.
+          </p>
         </div>
       </div>
 
-      <!-- Nombre del Negocio -->
-      <div>
-        <ion-item lines="none" class="input-content">
-          <ion-icon name="business" slot="start" color="primary"></ion-icon>
+      <!-- ── Sección: Información ─────────────────────────────── -->
+      <div class="as-section">
+        <div class="as-section-header">
+          <div class="as-section-icon">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <h2 class="as-section-title">Información del servicio</h2>
+        </div>
+
+        <!-- Nombre del negocio -->
+        <div class="as-field">
+          <label class="as-label">Nombre del negocio <span class="as-required">*</span></label>
           <ion-input
             type="text"
             formControlName="business_name"
-            placeholder="Nombre del negocio">
+            placeholder="Nombre del negocio"
+            class="as-input"
+            [class.as-input--error]="servicioForm.get('business_name')?.touched && servicioForm.get('business_name')?.errors">
           </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="servicioForm.get('business_name')?.errors && servicioForm.get('business_name')?.touched">
-          {{ getError('business_name') }}
-        </div>
-      </div>
-
-      <!-- Teléfono -->
-      <ion-item lines="none" class="input-content">
-        <ion-icon name="call" slot="start" color="primary"></ion-icon>
-        <ion-input
-          type="tel"
-          formControlName="phone"
-          placeholder="+56 9 1234 5678"
-          maxlength="17"
-          (ionInput)="formatPhone($event)">
-        </ion-input>
-      </ion-item>
-      <div class="error-message" *ngIf="servicioForm.get('phone')?.errors && servicioForm.get('phone')?.touched">
-        {{ getError('phone') }}
-      </div>
-
-      <!-- Descripción -->
-      <ion-item lines="none" class="input-content">
-        <ion-icon name="information-circle" slot="start" color="primary"></ion-icon>
-        <ion-textarea
-          formControlName="description"
-          placeholder="Descripción del servicio (opcional)"
-          rows="3"
-          maxlength="100">
-        </ion-textarea>
-      </ion-item>
-
-      <!-- Campos ocultos con coordenadas -->
-      <div style="display: none;">
-        <ion-input formControlName="address" type="text"></ion-input>
-        <ion-input formControlName="latitude" type="text"></ion-input>
-        <ion-input formControlName="longitude" type="text"></ion-input>
-      </div>
-
-      <!-- ══ FOTOS DE TRABAJOS ANTERIORES (PORTAFOLIO) ══ -->
-      <div class="portfolio-section">
-        <div class="portfolio-header">
-          <ion-icon name="images-outline" color="primary"></ion-icon>
-          <div class="portfolio-header-text">
-            <span class="portfolio-title">Fotos de trabajos anteriores</span>
-            <span class="portfolio-subtitle">Opcional • Máximo {{ MAX_PORTFOLIO_IMAGES }} imágenes</span>
+          <div class="as-field-error" *ngIf="servicioForm.get('business_name')?.errors && servicioForm.get('business_name')?.touched">
+            {{ getError('business_name') }}
           </div>
         </div>
+
+        <!-- Descripción -->
+        <div class="as-field">
+          <label class="as-label">Descripción</label>
+          <ion-textarea
+            formControlName="description"
+            placeholder="Describe brevemente tu servicio, experiencia y especialidades..."
+            rows="3"
+            maxlength="100"
+            class="as-textarea">
+          </ion-textarea>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="as-field">
+          <label class="as-label">Teléfono de contacto <span class="as-required">*</span></label>
+          <ion-input
+            type="tel"
+            formControlName="phone"
+            placeholder="+56 9 1234 5678"
+            maxlength="17"
+            class="as-input"
+            [class.as-input--error]="servicioForm.get('phone')?.touched && servicioForm.get('phone')?.errors"
+            (ionInput)="formatPhone($event)">
+          </ion-input>
+          <div class="as-field-error" *ngIf="servicioForm.get('phone')?.errors && servicioForm.get('phone')?.touched">
+            {{ getError('phone') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Sección: Dirección ───────────────────────────────── -->
+      <div class="as-section">
+        <div class="as-section-header">
+          <div class="as-section-icon">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <h2 class="as-section-title">Dirección del servicio</h2>
+        </div>
+
+        <div class="as-field">
+          <label class="as-label">Dirección <span class="as-required">*</span></label>
+          <div class="as-address-wrap">
+            <ion-input
+              type="text"
+              placeholder="Calle, número, ciudad..."
+              class="as-input"
+              [class.as-input--error]="servicioForm.get('address')?.touched && servicioForm.get('latitude')?.errors?.['required']"
+              (ionInput)="onAddressInput($event)"
+              (ionFocus)="onAddressFocus()"
+              (ionBlur)="onAddressBlur()"
+              [value]="selectedAddressText"
+              autocomplete="off">
+            </ion-input>
+
+            <ion-button
+              *ngIf="selectedAddressText"
+              fill="clear"
+              size="small"
+              class="as-address-clear"
+              (click)="clearAddress()"
+              (mousedown)="$event.preventDefault()"
+              aria-label="Limpiar dirección">
+              <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+
+            <ion-spinner
+              *ngIf="isSearching"
+              name="crescent"
+              class="as-address-spinner">
+            </ion-spinner>
+
+            <!-- Dropdown sugerencias -->
+            <div class="as-suggestions" *ngIf="showAddressSuggestions && addressSuggestions.length > 0">
+              <div
+                class="as-suggestion-item"
+                *ngFor="let suggestion of addressSuggestions"
+                (click)="selectAddressSuggestion(suggestion)"
+                (mousedown)="$event.preventDefault()">
+                <ion-icon
+                  [name]="getSuggestionIcon(suggestion)"
+                  [color]="getSuggestionColor(suggestion)"
+                  class="as-suggestion-icon">
+                </ion-icon>
+                <div class="as-suggestion-text">
+                  <div class="as-suggestion-main">{{ getSuggestionDisplayText(suggestion) }}</div>
+                  <div class="as-suggestion-sub" *ngIf="getSuggestionContext(suggestion)">
+                    {{ getSuggestionContext(suggestion) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="as-field-error" *ngIf="servicioForm.get('address')?.touched && servicioForm.get('latitude')?.errors?.['required']">
+            Selecciona una dirección de la lista de sugerencias
+          </div>
+        </div>
+
+        <!-- Mapa estático -->
+        <div class="as-map-preview" *ngIf="mapUrl">
+          <img [src]="mapUrl" alt="Mapa" class="as-static-map" />
+        </div>
+      </div>
+
+      <!-- ── Sección: Fotos de trabajos anteriores ────────────── -->
+      <div class="as-section">
+        <div class="as-section-header">
+          <div class="as-section-icon">
+            <ion-icon name="images-outline"></ion-icon>
+          </div>
+          <h2 class="as-section-title">Fotos de trabajos anteriores</h2>
+        </div>
+        <p class="as-section-desc">Opcional • Máximo {{ MAX_PORTFOLIO_IMAGES }} imágenes</p>
 
         <!-- Botón para agregar fotos -->
         <button
           type="button"
-          class="add-photo-btn"
+          class="as-file-upload-btn"
+          [class.as-file-upload-btn--disabled]="portfolioImages.length >= MAX_PORTFOLIO_IMAGES || uploadingImages"
           (click)="selectImageSource()"
           [disabled]="portfolioImages.length >= MAX_PORTFOLIO_IMAGES || uploadingImages">
           <ion-icon name="camera-outline"></ion-icon>
@@ -160,96 +208,106 @@
           <span *ngIf="uploadingImages">Subiendo...</span>
         </button>
 
-        <!-- Grid de previsualizaciones -->
-        <div class="portfolio-grid" *ngIf="portfolioImages.length > 0">
-          <div class="portfolio-item" *ngFor="let img of portfolioImages; let i = index">
-            <img [src]="img.preview" alt="Portfolio image" />
+        <!-- Preview grid -->
+        <div class="as-portfolio-grid" *ngIf="portfolioImages.length > 0">
+          <div class="as-portfolio-item" *ngFor="let img of portfolioImages; let i = index">
+            <img [src]="img.preview" alt="Portfolio image" class="as-portfolio-img" />
             <button
               type="button"
-              class="portfolio-remove-btn"
+              class="as-portfolio-remove"
               (click)="removeImage(i)"
-              [disabled]="uploadingImages">
+              [disabled]="uploadingImages"
+              aria-label="Eliminar imagen">
               <ion-icon name="close-circle"></ion-icon>
             </button>
           </div>
         </div>
 
-        <p class="portfolio-hint">
+        <p class="as-hint">
           <ion-icon name="information-circle-outline"></ion-icon>
           Formatos: JPG, PNG, WEBP. Máximo 5 MB por imagen.
         </p>
       </div>
 
-      <!-- ── Disponibilidad ─────────────────────────────────────────────────── -->
-      <div class="schedule-section-header">
-        <div class="schedule-section-icon">
-          <ion-icon name="time-outline"></ion-icon>
-        </div>
-        <span class="schedule-section-title">Horarios disponibles</span>
-      </div>
-
-      <div class="schedule-list">
-        <div class="schedule-row" *ngFor="let day of schedules" [class.active]="day.isActive">
-          <span class="day-name" [class.day-active]="day.isActive">{{ day.dayName }}</span>
-
-          <div class="schedule-inline-times" *ngIf="day.isActive">
-            <ion-select
-              [(ngModel)]="day.startTime"
-              [ngModelOptions]="{standalone: true}"
-              interface="popover"
-              class="time-select-compact">
-              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
-            </ion-select>
-            <span class="time-sep">—</span>
-            <ion-select
-              [(ngModel)]="day.endTime"
-              [ngModelOptions]="{standalone: true}"
-              interface="popover"
-              class="time-select-compact">
-              <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
-            </ion-select>
+      <!-- ── Sección: Horarios ────────────────────────────────── -->
+      <div class="as-section">
+        <div class="as-section-header">
+          <div class="as-section-icon">
+            <ion-icon name="time-outline"></ion-icon>
           </div>
+          <h2 class="as-section-title">Horario disponible</h2>
+        </div>
+        <p class="as-section-desc">Indica los días y horarios en que ofreces este servicio.</p>
 
-          <ion-toggle
-            [(ngModel)]="day.isActive"
-            [ngModelOptions]="{standalone: true}"
-            color="primary"
-            mode="md">
-          </ion-toggle>
+        <div class="as-hours-list">
+          <div class="as-day-row" *ngFor="let day of schedules" [class.as-day-row--active]="day.isActive">
+            <div class="as-day-header">
+              <span class="as-day-name">{{ day.dayName }}</span>
+              <ion-toggle
+                [(ngModel)]="day.isActive"
+                [ngModelOptions]="{standalone: true}"
+                color="primary"
+                mode="md"
+                class="as-toggle">
+              </ion-toggle>
+            </div>
+            <div class="as-day-times" *ngIf="day.isActive">
+              <div class="as-field as-field--compact">
+                <label class="as-label as-label--sm">Inicio</label>
+                <ion-select
+                  [(ngModel)]="day.startTime"
+                  [ngModelOptions]="{standalone: true}"
+                  interface="popover"
+                  class="as-time-select">
+                  <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+                </ion-select>
+              </div>
+              <span class="as-time-sep">—</span>
+              <div class="as-field as-field--compact">
+                <label class="as-label as-label--sm">Fin</label>
+                <ion-select
+                  [(ngModel)]="day.endTime"
+                  [ngModelOptions]="{standalone: true}"
+                  interface="popover"
+                  class="as-time-select">
+                  <ion-select-option *ngFor="let t of timeOptions" [value]="t">{{ t }}</ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- ── Fin disponibilidad ─────────────────────────────────────────────── -->
+
+      <!-- Campos ocultos -->
+      <div style="display: none;">
+        <ion-input formControlName="address" type="text"></ion-input>
+        <ion-input formControlName="latitude" type="text"></ion-input>
+        <ion-input formControlName="longitude" type="text"></ion-input>
+      </div>
 
     </form>
   </div>
 </ion-content>
 
 <ion-footer class="ion-no-border" *ngIf="!isLoading">
-  <ion-toolbar>
-    <ion-row>
-      <ion-col size="6">
-        <ion-button
-          (click)="goBack()"
-          expand="block"
-          shape="round"
-          color="light"
-          fill="outline"
-          class="footer-button">
-          Cancelar
-        </ion-button>
-      </ion-col>
-      <ion-col size="6">
-        <ion-button
-          (click)="updateService()"
-          expand="block"
-          shape="round"
-          color="primary"
-          class="footer-button"
-          [disabled]="servicioForm.invalid || isSaving">
-          <ion-spinner *ngIf="isSaving" slot="start" name="crescent"></ion-spinner>
-          Guardar
-        </ion-button>
-      </ion-col>
-    </ion-row>
+  <ion-toolbar class="as-footer-toolbar">
+    <div class="as-actions">
+      <ion-button
+        (click)="goBack()"
+        expand="block"
+        class="as-btn as-btn--secondary"
+        [disabled]="isSaving">
+        Cancelar
+      </ion-button>
+      <ion-button
+        (click)="updateService()"
+        expand="block"
+        class="as-btn as-btn--primary"
+        [disabled]="servicioForm.invalid || isSaving">
+        <ion-spinner *ngIf="isSaving" slot="start" name="crescent"></ion-spinner>
+        Guardar cambios
+      </ion-button>
+    </div>
   </ion-toolbar>
 </ion-footer>
+

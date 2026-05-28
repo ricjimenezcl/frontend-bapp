@@ -1,641 +1,673 @@
-// ─── Provider Add Service ──────────────────────────────────────────────────
-@import '../../../../theme/mixins';
+// ═══ Add Service (Mobile - DNA visual de inbox web) ════════════════
 
 :host {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: var(--bapp-bg-page);
+  background-image: radial-gradient(circle at 50% 0%, rgba(253, 215, 53, 0.05), transparent 60%);
 }
 
-ion-content {
-  --background: var(--bapp-bg-page);
-}
-
-// ─── Autofill override (iOS/web) ───────────────────────────────────────────
-ion-input input {
-  &:-webkit-autofill,
-  &:-webkit-autofill:hover,
-  &:-webkit-autofill:focus,
-  &:-webkit-autofill:active {
-    -webkit-text-fill-color: var(--bapp-text-primary) !important;
-    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
-    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
-    caret-color: var(--bapp-color-primary);
-    transition: background-color 99999s ease-in-out 0s;
-  }
-}
-
-// ─── Header ───────────────────────────────────────────────────────────────
-ion-header ion-toolbar {
+// ══ TOOLBAR / TOPBAR ════════════════════════════════════════════════
+.as-toolbar {
   --background: var(--bapp-bg-card);
   --border-color: var(--bapp-border);
-
-  ion-title {
-    font-weight: var(--bapp-font-semibold);
-    font-size: var(--bapp-text-lg);
-    color: var(--bapp-text-primary);
-  }
-
-  ion-button { --color: var(--bapp-text-secondary); }
+  --padding-top: env(safe-area-inset-top, 0px);
+  --padding-bottom: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-// ─── Main container ───────────────────────────────────────────────────────
-.modal-container {
-  padding: var(--bapp-space-4);
-  padding-bottom: 110px;
-}
-
-// ─── Instructions block ────────────────────────────────────────────────────
-.instructions {
-  text-align: center;
-  padding: var(--bapp-space-4) 0 var(--bapp-space-3);
-  margin-bottom: var(--bapp-space-4);
-
-  .title {
-    display: block;
-    font-weight: var(--bapp-font-bold);
-    font-size: var(--bapp-text-lg);
-    color: var(--bapp-text-primary);
-    margin-bottom: var(--bapp-space-2);
-    line-height: 1.4;
-  }
-
-  .sub-title {
-    display: block;
-    font-size: var(--bapp-text-sm);
-    color: var(--bapp-text-secondary);
-    line-height: 1.5;
-  }
-}
-
-// ─── Map container ────────────────────────────────────────────────────────
-.map-container-centered {
-  border-radius: var(--bapp-radius-lg);
-  overflow: hidden;
-  margin-bottom: var(--bapp-space-4);
-  border: 1px solid var(--bapp-border);
-  box-shadow: var(--bapp-shadow-md);
-
-  .static-map {
-    width: 100%;
-    display: block;
-    max-height: 180px;
-    object-fit: cover;
-  }
-}
-
-// ─── Form section card ────────────────────────────────────────────────────
-.form-section {
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-xl);
-  margin-bottom: var(--bapp-space-3);
-  overflow: visible;
-  box-shadow: var(--bapp-shadow-card);
-}
-
-// Separador entre filas dentro de una misma form-section
-.form-section > .input-with-suggestions + .input-with-suggestions,
-.form-section > .selected-service-container > .input-with-suggestions + .input-with-suggestions {
-  border-top: 1px solid var(--bapp-border);
-}
-
-.input-with-suggestions {
-  position: relative;
-}
-
-.input-with-suggestions ion-item {
-  --background: var(--ion-color-dark);
-  --border-color: transparent;
-  --inner-border-width: 0;
-  --padding-start: var(--bapp-space-3);
-  --inner-padding-end: var(--bapp-space-3);
-  --min-height: 52px;
-  --inner-padding-start: 0;
-}
-
-.input-with-suggestions ion-item ion-icon[slot="start"] {
-  color: var(--bapp-color-primary);
-  font-size: 20px;
-  margin-right: var(--bapp-space-3);
-}
-
-.input-with-suggestions ion-item ion-input {
-  --color: var(--bapp-text-primary);
-  --placeholder-color: var(--bapp-text-tertiary);
-  --padding-start: 0;
-  --padding-end: 0;
-  --background: transparent;
-  border: none;
-  border-radius: 0;
-  margin-top: 0;
-  font-size: var(--bapp-text-md);
-  font-weight: var(--bapp-font-regular);
-}
-
-
-.selected-service-container {
-  .input-with-suggestions ion-item ion-label h3 {
-    font-weight: var(--bapp-font-semibold);
-    font-size: var(--bapp-text-sm);
-    color: var(--bapp-text-primary);
-  }
-
-  .input-with-suggestions ion-item ion-button[fill="clear"] {
-    --color: var(--bapp-text-tertiary);
-  }
-
-  .input-with-suggestions ion-item ion-icon[name="checkmark-circle"] {
-    color: var(--bapp-color-success);
-  }
-}
-
-// Campos ocultos por nombre de campo
-ion-item:has(ion-input[name="direccion"]),
-ion-item:has(ion-input[name="lat"]),
-ion-item:has(ion-input[name="lng"]),
-ion-item:has(ion-input[name="servicio"]),
-ion-item:has(ion-input[name="categoria"]) {
-  display: none !important;
-}
-
-// Botón depurar oculto
-ion-item:has(ion-button[color="warning"]) {
-  display: none !important;
-}
-
-ion-spinner {
-  width: 20px;
-  height: 20px;
-  --color: var(--bapp-color-primary);
-}
-
-// ─── Suggestions dropdown ─────────────────────────────────────────────────
-.suggestions-container {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--bapp-bg-card-raised);
-  border: 1px solid var(--bapp-border);
-  border-radius: var(--bapp-radius-lg);
-  max-height: 260px;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: var(--bapp-shadow-lg);
-  @include hide-scrollbar;
-}
-
-.suggestion-item {
-  @include flex-start;
-  align-items: flex-start;
-  padding: var(--bapp-space-3) var(--bapp-space-4);
+.as-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bapp-space-4);
+  padding: var(--bapp-space-6) var(--bapp-space-4);
   border-bottom: 1px solid var(--bapp-border);
-  cursor: pointer;
-  transition: background var(--bapp-transition-fast);
-
-  &:last-child { border-bottom: none; }
-  &:active { background: rgba(255,255,255,0.06); }
-
-  ion-icon {
-    color: var(--bapp-color-primary);
-    font-size: 18px;
-    margin-right: var(--bapp-space-3);
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
 }
 
-.suggestion-text {
+.as-topbar-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   flex: 1;
   min-width: 0;
 }
 
-.suggestion-main {
-  font-weight: var(--bapp-font-medium);
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-primary);
-  line-height: 1.3;
-  @include truncate-text(1);
-}
-
-.suggestion-details {
-  font-size: var(--bapp-text-xs);
-  color: var(--bapp-text-secondary);
-  line-height: 1.3;
-  margin-top: 2px;
-  @include truncate-text(1);
-}
-
-.error-message {
-  font-size: var(--bapp-text-xs);
-  color: var(--bapp-color-danger);
-  padding: 2px var(--bapp-space-4) var(--bapp-space-2);
-  display: block;
-}
-
-// ─── Unificación visual ion-select / ion-input ────────────────────────────
-// ion-select tiene 16px de padding fijo en su host (Shadow DOM de Ionic).
-// CSS custom properties no lo pueden remover desde afuera.
-// Solución: margin-inline-start negativo en ion-select (propiedad CSS regular,
-// sí funciona sobre el host desde SCSS externo) para cancelar esos 16px.
-// ion-input queda con --padding-start: 0 para que ambos arranquen igual.
-ion-item.input-content,
-ion-item.select-content {
-  --padding-start: var(--bapp-space-3);
-  --inner-padding-start: var(--bapp-space-2);
-  --inner-padding-end: var(--bapp-space-2);
-  --min-height: 52px;
-  --background: var(--ion-color-dark);
-
-  ion-icon[slot="start"] {
-    font-size: 20px;
-    color: var(--bapp-color-primary);
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  ion-select {
-    align-self: center;
-    margin-inline-start: -16px !important;
-    margin-block: -12px !important;
-    width: calc(100% + 16px) !important;
-    font-size: var(--bapp-text-md);
-    --border-color: transparent !important;
-    --highlight-color: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-
-    &::part(container) {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0;
-      margin: 0;
-    }
-
-    &::part(placeholder) {
-      color: var(--bapp-text-tertiary);
-      font-size: var(--bapp-text-md);
-      font-weight: var(--bapp-font-regular);
-      flex: 1;
-      line-height: 1;
-      text-align: center;
-    }
-
-    &::part(text) {
-      color: var(--bapp-text-primary);
-      font-size: var(--bapp-text-md);
-      font-weight: var(--bapp-font-medium);
-      flex: 1;
-      line-height: 1;
-      text-align: center;
-    }
-
-    &::part(icon) {
-      color: var(--bapp-color-primary);
-      opacity: 1;
-      flex-shrink: 0;
-    }
-  }
-
-  ion-input {
-    align-self: center;
-    --padding-start: var(--bapp-space-2);
-    --padding-end: 0px !important;
-    --padding-top: 0px !important;
-    --padding-bottom: 0px !important;
-    --color: var(--bapp-text-primary) !important;
-    --placeholder-color: var(--bapp-text-tertiary) !important;
-    --border-color: transparent !important;
-    --highlight-color: transparent !important;
-    --highlight-color-focused: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: var(--bapp-text-md);
-
-  }
-
-  ion-textarea {
-    --padding-start: var(--bapp-space-2);
-    align-self: center;
-    --color: var(--bapp-text-primary) !important;
-    --placeholder-color: var(--bapp-text-tertiary) !important;
-    --border-color: transparent !important;
-    --highlight-color: transparent !important;
-    --highlight-color-focused: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: var(--bapp-text-md);
-
-  }
-
-  &:has(ion-textarea)::part(native) {
-    --padding-start: var(--bapp-space-2);
-    padding-top: var(--bapp-space-3);
-    padding-bottom: var(--bapp-space-3);
-  }
-}
-
-// ─── Footer ───────────────────────────────────────────────────────────────
-ion-footer {
-  background: var(--bapp-bg-card);
-  border-top: 1px solid var(--bapp-border);
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
-
-  ion-toolbar {
-    --background: transparent;
-    --padding-start: var(--bapp-space-4);
-    --padding-end: var(--bapp-space-4);
-    --padding-top: var(--bapp-space-2);
-    --padding-bottom: var(--bapp-space-2);
-    --min-height: 68px;
-  }
-
-  ion-col { padding: 0 4px; }
-}
-
-.footer-button {
-  --border-radius: var(--bapp-radius-full);
-  height: 46px;
-  font-weight: var(--bapp-font-semibold);
-  font-size: var(--bapp-text-md);
-  margin: 0;
-
-  &[color="light"] {
-    --border-color: var(--bapp-border);
-    --color: var(--bapp-text-secondary);
-    --background: transparent;
-  }
-
-  &[color="primary"] {
-    --color: #000000;
-    font-weight: var(--bapp-font-bold);
-  }
-}
-
-.ios ion-footer {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-
-
-// Separador visual entre paso 1 (categoría) y paso 2 (servicio)
-.form-section > .input-with-suggestions + .input-with-suggestions {
-  border-top: 1px solid var(--bapp-border);
-  position: relative;
-
-  &::before {
-    content: 'Paso 2';
-    position: absolute;
-    top: calc(-1 * var(--bapp-text-xs) / 2 - 1px);
-    left: var(--bapp-space-4);
-    font-size: var(--bapp-text-xs);
-    color: var(--bapp-text-tertiary);
-    background: var(--bapp-bg-card);
-    padding: 0 var(--bapp-space-2);
-    letter-spacing: 0.04em;
-  }
-}
-
-// Loading state for subcategories
-.input-with-suggestions ion-item ion-label[color="medium"],
-.input-with-suggestions ion-item ion-label {
-  --color: var(--bapp-text-secondary);
-  font-size: var(--bapp-text-sm);
-}
-
-// ─── Schedule section header (compacto) ────────────────────────────────────
-.schedule-section-header {
-  @include flex-start;
-  gap: var(--bapp-space-3);
-  margin-top: var(--bapp-space-4);
-  margin-bottom: var(--bapp-space-3);
-  padding: 0 var(--bapp-space-1);
-
-  .schedule-section-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--bapp-radius-md);
-    background: var(--bapp-color-primary-subtle);
-    @include flex-center;
-    flex-shrink: 0;
-
-    ion-icon {
-      font-size: 16px;
-      color: var(--bapp-color-primary);
-    }
-  }
-
-  .schedule-section-title {
-    font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-font-semibold);
-    color: var(--bapp-text-primary);
-  }
-}
-
-// ─── Schedule list (contenedor unificado) ──────────────────────────────────
-.schedule-list {
-  background: var(--bapp-bg-card-raised);
-  border-radius: var(--bapp-radius-lg);
-  border: 1.5px solid var(--bapp-border);
-  overflow: hidden;
-  margin-bottom: var(--bapp-space-4);
-}
-
-// ─── Schedule row (fila por día) ───────────────────────────────────────────
-.schedule-row {
-  @include flex-start;
-  align-items: center;
-  gap: var(--bapp-space-2);
-  padding: var(--bapp-space-2) var(--bapp-space-3);
-  min-height: 44px;
-  border-bottom: 1px solid var(--bapp-border);
-  transition: background var(--bapp-transition-fast);
-
-  &:last-child { border-bottom: none; }
-
-  &.active {
-    background: rgba(253, 215, 53, 0.04);
-    border-bottom-color: rgba(253, 215, 53, 0.15);
-  }
-
-  .day-name {
-    font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-font-medium);
-    color: var(--bapp-text-tertiary);
-    min-width: 78px;
-    flex-shrink: 0;
-    transition: color var(--bapp-transition-fast);
-
-    &.day-active {
-      color: var(--bapp-text-primary);
-      font-weight: var(--bapp-font-semibold);
-    }
-  }
-
-  ion-toggle {
-    flex-shrink: 0;
-    margin-left: auto;
-    --handle-width: 18px;
-    --handle-height: 18px;
-    width: 44px;
-    height: 24px;
-  }
-}
-
-// ─── Selectores de tiempo inline ───────────────────────────────────────────
-.schedule-inline-times {
-  @include flex-start;
-  align-items: center;
-  gap: var(--bapp-space-1);
-  flex: 1;
-  margin-right: var(--bapp-space-2);
-}
-
-.time-select-compact {
-  --background: var(--bapp-bg-input);
-  --padding-start: var(--bapp-space-2);
-  --padding-end: var(--bapp-space-1);
-  --color: var(--bapp-text-primary);
-  border-radius: var(--bapp-radius-sm);
-  font-size: var(--bapp-text-xs);
-  min-width: 56px;
-}
-
-.time-sep {
+.as-topbar-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
   color: var(--bapp-text-tertiary);
+  opacity: 0.6;
+}
+
+.as-topbar-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--bapp-text-primary);
+  margin: 0;
+  
+  @media (max-width: 380px) { font-size: 18px; }
+}
+
+.as-close-btn {
+  --background: rgba(255, 255, 255, 0.03);
+  --color: var(--bapp-text-secondary);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: var(--bapp-border);
+  --border-radius: 12px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  width: 36px;
+  height: 36px;
+  transition: all 0.2s ease;
+  
+  ion-icon { font-size: 18px; }
+  
+  &:hover {
+    --background: var(--bapp-color-primary);
+    --color: #000;
+    --border-color: var(--bapp-color-primary);
+  }
+}
+
+// ══ CONTENT / BODY ══════════════════════════════════════════════════
+ion-content {
+  --background: transparent;
+}
+
+.as-body {
+  padding: var(--bapp-space-6) var(--bapp-space-4);
+  animation: as-fade-in 0.4s ease-out;
+}
+
+@keyframes as-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ══ FORM ════════════════════════════════════════════════════════════
+.as-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-6);
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+// ══ SECCIÓN ═════════════════════════════════════════════════════════
+.as-section {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 24px;
+  padding: var(--bapp-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-4);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+  }
+}
+
+.as-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.as-section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(253, 215, 53, 0.08);
+  border: 1px solid rgba(253, 215, 53, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 18px;
+    color: var(--bapp-color-primary);
+  }
+}
+
+.as-section-title {
+  font-size: var(--bapp-text-lg);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--bapp-text-primary);
+  margin: 0;
+}
+
+.as-section-desc {
   font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+// ══ FIELD ═══════════════════════════════════════════════════════════
+.as-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.as-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bapp-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.as-label--sm {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bapp-text-secondary);
+}
+
+.as-required {
+  color: #F87171;
+  font-weight: 700;
+}
+
+.as-field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: #F87171;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: -4px;
+}
+
+// ── Fields row (2 columnas en > 480px) ──────────────────────────────
+.as-fields-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--bapp-space-4);
+  
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// ══ INPUT / SELECT / TEXTAREA ═══════════════════════════════════════
+.as-input,
+.as-select,
+.as-textarea {
+  --background: rgba(255, 255, 255, 0.03);
+  --color: var(--bapp-text-primary);
+  --placeholder-color: var(--bapp-text-tertiary);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: var(--bapp-border);
+  --border-radius: 14px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  font-size: 13px;
+  font-weight: var(--bapp-font-medium);
+  transition: all 0.2s ease;
+  
+  &:focus-within,
+  &.ion-focused {
+    --border-color: var(--bapp-color-primary);
+    --background: rgba(253, 215, 53, 0.04);
+  }
+  
+  &.as-input--error,
+  &.as-select--error {
+    --border-color: rgba(248, 113, 113, 0.5);
+  }
+}
+
+.as-textarea {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  min-height: 90px;
+}
+
+// ── Input con prefijo (ej: "$") ─────────────────────────────────────
+.as-input-prefix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.as-prefix {
+  position: absolute;
+  left: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bapp-text-secondary);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.as-input--prefixed {
+  --padding-start: 30px;
+}
+
+// ══ DIRECCIÓN (AUTOCOMPLETE) ════════════════════════════════════════
+.as-address-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.as-address-clear {
+  position: absolute;
+  right: 8px;
+  --padding-start: 6px;
+  --padding-end: 6px;
+  --color: var(--bapp-text-tertiary);
+  z-index: 2;
+  
+  ion-icon { font-size: 18px; }
+}
+
+.as-address-spinner {
+  position: absolute;
+  right: 12px;
+  font-size: 18px;
+  color: var(--bapp-color-primary);
+  z-index: 2;
+}
+
+.as-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  max-height: 280px;
+  overflow-y: auto;
+  animation: as-dropdown-slide 0.25s ease-out;
+  
+  &::-webkit-scrollbar { width: 6px; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--bapp-text-tertiary);
+    border-radius: 10px;
+  }
+}
+
+@keyframes as-dropdown-slide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.as-suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 14px;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--bapp-border);
+  min-height: 60px;
+  
+  &:last-child { border-bottom: none; }
+  
+  &:hover {
+    background: rgba(253, 215, 53, 0.08);
+  }
+  
+  &:active {
+    background: rgba(253, 215, 53, 0.12);
+  }
+}
+
+.as-suggestion-icon {
+  font-size: 18px;
   flex-shrink: 0;
 }
 
-// ══ PORTFOLIO IMAGES SECTION ══════════════════════════════════════════════
-.portfolio-section {
-  margin-top: var(--bapp-space-5);
-  margin-bottom: var(--bapp-space-4);
+.as-suggestion-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.portfolio-header {
-  @include flex-start;
-  gap: var(--bapp-space-3);
-  margin-bottom: var(--bapp-space-3);
-  padding: 0 var(--bapp-space-1);
-
-  ion-icon {
-    font-size: 24px;
-    flex-shrink: 0;
-  }
-}
-
-.portfolio-header-text {
-  @include flex-column(2px);
-}
-
-.portfolio-title {
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
+.as-suggestion-main {
+  font-size: 14px;
+  font-weight: 700;
   color: var(--bapp-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.portfolio-subtitle {
-  font-size: var(--bapp-text-xs);
+.as-suggestion-sub {
+  font-size: 11px;
+  font-weight: 600;
   color: var(--bapp-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.add-photo-btn {
-  @include flex-center;
-  gap: var(--bapp-space-2);
-  width: 100%;
-  padding: var(--bapp-space-3);
-  background: var(--bapp-bg-card);
-  border: 1.5px dashed var(--bapp-border-medium);
-  border-radius: var(--bapp-radius-xl);
-  color: var(--bapp-color-primary);
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
-  cursor: pointer;
-  transition: all var(--bapp-transition-fast);
-
-  ion-icon { font-size: 20px; }
-
-  &:active:not(:disabled) {
-    background: var(--bapp-color-primary-subtle);
-    border-color: var(--bapp-color-primary);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-.portfolio-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: var(--bapp-space-2);
-  margin-top: var(--bapp-space-3);
-}
-
-.portfolio-item {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: var(--bapp-radius-lg);
+// ── Mapa estático ───────────────────────────────────────────────────
+.as-map-preview {
+  border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--bapp-border);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
+  margin-top: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.portfolio-remove-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.7);
-  border: none;
-  @include flex-center;
-  cursor: pointer;
-  transition: all var(--bapp-transition-fast);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-
-  ion-icon {
-    font-size: 18px;
-    color: white;
-  }
-
-  &:active:not(:disabled) {
-    background: rgba(255, 0, 0, 0.8);
-    transform: scale(0.95);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+.as-static-map {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
 }
 
-.portfolio-hint {
-  @include flex-start;
-  gap: var(--bapp-space-1);
-  margin-top: var(--bapp-space-2);
-  padding: 0 var(--bapp-space-1);
-  font-size: var(--bapp-text-xs);
+// ══ LOADING ROW ═════════════════════════════════════════════════════
+.as-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--bapp-border);
+  border-radius: 14px;
+}
+
+.as-spinner {
+  color: var(--bapp-color-primary);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.as-loading-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bapp-text-secondary);
+}
+
+// ══ HINT ════════════════════════════════════════════════════════════
+.as-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--bapp-text-tertiary);
-  line-height: var(--bapp-leading-normal);
-
+  margin: 8px 0 0;
+  line-height: 1.5;
+  
   ion-icon {
     font-size: 14px;
     flex-shrink: 0;
-    margin-top: 1px;
+  }
+}
+
+// ══ PORTFOLIO (FOTOS) ═══════════════════════════════════════════════
+.as-file-upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(253, 215, 53, 0.08);
+  border: 1.5px dashed rgba(253, 215, 53, 0.3);
+  border-radius: 14px;
+  color: var(--bapp-color-primary);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  ion-icon { font-size: 20px; }
+  
+  &:hover:not(.as-file-upload-btn--disabled) {
+    background: rgba(253, 215, 53, 0.12);
+    border-color: rgba(253, 215, 53, 0.5);
+  }
+  
+  &:active:not(.as-file-upload-btn--disabled) {
+    background: rgba(253, 215, 53, 0.15);
+    border-color: rgba(253, 215, 53, 0.6);
+    transform: scale(0.98);
+  }
+  
+  &.as-file-upload-btn--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.as-portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.as-portfolio-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--bapp-border);
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.as-portfolio-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.as-portfolio-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #F87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  font-size: 0;
+  
+  ion-icon {
+    font-size: 16px;
+  }
+  
+  &:hover:not(:disabled) {
+    background: rgba(248, 113, 113, 0.2);
+    border-color: #F87171;
+  }
+  
+  &:active:not(:disabled) {
+    background: rgba(248, 113, 113, 0.3);
+    transform: scale(0.9);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ══ HORARIOS ════════════════════════════════════════════════════════
+.as-hours-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.as-day-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--bapp-border);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  
+  &.as-day-row--active {
+    background: rgba(253, 215, 53, 0.04);
+    border-color: rgba(253, 215, 53, 0.2);
+  }
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.as-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.as-day-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bapp-text-primary);
+}
+
+.as-toggle {
+  --background: rgba(148, 163, 184, 0.2);
+  --background-checked: var(--bapp-color-primary);
+  --handle-background: #fff;
+  --handle-background-checked: #000;
+}
+
+.as-day-times {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.as-field--compact {
+  gap: 4px;
+}
+
+.as-time-select {
+  --background: rgba(255, 255, 255, 0.04);
+  --color: var(--bapp-text-primary);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: var(--bapp-border);
+  --border-radius: 10px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.2s ease;
+  
+  &:focus-within {
+    --border-color: var(--bapp-color-primary);
+  }
+}
+
+.as-time-sep {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bapp-text-tertiary);
+  align-self: center;
+  margin-top: 20px;
+}
+
+// ══ FOOTER / ACTIONS ════════════════════════════════════════════════
+.as-footer-toolbar {
+  --background: var(--bapp-bg-card);
+  --border-color: var(--bapp-border);
+  --padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.as-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: var(--bapp-space-4);
+}
+
+.as-btn {
+  --border-radius: 14px;
+  --padding-top: 14px;
+  --padding-bottom: 14px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: -0.3px;
+  margin: 0;
+  height: auto;
+  transition: all 0.2s ease;
+  
+  &.as-btn--primary {
+    --background: var(--bapp-color-primary);
+    --color: #000;
+    --box-shadow: 0 6px 20px rgba(253, 215, 53, 0.3);
+    
+    &:hover {
+      --box-shadow: 0 8px 24px rgba(253, 215, 53, 0.4);
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  
+  &.as-btn--secondary {
+    --background: rgba(255, 255, 255, 0.03);
+    --color: var(--bapp-text-primary);
+    --border-width: 1px;
+    --border-style: solid;
+    --border-color: var(--bapp-border);
+    
+    &:hover {
+      --background: rgba(255, 255, 255, 0.05);
+    }
   }
 }

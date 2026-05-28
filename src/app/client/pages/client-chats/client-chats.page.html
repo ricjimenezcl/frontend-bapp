@@ -1,193 +1,117 @@
-<ion-content class="chats-content">
-
+<ion-content class="chats-content" [fullscreen]="true">
   <ion-refresher slot="fixed" (ionRefresh)="refreshConversations($event)">
-    <ion-refresher-content pullingIcon="chevron-down-circle-outline" refreshingSpinner="crescent">
+    <ion-refresher-content
+      pullingIcon="chevron-down-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="crescent"
+      refreshingText="Actualizando conversaciones...">
     </ion-refresher-content>
   </ion-refresher>
 
-  <!-- Glow ambiental -->
-  <div class="chats-glow"></div>
+  <section class="chats-hero">
+    <div>
+      <p class="eyebrow">Mensajes</p>
+      <h1>Charla con tus proveedores</h1>
+      <p class="subtitle">{{ stats().unread }} mensajes pendientes</p>
+    </div>
+    <ion-chip color="light" class="last-sync" *ngIf="stats().lastUpdated">
+      <ion-icon name="time-outline"></ion-icon>
+      <ion-label>Actualizado {{ stats().lastUpdated | date: 'shortTime' }}</ion-label>
+    </ion-chip>
+  </section>
 
-  <div class="chats-wrapper">
+  <section class="stats-grid">
+    <article class="stat-card highlight">
+      <p>Conversaciones totales</p>
+      <h2>{{ stats().totalConversations }}</h2>
+    </article>
+    <article class="stat-card">
+      <p>Sin leer</p>
+      <h2>{{ stats().unread }}</h2>
+    </article>
+    <article class="stat-card">
+      <p>Activas</p>
+      <h2>{{ stats().active }}</h2>
+    </article>
+  </section>
 
-    <!-- ── Header row ──────────────────────────────────────────────── -->
-    <div class="chats-header">
-      <h1 class="chats-heading">Mensajes</h1>
-      <div class="header-actions">
-        <button class="icon-btn" type="button">
-          <ion-icon name="add-outline"></ion-icon>
-        </button>
-        <button class="icon-btn icon-btn-muted" type="button">
-          <ion-icon name="search-outline"></ion-icon>
-        </button>
+  <section class="search-card">
+    <ion-searchbar
+      placeholder="Buscar proveedor o mensaje"
+      [value]="searchTerm()"
+      (ionInput)="onSearch($event)"
+      [debounce]="250"
+      showCancelButton="never"
+      animated="true">
+    </ion-searchbar>
+
+    <ion-segment class="filter-segment" [value]="filter()" (ionChange)="onFilterChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todo</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="unread">
+        <ion-label>Sin leer</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </section>
+
+  <ng-container *ngIf="isLoading(); else conversationsState">
+    <div class="skeleton-card" *ngFor="let _ of skeletonItems">
+      <ion-skeleton-text animated class="skeleton-avatar"></ion-skeleton-text>
+      <div class="skeleton-text-block">
+        <ion-skeleton-text animated style="width: 60%;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 40%;"></ion-skeleton-text>
       </div>
     </div>
+  </ng-container>
 
-    <!-- ── Search area ─────────────────────────────────────────────── -->
-    <div class="search-area">
-      <div class="search-pill">
-        <ion-icon name="chatbubble-outline" class="search-pill-icon"></ion-icon>
-        <ion-input
-          type="text"
-          placeholder="Buscar conversación..."
-          [value]="searchTerm()"
-          (ionInput)="onSearch($event)"
-          class="search-input">
-        </ion-input>
-      </div>
-      <button
-        class="filter-toggle"
-        [class.filter-toggle-active]="filter() === 'unread'"
-        (click)="onFilterChange($any({detail: {value: filter() === 'all' ? 'unread' : 'all'}}))"
-        type="button">
-        <ion-icon [name]="filter() === 'unread' ? 'mail-unread-outline' : 'options-outline'"></ion-icon>
-      </button>
+  <ng-template #conversationsState>
+    <div *ngIf="error(); else conversationList" class="state-card error">
+      <ion-icon name="warning-outline"></ion-icon>
+      <p>{{ error() }}</p>
+      <ion-button color="tertiary" (click)="refreshConversations()">Reintentar</ion-button>
     </div>
 
-    <!-- ── Conversation list ────────────────────────────────────────── -->
-    <div class="conversations-area">
+    <ng-template #conversationList>
+      <div *ngIf="filteredConversations().length === 0; else list" class="state-card empty">
+        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+        <p>No encontramos conversaciones para esta vista.</p>
+        <p class="muted">Contacta a tus proveedores desde tus reservas</p>
+      </div>
 
-      <!-- Skeleton -->
-      <ng-container *ngIf="isLoading(); else stateBlock">
-        <div class="chat-skeleton" *ngFor="let _ of skeletonItems">
-          <div class="skel-avatar"></div>
-          <div class="skel-body">
-            <div class="skel-row">
-              <div class="skel-name"></div>
-              <div class="skel-time"></div>
-            </div>
-            <div class="skel-rating"></div>
-            <div class="skel-preview"></div>
-          </div>
-        </div>
-      </ng-container>
-
-      <ng-template #stateBlock>
-
-        <!-- Error -->
-        <div *ngIf="error(); else listBlock" class="state-error">
-          <div class="state-icon-wrap state-icon-danger">
-            <ion-icon name="warning-outline"></ion-icon>
-          </div>
-          <p class="state-title">No pudimos cargar</p>
-          <p class="state-sub">{{ error() }}</p>
-          <button class="retry-btn" (click)="refreshConversations()" type="button">
-            Reintentar
-          </button>
-        </div>
-
-        <ng-template #listBlock>
-
-          <!-- Empty — Bappie Scout -->
-          <div *ngIf="filteredConversations().length === 0; else chatList" class="state-empty">
-            <div class="scout-wrap">
-              <svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" class="scout-svg">
-                <rect x="30" y="125" width="180" height="8" rx="2" fill="#1A1A1A"/>
-                <rect x="30" y="70"  width="180" height="50" rx="4" fill="#0A0A0A" opacity="0.9"/>
-                <rect x="50"  y="133" width="6" height="30" fill="#111"/>
-                <rect x="184" y="133" width="6" height="30" fill="#111"/>
-                <g class="scout-body">
-                  <circle cx="120" cy="110" r="38" fill="#111" stroke="var(--bapp-color-primary)" stroke-width="1"/>
-                  <circle cx="120" cy="65"  r="45" fill="#0A0A0A" stroke="#222" stroke-width="2"/>
-                  <circle cx="120" cy="65"  r="36" fill="var(--bapp-color-primary)"/>
-                  <circle cx="100" cy="65"  r="18" fill="#000" stroke="#222" stroke-width="2"/>
-                  <circle cx="100" cy="65"  r="7"  fill="#333" class="scout-blink"/>
-                  <circle cx="140" cy="65"  r="18" fill="#000" stroke="#222" stroke-width="2"/>
-                  <circle cx="140" cy="65"  r="7"  fill="#333" class="scout-blink"/>
-                  <rect x="90" y="55" width="60" height="20" fill="white" class="scout-shine"/>
-                  <path d="M 115 78 Q 120 82 125 78" stroke="#111" stroke-width="2" fill="none" stroke-linecap="round"/>
-                  <circle cx="120" cy="110" r="12" fill="#000"/>
-                  <path d="M 118 108 L 122 112 M 116 108 A 4 4 0 1 1 122 108"
-                        stroke="var(--bapp-color-primary)" stroke-width="2" fill="none"/>
-                  <rect x="95"  y="135" width="12" height="25" rx="6" fill="#111"/>
-                  <rect x="133" y="135" width="12" height="25" rx="6" fill="#111"/>
-                  <path d="M 85 110 Q 75 125 85 138" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/>
-                  <path d="M 155 110 Q 165 125 155 138" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/>
-                </g>
-              </svg>
-            </div>
-            <p class="state-title">Sin conversaciones</p>
-            <p class="state-sub">Bappie está atento a tus mensajes...</p>
+      <ng-template #list>
+        <button
+          type="button"
+          class="conversation-card"
+          *ngFor="let conversation of filteredConversations(); trackBy: trackByConversation"
+          [class.unread]="(conversation.unreadCount ?? 0) > 0"
+          (click)="openConversation(conversation)">
+          <div class="avatar">
+            <img
+              [src]="conversation.otherUser?.avatarUrl || 'assets/images/default-avatar.png'"
+              alt="Avatar"
+              loading="lazy">
           </div>
 
-          <!-- Chat list -->
-          <ng-template #chatList>
-            <div class="chat-list">
-
-              <div
-                class="chat-item"
-                [class.chat-item--unread]="(conversation.unreadCount ?? 0) > 0"
-                *ngFor="let conversation of filteredConversations(); trackBy: trackByConversation"
-                (click)="openConversation(conversation)">
-
-                <!-- Avatar -->
-                <div class="avatar-wrap">
-                  <div
-                    class="chat-avatar"
-                    [style.background-image]="conversation.otherUser?.avatarUrl
-                      ? 'url(' + conversation.otherUser!.avatarUrl + ')'
-                      : 'none'">
-                    <span class="avatar-initials"
-                      *ngIf="!conversation.otherUser?.avatarUrl">
-                      {{ getConversationInitials(conversation) }}
-                    </span>
-                  </div>
-                  <div class="online-dot"></div>
-                </div>
-
-                <!-- Content -->
-                <div class="chat-content">
-
-                  <!-- Row 1: name + time -->
-                  <div class="chat-row-top">
-                    <h3 class="chat-name">{{ conversation.displayName || 'Proveedor' }}</h3>
-                    <span class="chat-time"
-                      [class.chat-time--unread]="(conversation.unreadCount ?? 0) > 0">
-                      {{ formatTime(conversation.updatedAt) }}
-                    </span>
-                  </div>
-
-                  <!-- Row 2: rating -->
-                  <div class="rating-row">
-                    <span class="star star--filled">★</span>
-                    <span class="star star--filled">★</span>
-                    <span class="star star--filled">★</span>
-                    <span class="star star--filled">★</span>
-                    <span class="star"
-                      [class.star--filled]="(conversation.id % 3) !== 0">★</span>
-                    <span class="rating-value">
-                      {{ (conversation.id % 3) === 0 ? '4.0' : (conversation.id % 3) === 1 ? '4.8' : '4.5' }}
-                    </span>
-                  </div>
-
-                  <!-- Row 3: preview + badge -->
-                  <div class="chat-row-bottom">
-                    <p class="chat-preview"
-                      [class.chat-preview--unread]="(conversation.unreadCount ?? 0) > 0">
-                      {{ conversation.lastMessagePreview || 'Sin mensajes' }}
-                    </p>
-                    <span class="unread-badge"
-                      *ngIf="(conversation.unreadCount ?? 0) > 0">
-                      {{ conversation.unreadCount }}
-                    </span>
-                    <ion-icon
-                      name="checkmark-done-outline"
-                      class="read-check"
-                      *ngIf="(conversation.unreadCount ?? 0) === 0">
-                    </ion-icon>
-                  </div>
-
-                </div>
-              </div>
-
+          <div class="conversation-info">
+            <div class="conversation-header">
+              <h2>{{ conversation.displayName || 'Proveedor' }}</h2>
+              <span class="timestamp">{{ conversation.updatedAt | date: 'HH:mm' }}</span>
             </div>
-          </ng-template>
 
-        </ng-template>
+            <p class="conversation-preview">{{ conversation.lastMessagePreview || 'Sin mensajes' }}</p>
+
+            <div class="conversation-meta">
+              <ion-badge color="primary" *ngIf="conversation.unreadCount">
+                {{ conversation.unreadCount }} sin leer
+              </ion-badge>
+              <ion-badge color="medium" *ngIf="!conversation.unreadCount">
+                Al día
+              </ion-badge>
+            </div>
+          </div>
+        </button>
       </ng-template>
-
-    </div><!-- end conversations-area -->
-
-  </div><!-- end chats-wrapper -->
-
+    </ng-template>
+  </ng-template>
 </ion-content>

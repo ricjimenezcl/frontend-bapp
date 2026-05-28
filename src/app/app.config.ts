@@ -143,6 +143,12 @@ import {
   navigateOutline,
   briefcase,
   flag,
+  gridOutline,
+  imagesOutline,
+  lockOpenOutline,
+  warningOutline,
+  shieldCheckmark,
+  documentOutline,
   navigate
 
 
@@ -289,6 +295,12 @@ addIcons({
   briefcase,
   fingerPrintOutline,
   flag,
+  gridOutline,
+  imagesOutline,
+  lockOpenOutline,
+  shieldCheckmark,
+  documentOutline,
+  warningOutline,
   list: listOutline
 });
 

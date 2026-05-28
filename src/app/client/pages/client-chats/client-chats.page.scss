@@ -1,413 +1,124 @@
-// client-chats.page.scss
+// client-chats.page.scss (adaptado de provider-inbox)
 @import '../../../../theme/mixins';
+@import '../../../../theme/shared-ui';
 
 :host {
-  display: flex;
-  flex-direction: column;
+  display: block;
   height: 100%;
-  overflow: hidden;
-  background: var(--bapp-bg-page);
 }
 
 ion-content.chats-content {
   --background: var(--bapp-bg-page);
+  padding: var(--bapp-space-4);
 }
 
-// ── Glow ambiental ────────────────────────────────────────────────────────────
-.chats-glow {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 300px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(253, 215, 53, 0.08) 0%, transparent 65%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-// ── Wrapper ───────────────────────────────────────────────────────────────────
-.chats-wrapper {
-  position: relative;
-  z-index: 1;
-  padding: var(--bapp-space-6) var(--bapp-space-4) var(--bapp-space-4);
-  @include flex-column;
-  gap: 0;
-}
-
-// ── Header ────────────────────────────────────────────────────────────────────
-.chats-header {
-  @include flex-between;
+// ── Hero section ───────────────────────────────────────────────────────────────
+.chats-hero {
+  background: linear-gradient(135deg, rgba(253, 215, 53, 0.15) 0%, rgba(240, 165, 0, 0.08) 100%);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: var(--bapp-text-primary);
   margin-bottom: var(--bapp-space-5);
 }
 
-.chats-heading {
-  font-size: 26px;
-  font-weight: 800;
+.chats-hero p.eyebrow {
+  font-size: var(--bapp-text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bapp-text-tertiary);
+  margin-bottom: var(--bapp-space-1);
+}
+
+.chats-hero h1 {
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-bold);
   color: var(--bapp-text-primary);
-  letter-spacing: -0.05em;
-  margin: 0;
+  margin: 0 0 var(--bapp-space-1);
 }
 
-.header-actions {
-  @include flex-start;
-  gap: var(--bapp-space-3);
-}
-
-.icon-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
-  @include flex-center;
-  cursor: pointer;
-  color: var(--bapp-color-primary);
-  transition: background var(--bapp-transition-fast);
-
-  ion-icon { font-size: 20px; }
-  &:active { background: var(--bapp-bg-card-raised); }
-
-  &.icon-btn-muted {
-    color: var(--bapp-text-secondary);
-  }
-}
-
-// ── Search area ───────────────────────────────────────────────────────────────
-.search-area {
-  @include flex-start;
-  gap: var(--bapp-space-2);
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
-  border-radius: 20px;
-  padding: 4px;
-  margin-bottom: var(--bapp-space-6);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-}
-
-.search-pill {
-  flex: 1;
-  @include flex-start;
-  gap: var(--bapp-space-3);
-  background: rgba(255, 255, 255, 0.025);
-  border-radius: 16px;
-  padding: 12px var(--bapp-space-3);
-}
-
-.search-pill-icon {
-  font-size: 15px;
-  color: var(--bapp-color-primary);
-  flex-shrink: 0;
-}
-
-.search-input {
-  --background: transparent;
-  --color: var(--bapp-text-primary);
-  --placeholder-color: var(--bapp-text-disabled);
-  --padding-start: 0;
-  --padding-end: 0;
-  --padding-top: 0;
-  --padding-bottom: 0;
+.chats-hero .subtitle {
   font-size: var(--bapp-text-sm);
-  flex: 1;
+  color: var(--bapp-text-secondary);
 }
 
-.filter-toggle {
-  width: 48px;
-  height: 48px;
+.last-sync {
+  --background: var(--bapp-bg-card-raised);
+  --color: var(--bapp-text-secondary);
+  --border-radius: var(--bapp-radius-full);
+}
+
+// ── Stats grid ────────────────────────────────────────────────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-4);
+}
+
+// .stat-card, .stat-card.highlight — en _shared-ui
+
+// ── Search card ────────────────────────────────────────────────────────────────
+.search-card {
   background: var(--bapp-bg-card);
   border: 1px solid var(--bapp-border);
-  border-radius: 16px;
-  @include flex-center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all var(--bapp-transition-fast);
-
-  ion-icon { font-size: 20px; color: var(--bapp-text-secondary); }
-
-  &.filter-toggle-active {
-    background: rgba(253, 215, 53, 0.1);
-    border-color: rgba(253, 215, 53, 0.3);
-    ion-icon { color: var(--bapp-color-primary); }
-  }
-  &:active { opacity: 0.8; }
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-4);
 }
 
-// ── Conversations area ────────────────────────────────────────────────────────
-.conversations-area { @include flex-column; }
-
-// ── Chat list ─────────────────────────────────────────────────────────────────
-.chat-list {
-  @include flex-column;
-  gap: 4px;
+.filter-segment {
+  margin-top: var(--bapp-space-2);
+  --background: var(--bapp-bg-card-raised);
+  border-radius: var(--bapp-radius-md);
 }
 
-// ── Chat item ─────────────────────────────────────────────────────────────────
-.chat-item {
-  background: var(--bapp-bg-card);
+// ── Skeleton loading ────────────────────────────────────────────────────────────
+.skeleton-card {
   display: flex;
   align-items: center;
   gap: var(--bapp-space-4);
-  padding: var(--bapp-space-4) var(--bapp-space-2);
-  border-radius: 24px;
-  cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  transition: background var(--bapp-transition-fast);
-
-  &--unread {
-    background: rgba(253, 215, 53, 0.035);
-    border-bottom-color: transparent;
-  }
-  &:active { background: var(--bapp-bg-card); }
+  padding: var(--bapp-space-4);
+  background: var(--bapp-bg-card);
+  border: 1px dashed var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  margin-bottom: var(--bapp-space-3);
 }
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
-.avatar-wrap {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.chat-avatar {
+.skeleton-avatar {
   width: 56px;
   height: 56px;
-  border-radius: 20px;
-  background-color: var(--bapp-bg-card-raised);
-  background-size: cover;
-  background-position: center;
-  border: 1px solid var(--bapp-border);
-  @include flex-center;
-  overflow: hidden;
+  border-radius: var(--bapp-radius-lg);
+  --background: var(--bapp-bg-card-raised);
 }
 
-.avatar-initials {
-  font-size: var(--bapp-text-base);
-  font-weight: var(--bapp-font-bold);
-  color: var(--bapp-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.online-dot {
-  width: 13px;
-  height: 13px;
-  background: var(--bapp-color-success);
-  border: 3px solid var(--bapp-bg-page);
-  border-radius: 50%;
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-}
-
-// ── Chat content ──────────────────────────────────────────────────────────────
-.chat-content {
+.skeleton-text-block {
   flex: 1;
-  min-width: 0;
-  @include flex-column;
-  gap: 3px;
-}
-
-// Row 1: name + time
-.chat-row-top {
-  @include flex-between;
-  align-items: center;
-  gap: var(--bapp-space-2);
-}
-
-.chat-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--bapp-text-primary);
-  letter-spacing: -0.3px;
-  @include truncate-text(1);
-  flex: 1;
-  margin: 0;
-}
-
-.chat-time {
-  font-size: 11px;
-  color: var(--bapp-text-tertiary);
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  &--unread {
-    color: var(--bapp-color-success);
-    font-weight: var(--bapp-font-bold);
-  }
-}
-
-// Row 2: rating
-.rating-row {
-  @include flex-start;
-  gap: 2px;
-  align-items: center;
-}
-
-.star {
-  font-size: 12px;
-  color: var(--bapp-text-disabled);
-  line-height: 1;
-
-  &--filled {
-    color: var(--bapp-color-primary);
-  }
-}
-
-.rating-value {
-  font-size: 11px;
-  font-weight: var(--bapp-font-bold);
-  color: var(--bapp-text-tertiary);
-  margin-left: 4px;
-  letter-spacing: 0.02em;
-}
-
-// Row 3: preview + badge
-.chat-row-bottom {
-  @include flex-between;
-  align-items: center;
-  gap: var(--bapp-space-2);
-}
-
-.chat-preview {
-  font-size: var(--bapp-text-xs);
-  color: var(--bapp-text-tertiary);
-  @include truncate-text(1);
-  flex: 1;
-  margin: 0;
-
-  &--unread {
-    color: var(--bapp-text-primary);
-    font-weight: var(--bapp-font-medium);
-  }
-}
-
-.unread-badge {
-  background: var(--bapp-color-primary);
-  color: #000;
-  font-size: 10px;
-  font-weight: 800;
-  min-width: 18px;
-  height: 18px;
-  border-radius: var(--bapp-radius-full);
-  @include flex-center;
-  padding: 0 5px;
-  flex-shrink: 0;
-}
-
-.read-check {
-  font-size: 16px;
-  color: var(--bapp-color-success);
-  flex-shrink: 0;
-  opacity: 0.85;
-}
-
-// ── Skeleton ──────────────────────────────────────────────────────────────────
-.chat-skeleton {
   display: flex;
-  align-items: flex-start;
-  gap: var(--bapp-space-4);
-  padding: var(--bapp-space-4) var(--bapp-space-2);
-
-  .skel-avatar  {
-    width: 56px;
-    height: 56px;
-    border-radius: 20px;
-    flex-shrink: 0;
-    @include skeleton;
-  }
-
-  .skel-body {
-    @include flex-column;
-    gap: var(--bapp-space-2);
-    flex: 1;
-    padding-top: 2px;
-  }
-
-  .skel-row    { @include flex-between; gap: var(--bapp-space-2); }
-  .skel-name   { height: 15px; width: 45%; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-time   { height: 11px; width: 40px; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-rating { height: 12px; width: 80px; border-radius: var(--bapp-radius-sm); @include skeleton; }
-  .skel-preview{ height: 13px; width: 78%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  flex-direction: column;
+  gap: var(--bapp-space-2);
 }
 
-// ── States ────────────────────────────────────────────────────────────────────
-.state-error,
-.state-empty {
-  @include flex-column-center;
-  gap: var(--bapp-space-3);
-  padding: var(--bapp-space-10) var(--bapp-space-6);
-  text-align: center;
+// .state-card, .state-card.error, .state-card.empty — en _shared-ui
+// .muted — en _shared-ui
+// .conversation-card, .avatar, .conversation-info, .conversation-header — en _shared-ui
+// .timestamp, .conversation-preview, .conversation-meta — en _shared-ui
+
+ion-badge[color="primary"] {
+  --background: rgba(253, 215, 53, 0.2);
+  --color: var(--bapp-color-primary);
+  --padding-start: var(--bapp-space-2);
+  --padding-end: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
 }
 
-.state-icon-wrap {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
-  @include flex-center;
-  margin-bottom: var(--bapp-space-2);
-
-  ion-icon { font-size: 36px; }
-
-  &.state-icon-danger ion-icon { color: var(--bapp-color-danger); }
-}
-
-.state-title {
-  font-size: var(--bapp-text-base);
-  font-weight: var(--bapp-font-semibold);
-  color: var(--bapp-text-secondary);
-  margin: 0;
-}
-
-.state-sub {
-  font-size: var(--bapp-text-sm);
-  color: var(--bapp-text-tertiary);
-  max-width: 260px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.retry-btn {
-  padding: var(--bapp-space-2) var(--bapp-space-5);
-  background: rgba(253, 215, 53, 0.08);
-  border: 1px solid rgba(253, 215, 53, 0.25);
-  border-radius: var(--bapp-radius-full);
-  color: var(--bapp-color-primary);
-  font-size: var(--bapp-text-sm);
-  font-weight: var(--bapp-font-semibold);
-  cursor: pointer;
-  transition: background var(--bapp-transition-fast);
-
-  &:active { background: rgba(253, 215, 53, 0.14); }
-}
-
-// ── Bappie Scout SVG ──────────────────────────────────────────────────────────
-.scout-wrap  { width: 200px; height: 150px; }
-.scout-svg   { width: 100%; height: 100%; overflow: visible; }
-
-.scout-body  {
-  animation: scoutBreathe 4s ease-in-out infinite;
-  transform-origin: 120px 110px;
-}
-.scout-blink {
-  animation: scoutBlink 6s infinite;
-  transform-origin: center;
-}
-.scout-shine {
-  animation: scoutShine 3.5s ease-in-out infinite;
-  transform-origin: center;
-}
-
-@keyframes scoutBreathe {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50%       { transform: translateY(-6px) scale(1.01); }
-}
-@keyframes scoutBlink {
-  0%, 88%, 100% { transform: scaleY(1); }
-  94%           { transform: scaleY(0); }
-}
-@keyframes scoutShine {
-  0%   { transform: translateX(-30px) rotate(-45deg); opacity: 0; }
-  50%  { opacity: 0.16; }
-  100% { transform: translateX(30px) rotate(-45deg); opacity: 0; }
+ion-badge[color="medium"] {
+  --background: rgba(255, 255, 255, 0.1);
+  --color: var(--bapp-text-secondary);
+  --padding-start: var(--bapp-space-2);
+  --padding-end: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
 }

@@ -57,7 +57,7 @@ export class MapboxService {
     // 2º fallback: Nominatim directo (ya excluido del headersInterceptor)
     const nominatimUrl = `${NOMINATIM_BASE}/search?q=${encodeURIComponent(sanitized)}&countrycodes=cl&format=json&limit=8&addressdetails=1`;
 
-    return this.http.get<any[]>(backendUrl).pipe(
+    return this.http.get<any>(backendUrl).pipe(
       catchError(err => {
         // 429: rate limit del backend — no escalar a Nominatim para evitar cascada
         if (err?.status === 429) {
@@ -65,7 +65,7 @@ export class MapboxService {
           return of([]);
         }
         console.warn('[Geocoding] Backend proxy falló, usando Nominatim...');
-        return this.http.get<any[]>(nominatimUrl).pipe(
+        return this.http.get<any>(nominatimUrl).pipe(
           catchError(nominatimErr => {
             if (nominatimErr?.status === 429) {
               console.warn('[Geocoding] Nominatim también con rate limit (429)');
@@ -76,8 +76,16 @@ export class MapboxService {
           })
         );
       }),
-      map((results: any[]) => {
-        const features = this.normalizeSearchResults(Array.isArray(results) ? results : []);
+      map((results: any) => {
+        // ✅ El backend puede devolver {source: 'api'|'cache', results: [...]}
+        let resultArray: any[] = [];
+        if (Array.isArray(results)) {
+          resultArray = results;
+        } else if (results && typeof results === 'object' && Array.isArray(results.results)) {
+          resultArray = results.results;
+        }
+        
+        const features = this.normalizeSearchResults(resultArray);
         // Solo cachear si hay resultados reales (no cachear vacíos por 429)
         if (features.length > 0) {
           this.setAutocompleteCache(cacheKey, features);
@@ -172,17 +180,36 @@ export class MapboxService {
   }
 
   // ── Normalizar resultados (Nominatim / backend proxy) ────────────────
-  // Ambos endpoints retornan formato Nominatim: array con display_name, lat, lon
+  // Backend proxy devuelve: { place_name, text, address, center: [lon, lat], place_type }
+  // Nominatim directo devuelve: { display_name, lat, lon, class, type }
   private normalizeSearchResults(results: any[]): GeocodingFeature[] {
-    return results
-      .filter(r => r && (r.lat || r.latitude) && (r.lon || r.longitude || r.lng))
-      .map(r => {
-        const lat = parseFloat(r.lat ?? r.latitude ?? 0);
-        const lon = parseFloat(r.lon ?? r.longitude ?? r.lng ?? 0);
-        const displayName: string = r.display_name ?? r.formatted ?? '';
-        const parts = displayName.split(',');
-        const text = (parts[0]?.trim()) || r.name || 'Lugar';
-        const place_name = displayName || text;
+    // Filtro: acepta objetos con center[lon,lat] O lat/lon separados
+    const filtered = results.filter(r => {
+      if (!r) return false;
+      // Formato backend proxy: center array
+      if (r.center && Array.isArray(r.center) && r.center.length >= 2) return true;
+      // Formato Nominatim: lat/lon propiedades
+      if ((r.lat || r.latitude) && (r.lon || r.longitude || r.lng)) return true;
+      return false;
+    });
+    
+    return filtered.map(r => {
+      // Extraer coordenadas según formato
+      let lat: number, lon: number;
+      if (r.center && Array.isArray(r.center)) {
+        lon = parseFloat(r.center[0]);
+        lat = parseFloat(r.center[1]);
+      } else {
+        lat = parseFloat(r.lat ?? r.latitude ?? 0);
+        lon = parseFloat(r.lon ?? r.longitude ?? r.lng ?? 0);
+      }
+      
+      // Formato backend proxy tiene place_name, text, address
+      // Formato Nominatim tiene display_name
+      const displayName: string = r.place_name ?? r.display_name ?? r.formatted ?? '';
+      const parts = displayName.split(',');
+      const text = (parts[0]?.trim()) || r.text || r.name || 'Lugar';
+      const place_name = displayName || text;
 
         // place_type: si viene del backend proxy (Mapbox-compat) úsalo directamente;
         // si viene de Nominatim raw, derivarlo de class/type.

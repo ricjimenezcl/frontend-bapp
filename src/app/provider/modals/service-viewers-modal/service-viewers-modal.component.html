@@ -1,0 +1,187 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+  SERVICE-VIEWERS MODAL (Mobile — DNA web-bapp)
+  ═══════════════════════════════════════════════════════════════════ -->
+
+<ion-header class="ion-no-border svm-header">
+  <ion-toolbar mode="ios">
+    <div class="svm-header-content">
+      <div class="svm-header-left">
+        <div class="svm-header-icon">
+          <ion-icon name="eye-outline"></ion-icon>
+        </div>
+        <div class="svm-header-text">
+          <h2 class="svm-title">Clientes interesados</h2>
+          <p class="svm-subtitle">Personas que vieron tus servicios</p>
+        </div>
+      </div>
+      <ion-button 
+        fill="clear" 
+        class="svm-close-btn" 
+        (click)="close()" 
+        aria-label="Cerrar">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="svm-content">
+  
+  <!-- ══ LOADING / CONFIRMING ═══════════════════════════════════════ -->
+  <div class="svm-center-state" *ngIf="state === 'loading' || state === 'confirming'">
+    <ion-spinner name="crescent" class="svm-spinner"></ion-spinner>
+    <p class="svm-state-text">
+      {{ state === 'confirming' ? 'Activando acceso...' : 'Cargando...' }}
+    </p>
+  </div>
+
+  <!-- ══ ERROR ══════════════════════════════════════════════════════ -->
+  <div class="svm-center-state" *ngIf="state === 'error'">
+    <div class="svm-error-icon">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+    </div>
+    <p class="svm-state-text svm-state-text--error">{{ errorMsg }}</p>
+    <ion-button 
+      class="svm-btn svm-btn--secondary" 
+      expand="block"
+      (click)="retry()">
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- ══ LOCKED — vista previa borrosa + CTA premium ════════════════ -->
+  <div *ngIf="state === 'locked'">
+    
+    <!-- Price badge -->
+    <div class="svm-price-badge">
+      <ion-icon name="star"></ion-icon>
+      Desbloquea por solo $1.990 CLP · 7 días
+    </div>
+
+    <!-- Lista enmascarada -->
+    <div class="svm-clients-list svm-clients-list--masked">
+      <div class="svm-client-card svm-client-card--masked" *ngFor="let client of clients">
+        <div class="svm-avatar svm-avatar--masked">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <div class="svm-client-info">
+          <span class="svm-client-name svm-blurred">{{ client.display_name }}</span>
+          <span class="svm-client-service">{{ client.service_viewed }}</span>
+          <span class="svm-client-time">{{ timeAgo(client.viewed_at) }}</span>
+        </div>
+        <span class="svm-client-phone svm-blurred">*** *** ****</span>
+      </div>
+    </div>
+
+    <!-- CTA overlay -->
+    <div class="svm-cta-overlay">
+      <div class="svm-cta-card">
+        <div class="svm-cta-icon">
+          <ion-icon name="lock-closed"></ion-icon>
+        </div>
+        <h3 class="svm-cta-title">{{ total }} personas miraron tus servicios</h3>
+        <p class="svm-cta-desc">
+          Desbloquea sus datos de contacto por <strong>$1.990 CLP</strong> y tenlos disponibles durante 7 días.
+        </p>
+        <ul class="svm-cta-benefits">
+          <li>
+            <ion-icon name="checkmark-circle"></ion-icon>
+            Nombre completo y teléfono
+          </li>
+          <li>
+            <ion-icon name="checkmark-circle"></ion-icon>
+            Envía mensajes directamente
+          </li>
+          <li>
+            <ion-icon name="checkmark-circle"></ion-icon>
+            Acceso completo por 7 días
+          </li>
+        </ul>
+        <ion-button 
+          class="svm-btn svm-btn--primary" 
+          expand="block"
+          [disabled]="unlockLoading"
+          (click)="startUnlock()">
+          <ion-spinner name="crescent" class="svm-btn-spinner" *ngIf="unlockLoading"></ion-spinner>
+          <ion-icon name="star" *ngIf="!unlockLoading"></ion-icon>
+          {{ unlockLoading ? 'Procesando...' : 'Desbloquear por $1.990' }}
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ PAYING — esperando confirmación de pago ═══════════════════ -->
+  <div class="svm-center-state" *ngIf="state === 'paying'">
+    <div class="svm-paying-icon">
+      <ion-icon name="card-outline"></ion-icon>
+    </div>
+    <h3 class="svm-state-heading">Pago en proceso</h3>
+    <p class="svm-state-text">
+      Completa el pago en la ventana que se abrió. Cuando termines, haz clic en "Confirmar pago".
+    </p>
+    <div class="svm-paying-ref" *ngIf="paymentRef">
+      <span class="svm-ref-label">Ref:</span>
+      <span class="svm-ref-value">{{ paymentRef }}</span>
+    </div>
+    <ion-button 
+      class="svm-btn svm-btn--primary" 
+      expand="block"
+      [disabled]="unlockLoading"
+      (click)="confirmPayment()">
+      <ion-spinner name="crescent" class="svm-btn-spinner" *ngIf="unlockLoading"></ion-spinner>
+      {{ unlockLoading ? 'Verificando...' : 'Confirmar pago' }}
+    </ion-button>
+    <ion-button 
+      class="svm-btn svm-btn--ghost" 
+      expand="block"
+      (click)="retry()">
+      Cancelar
+    </ion-button>
+  </div>
+
+  <!-- ══ UNLOCKED — datos reales ═══════════════════════════════════ -->
+  <div *ngIf="state === 'unlocked'">
+    
+    <!-- Active badge -->
+    <div class="svm-active-badge">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Acceso activo · {{ countdownLabel }}
+    </div>
+
+    <!-- Lista desbloqueada -->
+    <div class="svm-clients-list">
+      <div class="svm-client-card" *ngFor="let client of clients">
+        <div class="svm-avatar">
+          <img 
+            *ngIf="client.avatar_url" 
+            [src]="client.avatar_url" 
+            [alt]="client.display_name"
+            loading="lazy" />
+          <ion-icon 
+            *ngIf="!client.avatar_url" 
+            name="person-outline">
+          </ion-icon>
+        </div>
+        <div class="svm-client-info">
+          <span class="svm-client-name">{{ client.display_name }}</span>
+          <span class="svm-client-service">{{ client.service_viewed }}</span>
+          <span class="svm-client-time">{{ timeAgo(client.viewed_at) }}</span>
+        </div>
+        <div class="svm-client-actions">
+          <span class="svm-client-phone-label">{{ formatPhone(client.phone) }}</span>
+          <ion-button 
+            class="svm-chat-btn" 
+            fill="clear"
+            size="small"
+            (click)="$event.stopPropagation(); goToChat(client.id)"
+            title="Enviar mensaje">
+            <ion-icon slot="icon-only" name="chatbubble-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>

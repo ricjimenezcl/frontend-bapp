@@ -1,10 +1,10 @@
 // src/app/provider/pages/provider-add-service/provider-add-service.page.ts
-import { Component, OnInit, OnDestroy, Input, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
 import { IonicModule, ModalController, AlertController, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { MapboxService } from '../../../shared/services/mapbox.service';
 import { CoreService } from '../../../shared/services/core.service';
@@ -64,15 +64,15 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private providerProfile: any = null;
 
   // Servicios inyectados
-  private fb           = inject(FormBuilder);
-  private modalCtrl    = inject(ModalController);
-  private alertCtrl    = inject(AlertController);
-  private loadingCtrl  = inject(LoadingController);
-  private toastCtrl    = inject(ToastController);
-  private mapboxService = inject(MapboxService);
-  private coreService  = inject(CoreService);
-  private authService  = inject(AuthService);
-  private providerService = inject(ProviderService);
+  private readonly fb           = inject(FormBuilder);
+  private readonly modalCtrl    = inject(ModalController);
+  private readonly alertCtrl    = inject(AlertController);
+  private readonly loadingCtrl  = inject(LoadingController);
+  private readonly toastCtrl    = inject(ToastController);
+  private readonly mapboxService = inject(MapboxService);
+  private readonly coreService  = inject(CoreService);
+  private readonly authService  = inject(AuthService);
+  private readonly providerService = inject(ProviderService);
 
   // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -93,21 +93,20 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   schedules: DaySchedule[] = [];
 
   // Dirección autocomplete
-  selectedAddressText: string = '';
   selectedAddressObject: any = null;
   address: any = { place: '', set: false };
   mapUrl: string = '';
   addressSuggestions: any[] = [];
   showAddressSuggestions: boolean = false;
-  private searchTerms = new Subject<string>();
   isSearching: boolean = false;
 
-  // ══ PORTFOLIO IMAGES ══════════════════════════════════════════════
+  // ══ PORTFOLIO IMAGES ═══════════════════════════════════
   portfolioImages: { file: File | null; preview: string; url?: string }[] = [];
   uploadingImages: boolean = false;
-  private documentUploadService = inject(DocumentUploadService);
-  private cameraService = inject(CameraService);
-  private actionSheetCtrl = inject(ActionSheetController);
+  private readonly documentUploadService = inject(DocumentUploadService);
+  private readonly cameraService = inject(CameraService);
+  private readonly actionSheetCtrl = inject(ActionSheetController);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly MAX_PORTFOLIO_IMAGES = 5;
   // ═══════════════════════════════════════════════════════════════════
 
@@ -157,7 +156,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     });
   }
 
-  async ngOnInit() {
+  ngOnInit(): void {
     // Verificar autenticación
     if (!this.currentUser || typeof this.currentUser !== 'object' || !this.currentUser.id) {
       this.presentToast('Debe iniciar sesión para agregar servicios', 'danger');
@@ -195,7 +194,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     this.setupAutocomplete();
 
     // Inicializar mapa con ubicación por defecto (Santiago, Chile)
-    await this.initMap(-33.4489, -70.6693);
+    this.initMap(-33.4489, -70.6693);
   }
 
   // ── Selección inline 2 pasos (reemplaza flujo modal) ─────────────────
@@ -236,15 +235,25 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
   // Configurar autocompletado de direcciones
   private setupAutocomplete() {
-    this.searchTerms.pipe(
+    // Escuchar cambios en el control de dirección del formulario
+    const direccionControl = this.servicioForm.get('direccion');
+    if (!direccionControl) {
+      console.warn('❌ Control de dirección no encontrado');
+      return;
+    }
+
+    direccionControl.valueChanges.pipe(
       debounceTime(600),
       distinctUntilChanged(),
+      takeUntil(this.destroy$),
       switchMap((term: string) => {
-        if (term.length < 3) {
+        if (!term || term.length < 3) {
           this.addressSuggestions = [];
           this.showAddressSuggestions = false;
-          return [];
+          this.isSearching = false;
+          return of([]); // Usar of([]) para emitir observable vacío
         }
+        
         this.isSearching = true;
         return this.mapboxService.autocompleteChile(term);
       })
@@ -253,12 +262,14 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
         this.addressSuggestions = suggestions;
         this.showAddressSuggestions = suggestions.length > 0;
         this.isSearching = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error en autocompletado:', error);
+        console.error('❌ Error en autocompletado:', error);
         this.addressSuggestions = [];
         this.showAddressSuggestions = false;
         this.isSearching = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -288,81 +299,54 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   onAddressFocus() {
     if (this.addressSuggestions.length > 0) {
       this.showAddressSuggestions = true;
-    }
-  }
-
-  onAddressInput(event: any) {
-    const query = event.target.value;
-    this.selectedAddressText = query;
-    
-    if (this.selectedAddressObject && query !== this.getSuggestionDisplayText(this.selectedAddressObject)) {
-      this.selectedAddressObject = null;
-      this.address.set = false;
-      this.servicioForm.patchValue({
-        lat: '',
-        lng: ''
-      });
-    }
-    
-    if (query.length >= 3) {
-      this.isSearching = true;
-      this.showAddressSuggestions = true;
-      this.searchTerms.next(query);
-    } else {
-      this.showAddressSuggestions = false;
-      this.addressSuggestions = [];
+      this.cdr.detectChanges();
     }
   }
 
   onAddressBlur() {
     setTimeout(() => {
-      if (this.selectedAddressObject && !this.selectedAddressText) {
-        this.selectedAddressText = this.getSuggestionDisplayText(this.selectedAddressObject);
-      }
       this.showAddressSuggestions = false;
     }, 200);
   }
 
   selectAddressSuggestion(suggestion: any) {
     this.selectedAddressObject = suggestion;
-    this.selectedAddressText = this.getSuggestionDisplayText(suggestion);
-    this.address.place = this.selectedAddressText;
-    this.address.set = true;
+    const displayText = this.getSuggestionDisplayText(suggestion);
     
-    if (suggestion.center) {
-      const [lng, lat] = suggestion.center;
-      
-      this.servicioForm.patchValue({
-        direccion: this.selectedAddressText,
-        lat: lat,
-        lng: lng
-      });
-      
-      this.updateMap(lat, lng);
-    } else {
-    // Si no hay coordenadas, al menos guarda la dirección
+    // Las coordenadas están en suggestion.center [lon, lat]
+    const lon = suggestion.center[0];
+    const lat = suggestion.center[1];
+    
+    // Actualizar el formulario
     this.servicioForm.patchValue({
-      direccion: this.selectedAddressText
-    });
-  }
-  
-  // Forzar validación del formulario
-  this.servicioForm.updateValueAndValidity();
+      direccion: displayText,
+      lat: lat.toString(),
+      lng: lon.toString()
+    }, { emitEvent: false }); // emitEvent: false para no triggerar valueChanges
     
+    this.address.place = displayText;
+    this.address.set = true;
     this.showAddressSuggestions = false;
     this.addressSuggestions = [];
+    
+    // Actualizar mapa
+    this.updateMap(lat, lon);
   }
 
   clearAddress() {
-    this.selectedAddressText = '';
     this.selectedAddressObject = null;
-    this.address.place = '';
     this.address.set = false;
+    this.addressSuggestions = [];
+    this.showAddressSuggestions = false;
+    
     this.servicioForm.patchValue({
       direccion: '',
       lat: '',
       lng: ''
     });
+    
+    // Resetear mapa a Santiago
+    this.initMap(-33.4489, -70.6693);
   }
 
   // Métodos de utilidad
@@ -467,71 +451,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   //     await loading.present();
 
   //     try {
-  //       const formData = this.servicioForm.value;
-  //       const fono = formData.fono.replace(/\s/g, '');
-
-  //       const serviceData = {
-  //         provider_id: this.currentUser.id,
-  //         service_category_id: parseInt(formData.categoria),
-  //         business_name: formData.nombre_prestador,
-  //         description: formData.detalle || '',
-  //         address: formData.direccion,
-  //         latitude: parseFloat(formData.lat),
-  //         longitude: parseFloat(formData.lng),
-  //         phone: fono,
-  //         hourly_rate: 15000, // Valor por defecto, debería ser un campo en el formulario
-  //         is_available: true,
-  //         validation_status: 'pending'
-  //       };
-
-  //       console.log('Datos del servicio a guardar:', serviceData);
-
-  //       // Simular éxito de guardado
-  //       setTimeout(async () => {
-  //         await loading.dismiss();
-  //         await this.presentToast('Servicio guardado correctamente', 'success');
-          
-  //         // Cerrar modal con éxito
-  //         this.modalCtrl.dismiss({ 
-  //           success: true, 
-  //           service: serviceData 
-  //         }, 'confirm');
-  //       }, 2000);
-
-  //     } catch (error: any) {
-  //       await loading.dismiss();
-  //       console.error('Error guardando servicio:', error);
-        
-  //       let errorMessage = 'No se pudo guardar el servicio';
-  //       if (error.error?.detail) {
-  //         errorMessage = error.error.detail;
-  //       } else if (error.status === 404) {
-  //         errorMessage = 'No se encontró el perfil de proveedor. Complete su registro primero.';
-  //       } else if (error.status === 401) {
-  //         errorMessage = 'Sesión expirada. Por favor inicie sesión nuevamente.';
-  //       }
-        
-  //       this.presentToast(errorMessage, 'danger');
-  //     }
-  //   } else {
-  //     // Marcar todos los campos como tocados para mostrar errores
-  //     Object.keys(this.servicioForm.controls).forEach(key => {
-  //       const control = this.servicioForm.get(key);
-  //       if (control) {
-  //         control.markAsTouched();
-  //       }
-  //     });
-      
-  //     let errorMessage = 'Por favor complete todos los campos requeridos';
-  //     if (!this.selectedService) {
-  //       errorMessage = 'Debe seleccionar un servicio';
-  //     }
-      
-  //     this.presentToast(errorMessage, 'warning');
-  //   }
-  // }
-
-   // Enviar servicio al backend
+  // Enviar servicio al backend
   async submitService() {
     if (this.servicioForm.valid && this.currentUser) {
       const loading = await this.loadingCtrl.create({
@@ -562,15 +482,15 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
         const fono = formData.fono.replace(/\s/g, '');
 
         const serviceData: any = {
-          servicio: parseInt(formData.servicio),
-          categoria: parseInt(formData.categoria),
+          servicio: Number.parseInt(formData.servicio),
+          categoria: Number.parseInt(formData.categoria),
           nombre_prestador: formData.nombre_prestador,
           fono: fono,
           detalle: formData.detalle || '',
           direccion: formData.direccion,
-          lat: parseFloat(formData.lat),
-          lng: parseFloat(formData.lng),
-          hourly_rate: formData.hourly_rate ? parseFloat(formData.hourly_rate) : null,
+          lat: Number.parseFloat(formData.lat),
+          lng: Number.parseFloat(formData.lng),
+          hourly_rate: formData.hourly_rate ? Number.parseFloat(formData.hourly_rate) : null,
           id_contacto: this.providerProfile?.id ?? this.currentUser.id
         };
 
@@ -750,13 +670,14 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private base64ToFile(base64: string, filename: string): File {
     // Extraer el tipo MIME y los datos
     const arr = base64.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const regexResult = /:(.*?);/.exec(arr[0]);
+    const mime = regexResult?.[1] || 'image/jpeg';
     const bstr = atob(arr[1]);
     let n = bstr.length;
     const u8arr = new Uint8Array(n);
     
     while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
+      u8arr[n] = bstr.codePointAt(n) || 0;
     }
     
     return new File([u8arr], filename, { type: mime });
@@ -800,7 +721,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
         try {
           // Generar firma de Cloudinary
-          const signature = await this.documentUploadService.generateUploadSignature('portfolio').toPromise();
+          const signature = await firstValueFrom(this.documentUploadService.generateUploadSignature('portfolio'));
           
           if (!signature) {
             throw new Error('No se pudo generar firma de subida');
@@ -857,12 +778,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     const activeDays = this.schedules.filter(d => d.isActive);
     for (const day of activeDays) {
       try {
-        await this.coreService.upsertServiceSchedule(providerId, spId, {
+        await firstValueFrom(this.coreService.upsertServiceSchedule(providerId, spId, {
           day_of_week: day.dayOfWeek,
           start_time: day.startTime,
           end_time: day.endTime,
           is_available: true,
-        }).toPromise();
+        }));
       } catch (e) {
         console.error(`Error guardando horario día ${day.dayOfWeek}:`, e);
       }

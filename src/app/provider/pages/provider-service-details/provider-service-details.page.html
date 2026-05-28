@@ -1,86 +1,167 @@
-<ion-content>
+<ion-content [fullscreen]="true">
 
-  <!-- ── Page header ─────────────────────────────────────── -->
-  <div class="page-header">
-    <div class="header-left">
-      <h2 class="page-title">Mis Servicios</h2>
-      <p class="page-subtitle">{{ servicios.length }} servicios registrados</p>
+  <!-- ══ TOPBAR ════════════════════════════════════════════════════ -->
+  <div class="ms-topbar">
+    <div class="ms-topbar-left">
+      <span class="ms-topbar-eyebrow">Panel de proveedor</span>
+      <h1 class="ms-topbar-title">Mis Servicios</h1>
     </div>
-    <button class="fab-add" (click)="openAddServiceModal()">
-      <ion-icon name="add"></ion-icon>
-    </button>
+    <div class="ms-topbar-actions">
+      <ion-button 
+        *ngIf="needsExtraServicePlan()"
+        class="ms-btn-upgrade"
+        size="small"
+        (click)="goToExtraServicePlan()">
+        Desbloquear 3er servicio
+      </ion-button>
+      <ion-button 
+        class="ms-btn-add"
+        size="small"
+        (click)="openAddServiceModal()">
+        <ion-icon slot="start" name="add"></ion-icon>
+        Nuevo servicio
+      </ion-button>
+    </div>
   </div>
 
-  <!-- ── Loading ──────────────────────────────────────────── -->
-  <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner color="primary"></ion-spinner>
-    <p>Cargando servicios...</p>
-  </div>
+  <!-- ══ BODY ══════════════════════════════════════════════════════ -->
+  <div class="ms-body">
 
-  <!-- ── Empty state ──────────────────────────────────────── -->
-  <div *ngIf="!isLoading && servicios.length === 0" class="empty-state">
-    <ion-icon name="construct-outline"></ion-icon>
-    <p class="empty-title">No tienes servicios registrados</p>
-    <p class="empty-sub">Agrega tu primer servicio para comenzar a recibir solicitudes</p>
-    <ion-button shape="round" color="primary" size="small" (click)="openAddServiceModal()">
-      <ion-icon name="add" slot="start"></ion-icon>
-      Agregar servicio
-    </ion-button>
-  </div>
+    <!-- ── LOADING ─────────────────────────────────────────────── -->
+    <div class="ms-sk-grid" *ngIf="isLoading">
+      <div class="ms-sk-card" *ngFor="let i of [1,2,3,4,5,6]">
+        <div class="ms-sk-card-header">
+          <div class="ms-sk ms-sk--icon"></div>
+          <div class="ms-sk-lines">
+            <div class="ms-sk ms-sk--title"></div>
+            <div class="ms-sk ms-sk--sub"></div>
+          </div>
+        </div>
+        <div class="ms-sk ms-sk--desc"></div>
+        <div class="ms-sk ms-sk--desc ms-sk--desc-short"></div>
+        <div class="ms-sk-footer">
+          <div class="ms-sk ms-sk--chip"></div>
+          <div class="ms-sk ms-sk--chip"></div>
+        </div>
+      </div>
+    </div>
 
-  <!-- ── Lista de servicios ───────────────────────────────── -->
-  <div *ngIf="!isLoading && servicios.length > 0" class="services-list">
+    <!-- ── ERROR ────────────────────────────────────────────────── -->
+    <div class="ms-empty-state" *ngIf="!isLoading && error">
+      <div class="ms-empty-icon ms-empty-icon--error">
+        <ion-icon name="warning-outline"></ion-icon>
+      </div>
+      <h3 class="ms-empty-title">Algo salió mal</h3>
+      <p class="ms-empty-desc">{{ error }}</p>
+      <ion-button class="ms-btn-retry" (click)="loadServicios()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Reintentar
+      </ion-button>
+    </div>
 
-    <div class="service-card" *ngFor="let servicio of servicios; trackBy: trackById"
-         [class.inactive]="!servicio.is_available">
+    <!-- ── EMPTY ─────────────────────────────────────────────────── -->
+    <div class="ms-empty-state" *ngIf="!isLoading && !error && servicios.length === 0">
+      <div class="ms-empty-icon">
+        <ion-icon name="briefcase-outline"></ion-icon>
+      </div>
+      <h3 class="ms-empty-title">Sin servicios publicados</h3>
+      <p class="ms-empty-desc">Crea tu primer servicio y empieza a recibir reservas de clientes en tu zona.</p>
+      <ion-button class="ms-btn-add ms-btn-add--cta" (click)="openAddServiceModal()">
+        <ion-icon slot="start" name="add"></ion-icon>
+        Agregar mi primer servicio
+      </ion-button>
+    </div>
 
-      <!-- Top row: badge + toggle -->
-      <div class="card-top">
-        <div class="card-top-left">
-          <h3 class="service-name">{{ servicio.business_name }}</h3>
-          <span class="status-badge" [class]="'badge-' + getEstadoColor(servicio)">
-            {{ getEstadoServicio(servicio) }}
+    <!-- ── SERVICE GRID ──────────────────────────────────────────── -->
+    <ng-container *ngIf="!isLoading && !error && servicios.length > 0">
+
+      <!-- Contador + summary chips -->
+      <div class="ms-summary-bar">
+        <span class="ms-summary-count">
+          {{ servicios.length }} servicio{{ servicios.length !== 1 ? 's' : '' }}
+        </span>
+        <div class="ms-summary-chips">
+          <span class="ms-chip ms-chip--approved" *ngIf="countByStatus('approved') > 0">
+            <span class="ms-chip-dot"></span>
+            {{ countByStatus('approved') }} aprobado{{ countByStatus('approved') !== 1 ? 's' : '' }}
+          </span>
+          <span class="ms-chip ms-chip--pending" *ngIf="countByStatus('pending') > 0">
+            <span class="ms-chip-dot"></span>
+            {{ countByStatus('pending') }} pendiente{{ countByStatus('pending') !== 1 ? 's' : '' }}
+          </span>
+          <span class="ms-chip ms-chip--rejected" *ngIf="countByStatus('rejected') > 0">
+            <span class="ms-chip-dot"></span>
+            {{ countByStatus('rejected') }} rechazado{{ countByStatus('rejected') !== 1 ? 's' : '' }}
           </span>
         </div>
-        <ion-toggle
-          class="toggle"
-          mode="md"
-          [checked]="servicio.is_available"
-          [disabled]="servicio.validation_status === 'rejected'"
-          (ionChange)="toggleDisponibilidad(servicio, $event)"
-        ></ion-toggle>
       </div>
 
-      <!-- Description -->
-      <p class="service-desc" *ngIf="servicio.description">
-        {{ truncateText(servicio.description, 60) }}
-      </p>
+      <div class="ms-grid">
+        <div class="ms-service-card" 
+          *ngFor="let svc of servicios; trackBy: trackById"
+          [class.ms-service-card--inactive]="!svc.is_available">
 
-      <!-- Price + category row -->
-      <div class="card-meta">
-        <div class="price-group" *ngIf="servicio.hourly_rate">
-          <span class="price">${{ servicio.hourly_rate | number }}</span>
-          <span class="price-unit">/hora</span>
-        </div>
-        <div class="category-group">
-          <ion-icon [name]="getServiceIcon(servicio)" class="cat-icon"></ion-icon>
-          <span class="cat-label">{{ servicio.service_category?.name || 'Servicio' }}</span>
-        </div>
+          <!-- Card header: ícono categoría + nombre + badge status -->
+          <div class="ms-card-header">
+            <div class="ms-card-icon">
+              <ion-icon [name]="getServiceIcon(svc)"></ion-icon>
+            </div>
+            <div class="ms-card-name-wrap">
+              <h3 class="ms-card-name">{{ svc.business_name }}</h3>
+              <span class="ms-card-category" *ngIf="svc.service_category?.name">
+                {{ svc.service_category?.name }}
+              </span>
+            </div>
+            <div class="ms-card-badges">
+              <span class="ms-status-badge ms-status-badge--{{ svc.validation_status }}">
+                {{ statusLabel(svc.validation_status) }}
+              </span>
+              <span class="ms-status-badge ms-status-badge--inactive" *ngIf="!svc.is_available">
+                Inactivo
+              </span>
+            </div>
+          </div>
+
+          <!-- Descripción -->
+          <p class="ms-card-desc" *ngIf="svc.description">
+            {{ svc.description }}
+          </p>
+
+          <!-- Metadata: tarifa -->
+          <div class="ms-card-meta">
+            <span class="ms-meta-rate" *ngIf="svc.hourly_rate">
+              <ion-icon name="cash-outline"></ion-icon>
+              ${{ svc.hourly_rate | number:'1.0-0' }}/hr
+            </span>
+          </div>
+
+          <!-- Divider -->
+          <div class="ms-card-divider"></div>
+
+          <!-- Acciones -->
+          <div class="ms-card-actions">
+            <button class="ms-action-btn ms-action-btn--edit" (click)="goEditServicio(svc)">
+              <ion-icon name="create-outline"></ion-icon>
+              Editar
+            </button>
+            <button class="ms-action-btn ms-action-btn--delete" (click)="delServicio(svc)">
+              <ion-icon name="trash-outline"></ion-icon>
+              Eliminar
+            </button>
+            <ion-toggle
+              class="ms-action-toggle"
+              mode="md"
+              [checked]="svc.is_available"
+              [disabled]="svc.validation_status === 'rejected'"
+              (ionChange)="toggleDisponibilidad(svc, $event)">
+            </ion-toggle>
+          </div>
+
+        </div><!-- end ms-service-card -->
       </div>
 
-      <!-- Action buttons -->
-      <div class="card-actions">
-        <button class="btn-edit" (click)="goEditServicio(servicio)">
-          <ion-icon name="create-outline"></ion-icon>
-          Editar
-        </button>
-        <button class="btn-delete" (click)="delServicio(servicio)">
-          <ion-icon name="trash-outline"></ion-icon>
-        </button>
-      </div>
+    </ng-container>
 
-    </div><!-- end service-card -->
-
-  </div><!-- end services-list -->
+  </div>
 
 </ion-content>

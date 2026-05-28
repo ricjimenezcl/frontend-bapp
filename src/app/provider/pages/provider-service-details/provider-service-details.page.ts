@@ -2,7 +2,7 @@
 import { Component,  OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent, IonCard, IonBadge, IonToggle, IonRow, IonCol, IonIcon, IonLabel, IonSpinner, IonBackButton, AlertController, LoadingController, ModalController, ToastController, NavController } from '@ionic/angular/standalone';
+import { IonButton, IonContent, IonToggle, IonIcon, AlertController, LoadingController, ModalController, ToastController, NavController } from '@ionic/angular/standalone';
 import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
 import { ProviderService, ProviderServices } from '../../services/provider.service';
@@ -19,29 +19,28 @@ import { DocumentUploadService } from '../../../shared/services/document-upload.
   imports: [
     CommonModule,
     RouterModule,
-    IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-    IonContent, IonCard, IonBadge, IonToggle, IonRow, IonCol,
-    IonIcon, IonLabel, IonSpinner, IonBackButton
+    IonContent, IonButton, IonToggle, IonIcon
   ]
 })
 export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
-  private cdr = inject(ChangeDetectorRef);
-  private authService = inject(AuthService);
-  private providerService = inject(ProviderService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private alertCtrl = inject(AlertController);
-  private loadingCtrl = inject(LoadingController);
-  private navCtrl = inject(NavController);
-  private coreService = inject(CoreService);
-  private modalCtrl = inject(ModalController);
-  private toastCtrl = inject(ToastController);
-  private documentService = inject(DocumentUploadService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly authService = inject(AuthService);
+  private readonly providerService = inject(ProviderService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly alertCtrl = inject(AlertController);
+  private readonly loadingCtrl = inject(LoadingController);
+  private readonly navCtrl = inject(NavController);
+  private readonly coreService = inject(CoreService);
+  private readonly modalCtrl = inject(ModalController);
+  private readonly toastCtrl = inject(ToastController);
+  private readonly documentService = inject(DocumentUploadService);
 
   currentUser: any;
   servicios: ProviderServices[] = [];
   isLoading: boolean = true;
+  error: string = '';
   private pendingOpenModal = false;
 
   ngOnInit() {
@@ -78,6 +77,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   loadServicios() {
     if (!this.currentUser) return;
     this.isLoading = true;
+    this.error = '';
     this.providerService.getMyProfile().pipe(
       switchMap(profile => this.providerService.getProviderServices(profile.id.toString())),
       takeUntil(this.destroy$)
@@ -95,8 +95,8 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
         console.error('Error al cargar servicios:', error);
         this.isLoading = false;
         this.servicios = [];
+        this.error = 'Error al cargar servicios. Por favor, intenta nuevamente.';
         this.pendingOpenModal = false;
-        this.presentAlert('Error', 'No se pudieron cargar los servicios');
       }
     });
   }
@@ -128,7 +128,10 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     // Leer la intención del usuario directamente del evento (más fiable que calcular estado)
     const wantsEnabled: boolean = !!event?.detail?.checked;
 
-    if (!wantsEnabled) {
+    if (wantsEnabled) {
+      // ── El usuario quiere HABILITAR ───────────────────────────────────────
+      await this.ejecutarHabilitar(servicio);
+    } else {
       // ── El usuario quiere DESHABILITAR ────────────────────────────────────
       const confirmed = await this.mostrarConfirmacionDeshabilitar();
       if (!confirmed) {
@@ -137,25 +140,24 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
         return;
       }
       await this.ejecutarDeshabilitar(servicio);
-    } else {
-      // ── El usuario quiere HABILITAR ───────────────────────────────────────
-      await this.ejecutarHabilitar(servicio);
     }
   }
 
   private mostrarConfirmacionDeshabilitar(): Promise<boolean> {
-    return new Promise(async (resolve) => {
-      const alert = await this.alertCtrl.create({
+    return new Promise((resolve) => {
+      this.alertCtrl.create({
         header: 'Deshabilitar servicio',
         message: 'Si deshabilitas este servicio, dejará de aparecer en las búsquedas de los clientes. ¿Deseas continuar?',
         buttons: [
           { text: 'Cancelar', role: 'cancel' },
           { text: 'Confirmar', role: 'confirm' }
         ]
+      }).then(alert => {
+        alert.present();
+        alert.onDidDismiss().then(({ role }) => {
+          resolve(role === 'confirm');
+        });
       });
-      await alert.present();
-      const { role } = await alert.onDidDismiss();
-      resolve(role === 'confirm');
     });
   }
 
@@ -245,7 +247,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
             await loading.present();
 
             try {
-              await this.providerService.deleteProviderService(servicio.id).toPromise();
+              await firstValueFrom(this.providerService.deleteProviderService(servicio.id));
               await loading.dismiss();
 
               this.servicios = this.servicios.filter(s => s.id !== servicio.id);
@@ -284,7 +286,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
       .subscribe({
         next: async (verification: any) => {
           await loading.dismiss();
-          if (!verification || verification.face_match_status !== 'APPROVED') {
+          if (verification?.face_match_status !== 'APPROVED') {
             await this.showVerificationRequired(verification);
             return;
           }
@@ -422,6 +424,44 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
 
   trackById(_index: number, servicio: ProviderServices): number {
     return servicio.id;
+  }
+
+  /**
+   * Verifica si el proveedor necesita plan extra (tiene 2+ servicios)
+   */
+  needsExtraServicePlan(): boolean {
+    return this.servicios.length >= 2;
+  }
+
+  /**
+   * Obtiene la etiqueta del estado de validación
+   */
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      approved: 'Aprobado',
+      pending: 'Pendiente',
+      rejected: 'Rechazado',
+    };
+    return map[status] ?? status;
+  }
+
+  /**
+   * Cuenta servicios por estado de validación
+   */
+  countByStatus(status: string): number {
+    return this.servicios.filter(s => s.validation_status === status).length;
+  }
+
+  /**
+   * Navega a la página de plan extra de servicios
+   */
+  goToExtraServicePlan(): void {
+    this.router.navigate(['/product-catalog'], {
+      queryParams: {
+        returnTo: '/provider/tabs/service-details',
+        action: 'add-service'
+      }
+    });
   }
 
   goBack() {

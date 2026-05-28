@@ -1,6 +1,6 @@
 import { Component,  OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController, AlertController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { ProviderProfile } from '../../../core/models/provider.model';
 import { WebSocketService } from '../../../core/services/websocket.service';
 import { NotificationType } from '../../../core/models/chat.model';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
+import { ServiceViewersModalComponent } from '../../modals/service-viewers-modal/service-viewers-modal.component';
 
 @Component({
   selector: 'app-provider-home',
@@ -21,6 +22,10 @@ export class ProviderHomePage implements OnInit, OnDestroy {
   isLoading = false;
   providerName = 'Provider';
   providerProfile: ProviderProfile | null = null;
+  validationStatus: string = 'not_submitted';
+  showVerificationAlert = false;
+  verificationMessage = '';
+  stats: ProviderStats | null = null;
 
   metrics = {
     profileViews: 0,
@@ -30,15 +35,16 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     pendingServices: 0,
   };
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
     public router: Router,
-    private providerService: ProviderService,
-    private wsService: WebSocketService,
-    private toastCtrl: ToastController,
-    private alertCtrl: AlertController,
-    private documentService: DocumentUploadService
+    private readonly providerService: ProviderService,
+    private readonly wsService: WebSocketService,
+    private readonly toastCtrl: ToastController,
+    private readonly alertCtrl: AlertController,
+    private readonly documentService: DocumentUploadService,
+    private readonly modalCtrl: ModalController
   ) { }
 
   ngOnInit() {
@@ -106,6 +112,7 @@ export class ProviderHomePage implements OnInit, OnDestroy {
       .subscribe({
         next: (stats: ProviderStats) => {
           console.log('✅ Métricas del proveedor cargadas:', stats);
+          this.stats = stats; // Guardar stats completas
           this.metrics = {
             profileViews:    stats.profile_views    ?? 0,
             serviceViews:    stats.service_views    ?? 0,
@@ -132,9 +139,9 @@ export class ProviderHomePage implements OnInit, OnDestroy {
    */
   getGreeting(): string {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Morning';
-    if (hour < 18) return 'Afternoon';
-    return 'Evening';
+    if (hour < 12) return 'Buenos días';
+    if (hour < 18) return 'Buenas tardes';
+    return 'Buenas noches';
   }
 
   /**
@@ -157,59 +164,79 @@ export class ProviderHomePage implements OnInit, OnDestroy {
         next: (verification: any) => {
           console.log('✅ Estado de verificación:', verification);
           
-          // Si no hay verificación o no está aprobada, mostrar alerta
+          if (verification && verification.face_match_status) {
+            this.validationStatus = verification.face_match_status === 'APPROVED' ? 'approved' : verification.face_match_status?.toLowerCase();
+          }
+          
+          // Si no hay verificación o no está aprobada, mostrar banner
           if (!verification || verification.face_match_status !== 'APPROVED') {
-            this.showVerificationWarning(verification);
+            this.showVerificationBanner(verification);
           }
         },
         error: (error) => {
           console.warn('⚠️ Error al verificar estado de verificación:', error);
           
-          // Si el error es 403, significa que no tiene registro de provider (ya manejado)
+          // Si el error es 403, significa que no tiene registro de provider
           if (error.status === 403) {
             return;
           }
           
-          // Si no hay verificación, mostrar alerta
-          this.showVerificationWarning(null);
+          // Si no hay verificación, mostrar banner
+          this.showVerificationBanner(null);
         }
       });
   }
 
   /**
-   * Mostrar alerta de verificación pendiente
+   * Mostrar banner de verificación pendiente (sin alert modal)
    */
-  private async showVerificationWarning(verification: any) {
-    let message = 'Para poder agregar servicios, debes completar la verificación de identidad. ';
+  private showVerificationBanner(verification: any) {
+    let message = 'Para poder agregar servicios, debes completar la verificación de identidad.';
     
     if (!verification) {
-      message += 'Por favor, ve a la sección de Verificación de Identidad y sube tu selfie y documento de identidad.';
+      message = 'Para poder agregar servicios, debes completar la verificación de identidad.';
+      this.validationStatus = 'not_submitted';
     } else if (verification.face_match_status === 'PENDING') {
-      message += 'Tu verificación está pendiente de procesamiento.';
+      message = 'Tu verificación está pendiente de procesamiento.';
+      this.validationStatus = 'pending';
     } else if (verification.face_match_status === 'PROCESSING') {
-      message += 'Tu verificación está siendo procesada por nuestro sistema.';
+      message = 'Tu verificación está siendo procesada por nuestro sistema.';
+      this.validationStatus = 'processing';
     } else if (verification.face_match_status === 'REJECTED') {
-      message += 'Tu verificación fue rechazada. Por favor, intenta nuevamente con fotos más claras.';
+      message = 'Tu verificación fue rechazada. Por favor, intenta nuevamente con fotos más claras.';
+      this.validationStatus = 'rejected';
     }
 
-    const alert = await this.alertCtrl.create({
-      header: '📋 Verificación de Identidad Requerida',
-      message: message,
-      buttons: [
-        {
-          text: 'Más tarde',
-          role: 'cancel'
-        },
-        {
-          text: 'Verificar ahora',
-          handler: () => {
-            this.router.navigate(['/auth/verify-identity']);
-          }
-        }
-      ]
+    this.verificationMessage = message;
+    this.showVerificationAlert = true;
+  }
+
+  /**
+   * Ir a verificación de identidad
+   */
+  goToVerifyIdentity() {
+    this.router.navigate(['/auth/document-verification']);
+  }
+
+  /**
+   * Cerrar banner de verificación
+   */
+  dismissVerificationAlert() {
+    this.showVerificationAlert = false;
+  }
+
+  /**
+   * Abrir modal de clientes interesados
+   */
+  async openServiceViewers() {
+    const modal = await this.modalCtrl.create({
+      component: ServiceViewersModalComponent,
+      cssClass: 'service-viewers-modal',
+      breakpoints: [0, 0.5, 0.8, 1],
+      initialBreakpoint: 0.8
     });
 
-    await alert.present();
+    await modal.present();
   }
 }
    
