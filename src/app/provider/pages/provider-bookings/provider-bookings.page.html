@@ -54,7 +54,11 @@
           <span class="bk-service-label">{{ booking.description || 'Reserva de servicio' }}</span>
         </div>
         <div class="bk-status-badge" [attr.data-status]="booking.status">
-          {{ booking.status | uppercase }}
+          {{ (booking.status | uppercase) === 'APPROVED' ? 'Aprobado' :
+             (booking.status | uppercase) === 'REJECTED' ? 'Rechazado' :
+             (booking.status | uppercase) === 'PENDING' ? 'Pendiente' :
+             (booking.status | uppercase) === 'COMPLETED' ? 'Completado' :
+             booking.status | uppercase }}
         </div>
       </div>
 
@@ -78,7 +82,7 @@
       </div>
 
       <!-- Action buttons for pending -->
-      <div class="bk-actions" *ngIf="(booking.status | lowercase) === 'pending'">
+      <div class="bk-actions" *ngIf="(booking.status | uppercase) === 'PENDING'">
         <button class="bk-btn bk-btn-chat" (click)="acceptBooking(booking)" type="button">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
           <span>Aceptar</span>

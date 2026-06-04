@@ -83,8 +83,8 @@
 
       </div>
 
-      <!-- Actions (PENDING or CONFIRMED only) -->
-      <div class="bk-actions" *ngIf="booking.status === 'PENDING' || booking.status === 'CONFIRMED'">
+      <!-- Actions (PENDING or APPROVED only) -->
+      <div class="bk-actions" *ngIf="booking.status === 'PENDING' || booking.status === 'APPROVED' || booking.status === 'CONFIRMED'">
         <button
           class="bk-btn bk-btn-chat"
           (click)="goToChat(booking)"

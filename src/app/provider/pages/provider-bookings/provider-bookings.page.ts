@@ -99,16 +99,20 @@ export class ProviderBookingsPage implements OnInit, OnDestroy {
 
   filterBookings() {
     if (this.selectedSegment === 'pending') {
-      this.filteredBookings = this.bookings.filter(b => b.status?.toLowerCase() === BookingStatus.PENDING);
+      this.filteredBookings = this.bookings.filter(b => {
+        const s = (b.status || '').toUpperCase();
+        return s === BookingStatus.PENDING;
+      });
     } else if (this.selectedSegment === 'confirmed') {
       this.filteredBookings = this.bookings.filter(b => {
-        const s = b.status?.toLowerCase();
-        return s === BookingStatus.CONFIRMED || s === BookingStatus.IN_PROGRESS;
+        const s = (b.status || '').toUpperCase();
+        return s === BookingStatus.APPROVED || s === BookingStatus.CONFIRMED || s === BookingStatus.IN_PROGRESS;
       });
     } else {
       this.filteredBookings = this.bookings.filter(b => {
-        const s = b.status?.toLowerCase();
-        return s === BookingStatus.COMPLETED || s === BookingStatus.CANCELLED;
+        const s = (b.status || '').toUpperCase();
+        return s === BookingStatus.COMPLETED || s === BookingStatus.REJECTED ||
+               s === BookingStatus.CANCELLED || s === BookingStatus.NOSHOW;
       });
     }
   }

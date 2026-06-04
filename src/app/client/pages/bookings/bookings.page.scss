@@ -131,9 +131,11 @@ ion-content.bk-content { --background: var(--bapp-bg-page); }
   border-radius: var(--bapp-radius-full);
   flex-shrink: 0;
 
+  &[data-status="APPROVED"]   { background: rgba(34,197,94,0.15);  color: var(--bapp-color-success); }
   &[data-status="CONFIRMED"]  { background: rgba(34,197,94,0.15);  color: var(--bapp-color-success); }
   &[data-status="PENDING"]    { background: rgba(253,215,53,0.18); color: #C89800; }
   &[data-status="COMPLETED"]  { background: rgba(14,165,233,0.15); color: var(--bapp-color-accent); }
+  &[data-status="REJECTED"]   { background: rgba(244,67,54,0.15);  color: var(--bapp-color-danger); }
   &[data-status="CANCELLED"]  { background: rgba(244,67,54,0.15);  color: var(--bapp-color-danger); }
 }
 

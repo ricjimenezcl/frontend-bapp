@@ -138,24 +138,24 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
       const status = (booking.status || '').toUpperCase();
 
       if (this.selectedSegment === 'upcoming') {
-        // Próximas: pendientes + confirmadas + en progreso
-        if (status === 'CANCELLED') return false;
+        // Próximas: PENDING + APPROVED + confirmadas + en progreso
+        if (status === 'CANCELLED' || status === 'REJECTED') return false;
         if (status === 'COMPLETED') return false;
-        if (status === 'PENDING') return true;
+        if (status === 'PENDING' || status === 'APPROVED') return true;
         if (!booking.scheduled_date) return status === 'CONFIRMED' || status === 'IN_PROGRESS';
         const bookingDate = new Date(booking.scheduled_date);
         return bookingDate >= now;
       } else if (this.selectedSegment === 'past') {
         // Completadas + pasadas
-        if (status === 'CANCELLED') return false;
-        if (status === 'PENDING') return false;
+        if (status === 'CANCELLED' || status === 'REJECTED') return false;
+        if (status === 'PENDING' || status === 'APPROVED') return false;
         if (status === 'COMPLETED') return true;
         if (!booking.scheduled_date) return false;
         const bookingDate = new Date(booking.scheduled_date);
         return bookingDate < now && status !== 'PENDING';
       } else {
-        // Canceladas
-        return status === 'CANCELLED';
+        // Canceladas / rechazadas
+        return status === 'CANCELLED' || status === 'REJECTED';
       }
     });
   }
@@ -212,11 +212,13 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
 
   getStatusLabel(status: string | undefined): string {
     switch (status) {
+      case 'APPROVED':  return 'Aprobada';
       case 'CONFIRMED': return 'Confirmada';
-      case 'PENDING': return 'Pendiente';
+      case 'PENDING':   return 'Pendiente';
       case 'COMPLETED': return 'Completada';
+      case 'REJECTED':  return 'Rechazada';
       case 'CANCELLED': return 'Cancelada';
-      default: return 'Desconocido';
+      default: return status || 'Desconocido';
     }
   }
 

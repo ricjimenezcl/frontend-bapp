@@ -176,7 +176,7 @@ export class BookingService {
    * @returns Observable con la reserva actualizada
    */
   confirmBooking(bookingId: number, request?: ConfirmBookingRequest): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/confirm`, request || {}).pipe(
+    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/approve`, request || {}).pipe(
       tap(() => this.refreshProviderBookings())
     );
   }
@@ -226,7 +226,14 @@ export class BookingService {
     reason: string = 'PROVIDER_REQUEST',
     reasonComment?: string
   ): Observable<BookingResponse> {
-    return this.cancelBooking(bookingId, reason, reasonComment);
+    return this.http.patch<BookingResponse>(`${this.apiUrl}/${bookingId}/reject`, {
+      reason_comment: reasonComment || null
+    }).pipe(
+      tap(() => {
+        this.refreshMyBookings();
+        this.refreshProviderBookings();
+      })
+    );
   }
 
   /**
@@ -359,7 +366,7 @@ export class BookingService {
    * @returns true si puede ser cancelada
    */
   canCancel(booking: BookingResponse): boolean {
-    const cancellableStatuses: BookingStatus[] = ['PENDING', 'CONFIRMED'];
+    const cancellableStatuses: BookingStatus[] = ['PENDING', 'APPROVED', 'CONFIRMED'];
     return cancellableStatuses.includes(booking.status);
   }
 
@@ -378,7 +385,7 @@ export class BookingService {
    * @returns true si puede ser completada
    */
   canComplete(booking: BookingResponse): boolean {
-    const completableStatuses: BookingStatus[] = ['CONFIRMED', 'IN_PROGRESS'];
+    const completableStatuses: BookingStatus[] = ['APPROVED', 'CONFIRMED', 'IN_PROGRESS'];
     return completableStatuses.includes(booking.status);
   }
 

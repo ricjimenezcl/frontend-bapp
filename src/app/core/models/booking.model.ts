@@ -1,10 +1,12 @@
 export enum BookingStatus {
-    PENDING = 'PENDING',
-    CONFIRMED = 'CONFIRMED',
-    IN_PROGRESS = 'IN_PROGRESS',
-    COMPLETED = 'COMPLETED',
-    CANCELLED = 'CANCELLED',
-    NOSHOW = 'NOSHOW'
+    PENDING     = 'PENDING',
+    APPROVED    = 'APPROVED',
+    REJECTED    = 'REJECTED',
+    CONFIRMED   = 'CONFIRMED',   // legacy
+    IN_PROGRESS = 'IN_PROGRESS', // legacy
+    COMPLETED   = 'COMPLETED',
+    CANCELLED   = 'CANCELLED',   // legacy
+    NOSHOW      = 'NOSHOW',      // legacy
 }
 
 export interface BookingCreate {
@@ -52,6 +54,8 @@ export interface BookingResponse {
 
 export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
     PENDING:     'Pendiente',
+    APPROVED:    'Aprobado',
+    REJECTED:    'Rechazado',
     CONFIRMED:   'Confirmado',
     IN_PROGRESS: 'En progreso',
     COMPLETED:   'Completado',
@@ -61,9 +65,11 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
 
 export const BOOKING_STATUS_COLORS: Record<BookingStatus, string> = {
     PENDING:     'warning',
-    CONFIRMED:   'primary',
-    IN_PROGRESS: 'primary',
-    COMPLETED:   'success',
+    APPROVED:    'success',
+    REJECTED:    'danger',
+    CONFIRMED:   'success',
+    IN_PROGRESS: 'success',
+    COMPLETED:   'tertiary',
     CANCELLED:   'danger',
     NOSHOW:      'medium',
 };
