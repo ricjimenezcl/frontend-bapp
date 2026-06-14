@@ -93,7 +93,22 @@
       {{ provider.description || 'Proveedor de servicios profesional. Contacta para más información.' }}
     </ion-label>
 
-    
+    <!-- Portafolio de imágenes -->
+    <ng-container *ngIf="provider && $any(provider).portfolio_images?.length > 0">
+      <div class="break"></div>
+      <div class="main-title">
+        <ion-label class="title">Portafolio</ion-label>
+      </div>
+      <div class="pi-portfolio-grid">
+        <div class="pi-portfolio-thumb"
+          *ngFor="let img of $any(provider).portfolio_images; let i = index"
+          (click)="openLightbox($any(provider).portfolio_images, i)"
+          (keypress)="openLightbox($any(provider).portfolio_images, i)"
+          role="button" tabindex="0">
+          <img [src]="img" [alt]="'Foto ' + (i + 1)" loading="lazy" />
+        </div>
+      </div>
+    </ng-container>
 
     <div class="break"></div>
 
@@ -353,5 +368,26 @@
       </ion-content>
     </ng-template>
   </ion-modal>
+
+  <!-- ══ LIGHTBOX DE PORTAFOLIO ══════════════════════════════════ -->
+  <div class="pi-lb-overlay" *ngIf="lightboxOpen"
+    (click)="closeLightbox()"
+    (keypress)="closeLightbox()"
+    role="button" tabindex="0" aria-label="Cerrar lightbox">
+  </div>
+  <div class="pi-lb-box" *ngIf="lightboxOpen">
+    <button class="pi-lb-close" (click)="closeLightbox()" aria-label="Cerrar">
+      <ion-icon name="close"></ion-icon>
+    </button>
+    <img class="pi-lb-img" [src]="lightboxImages[lightboxIndex]" [alt]="'Foto ' + (lightboxIndex + 1)" />
+    <button class="pi-lb-nav pi-lb-prev" *ngIf="lightboxImages.length > 1" (click)="lightboxPrev()" aria-label="Anterior">
+      <ion-icon name="chevron-back"></ion-icon>
+    </button>
+    <button class="pi-lb-nav pi-lb-next" *ngIf="lightboxImages.length > 1" (click)="lightboxNext()" aria-label="Siguiente">
+      <ion-icon name="chevron-forward"></ion-icon>
+    </button>
+    <div class="pi-lb-counter">{{ lightboxIndex + 1 }} / {{ lightboxImages.length }}</div>
+  </div>
+
 </ion-content>
 

@@ -4,8 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { ProductService, Product } from '../../services/product.service';
 import { PaymentService } from '../../services/payment.service';
+import { PaymentRedirectService } from '../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../services/platform-detection.service';
 import { AuthService } from '../../auth/services/auth.service';
+import { ProductType } from '../../core/models/payment.model';
 
 @Component({
   selector: 'app-product-catalog',
@@ -23,6 +25,7 @@ export class ProductCatalogPage implements OnInit {
   constructor(
     private productService: ProductService,
     public paymentService: PaymentService,
+    private paymentRedirect: PaymentRedirectService,
     private platformDetection: PlatformDetectionService,
     private authService: AuthService,
     private router: Router,
@@ -99,43 +102,24 @@ export class ProductCatalogPage implements OnInit {
   }
 
   /**
-   * Purchase product
+   * Purchase product — redirige al sitio web bappsearch.com para completar el pago.
+   * El flujo de pago es manejado por Transbank WebPay en el navegador del sistema.
    */
   async purchaseProduct(product: Product) {
-    // Confirm purchase
     const confirm = await this.showPurchaseConfirmation(product);
     if (!confirm) {
       return;
     }
 
-    const loading = await this.loadingCtrl.create({
-      message: 'Procesando compra...',
+    const returnTo = this.route.snapshot.queryParamMap.get('returnTo') ?? '/tabs/profile';
+    const action   = this.route.snapshot.queryParamMap.get('action') ?? undefined;
+
+    // Redirigir al sitio de pago externo (bappsearch.com/payment)
+    this.paymentRedirect.openPayment({
+      productType: product.sku as ProductType,
+      returnTo,
+      action,
     });
-    await loading.present();
-
-    try {
-      const result = await this.paymentService.purchaseProduct(product).toPromise();
-
-      await loading.dismiss();
-
-      if (result?.success) {
-        await this.showSuccessMessage(product);
-        // Si viene de un flujo de retorno (ej: add-service), redirigir allí
-        const returnTo = this.route.snapshot.queryParamMap.get('returnTo');
-        const action = this.route.snapshot.queryParamMap.get('action');
-        if (returnTo) {
-          this.router.navigate([returnTo], { queryParams: action ? { action } : {} });
-        } else {
-          this.router.navigate(['/tabs/profile']);
-        }
-      } else {
-        this.showToast(result?.error || 'Error en la compra', 'danger');
-      }
-    } catch (error: any) {
-      await loading.dismiss();
-      console.error('Purchase error:', error);
-      this.showToast(error?.message || 'Error al procesar la compra', 'danger');
-    }
   }
 
   /**

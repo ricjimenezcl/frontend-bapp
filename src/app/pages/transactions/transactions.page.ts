@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { ProductService, Transaction } from '../../services/product.service';
+import { PaymentRedirectService } from '../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-transactions',
@@ -25,7 +26,8 @@ export class TransactionsPage implements OnInit {
     private productService: ProductService,
     private router: Router,
     private loadingCtrl: LoadingController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   ngOnInit() {
@@ -178,6 +180,6 @@ export class TransactionsPage implements OnInit {
    * Go to product catalog
    */
   goToCatalog() {
-    this.router.navigate(['/product-catalog']);
+    this.paymentRedirect.openPayment({ productType: 'PROVIDER_SERVICE_30', returnTo: '/tabs/profile' });
   }
 }

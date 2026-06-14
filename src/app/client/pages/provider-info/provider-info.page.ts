@@ -54,6 +54,11 @@ export class ProviderInfoPage implements OnInit {
 
   userLocation: { lat: number; lng: number } | null = null;
 
+  // ── Lightbox de portafolio ──
+  lightboxOpen = false;
+  lightboxImages: string[] = [];
+  lightboxIndex = 0;
+
   // Address autocomplete variables
   selectedAddressText: string = '';
   selectedAddressObject: any = null;
@@ -262,6 +267,28 @@ export class ProviderInfoPage implements OnInit {
       }
     });
   }
+
+  // ── Métodos del lightbox de portafolio ──────────────────────────
+
+  openLightbox(images: string[], index: number) {
+    this.lightboxImages = images;
+    this.lightboxIndex  = index;
+    this.lightboxOpen   = true;
+  }
+
+  closeLightbox() {
+    this.lightboxOpen = false;
+  }
+
+  lightboxNext() {
+    this.lightboxIndex = (this.lightboxIndex + 1) % this.lightboxImages.length;
+  }
+
+  lightboxPrev() {
+    this.lightboxIndex = (this.lightboxIndex - 1 + this.lightboxImages.length) % this.lightboxImages.length;
+  }
+
+  // ────────────────────────────────────────────────────────────────
 
   selectTime(time: string) {
     this.selectedTime = time;

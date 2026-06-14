@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService, Transaction } from '../../services/product.service';
+import { PaymentRedirectService } from '../../services/payment-redirect.service';
 
 /**
  * Premium Badge Component
@@ -23,7 +24,8 @@ export class PremiumBadgeComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   ngOnInit() {
@@ -117,10 +119,10 @@ export class PremiumBadgeComponent implements OnInit {
   }
 
   /**
-   * Navigate to product catalog
+   * Abre el sitio de pago en el navegador del sistema
    */
   goToCatalog() {
-    this.router.navigate(['/product-catalog']);
+    this.paymentRedirect.openProviderPremium('/tabs/profile');
   }
 
   /**

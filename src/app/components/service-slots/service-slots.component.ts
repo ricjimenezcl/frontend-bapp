@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService, Transaction } from '../../services/product.service';
+import { PaymentRedirectService } from '../../services/payment-redirect.service';
 
 /**
  * Service Slots Component
@@ -25,7 +26,8 @@ export class ServiceSlotsComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   ngOnInit() {
@@ -142,10 +144,10 @@ export class ServiceSlotsComponent implements OnInit {
   }
 
   /**
-   * Navigate to product catalog
+   * Abre el sitio de pago en el navegador del sistema
    */
   goToCatalog() {
-    this.router.navigate(['/product-catalog']);
+    this.paymentRedirect.openProviderServicePlan('/provider/tabs/service-details');
   }
 
   /**

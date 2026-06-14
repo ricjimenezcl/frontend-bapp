@@ -64,6 +64,7 @@
         <ion-icon *ngIf="stats && stats.average_rating > 0" name="star" class="ph-stat-star"></ion-icon>
       </h3>
       <p>Calificación</p>
+      <small class="ph-stat-sub" *ngIf="reviews.length > 0">{{ reviews.length }} reseña{{ reviews.length !== 1 ? 's' : '' }}</small>
     </div>
   </div>
 
@@ -151,8 +152,28 @@
             </div>
           </div>
 
-        </div>
-      </div>
+          <!-- Card reseñas recibidas -->
+          <div class="ph-metric-card ph-metric-card--full ph-metric-card--clickable"
+            (click)="openReviews()"
+            (keypress)="openReviews()"
+            role="button" tabindex="0">
+            <div class="ph-metric-icon ph-metric-icon--amber">
+              <ion-icon name="star-outline"></ion-icon>
+            </div>
+            <div class="ph-metric-body">
+              <div class="ph-metric-row">
+                <span class="ph-metric-value">{{ reviews.length }}</span>
+                <span class="ph-metric-badge ph-metric-badge--amber" *ngIf="reviews.length > 0">
+                  {{ (stats?.average_rating ?? 0) | number:'1.1-1' }} ★
+                </span>
+              </div>
+              <span class="ph-metric-label">Reseñas recibidas</span>
+            </div>
+            <ion-icon name="chevron-forward" class="ph-metric-chevron"></ion-icon>
+          </div>
+
+        </div><!-- /.ph-metrics-grid -->
+      </div><!-- /.ph-section -->
 
       <!-- ── Accesos rápidos ───────────────────────────────────── -->
       <div class="ph-section">
@@ -206,6 +227,62 @@
 
     </ng-container>
 
+  </div>
+
+  <!-- ══ PANEL DE RESEÑAS ════════════════════════════════════════ -->
+  <div class="ph-rv-overlay" *ngIf="showReviewsModal" (click)="closeReviews()" (keypress)="closeReviews()" role="button" tabindex="0" aria-label="Cerrar panel"></div>
+  <div class="ph-rv-panel" [class.ph-rv-panel--open]="showReviewsModal">
+    <div class="ph-rv-header">
+      <div class="ph-rv-handle"></div>
+      <h3 class="ph-rv-title">
+        <ion-icon name="star"></ion-icon>
+        Reseñas recibidas
+        <span class="ph-rv-count" *ngIf="reviews.length > 0">({{ reviews.length }})</span>
+      </h3>
+      <ion-button fill="clear" size="small" class="ph-rv-close" (click)="closeReviews()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="ph-rv-body">
+      <!-- Skeleton cargando -->
+      <ng-container *ngIf="reviewsLoading">
+        <div class="ph-rv-skeleton" *ngFor="let i of [1,2,3]">
+          <div class="ph-sk ph-sk--avatar"></div>
+          <div class="ph-rv-sk-lines">
+            <div class="ph-sk ph-sk--name"></div>
+            <div class="ph-sk ph-sk--text"></div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Sin reseñas -->
+      <div class="ph-rv-empty" *ngIf="!reviewsLoading && reviews.length === 0">
+        <ion-icon name="star-outline"></ion-icon>
+        <p>Aún no tienes reseñas</p>
+        <small>Cuando completes reservas, los clientes podrán calificarte aquí</small>
+      </div>
+
+      <!-- Lista de reseñas -->
+      <div class="ph-rv-list" *ngIf="!reviewsLoading && reviews.length > 0">
+        <div class="ph-rv-card" *ngFor="let review of reviews">
+          <div class="ph-rv-card-header">
+            <div class="ph-rv-avatar">
+              {{ (review.client_name ?? 'C').charAt(0).toUpperCase() }}
+            </div>
+            <div class="ph-rv-card-meta">
+              <span class="ph-rv-client-name">{{ review.client_name ?? 'Cliente' }}</span>
+              <span class="ph-rv-date">{{ review.created_at | date:'dd MMM yyyy' }}</span>
+            </div>
+            <div class="ph-rv-stars">
+              <ion-icon name="star" *ngFor="let s of starArray(review.rating)" class="ph-rv-star--filled"></ion-icon>
+              <ion-icon name="star-outline" *ngFor="let s of starArray(5 - review.rating)" class="ph-rv-star--empty"></ion-icon>
+            </div>
+          </div>
+          <p class="ph-rv-comment" *ngIf="review.comment">{{ review.comment }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 
 </ion-content>

@@ -9,6 +9,7 @@ import { ProviderProfile } from '../../../core/models/provider.model';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MonetizationComponentsModule } from '../../../components/monetization-components.module';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-provider-profile',
@@ -29,7 +30,8 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private readonly toastCtrl: ToastController,
     private authService: AuthService,
-    private providerService: ProviderService
+    private providerService: ProviderService,
+    private paymentRedirect: PaymentRedirectService
   ) { }
 
   ngOnInit() {}
@@ -139,7 +141,7 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
   }
 
   goToCatalog() {
-    this.router.navigate(['/product-catalog']);
+    this.paymentRedirect.openProviderServicePlan('/provider/tabs/profile');
   }
 
   async goSalir() {

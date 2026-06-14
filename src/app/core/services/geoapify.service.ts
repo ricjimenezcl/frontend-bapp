@@ -1,112 +1,157 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, map, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
-/**
- * Resultado de geocodificación de Geoapify
- */
-export interface GeoapifyResult {
+// Formato que devuelve GET /api/v1/providers/geocoding/search (Nominatim/Mapbox)
+interface NominatimResponse {
+  source: 'api' | 'cache';
+  results: NominatimResult[];
+}
+
+interface NominatimResult {
+  place_name: string;       // "Av. Providencia 1234, Providencia, Santiago"
+  text: string;             // "Av. Providencia"
+  address: string;          // "1234"
+  center: [number, number]; // [lon, lat]
+  relevance: number;
+  place_type: string[];
+}
+
+// Formato que devuelve GET /api/v1/geocoding/reverse (Geoapify directo)
+interface ReverseResponse {
+  features?: { properties?: { formatted?: string } }[];
+}
+
+export interface AddressSuggestion {
+  id: string;
   formatted: string;
+  displayText: string;
+  context: string;
   lat: number;
   lon: number;
-  address_line1?: string;
-  address_line2?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postcode?: string;
-  country_code?: string;
-  place_id?: string;
+  icon: string;
 }
 
-/**
- * Response del backend para geocodificación
- */
-export interface GeoapifyResponse {
-  results: GeoapifyResult[];
-}
+/** Alias para retrocompatibilidad con código existente de la app */
+export type GeoapifyResult = AddressSuggestion;
 
-/**
- * Geoapify Service - Sincronizado con proyecto WEB
- * Servicio para búsqueda de direcciones y geocodificación inversa
- * usando los endpoints del backend que consumen Geoapify API
- */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class GeoapifyService {
-  private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/providers/geocoding`;
+  private readonly http = inject(HttpClient);
+
+  // Cache local (el backend ya tiene caché Redis 7 días, pero evitamos peticiones redundantes)
+  private readonly autocompleteCache = new Map<string, {
+    data: AddressSuggestion[];
+    timestamp: number;
+  }>();
+
+  private readonly reverseCache = new Map<string, {
+    data: string;
+    timestamp: number;
+  }>();
+
+  private readonly AUTOCOMPLETE_CACHE_TTL = 5 * 60 * 1000;  // 5 min
+  private readonly REVERSE_CACHE_TTL      = 10 * 60 * 1000; // 10 min
+  private readonly MAX_CACHE_SIZE         = 100;
 
   /**
-   * Buscar direcciones por texto (autocomplete)
-   * @param query Texto de búsqueda (mínimo 3 caracteres)
-   * @param country Código de país (default: 'cl' para Chile)
-   * @returns Observable con array de resultados
+   * Autocompletado de direcciones limitado a Chile.
+   * Usa GET /api/v1/providers/geocoding/search (Nominatim + caché Redis 7 días).
    */
-  searchAddress(query: string, country = 'cl'): Observable<GeoapifyResult[]> {
-    if (!query || query.length < 3) {
-      return of([]);
+  autocompleteAddress(query: string, country = 'cl'): Observable<AddressSuggestion[]> {
+    if (!query || query.length < 3) return of([]);
+
+    const cacheKey = query.toLowerCase().trim();
+    const cached = this.autocompleteCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.AUTOCOMPLETE_CACHE_TTL) {
+      return of(cached.data);
     }
 
-    return this.http.get<GeoapifyResponse>(`${this.apiUrl}/search`, {
+    const url = `${environment.apiUrl}/providers/geocoding/search`;
+    return this.http.get<NominatimResponse>(url, {
       params: { q: query, country }
     }).pipe(
-      map(response => response.results || []),
-      catchError(error => {
-        console.error('[GeoapifyService] searchAddress error:', error);
-        return of([]);
-      })
+      map(response => {
+        const results = this.transformNominatimResults(response.results || []);
+        this.autocompleteCache.set(cacheKey, { data: results, timestamp: Date.now() });
+        if (this.autocompleteCache.size > this.MAX_CACHE_SIZE) {
+          this.autocompleteCache.delete(this.autocompleteCache.keys().next().value!);
+        }
+        return results;
+      }),
+      catchError(() => of([]))
+    );
+  }
+
+  /** @deprecated Usar autocompleteAddress() */
+  searchAddress(query: string, country = 'cl'): Observable<AddressSuggestion[]> {
+    return this.autocompleteAddress(query, country);
+  }
+
+  /** @deprecated Usar autocompleteAddress() con limit */
+  searchAddressWithLimit(query: string, limit = 5, country = 'cl'): Observable<AddressSuggestion[]> {
+    return this.autocompleteAddress(query, country).pipe(
+      map(results => results.slice(0, limit))
     );
   }
 
   /**
-   * Geocodificación inversa - obtener dirección desde coordenadas
-   * @param lat Latitud
-   * @param lon Longitud
-   * @returns Observable con el resultado más cercano o null
+   * Geocodificación inversa: coordenadas → dirección formateada.
+   * Devuelve un AddressSuggestion con .formatted para compatibilidad con LocationService.
    */
-  reverseGeocode(lat: number, lon: number): Observable<GeoapifyResult | null> {
-    return this.http.get<GeoapifyResponse>(`${this.apiUrl}/reverse`, {
-      params: { 
-        lat: lat.toString(), 
-        lon: lon.toString() 
-      }
-    }).pipe(
-      map(response => response.results?.[0] || null),
-      catchError(error => {
-        console.error('[GeoapifyService] reverseGeocode error:', error);
-        return of(null);
-      })
-    );
-  }
-
-  /**
-   * Buscar direcciones con límite de resultados
-   * @param query Texto de búsqueda
-   * @param limit Número máximo de resultados (default: 5)
-   * @param country Código de país
-   * @returns Observable con array de resultados
-   */
-  searchAddressWithLimit(
-    query: string, 
-    limit: number = 5, 
-    country = 'cl'
-  ): Observable<GeoapifyResult[]> {
-    if (!query || query.length < 3) {
-      return of([]);
+  reverseGeocode(lat: number, lon: number): Observable<AddressSuggestion | null> {
+    const cacheKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+    const cached = this.reverseCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.REVERSE_CACHE_TTL) {
+      return of(this.addressStringToSuggestion(cached.data, lat, lon));
     }
 
-    return this.http.get<GeoapifyResponse>(`${this.apiUrl}/search`, {
-      params: { q: query, country, limit: limit.toString() }
+    const url = `${environment.apiUrl}/geocoding/reverse`;
+    return this.http.get<ReverseResponse>(url, {
+      params: { lat: lat.toString(), lon: lon.toString() }
     }).pipe(
-      map(response => (response.results || []).slice(0, limit)),
-      catchError(error => {
-        console.error('[GeoapifyService] searchAddressWithLimit error:', error);
-        return of([]);
-      })
+      map(response => {
+        const address = response.features?.[0]?.properties?.formatted ?? 'Ubicación desconocida';
+        this.reverseCache.set(cacheKey, { data: address, timestamp: Date.now() });
+        if (this.reverseCache.size > this.MAX_CACHE_SIZE) {
+          this.reverseCache.delete(this.reverseCache.keys().next().value!);
+        }
+        return this.addressStringToSuggestion(address, lat, lon);
+      }),
+      catchError(() => of(null))
     );
+  }
+
+  private addressStringToSuggestion(address: string, lat: number, lon: number): AddressSuggestion {
+    return { id: `rev_${lat}_${lon}`, formatted: address, displayText: address, context: '', lat, lon, icon: 'location-outline' };
+  }
+
+  private transformNominatimResults(results: NominatimResult[]): AddressSuggestion[] {
+    return results.map((r, idx) => {
+      const lon = r.center[0];
+      const lat = r.center[1];
+      const displayText = r.address ? `${r.text} ${r.address}`.trim() : r.text || r.place_name;
+      const firstComma = r.place_name.indexOf(',');
+      const context = firstComma !== -1 ? r.place_name.slice(firstComma + 1).trim() : '';
+      return {
+        id:          String(idx),
+        formatted:   r.place_name,
+        displayText,
+        context,
+        lat,
+        lon,
+        icon:        this.getIconForPlaceType(r.place_type),
+      };
+    });
+  }
+
+  private getIconForPlaceType(placeType: string[]): string {
+    const type = (placeType?.[0] ?? '').toLowerCase();
+    if (type === 'house' || type === 'address') return 'home-outline';
+    if (type === 'park'  || type === 'leisure') return 'leaf-outline';
+    if (type === 'city'  || type === 'town')    return 'business-outline';
+    return 'location-outline';
   }
 }

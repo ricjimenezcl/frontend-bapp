@@ -1,4 +1,3 @@
-// src/app/client/pages/client-profile/client-profile.page.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -9,6 +8,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { ClientService } from '../../services/client.service';
 import { DEFAULT_AVATAR_URL } from '../../../core/constants/default-avatar';
 import { MonetizationComponentsModule } from '../../../components/monetization-components.module';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-client-profile',
@@ -44,7 +44,8 @@ export class ClientProfilePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private clientService: ClientService,
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   ngOnInit() {
@@ -191,7 +192,7 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   }
 
   goToCatalog() {
-    this.router.navigate(['/product-catalog']);
+    this.paymentRedirect.openClientUnlock('/client/tabs/profile');
   }
 
   async inviteFriends() {

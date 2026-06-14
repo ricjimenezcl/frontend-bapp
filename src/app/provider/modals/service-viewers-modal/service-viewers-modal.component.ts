@@ -4,6 +4,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 // ═══ Interfaces ═══════════════════════════════════════════════════
 
@@ -60,7 +61,8 @@ export class ServiceViewersModalComponent implements OnInit {
   constructor(
     private readonly modalCtrl: ModalController,
     private readonly http: HttpClient,
-    private readonly router: Router
+    private readonly router: Router,
+    private readonly paymentRedirect: PaymentRedirectService
   ) {}
 
   ngOnInit() {
@@ -197,14 +199,9 @@ export class ServiceViewersModalComponent implements OnInit {
       return;
     }
     
-    // Modo real: cerrar modal y navegar a payment
+    // Modo real: cerrar modal y abrir pago en bappsearch.com
     this.modalCtrl.dismiss();
-    this.router.navigate(['/payment'], {
-      queryParams: {
-        product_type: 'PROVIDER_LEADS_7',
-        returnTo: '/provider/tabs/home'
-      }
-    });
+    this.paymentRedirect.openProviderLeads('/provider/tabs/home');
   }
 
   confirmPayment(): void {

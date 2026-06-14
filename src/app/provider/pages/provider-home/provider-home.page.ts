@@ -10,6 +10,8 @@ import { WebSocketService } from '../../../core/services/websocket.service';
 import { NotificationType } from '../../../core/models/chat.model';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { ServiceViewersModalComponent } from '../../modals/service-viewers-modal/service-viewers-modal.component';
+import { ReviewService } from '../../../core/services/review.service';
+import { Review } from '../../../core/models/review.model';
 
 @Component({
   selector: 'app-provider-home',
@@ -26,6 +28,9 @@ export class ProviderHomePage implements OnInit, OnDestroy {
   showVerificationAlert = false;
   verificationMessage = '';
   stats: ProviderStats | null = null;
+  reviews: Review[] = [];
+  reviewsLoading = false;
+  showReviewsModal = false;
 
   metrics = {
     profileViews: 0,
@@ -44,7 +49,8 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     private readonly toastCtrl: ToastController,
     private readonly alertCtrl: AlertController,
     private readonly documentService: DocumentUploadService,
-    private readonly modalCtrl: ModalController
+    private readonly modalCtrl: ModalController,
+    private readonly reviewService: ReviewService
   ) { }
 
   ngOnInit() {
@@ -94,6 +100,8 @@ export class ProviderHomePage implements OnInit, OnDestroy {
           
           // Cargar métricas reales después de obtener el perfil
           this.loadProviderMetrics(profile.id.toString());
+          // Cargar reseñas del proveedor
+          this.loadReviews(profile.id);
         },
         error: (error) => {
           console.error('❌ Error cargando perfil del proveedor:', error);
@@ -132,6 +140,40 @@ export class ProviderHomePage implements OnInit, OnDestroy {
           };
         }
       });
+  }
+
+  /**
+   * Cargar reseñas recibidas por el proveedor
+   */
+  private loadReviews(providerId: number) {
+    this.reviewsLoading = true;
+    this.reviewService.getProviderReviews(providerId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (reviews) => {
+          this.reviews = reviews;
+          this.reviewsLoading = false;
+        },
+        error: (err) => {
+          console.warn('⚠️ Error cargando reseñas:', err);
+          this.reviewsLoading = false;
+        }
+      });
+  }
+
+  /** Abrir panel de reseñas */
+  openReviews() {
+    this.showReviewsModal = true;
+  }
+
+  /** Cerrar panel de reseñas */
+  closeReviews() {
+    this.showReviewsModal = false;
+  }
+
+  /** Genera un arreglo de N enteros para usar en *ngFor de estrellas */
+  starArray(n: number): number[] {
+    return Array(Math.min(Math.max(Math.round(n), 0), 5)).fill(0);
   }
 
   /**

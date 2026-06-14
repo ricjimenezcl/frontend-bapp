@@ -7,6 +7,7 @@ import { StateService } from '../../../shared/services/state.service';
 import { MapService } from '../../../core/services/map.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { BappieChatbotComponent } from '../../../shared/components/bappie-chatbot/bappie-chatbot.component';
 
 @Component({
   selector: 'app-client-tabs',
@@ -14,7 +15,7 @@ import { filter, takeUntil } from 'rxjs/operators';
   styleUrls: ['./tabs.page.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [CommonModule, IonicModule, RouterModule]
+  imports: [CommonModule, IonicModule, RouterModule, BappieChatbotComponent]
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
   selectedServices: any[] = [];

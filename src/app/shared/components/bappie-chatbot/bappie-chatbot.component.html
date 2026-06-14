@@ -1,0 +1,64 @@
+<!-- ══ TRIGGER FAB ═══════════════════════════════════════════════ -->
+<div class="bap-fab-wrap">
+  <div class="bap-tooltip" *ngIf="showTooltip && !isOpen">¡Pregúntame algo! 💬</div>
+  <button class="bap-fab" (click)="toggleChat()" aria-label="Abrir chat con Bappie IA">
+    <span *ngIf="!isOpen" class="bap-fab-emoji">🤖</span>
+    <ion-icon *ngIf="isOpen" name="close" class="bap-fab-close"></ion-icon>
+  </button>
+</div>
+
+<!-- ══ CHAT WINDOW ════════════════════════════════════════════════ -->
+<div class="bap-window" [class.bap-window--open]="isOpen">
+  <!-- Header -->
+  <div class="bap-header">
+    <div class="bap-header-avatar">🤖</div>
+    <div class="bap-header-info">
+      <span class="bap-header-name">Bappie IA</span>
+      <span class="bap-header-status">Asistente virtual de BAPP</span>
+    </div>
+  </div>
+
+  <!-- Body / messages -->
+  <div class="bap-body" #chatBody>
+    <div
+      *ngFor="let msg of messages"
+      class="bap-msg"
+      [class.bap-msg--bot]="msg.type === 'msg-bot'"
+      [class.bap-msg--user]="msg.type === 'msg-user'"
+      [innerHTML]="msg.text">
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="bap-typing" *ngIf="isTyping">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="bap-suggestions" *ngIf="suggestions.length > 0 && messages.length <= 2">
+    <button
+      *ngFor="let s of suggestions"
+      class="bap-suggestion"
+      (click)="useSuggestion(s)">
+      {{ s }}
+    </button>
+  </div>
+
+  <!-- Input -->
+  <div class="bap-input-row">
+    <input
+      class="bap-input"
+      type="text"
+      placeholder="Escribe tu pregunta..."
+      [(ngModel)]="userInput"
+      (keydown.enter)="handleUserInput()"
+      [disabled]="isProcessing" />
+    <button
+      class="bap-send"
+      (click)="handleUserInput()"
+      [disabled]="isProcessing || !userInput.trim()"
+      aria-label="Enviar">
+      <ion-icon name="send"></ion-icon>
+    </button>
+  </div>
+</div>

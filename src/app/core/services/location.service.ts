@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { GeoapifyService, GeoapifyResult } from './geoapify.service';
+import { GeoapifyService, AddressSuggestion } from './geoapify.service';
 import { GpsValidationService } from './gps-validation.service';
 import { Observable, from } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
@@ -43,7 +43,7 @@ export class LocationService {
    * @param country Código de país (default: 'cl')
    * @returns Observable con resultados de direcciones
    */
-  searchAddresses(query: string, country = 'cl'): Observable<GeoapifyResult[]> {
+  searchAddresses(query: string, country = 'cl'): Observable<AddressSuggestion[]> {
     return this.geoapifyService.searchAddress(query, country);
   }
 
@@ -58,7 +58,7 @@ export class LocationService {
     query: string, 
     limit: number = 5, 
     country = 'cl'
-  ): Observable<GeoapifyResult[]> {
+  ): Observable<AddressSuggestion[]> {
     return this.geoapifyService.searchAddressWithLimit(query, limit, country);
   }
 
@@ -68,7 +68,7 @@ export class LocationService {
    * @param lon Longitud
    * @returns Observable con resultado de dirección o null
    */
-  getAddressFromCoordinates(lat: number, lon: number): Observable<GeoapifyResult | null> {
+  getAddressFromCoordinates(lat: number, lon: number): Observable<AddressSuggestion | null> {
     return this.geoapifyService.reverseGeocode(lat, lon);
   }
 

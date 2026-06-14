@@ -49,6 +49,7 @@ export interface ServiceProvider {
   validation_status?: string;
   distance?: number;
   services?: ServiceCategory[];
+  portfolio_images?: string[];
 }
 
 export interface Booking {

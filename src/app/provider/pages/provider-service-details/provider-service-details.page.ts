@@ -1,4 +1,3 @@
-// src/app/provider/pages/provider-service-details/provider-service-details.page.ts
 import { Component,  OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -10,6 +9,7 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { CoreService } from '../../../shared/services/core.service';
 import { ProviderAddServicePage } from '../provider-add-service/provider-add-service.page';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-provider-service-details',
@@ -36,6 +36,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
   private readonly documentService = inject(DocumentUploadService);
+  private readonly paymentRedirect = inject(PaymentRedirectService);
 
   currentUser: any;
   servicios: ProviderServices[] = [];
@@ -215,7 +216,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     await alert.present();
     const { role } = await alert.onDidDismiss();
     if (role === 'confirm') {
-      this.router.navigate(['/product-catalog']);
+      this.paymentRedirect.openProviderServicePlan('/provider/tabs/service-details');
     }
   }
 
@@ -313,9 +314,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     const { role } = await alert.onDidDismiss();
     if (role === 'confirm') {
       const returnTo = this.router.url.split('?')[0];
-      this.router.navigate(['/product-catalog'], {
-        queryParams: { returnTo, action: 'add-service' }
-      });
+      this.paymentRedirect.openProviderServicePlan(returnTo, 'add-service');
     }
   }
 
@@ -456,12 +455,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
    * Navega a la página de plan extra de servicios
    */
   goToExtraServicePlan(): void {
-    this.router.navigate(['/product-catalog'], {
-      queryParams: {
-        returnTo: '/provider/tabs/service-details',
-        action: 'add-service'
-      }
-    });
+    this.paymentRedirect.openProviderServicePlan('/provider/tabs/service-details', 'add-service');
   }
 
   goBack() {
