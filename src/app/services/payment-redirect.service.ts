@@ -30,7 +30,7 @@ export interface PaymentRedirectOptions {
   action?: string;
 }
 
-const PAYMENT_BASE_URL = 'https://bappsearch.com/payment';
+const PAYMENT_BASE_URL = 'https://bappsearch.com/app-payment';
 
 @Injectable({ providedIn: 'root' })
 export class PaymentRedirectService {
@@ -45,8 +45,10 @@ export class PaymentRedirectService {
     const user = this.auth.getCurrentUser();
     const userId = user?.id ?? user?.user_id ?? '';
     const role   = (user?.role ?? 'CLIENT').toUpperCase();
+    const token  = localStorage.getItem('token') ?? '';
 
     const params = new URLSearchParams({
+      token,
       product_type: options.productType,
       user_id:      String(userId),
       role,
