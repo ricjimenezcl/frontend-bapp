@@ -1,82 +1,81 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Términos y Condiciones</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="login-bg">
+    <div class="login-wrap">
 
-<ion-content class="ion-padding terms-acceptance">
+      <!-- Logo -->
+      <div class="login-logo">
+        <img src="assets/imgs/logo.png" alt="logo" class="logo-img">
+        <img src="assets/imgs/titulo.png" alt="titulo" class="titulo-img">
+      </div>
 
-  <div class="welcome-block">
-    <ion-icon name="shield-checkmark-outline" class="shield-icon"></ion-icon>
-    <h2>Antes de continuar</h2>
-    <p>Para usar BAPP Search debes aceptar nuestros Términos y Condiciones y Política de Privacidad.</p>
+      <!-- Card -->
+      <div class="login-card">
+
+        <!-- Header de la card -->
+        <div class="ta-header">
+          <div class="ta-icon-wrap">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+          </div>
+          <h2 class="ta-title">Términos y condiciones</h2>
+          <p class="ta-subtitle">Por favor revisa y acepta los términos para continuar</p>
+        </div>
+
+        <!-- Resumen scrollable -->
+        <div class="ta-terms-box">
+          <p class="ta-terms-heading">Términos de uso de BAPP</p>
+          <p class="ta-terms-text">Al usar nuestra plataforma, aceptas que tus datos serán utilizados para conectarte con proveedores de servicios cercanos. Nos comprometemos a proteger tu privacidad y datos personales conforme a la ley aplicable.</p>
+          <p class="ta-terms-text">No está permitido usar la plataforma para actividades ilegales, spam o cualquier comportamiento que viole los derechos de otros usuarios.</p>
+          <p class="ta-terms-text">BAPP actúa como intermediario y no se responsabiliza por la calidad de los servicios prestados por proveedores independientes.</p>
+          <div class="ta-terms-links">
+            <ion-button fill="clear" size="small" routerLink="/terms" class="ta-link-btn">
+              <ion-icon name="document-text-outline" slot="start"></ion-icon>
+              Términos y condiciones completos
+            </ion-button>
+            <ion-button fill="clear" size="small" routerLink="/privacy" class="ta-link-btn">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              Política de privacidad completa
+            </ion-button>
+          </div>
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="ta-checks">
+          <ion-item lines="none" class="ta-check-item">
+            <ion-checkbox slot="start" [(ngModel)]="termsAccepted"></ion-checkbox>
+            <ion-label class="ion-text-wrap ta-check-label">
+              He leído y acepto los
+              <a routerLink="/terms" class="ta-link">Términos y condiciones</a>
+              y la
+              <a routerLink="/privacy" class="ta-link">Política de privacidad</a> *
+            </ion-label>
+          </ion-item>
+
+          <ion-item lines="none" class="ta-check-item">
+            <ion-checkbox slot="start" [(ngModel)]="emailOptIn"></ion-checkbox>
+            <ion-label class="ion-text-wrap ta-check-label ta-check-optional">
+              Acepto recibir comunicaciones por correo electrónico <span class="ta-optional">(opcional)</span>
+            </ion-label>
+          </ion-item>
+        </div>
+
+        <!-- Acciones -->
+        <div class="ta-actions">
+          <ion-button
+            expand="block"
+            class="submit-btn"
+            [disabled]="!canContinue || isLoading"
+            (click)="onAccept()">
+            <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!isLoading" name="checkmark-circle-outline" slot="start"></ion-icon>
+            {{ isLoading ? 'Guardando...' : 'Aceptar y continuar' }}
+          </ion-button>
+
+          <button type="button" class="ta-decline-btn" (click)="onDecline()" [disabled]="isLoading">
+            Rechazar y cerrar sesión
+          </button>
+        </div>
+
+      </div>
+    </div>
   </div>
-
-  <div class="terms-summary">
-    <h3>Resumen de lo más importante:</h3>
-    <ul>
-      <li>Tu información es tratada de forma confidencial y segura.</li>
-      <li>No vendemos tus datos personales a terceros.</li>
-      <li>Puedes solicitar la eliminación de tu cuenta en cualquier momento.</li>
-      <li>El servicio conecta clientes con proveedores de servicios en Chile.</li>
-    </ul>
-  </div>
-
-  <div class="links-block">
-    <ion-button fill="clear" routerLink="/terms" target="_blank" size="small">
-      <ion-icon name="document-text-outline" slot="start"></ion-icon>
-      Leer Términos y Condiciones completos
-    </ion-button>
-    <ion-button fill="clear" routerLink="/privacy" target="_blank" size="small">
-      <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-      Leer Política de Privacidad completa
-    </ion-button>
-  </div>
-
-  <!-- Checkbox obligatorio -->
-  <ion-item lines="none" class="checkbox-item">
-    <ion-checkbox
-      [(ngModel)]="termsAccepted"
-      slot="start"
-    ></ion-checkbox>
-    <ion-label class="ion-text-wrap">
-      Acepto los <a routerLink="/terms">Términos y Condiciones</a>
-      y la <a routerLink="/privacy">Política de Privacidad</a> *
-    </ion-label>
-  </ion-item>
-
-  <!-- Checkbox opcional -->
-  <ion-item lines="none" class="checkbox-item">
-    <ion-checkbox
-      [(ngModel)]="emailOptIn"
-      slot="start"
-    ></ion-checkbox>
-    <ion-label class="ion-text-wrap">
-      Deseo recibir ofertas y novedades de BAPP Search por email (opcional)
-    </ion-label>
-  </ion-item>
-
-  <div class="actions">
-    <ion-button
-      expand="block"
-      [disabled]="!canContinue || isLoading"
-      (click)="onAccept()"
-      class="accept-button"
-    >
-      <ion-spinner *ngIf="isLoading" slot="start" name="crescent"></ion-spinner>
-      <ion-icon *ngIf="!isLoading" name="checkmark-circle-outline" slot="start"></ion-icon>
-      {{ isLoading ? 'Guardando...' : 'Aceptar y continuar' }}
-    </ion-button>
-
-    <ion-button
-      expand="block"
-      fill="outline"
-      color="medium"
-      (click)="onDecline()"
-      [disabled]="isLoading"
-    >
-      Rechazar y cerrar sesión
-    </ion-button>
-  </div>
-
 </ion-content>

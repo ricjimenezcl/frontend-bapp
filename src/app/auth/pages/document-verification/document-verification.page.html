@@ -1,344 +1,216 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Verificación de Identidad</ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content>
+  <div class="dv-bg">
+    <div class="dv-wrap">
 
-<ion-content class="ion-padding">
-  <!-- STEP 1: UPLOAD DOCUMENTS -->
-  <div *ngIf="state.step === 'UPLOAD'" class="verification-container">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>📋 Verificación de Identidad</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <p class="info-text">
-          Para poder agregar servicios, necesitamos verificar tu identidad comparando tu
-          rostro con tu documento de identidad.
-        </p>
+      <!-- Logo -->
+      <div class="login-logo">
+        <img src="assets/imgs/logo.png" alt="logo" class="logo-img">
+        <img src="assets/imgs/titulo.png" alt="titulo" class="titulo-img">
+      </div>
 
-        <ol class="steps-list">
-          <li>Captura una selfie con verificación de liveness (gira tu rostro)</li>
-          <li>Sube una foto clara de tu documento de identidad</li>
-          <li>Confirma para análisis de rostro automático</li>
-          <li>Espera la verificación del sistema</li>
-        </ol>
-      </ion-card-content>
-    </ion-card>
+      <!-- Page title -->
+      <div class="dv-page-header">
+        <div class="dv-page-icon">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </div>
+        <div>
+          <h1 class="dv-page-title">Verificación de identidad</h1>
+          <p class="dv-page-sub">Verificación facial automática con IA</p>
+        </div>
+      </div>
 
-    <!-- SELFIE SECTION -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="camera"></ion-icon> Selfie
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="state.selfieUrl; else noSelfie" class="preview-container">
-          <img [src]="state.selfieUrl" class="preview-image" alt="Selfie" />
-          <p class="success-text" *ngIf="state.selfieDocumentId">
-            <ion-icon name="checkmark-circle"></ion-icon> Selfie guardada
+      <!-- Stepper -->
+      <div class="dv-stepper">
+        <div class="dv-step" [class.dv-step--active]="state.step === 'UPLOAD'" [class.dv-step--done]="state.step !== 'UPLOAD'">
+          <div class="dv-step-circle">1</div>
+          <span>Subir</span>
+        </div>
+        <div class="dv-step-line"></div>
+        <div class="dv-step" [class.dv-step--active]="state.step === 'VERIFY'" [class.dv-step--done]="state.step === 'WAITING' || state.step === 'APPROVED' || state.step === 'REJECTED'">
+          <div class="dv-step-circle">2</div>
+          <span>Verificar</span>
+        </div>
+        <div class="dv-step-line"></div>
+        <div class="dv-step" [class.dv-step--active]="state.step === 'WAITING'">
+          <div class="dv-step-circle">3</div>
+          <span>Procesando</span>
+        </div>
+        <div class="dv-step-line"></div>
+        <div class="dv-step" [class.dv-step--active]="state.step === 'APPROVED' || state.step === 'REJECTED'">
+          <div class="dv-step-circle">4</div>
+          <span>Resultado</span>
+        </div>
+      </div>
+
+      <!-- ── STEP UPLOAD ─────────────────────────────────────────────────── -->
+      <ng-container *ngIf="state.step === 'UPLOAD'">
+
+        <!-- Info card -->
+        <div class="dv-card">
+          <p class="dv-info-text">
+            Para agregar servicios necesitamos verificar tu identidad comparando tu selfie con tu documento de identidad.
           </p>
+          <ol class="dv-steps-list">
+            <li>Captura una selfie con verificación de liveness</li>
+            <li>Sube una foto de tu documento de identidad</li>
+            <li>Confirma para el análisis automático</li>
+          </ol>
         </div>
 
-        <ng-template #noSelfie>
-          <div class="placeholder">
-            <ion-icon name="camera" size="large"></ion-icon>
-            <p>No hay selfie capturada</p>
-          </div>
-        </ng-template>
-
-        <div class="button-group">
-          <ion-button
-            expand="block"
-            (click)="captureSelfie()"
-            [disabled]="state.uploading"
-            color="primary"
-          >
-            <ion-icon name="camera" slot="start"></ion-icon>
-            {{ state.selfieUrl ? 'Cambiar Selfie' : 'Capturar Selfie' }}
-          </ion-button>
-
-          <ion-button
-            expand="block"
-            (click)="uploadSelfie()"
-            [disabled]="!state.selfieUrl || state.uploading"
-            color="success"
-          >
-            <ion-spinner *ngIf="state.uploading" name="crescent"></ion-spinner>
-            <span *ngIf="!state.uploading">
-              <ion-icon name="cloud-upload" slot="start"></ion-icon>
-              {{ state.selfieDocumentId ? 'Selfie Subida ✓' : 'Subir Selfie' }}
+        <!-- Selfie card -->
+        <div class="dv-card dv-upload-card">
+          <div class="dv-upload-header">
+            <ion-icon name="camera-outline" class="dv-upload-icon"></ion-icon>
+            <span class="dv-upload-title">Selfie</span>
+            <span class="dv-upload-check" *ngIf="state.selfieDocumentId">
+              <ion-icon name="checkmark-circle"></ion-icon>
             </span>
-          </ion-button>
-        </div>
-
-        <ion-progress-bar
-          *ngIf="state.uploading && state.uploadProgress > 0"
-          type="determinate"
-          [value]="state.uploadProgress / 100"
-        ></ion-progress-bar>
-        <p *ngIf="state.uploading" class="progress-text">
-          {{ state.uploadProgress }}%
-        </p>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- ID DOCUMENT SECTION -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="document"></ion-icon> Documento de Identidad
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="state.idDocumentUrl; else noIdDoc" class="preview-container">
-          <img [src]="state.idDocumentUrl" class="preview-image" alt="ID Document" />
-          <p class="success-text" *ngIf="state.idDocumentId">
-            <ion-icon name="checkmark-circle"></ion-icon> Documento guardado
-          </p>
-        </div>
-
-        <ng-template #noIdDoc>
-          <div class="placeholder">
-            <ion-icon name="document" size="large"></ion-icon>
-            <p>No hay documento capturado</p>
           </div>
-        </ng-template>
 
-        <div class="button-group">
-          <ion-button
-            expand="block"
-            (click)="selectIdDocument()"
-            [disabled]="state.uploading"
-            color="primary"
-          >
-            <ion-icon name="image" slot="start"></ion-icon>
-            {{ state.idDocumentUrl ? 'Cambiar Documento' : 'Seleccionar Documento' }}
-          </ion-button>
+          <div class="dv-preview-wrap" *ngIf="state.selfieUrl">
+            <img [src]="state.selfieUrl" class="dv-preview-img" alt="Selfie" />
+          </div>
+          <div class="dv-placeholder" *ngIf="!state.selfieUrl">
+            <ion-icon name="camera-outline"></ion-icon>
+            <span>Sin selfie</span>
+          </div>
 
-          <ion-button
-            expand="block"
-            (click)="uploadIdDocument()"
-            [disabled]="!state.idDocumentUrl || state.uploading"
-            color="success"
-          >
-            <ion-spinner *ngIf="state.uploading" name="crescent"></ion-spinner>
-            <span *ngIf="!state.uploading">
-              <ion-icon name="cloud-upload" slot="start"></ion-icon>
-              {{ state.idDocumentId ? 'Documento Subido ✓' : 'Subir Documento' }}
-            </span>
-          </ion-button>
+          <div class="dv-btn-group">
+            <ion-button expand="block" class="dv-btn-primary" (click)="captureSelfie()" [disabled]="state.uploading">
+              <ion-icon [name]="state.selfieUrl ? 'camera' : 'camera-outline'" slot="start"></ion-icon>
+              {{ state.selfieUrl ? 'Cambiar selfie' : 'Capturar selfie' }}
+            </ion-button>
+            <ion-button expand="block" class="dv-btn-success" (click)="uploadSelfie()" [disabled]="!state.selfieUrl || state.uploading">
+              <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
+              {{ state.selfieDocumentId ? 'Selfie subida ✓' : 'Subir selfie' }}
+            </ion-button>
+          </div>
+
+          <ion-progress-bar *ngIf="state.uploading && state.uploadProgress > 0"
+            type="determinate" [value]="state.uploadProgress / 100" class="dv-progress"></ion-progress-bar>
         </div>
 
-        <ion-progress-bar
-          *ngIf="state.uploading && state.uploadProgress > 0"
-          type="determinate"
-          [value]="state.uploadProgress / 100"
-        ></ion-progress-bar>
-        <p *ngIf="state.uploading" class="progress-text">
-          {{ state.uploadProgress }}%
-        </p>
-      </ion-card-content>
-    </ion-card>
+        <!-- Documento card -->
+        <div class="dv-card dv-upload-card">
+          <div class="dv-upload-header">
+            <ion-icon name="document-outline" class="dv-upload-icon"></ion-icon>
+            <span class="dv-upload-title">Documento de identidad</span>
+            <span class="dv-upload-check" *ngIf="state.idDocumentId">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </span>
+          </div>
 
-    <!-- FACE PREVIEW SECTION -->
-    <ion-card *ngIf="state.selfieDocumentId && state.idDocumentId">
-      <ion-card-header>
-        <ion-card-title>
-          👤 Preview de Rostros a Comparar
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <p class="info-text">
-          Estos son los rostros que serán comparados para verificar tu identidad:
-        </p>
+          <div class="dv-preview-wrap" *ngIf="state.idDocumentUrl">
+            <img [src]="state.idDocumentUrl" class="dv-preview-img" alt="Documento" />
+          </div>
+          <div class="dv-placeholder" *ngIf="!state.idDocumentUrl">
+            <ion-icon name="document-outline"></ion-icon>
+            <span>Sin documento</span>
+          </div>
 
-        <!-- Loading State -->
-        <div *ngIf="state.loadingPreview" class="face-preview-container">
-          <div class="loading-message">
+          <div class="dv-btn-group">
+            <ion-button expand="block" class="dv-btn-primary" (click)="selectIdDocument()" [disabled]="state.uploading">
+              <ion-icon name="image-outline" slot="start"></ion-icon>
+              {{ state.idDocumentUrl ? 'Cambiar documento' : 'Seleccionar documento' }}
+            </ion-button>
+            <ion-button expand="block" class="dv-btn-success" (click)="uploadIdDocument()" [disabled]="!state.idDocumentUrl || state.uploading">
+              <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
+              {{ state.idDocumentId ? 'Documento subido ✓' : 'Subir documento' }}
+            </ion-button>
+          </div>
+
+          <ion-progress-bar *ngIf="state.uploading && state.uploadProgress > 0"
+            type="determinate" [value]="state.uploadProgress / 100" class="dv-progress"></ion-progress-bar>
+        </div>
+
+        <!-- Preview de rostros -->
+        <div class="dv-card" *ngIf="state.selfieDocumentId && state.idDocumentId">
+          <p class="dv-upload-title">Vista previa de rostros</p>
+
+          <div class="dv-face-loading" *ngIf="state.loadingPreview">
             <ion-spinner name="crescent"></ion-spinner>
-            <p>Detectando rostros...</p>
+            <span>Detectando rostros…</span>
+          </div>
+
+          <div class="dv-face-error" *ngIf="state.facePreviewError && !state.loadingPreview">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ state.facePreviewError }}</span>
+          </div>
+
+          <div class="dv-face-grid" *ngIf="state.selfieFacePreview && state.idFacePreview && !state.loadingPreview && !state.facePreviewError">
+            <div class="dv-face-item">
+              <img [src]="state.selfieFacePreview" class="dv-face-img" alt="Selfie">
+              <span>Tu selfie</span>
+            </div>
+            <div class="dv-face-item">
+              <img [src]="state.idFacePreview" class="dv-face-img" alt="Documento">
+              <span>Tu documento</span>
+            </div>
           </div>
         </div>
 
-        <!-- Error State -->
-        <div *ngIf="state.facePreviewError && !state.loadingPreview" class="face-preview-container">
-          <div class="error-message">
-            <ion-icon name="alert-circle"></ion-icon>
-            <p>{{ state.facePreviewError }}</p>
-          </div>
+        <!-- Botón verificar -->
+        <div class="dv-card">
+          <ion-button expand="block" class="submit-btn" (click)="initiateVerification()" [disabled]="!canInitiateVerification">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Verificar identidad
+          </ion-button>
+          <p class="dv-hint" *ngIf="!bothDocumentsUploaded">
+            Debes subir la selfie y el documento para continuar
+          </p>
         </div>
 
-        <!-- Success State - Show Cropped Faces -->
-        <div *ngIf="state.selfieFacePreview && state.idFacePreview && !state.loadingPreview && !state.facePreviewError" class="face-preview-grid">
-          <div class="face-preview-item">
-            <h4>Rostro de Selfie</h4>
-            <img [src]="state.selfieFacePreview" class="face-preview-image" alt="Cropped Selfie Face" />
-          </div>
-          <div class="face-preview-item">
-            <h4>Rostro del Documento</h4>
-            <img [src]="state.idFacePreview" class="face-preview-image" alt="Cropped ID Face" />
-          </div>
-        </div>
+      </ng-container>
 
-        <p class="hint-text" *ngIf="!state.loadingPreview && !state.facePreviewError && state.selfieFacePreview && state.idFacePreview">
-          ✓ Rostros detectados correctamente
-        </p>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- VERIFY BUTTON -->
-    <ion-card>
-      <ion-card-content>
-        <ion-button
-          expand="block"
-          size="large"
-          (click)="initiateVerification()"
-          [disabled]="!canInitiateVerification"
-          color="success"
-        >
-          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-          Verificar Identidad
-        </ion-button>
-        <p class="hint-text" *ngIf="!bothDocumentsUploaded">
-          ⚠️ Debe subir selfie y documento para continuar
-        </p>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- STEP 2: WAITING FOR ADMIN APPROVAL -->
-  <div *ngIf="state.step === 'WAITING'" class="verification-container">
-    <ion-card color="warning">
-      <ion-card-header>
-        <ion-card-title>
+      <!-- ── STEP WAITING ────────────────────────────────────────────────── -->
+      <div class="dv-card dv-state-card dv-state-warning" *ngIf="state.step === 'WAITING'">
+        <div class="dv-state-icon">
           <ion-spinner name="crescent"></ion-spinner>
-          Verificación en Proceso
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="status-message">
-          <p class="large-text">
-            ⏳ {{ getStatusMessage() }}
-          </p>
-          <p class="description">
-            Un administrador está revisando tus documentos. Esto puede tomar
-            algunos minutos.
-          </p>
-          <p class="small-text">
-            Te notificaremos cuando la verificación esté completa.
-          </p>
         </div>
+        <h2 class="dv-state-title">Verificación en proceso</h2>
+        <p class="dv-state-text">{{ getStatusMessage() }}</p>
+        <p class="dv-state-sub">Un administrador está revisando tus documentos. Te notificaremos cuando esté listo.</p>
+        <ion-progress-bar type="indeterminate" class="dv-progress dv-progress-warning"></ion-progress-bar>
+      </div>
 
-        <ion-progress-bar
-          type="indeterminate"
-          color="warning"
-        ></ion-progress-bar>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- STEP 3: APPROVED -->
-  <div *ngIf="state.step === 'APPROVED'" class="verification-container">
-    <ion-card color="success">
-      <ion-card-header>
-        <ion-card-title>
+      <!-- ── STEP APPROVED ───────────────────────────────────────────────── -->
+      <div class="dv-card dv-state-card dv-state-success" *ngIf="state.step === 'APPROVED'">
+        <div class="dv-state-icon dv-state-icon-success">
           <ion-icon name="checkmark-circle"></ion-icon>
-          ¡Verificación Aprobada!
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="success-container">
-          <div class="success-icon">
-            <ion-icon name="checkmark-circle"></ion-icon>
-          </div>
-          <p class="success-message">
-            Tu identidad ha sido verificada correctamente.
-          </p>
-          <p class="description">
-            Ahora puedes acceder a tu panel de proveedor y agregar servicios.
-          </p>
-
-          <ion-button
-            expand="block"
-            size="large"
-            (click)="continueToDashboard()"
-            color="success"
-          >
-            <ion-icon name="arrow-forward" slot="end"></ion-icon>
-            Continuar a Dashboard
-          </ion-button>
         </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
+        <h2 class="dv-state-title">¡Verificación aprobada!</h2>
+        <p class="dv-state-text">Tu identidad ha sido verificada correctamente.</p>
+        <p class="dv-state-sub">Ahora puedes acceder a tu panel y agregar servicios.</p>
+        <ion-button expand="block" class="submit-btn" (click)="continueToDashboard()">
+          <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+          Ir al panel
+        </ion-button>
+      </div>
 
-  <!-- STEP 4: REJECTED -->
-  <div *ngIf="state.step === 'REJECTED'" class="verification-container">
-    <ion-card color="danger">
-      <ion-card-header>
-        <ion-card-title>
+      <!-- ── STEP REJECTED ──────────────────────────────────────────────── -->
+      <div class="dv-card dv-state-card dv-state-danger" *ngIf="state.step === 'REJECTED'">
+        <div class="dv-state-icon dv-state-icon-danger">
           <ion-icon name="close-circle"></ion-icon>
-          Verificación Rechazada
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="error-container">
-          <div class="error-icon">
-            <ion-icon name="close-circle"></ion-icon>
-          </div>
-          <p class="error-message">
-            La verificación de identidad fue rechazada.
-          </p>
-          <p class="description">
-            Asegúrate de que:
-          </p>
-          <ul>
-            <li>La selfie muestre tu rostro claramente</li>
-            <li>El documento sea legible y completo</li>
-            <li>Los rostros sean claramente visibles</li>
-          </ul>
-
-          <ion-button
-            expand="block"
-            size="large"
-            (click)="retryVerification()"
-            color="danger"
-          >
-            <ion-icon name="refresh" slot="start"></ion-icon>
-            Intentar Nuevamente
-          </ion-button>
         </div>
-      </ion-card-content>
-    </ion-card>
+        <h2 class="dv-state-title">Verificación rechazada</h2>
+        <p class="dv-state-text">La verificación de identidad no pudo completarse.</p>
+        <ul class="dv-tips-list">
+          <li>La selfie debe mostrar tu rostro con claridad</li>
+          <li>El documento debe ser legible y completo</li>
+          <li>Los rostros deben ser claramente visibles</li>
+        </ul>
+        <ion-button expand="block" class="dv-btn-danger" (click)="retryVerification()"
+          *ngIf="state.retryCount < state.maxRetries">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Intentar nuevamente
+        </ion-button>
+      </div>
+
+    </div>
   </div>
 
-  <!-- Agregar vista previa de imágenes -->
-  <div *ngIf="state.selfieUrl" class="preview-container">
-    <img [src]="state.selfieUrl" class="preview-image" alt="Selfie" />
-  </div>
-  <div *ngIf="state.idDocumentUrl" class="preview-container">
-    <img [src]="state.idDocumentUrl" class="preview-image" alt="ID Document" />
-  </div>
-
-  <!-- Mostrar confidence score -->
-  <p *ngIf="state.confidenceScore !== null" class="confidence-score">
-    Confianza: {{ state.confidenceScore.toFixed(1) }}%
-  </p>
-
-  <!-- Botón de reintento solo en estado REJECTED -->
-  <ion-button *ngIf="state.step === 'REJECTED' && state.retryCount < state.maxRetries"
-            (click)="retryVerification()"
-            color="danger">
-    Reintentar Verificación
-  </ion-button>
-
-  <!-- Spinner de carga durante análisis -->
-  <ion-spinner *ngIf="state.step === 'WAITING'" name="crescent"></ion-spinner>
-
-  <!-- Componente de Captura de Selfie con Liveness Detection -->
-  <app-selfie-capture
-    (photoTaken)="onSelfieCaptured($event)"
-  ></app-selfie-capture>
+  <!-- Componente Selfie Capture (posicionado fuera del flujo visual) -->
+  <app-selfie-capture (photoTaken)="onSelfieCaptured($event)"></app-selfie-capture>
 </ion-content>

@@ -1,35 +1,71 @@
-<ion-content class="email-verification-page" fullscreen>
-  <div class="verification-container">
+<ion-content>
+  <div class="login-bg">
+    <div class="login-wrap">
 
-    <!-- Loading -->
-    <ng-container *ngIf="status === 'loading'">
-      <ion-spinner name="crescent" color="primary"></ion-spinner>
-      <p class="status-text">Verificando tu correo…</p>
-    </ng-container>
+      <!-- Logo -->
+      <div class="login-logo">
+        <img src="assets/imgs/logo.png" alt="logo" class="logo-img">
+        <img src="assets/imgs/titulo.png" alt="titulo" class="titulo-img">
+      </div>
 
-    <!-- Success -->
-    <ng-container *ngIf="status === 'success'">
-      <ion-icon name="checkmark-circle" color="success" class="status-icon"></ion-icon>
-      <h2>¡Correo verificado!</h2>
-      <p class="status-text">{{ message }}</p>
-      <ion-button expand="block" (click)="goToLogin()">Iniciar sesión</ion-button>
-    </ng-container>
+      <!-- Status card -->
+      <div class="login-card ev-card">
 
-    <!-- Expired -->
-    <ng-container *ngIf="status === 'expired'">
-      <ion-icon name="time-outline" color="warning" class="status-icon"></ion-icon>
-      <h2>Enlace expirado</h2>
-      <p class="status-text">{{ message }}</p>
-      <ion-button expand="block" fill="outline" (click)="goToLogin()">Volver al inicio</ion-button>
-    </ng-container>
+        <!-- Loading -->
+        <ng-container *ngIf="status === 'loading'">
+          <div class="ev-state-icon ev-icon-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+          <h2 class="ev-title">Verificando tu correo</h2>
+          <p class="ev-text">Por favor espera un momento…</p>
+        </ng-container>
 
-    <!-- Error -->
-    <ng-container *ngIf="status === 'error'">
-      <ion-icon name="close-circle" color="danger" class="status-icon"></ion-icon>
-      <h2>Enlace inválido</h2>
-      <p class="status-text">{{ message }}</p>
-      <ion-button expand="block" fill="outline" (click)="goToLogin()">Volver al inicio</ion-button>
-    </ng-container>
+        <!-- Success -->
+        <ng-container *ngIf="status === 'success'">
+          <div class="ev-state-icon ev-icon-success">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h2 class="ev-title">¡Correo verificado!</h2>
+          <p class="ev-text">{{ message }}</p>
+          <ion-button expand="block" class="submit-btn" (click)="goToLogin()">
+            Iniciar sesión
+          </ion-button>
+        </ng-container>
 
+        <!-- Expired -->
+        <ng-container *ngIf="status === 'expired'">
+          <div class="ev-state-icon ev-icon-warning">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+          </div>
+          <h2 class="ev-title">Enlace expirado</h2>
+          <p class="ev-text">{{ message }}</p>
+          <ion-button expand="block" fill="outline" class="ev-btn-outline" (click)="goToLogin()">
+            Volver al inicio
+          </ion-button>
+        </ng-container>
+
+        <!-- Error -->
+        <ng-container *ngIf="status === 'error'">
+          <div class="ev-state-icon ev-icon-danger">
+            <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </div>
+          <h2 class="ev-title">Enlace inválido</h2>
+          <p class="ev-text">{{ message }}</p>
+          <ion-button expand="block" fill="outline" class="ev-btn-outline" (click)="goToLogin()">
+            Volver al inicio
+          </ion-button>
+        </ng-container>
+
+      </div>
+    </div>
   </div>
 </ion-content>

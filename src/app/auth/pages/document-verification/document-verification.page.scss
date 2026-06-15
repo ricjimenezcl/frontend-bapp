@@ -1,6 +1,396 @@
+// document-verification.page.scss
+@import '../../../../theme/mixins';
+
+:host { display: block; height: 100%; }
+
 ion-content {
   --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
 }
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+.dv-bg {
+  min-height: 100%;
+  padding: var(--bapp-space-6) var(--bapp-space-4) var(--bapp-space-8);
+}
+
+.dv-wrap {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-4);
+}
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+.login-logo {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-2);
+
+  .logo-img   { width: 60px; height: 60px; object-fit: contain; }
+  .titulo-img { width: 140px; height: auto; object-fit: contain; }
+}
+
+// ── Page header ───────────────────────────────────────────────────────────────
+.dv-page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+}
+
+.dv-page-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--bapp-radius-xl);
+  background: rgba(253, 215, 53, 0.12);
+  border: 1px solid rgba(253, 215, 53, 0.3);
+  @include flex-center;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 24px; color: var(--bapp-color-primary); }
+}
+
+.dv-page-title {
+  margin: 0;
+  font-size: var(--bapp-text-lg);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.dv-page-sub {
+  margin: 2px 0 0;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+}
+
+// ── Stepper ───────────────────────────────────────────────────────────────────
+.dv-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-3) var(--bapp-space-4);
+}
+
+.dv-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+
+  .dv-step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bapp-surface-elevated, rgba(255,255,255,0.06));
+    border: 1.5px solid var(--bapp-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-tertiary);
+    transition: all 0.2s;
+  }
+
+  span {
+    font-size: 9px;
+    color: var(--bapp-text-tertiary);
+    font-weight: var(--bapp-font-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &.dv-step--active {
+    .dv-step-circle {
+      background: var(--bapp-color-primary);
+      border-color: var(--bapp-color-primary);
+      color: #000;
+    }
+    span { color: var(--bapp-color-primary); }
+  }
+
+  &.dv-step--done {
+    .dv-step-circle {
+      background: rgba(34,197,94,0.15);
+      border-color: rgba(34,197,94,0.4);
+      color: #22c55e;
+    }
+    span { color: #22c55e; }
+  }
+}
+
+.dv-step-line {
+  flex: 0 0 20px;
+  height: 1px;
+  background: var(--bapp-border);
+  margin-bottom: 16px;
+}
+
+// ── Cards ─────────────────────────────────────────────────────────────────────
+.dv-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  padding: var(--bapp-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-3);
+}
+
+// ── Info text / list ──────────────────────────────────────────────────────────
+.dv-info-text {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  line-height: 1.5;
+}
+
+.dv-steps-list {
+  margin: 0;
+  padding-left: var(--bapp-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-1);
+
+  li {
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
+    line-height: 1.4;
+  }
+}
+
+// ── Upload card ───────────────────────────────────────────────────────────────
+.dv-upload-header {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+
+  .dv-upload-icon {
+    font-size: 20px;
+    color: var(--bapp-color-primary);
+    flex-shrink: 0;
+  }
+
+  .dv-upload-title {
+    flex: 1;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+  }
+
+  .dv-upload-check {
+    ion-icon { font-size: 18px; color: #22c55e; }
+  }
+}
+
+.dv-preview-wrap {
+  border-radius: var(--bapp-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--bapp-border);
+
+  .dv-preview-img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.dv-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bapp-space-2);
+  height: 80px;
+  background: var(--bapp-bg-input);
+  border: 1.5px dashed var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  color: var(--bapp-text-tertiary);
+  font-size: var(--bapp-text-sm);
+
+  ion-icon { font-size: 22px; }
+}
+
+// ── Button group ──────────────────────────────────────────────────────────────
+.dv-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-2);
+}
+
+.dv-btn-primary {
+  --border-radius: var(--bapp-radius-full);
+  --background: rgba(253,215,53,0.12);
+  --background-activated: rgba(253,215,53,0.2);
+  --color: var(--bapp-color-primary);
+  --border-color: rgba(253,215,53,0.3);
+  --border-style: solid;
+  --border-width: 1px;
+  height: 42px;
+  font-weight: var(--bapp-font-semibold);
+}
+
+.dv-btn-success {
+  --border-radius: var(--bapp-radius-full);
+  --background: rgba(34,197,94,0.12);
+  --background-activated: rgba(34,197,94,0.2);
+  --color: #22c55e;
+  --border-color: rgba(34,197,94,0.3);
+  --border-style: solid;
+  --border-width: 1px;
+  height: 42px;
+  font-weight: var(--bapp-font-semibold);
+}
+
+.dv-btn-danger {
+  --border-radius: var(--bapp-radius-full);
+  --background: rgba(239,68,68,0.12);
+  --background-activated: rgba(239,68,68,0.2);
+  --color: var(--bapp-color-danger);
+  --border-color: rgba(239,68,68,0.3);
+  --border-style: solid;
+  --border-width: 1px;
+  height: 42px;
+  font-weight: var(--bapp-font-semibold);
+}
+
+.submit-btn {
+  --border-radius: var(--bapp-radius-full);
+  --background: var(--bapp-color-primary);
+  --color: #000;
+  font-weight: var(--bapp-font-semibold);
+  height: 48px;
+}
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+.dv-progress {
+  border-radius: 2px;
+  --background: var(--bapp-border);
+  --progress-background: var(--bapp-color-primary);
+
+  &.dv-progress-warning {
+    --progress-background: var(--bapp-color-primary);
+  }
+}
+
+// ── Face preview ──────────────────────────────────────────────────────────────
+.dv-face-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bapp-space-3);
+}
+
+.dv-face-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bapp-space-1);
+
+  .dv-face-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--bapp-radius-lg);
+    border: 1px solid var(--bapp-border);
+  }
+
+  span {
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-tertiary);
+  }
+}
+
+.dv-face-loading, .dv-face-error {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  padding: var(--bapp-space-2) 0;
+}
+
+.dv-face-error {
+  color: var(--bapp-color-danger);
+  ion-icon { font-size: 18px; }
+}
+
+// ── Hint text ─────────────────────────────────────────────────────────────────
+.dv-hint {
+  margin: 0;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  text-align: center;
+}
+
+// ── State cards (WAITING / APPROVED / REJECTED) ───────────────────────────────
+.dv-state-card {
+  align-items: center;
+  text-align: center;
+  padding: var(--bapp-space-8) var(--bapp-space-6);
+  gap: var(--bapp-space-4);
+}
+
+.dv-state-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(253,215,53,0.1);
+  @include flex-center;
+  flex-shrink: 0;
+
+  ion-spinner { width: 36px; height: 36px; --color: var(--bapp-color-primary); }
+
+  &.dv-state-icon-success {
+    background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.3);
+    ion-icon { font-size: 40px; color: #22c55e; }
+  }
+
+  &.dv-state-icon-danger {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    ion-icon { font-size: 40px; color: var(--bapp-color-danger); }
+  }
+}
+
+.dv-state-title {
+  margin: 0;
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.dv-state-text {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+}
+
+.dv-state-sub {
+  margin: 0;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  max-width: 280px;
+}
+
+.dv-tips-list {
+  margin: 0;
+  padding-left: var(--bapp-space-5);
+  text-align: left;
+
+  li {
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-secondary);
+    margin-bottom: var(--bapp-space-1);
+    line-height: 1.4;
+  }
+}
+
 
 ion-item {
   --background: var(--ion-color-dark);

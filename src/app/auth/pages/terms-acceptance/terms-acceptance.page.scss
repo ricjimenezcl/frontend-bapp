@@ -1,96 +1,194 @@
-.terms-acceptance {
-  --background: var(--ion-color-light);
+// terms-acceptance.page.scss
+@import '../../../../theme/mixins';
 
-  .welcome-block {
-    text-align: center;
-    padding: 24px 16px 16px;
+:host { display: block; height: 100%; }
 
-    .shield-icon {
-      font-size: 56px;
-      color: var(--ion-color-primary);
-      margin-bottom: 12px;
-    }
+ion-content {
+  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
 
-    h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 0 0 8px;
-      color: var(--ion-color-dark);
-    }
+// ── Layout ────────────────────────────────────────────────────────────────────
+.login-bg {
+  min-height: 100%;
+  @include flex-column-center;
+  padding: var(--bapp-space-6) var(--bapp-space-4);
+}
 
-    p {
-      font-size: 0.95rem;
-      color: var(--ion-color-medium);
-      margin: 0;
-    }
+.login-wrap {
+  width: 100%;
+  max-width: 420px;
+  @include flex-column-center;
+  gap: var(--bapp-space-5);
+}
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+.login-logo {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+
+  .logo-img   { width: 72px; height: 72px; object-fit: contain; }
+  .titulo-img { width: 160px; height: auto; object-fit: contain; }
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.login-card {
+  width: 100%;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  padding: var(--bapp-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-5);
+}
+
+// ── Card header ───────────────────────────────────────────────────────────────
+.ta-header {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  text-align: center;
+}
+
+.ta-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--bapp-radius-xl);
+  background: rgba(253, 215, 53, 0.12);
+  border: 1px solid rgba(253, 215, 53, 0.3);
+  @include flex-center;
+
+  ion-icon {
+    font-size: 28px;
+    color: var(--bapp-color-primary);
   }
+}
 
-  .terms-summary {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    margin: 16px 0;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+.ta-title {
+  margin: 0;
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
 
-    h3 {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin: 0 0 10px;
-      color: var(--ion-color-dark);
-    }
+.ta-subtitle {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+}
 
-    ul {
-      margin: 0;
-      padding-left: 20px;
+// ── Terms box scrollable ──────────────────────────────────────────────────────
+.ta-terms-box {
+  background: var(--bapp-bg-input);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-md);
+  padding: var(--bapp-space-4);
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-3);
 
-      li {
-        font-size: 0.9rem;
-        color: var(--ion-color-medium-shade);
-        margin-bottom: 6px;
-      }
-    }
-  }
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: var(--bapp-border); border-radius: 2px; }
+}
 
-  .links-block {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
+.ta-terms-heading {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
 
-    ion-button {
-      --color: var(--ion-color-primary);
-      font-size: 0.85rem;
-      text-align: left;
-      justify-content: flex-start;
-    }
-  }
+.ta-terms-text {
+  margin: 0;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+  line-height: 1.5;
+}
 
-  .checkbox-item {
-    --background: transparent;
+.ta-terms-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: var(--bapp-space-1);
+
+  .ta-link-btn {
+    --color: var(--bapp-color-primary);
     --padding-start: 0;
-    margin-bottom: 8px;
-
-    ion-label {
-      font-size: 0.9rem;
-      white-space: normal;
-      color: var(--ion-color-dark);
-
-      a {
-        color: var(--ion-color-primary);
-        text-decoration: underline;
-      }
-    }
+    font-size: var(--bapp-text-xs);
+    height: 32px;
+    justify-content: flex-start;
   }
+}
 
-  .actions {
-    margin-top: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+// ── Checkboxes ────────────────────────────────────────────────────────────────
+.ta-checks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-2);
+}
 
-    .accept-button {
-      --border-radius: 10px;
-      font-weight: 600;
-    }
+.ta-check-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: auto;
+
+  ion-checkbox {
+    --checkbox-background-checked: var(--bapp-color-primary);
+    --border-color-checked: var(--bapp-color-primary);
+    --border-color: var(--bapp-border);
+    --checkmark-color: #000;
+    margin-inline-end: var(--bapp-space-3);
   }
+}
+
+.ta-check-label {
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-primary);
+  line-height: 1.4;
+  white-space: normal;
+
+  &.ta-check-optional { color: var(--bapp-text-secondary); }
+}
+
+.ta-link {
+  color: var(--bapp-color-primary);
+  font-weight: var(--bapp-font-semibold);
+  text-decoration: none;
+}
+
+.ta-optional {
+  color: var(--bapp-text-tertiary);
+  font-size: var(--bapp-text-xs);
+}
+
+// ── Acciones ──────────────────────────────────────────────────────────────────
+.ta-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-3);
+}
+
+.submit-btn {
+  --border-radius: var(--bapp-radius-full);
+  --background: var(--bapp-color-primary);
+  --color: #000;
+  font-weight: var(--bapp-font-semibold);
+  height: 48px;
+}
+
+.ta-decline-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  padding: var(--bapp-space-2) 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  cursor: pointer;
+  text-align: center;
+
+  &:active { opacity: 0.7; }
+  &:disabled { opacity: 0.4; pointer-events: none; }
 }
