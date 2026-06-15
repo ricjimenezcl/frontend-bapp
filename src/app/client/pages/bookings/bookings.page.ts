@@ -64,16 +64,23 @@ export class ClientBookingsPage implements OnInit, OnDestroy {
 
   private async showReviewPrompt(bookingId: number, providerId?: number) {
     if (!providerId) return;
+    await this.openReviewModal({ id: bookingId, provider_id: providerId, client_id: 0 });
+  }
+
+  async openReviewModal(booking: Booking) {
+    if (!booking.id || !booking.provider_id) return;
     const modal = await this.modalCtrl.create({
       component: ReviewModalComponent,
-      componentProps: { bookingId, providerId },
-      breakpoints: [0, 0.75],
-      initialBreakpoint: 0.75,
+      componentProps: { bookingId: booking.id, providerId: booking.provider_id },
+      breakpoints: [0, 0.85],
+      initialBreakpoint: 0.85,
+      cssClass: 'review-modal-sheet',
     });
     await modal.present();
     const { data } = await modal.onWillDismiss();
     if (data?.reviewed) {
-      await this.showToast('¡Reseña enviada!');
+      booking.has_review = true;
+      await this.showToast('¡Reseña enviada! Gracias por tu opinión.');
     }
   }
 

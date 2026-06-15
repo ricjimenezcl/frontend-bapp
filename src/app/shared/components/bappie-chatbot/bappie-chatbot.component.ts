@@ -3,6 +3,8 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  signal,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -23,50 +25,56 @@ interface Message {
   styleUrls: ['./bappie-chatbot.component.scss'],
 })
 export class BappieChatbotComponent implements OnInit {
+  private http = inject(HttpClient);
   @ViewChild('chatBody') chatBody!: ElementRef;
 
-  isOpen        = false;
-  isProcessing  = false;
-  isTyping      = false;
-  showTooltip   = true;
-  userInput     = '';
+  isOpen       = signal(false);
+  isProcessing = signal(false);
+  isTyping     = signal(false);
+  isGreeting   = signal(false);
+  showTooltip  = signal(true);
+  hasGreeted   = false;
+  userInput    = '';
 
-  messages: Message[] = [
+  messages = signal<Message[]>([
     {
       text: '¡Hola! Soy <strong>Bappie IA</strong>. Estoy aquí para ayudarte a encontrar el servicio que buscas o resolver tus dudas.',
       type: 'msg-bot',
     },
-  ];
+  ]);
 
   suggestions = ['¿Qué servicios hay?', '¿Cómo agendar?', '¿Tiene costo?'];
-
-  constructor(private http: HttpClient) {}
 
   ngOnInit() {}
 
   toggleChat() {
-    this.isOpen = !this.isOpen;
-    if (this.isOpen) {
-      this.showTooltip = false;
+    this.isOpen.update(v => !v);
+    if (this.isOpen()) {
+      this.hasGreeted = true;
+      this.showTooltip.set(false);
       this.scrollToBottom();
+      if (!this.isGreeting()) {
+        this.isGreeting.set(true);
+        setTimeout(() => this.isGreeting.set(false), 2000);
+      }
     } else {
-      this.showTooltip = true;
+      this.showTooltip.set(true);
     }
   }
 
   handleUserInput() {
     const text = this.userInput.trim();
-    if (!text || this.isProcessing) return;
+    if (!text || this.isProcessing()) return;
 
-    this.messages = [...this.messages, { text, type: 'msg-user' }];
-    const history = this.messages.map(m => ({
+    this.messages.update(m => [...m, { text, type: 'msg-user' }]);
+    const history = this.messages().map(m => ({
       role: m.type === 'msg-user' ? 'user' : 'assistant',
       content: m.text,
     }));
 
-    this.userInput    = '';
-    this.isProcessing = true;
-    this.isTyping     = true;
+    this.userInput = '';
+    this.isProcessing.set(true);
+    this.isTyping.set(true);
     this.scrollToBottom();
 
     this.http
@@ -76,21 +84,18 @@ export class BappieChatbotComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.isTyping     = false;
-          this.isProcessing = false;
-          this.messages     = [...this.messages, { text: res.response, type: 'msg-bot' }];
+          this.isTyping.set(false);
+          this.isProcessing.set(false);
+          this.messages.update(m => [...m, { text: res.response, type: 'msg-bot' }]);
           this.scrollToBottom();
         },
         error: () => {
-          this.isTyping     = false;
-          this.isProcessing = false;
-          this.messages     = [
-            ...this.messages,
-            {
-              text: 'Lo siento, tuve un problema de conexión. ¿Podrías intentar de nuevo?',
-              type: 'msg-bot',
-            },
-          ];
+          this.isTyping.set(false);
+          this.isProcessing.set(false);
+          this.messages.update(m => [
+            ...m,
+            { text: 'Lo siento, tuve un problema de conexión. ¿Podrías intentar de nuevo?', type: 'msg-bot' },
+          ]);
           this.scrollToBottom();
         },
       });

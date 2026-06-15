@@ -1,64 +1,115 @@
-<!-- ══ TRIGGER FAB ═══════════════════════════════════════════════ -->
-<div class="bap-fab-wrap">
-  <div class="bap-tooltip" *ngIf="showTooltip && !isOpen">¡Pregúntame algo! 💬</div>
-  <button class="bap-fab" (click)="toggleChat()" aria-label="Abrir chat con Bappie IA">
-    <span *ngIf="!isOpen" class="bap-fab-emoji">🤖</span>
-    <ion-icon *ngIf="isOpen" name="close" class="bap-fab-close"></ion-icon>
+<div id="bappie-widget-container">
+
+  <!-- Tooltip de Bienvenida -->
+  <div id="bappie-tooltip" class="bappie-tooltip" [class.visible]="showTooltip() && !isOpen()">
+    ¡Hola! Soy <strong>Bappie IA</strong> 👋
+    <span>Estoy aquí para ayudarte</span>
+  </div>
+
+  <!-- Ventana del Chat -->
+  <div id="bappie-chat-window" [class.open]="isOpen()">
+    <div class="chat-header" [class.is-typing]="isTyping()" [class.is-greeting]="isGreeting()">
+      <span class="header-title">BAPPSEARCH AI</span>
+      <svg class="bappie-avatar" id="bappie-svg-mob" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bodyGradMob" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#5B5B66" />
+            <stop offset="100%" stop-color="#2D2D33" />
+          </linearGradient>
+          <filter id="shadowHeavyMob"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.8"/></filter>
+        </defs>
+        <g class="typing-bubble-svg" transform="translate(250, 100)">
+          <path d="M 0 0 Q 0 -25 25 -25 L 85 -25 Q 110 -25 110 0 L 110 25 Q 110 50 85 50 L 25 50 Q 0 50 0 25 Z" fill="rgba(18, 18, 22, 0.9)" stroke="var(--chat-indigo)" stroke-width="2" />
+          <circle cx="35" cy="12" r="4" fill="var(--chat-indigo)"><animate attributeName="opacity" values="0.2;1;0.2" dur="1s" repeatCount="indefinite" begin="0s"/></circle>
+          <circle cx="55" cy="12" r="4" fill="var(--chat-indigo)"><animate attributeName="opacity" values="0.2;1;0.2" dur="1s" repeatCount="indefinite" begin="0.3s"/></circle>
+          <circle cx="75" cy="12" r="4" fill="var(--chat-indigo)"><animate attributeName="opacity" values="0.2;1;0.2" dur="1s" repeatCount="indefinite" begin="0.6s"/></circle>
+        </g>
+        <g transform="translate(150, 80)">
+          <rect x="145" y="140" width="10" height="20" fill="#666" />
+          <path d="M 115 160 Q 150 180 185 160 C 190 210 170 240 150 240 C 130 240 110 210 115 160 Z" fill="url(#bodyGradMob)" stroke="#666" stroke-width="2" filter="url(#shadowHeavyMob)" />
+          <g class="arm-l" transform-origin="105px 170px"><path d="M 105 170 Q 120 180 140 190" fill="none" stroke="url(#bodyGradMob)" stroke-width="11" stroke-linecap="round" /><circle cx="140" cy="190" r="5" fill="var(--chat-indigo)" /></g>
+          <g class="arm-r" transform-origin="195px 170px"><path d="M 195 170 Q 180 180 160 190" fill="none" stroke="url(#bodyGradMob)" stroke-width="11" stroke-linecap="round" /><circle cx="160" cy="190" r="5" fill="var(--chat-indigo)" /></g>
+          <g transform="translate(150, 105) scale(1.1) translate(-45, -45)" filter="url(#shadowHeavyMob)">
+            <path d="M45,10 C25.67,10 10,25.67 10,45 C10,65 45,95 45,95 C45,95 80,65 80,45 C80,25.67 64.33,10 45,10 Z" transform="rotate(-45 45 45)" fill="var(--bapp-red)" />
+            <circle cx="45" cy="45" r="22" fill="#000" />
+            <circle cx="45" cy="45" r="6" fill="var(--chat-indigo)"><animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite" /></circle>
+            <circle cx="45" cy="45" r="17" fill="none" stroke="#FFF" stroke-width="8" />
+            <line x1="33" y1="57" x2="14" y2="76" stroke="#FFF" stroke-width="8" stroke-linecap="round" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="chat-body" #chatBody>
+      <div
+        *ngFor="let msg of messages(); let i = index"
+        class="msg"
+        [ngClass]="msg.type"
+        [innerHTML]="msg.text">
+      </div>
+      <div class="msg-typing" *ngIf="isTyping()">
+        Procesando <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+
+    <div class="quick-replies">
+      <button
+        *ngFor="let suggestion of suggestions"
+        class="btn-chip"
+        (click)="useSuggestion(suggestion)"
+        [disabled]="isProcessing()">
+        {{ suggestion }}
+      </button>
+    </div>
+
+    <div class="chat-footer">
+      <div class="chat-input-wrapper">
+        <input
+          type="text"
+          [(ngModel)]="userInput"
+          (keyup.enter)="handleUserInput()"
+          class="chat-input"
+          placeholder="Escribe aquí tu duda..."
+          autocomplete="off"
+          [disabled]="isProcessing()">
+      </div>
+      <button
+        (click)="handleUserInput()"
+        class="btn-send"
+        [disabled]="!userInput.trim() || isProcessing()"
+        aria-label="Enviar mensaje">
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Trigger Flotante -->
+  <button id="bappie-trigger" (click)="toggleChat()" aria-label="Abrir chat">
+    <div class="badge" *ngIf="!hasGreeted && !isOpen()"></div>
+    <svg class="trigger-svg" viewBox="60 50 180 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bodyGradBtnMob" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#5B5B66" />
+          <stop offset="100%" stop-color="#2D2D33" />
+        </linearGradient>
+      </defs>
+      <g>
+        <rect x="145" y="140" width="10" height="20" fill="#666" />
+        <path d="M 115 160 Q 150 180 185 160 C 190 210 170 240 150 240 C 130 240 110 210 115 160 Z" fill="url(#bodyGradBtnMob)" stroke="#666" stroke-width="2" />
+        <g transform-origin="105px 170px"><path d="M 105 170 Q 120 180 140 190" fill="none" stroke="url(#bodyGradBtnMob)" stroke-width="11" stroke-linecap="round" /><circle cx="140" cy="190" r="5" fill="var(--chat-indigo)" /></g>
+        <g transform-origin="195px 170px"><path d="M 195 170 Q 180 180 160 190" fill="none" stroke="url(#bodyGradBtnMob)" stroke-width="11" stroke-linecap="round" /><circle cx="160" cy="190" r="5" fill="var(--chat-indigo)" /></g>
+        <g transform="translate(150, 105) scale(1.1) translate(-45, -45)">
+          <path d="M45,10 C25.67,10 10,25.67 10,45 C10,65 45,95 45,95 C45,95 80,65 80,45 C80,25.67 64.33,10 45,10 Z" transform="rotate(-45 45 45)" fill="var(--bapp-red)" />
+          <circle cx="45" cy="45" r="22" fill="#000" />
+          <circle cx="45" cy="45" r="6" fill="var(--chat-indigo)" />
+          <circle cx="45" cy="45" r="17" fill="none" stroke="#FFF" stroke-width="8" />
+          <line x1="33" y1="57" x2="14" y2="76" stroke="#FFF" stroke-width="8" stroke-linecap="round" />
+        </g>
+      </g>
+    </svg>
   </button>
-</div>
 
-<!-- ══ CHAT WINDOW ════════════════════════════════════════════════ -->
-<div class="bap-window" [class.bap-window--open]="isOpen">
-  <!-- Header -->
-  <div class="bap-header">
-    <div class="bap-header-avatar">🤖</div>
-    <div class="bap-header-info">
-      <span class="bap-header-name">Bappie IA</span>
-      <span class="bap-header-status">Asistente virtual de BAPP</span>
-    </div>
-  </div>
-
-  <!-- Body / messages -->
-  <div class="bap-body" #chatBody>
-    <div
-      *ngFor="let msg of messages"
-      class="bap-msg"
-      [class.bap-msg--bot]="msg.type === 'msg-bot'"
-      [class.bap-msg--user]="msg.type === 'msg-user'"
-      [innerHTML]="msg.text">
-    </div>
-
-    <!-- Typing indicator -->
-    <div class="bap-typing" *ngIf="isTyping">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
-
-  <!-- Suggestions -->
-  <div class="bap-suggestions" *ngIf="suggestions.length > 0 && messages.length <= 2">
-    <button
-      *ngFor="let s of suggestions"
-      class="bap-suggestion"
-      (click)="useSuggestion(s)">
-      {{ s }}
-    </button>
-  </div>
-
-  <!-- Input -->
-  <div class="bap-input-row">
-    <input
-      class="bap-input"
-      type="text"
-      placeholder="Escribe tu pregunta..."
-      [(ngModel)]="userInput"
-      (keydown.enter)="handleUserInput()"
-      [disabled]="isProcessing" />
-    <button
-      class="bap-send"
-      (click)="handleUserInput()"
-      [disabled]="isProcessing || !userInput.trim()"
-      aria-label="Enviar">
-      <ion-icon name="send"></ion-icon>
-    </button>
-  </div>
 </div>

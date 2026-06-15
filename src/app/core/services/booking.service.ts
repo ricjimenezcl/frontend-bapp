@@ -176,7 +176,7 @@ export class BookingService {
    * @returns Observable con la reserva actualizada
    */
   confirmBooking(bookingId: number, request?: ConfirmBookingRequest): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/approve`, request || {}).pipe(
+    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/confirm`, {}).pipe(
       tap(() => this.refreshProviderBookings())
     );
   }
@@ -226,8 +226,8 @@ export class BookingService {
     reason: string = 'PROVIDER_REQUEST',
     reasonComment?: string
   ): Observable<BookingResponse> {
-    return this.http.patch<BookingResponse>(`${this.apiUrl}/${bookingId}/reject`, {
-      reason_comment: reasonComment || null
+    return this.http.put<BookingResponse>(`${this.apiUrl}/${bookingId}/status`, {
+      status: 'REJECTED'
     }).pipe(
       tap(() => {
         this.refreshMyBookings();

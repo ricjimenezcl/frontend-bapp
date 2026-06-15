@@ -1,63 +1,74 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Califica el servicio</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()" fill="clear">
-        <ion-icon name="close"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="rm-container">
 
-<ion-content class="ion-padding">
+  <!-- Drag handle -->
+  <div class="rm-drag-handle"></div>
 
-  <!-- Rating stars -->
-  <div class="review-stars-container ion-text-center ion-margin-bottom">
-    <p class="rating-label">¿Cómo calificarías el servicio?</p>
-    <div class="stars-row">
-      <ion-icon
-        *ngFor="let star of stars"
-        [name]="star <= selectedRating ? 'star' : 'star-outline'"
-        [class.active]="star <= selectedRating"
-        (click)="setRating(star)"
-        class="review-star">
-      </ion-icon>
+  <!-- Header -->
+  <div class="rm-header">
+    <div class="rm-header-icon">
+      <ion-icon name="star"></ion-icon>
     </div>
-    <p class="rating-value">{{ selectedRating }}/5</p>
+    <div class="rm-header-text">
+      <h2 class="rm-title">Califica el servicio</h2>
+      <p class="rm-subtitle">Tu opinión ayuda a otros usuarios</p>
+    </div>
+    <button class="rm-close-btn" (click)="dismiss()" type="button">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- Stars -->
+  <div class="rm-stars-section">
+    <p class="rm-stars-label">¿Cómo calificarías el servicio?</p>
+    <div class="rm-stars-row">
+      <button
+        *ngFor="let star of stars"
+        class="rm-star-btn"
+        [class.rm-star-active]="star <= selectedRating"
+        (click)="setRating(star)"
+        type="button">
+        <ion-icon [name]="star <= selectedRating ? 'star' : 'star-outline'"></ion-icon>
+      </button>
+    </div>
+    <p class="rm-stars-value">
+      <span *ngIf="selectedRating === 1">Muy malo</span>
+      <span *ngIf="selectedRating === 2">Malo</span>
+      <span *ngIf="selectedRating === 3">Regular</span>
+      <span *ngIf="selectedRating === 4">Bueno</span>
+      <span *ngIf="selectedRating === 5">¡Excelente!</span>
+    </p>
   </div>
 
   <!-- Comment -->
-  <ion-item lines="full">
-    <ion-label position="stacked">Comentario (opcional)</ion-label>
-    <ion-textarea
+  <div class="rm-comment-section">
+    <label class="rm-comment-label">Comentario <span class="rm-optional">(opcional)</span></label>
+    <textarea
+      class="rm-textarea"
       [formControl]="$any(reviewForm.controls['comment'])"
-      placeholder="Describe tu experiencia..."
+      placeholder="Describe tu experiencia con el servicio..."
       rows="4"
       maxlength="500">
-    </ion-textarea>
-  </ion-item>
-  <p class="char-count ion-text-end ion-padding-horizontal">
-    {{ (reviewForm.value.comment?.length || 0) }}/500
-  </p>
+    </textarea>
+    <p class="rm-char-count">{{ (reviewForm.value.comment?.length || 0) }}/500</p>
+  </div>
 
-  <!-- Submit -->
-  <ion-button
-    expand="block"
-    color="primary"
-    [disabled]="isSubmitting"
-    (click)="submit()"
-    class="ion-margin-top">
-    <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
-    <span *ngIf="!isSubmitting">Enviar reseña</span>
-  </ion-button>
+  <!-- Actions -->
+  <div class="rm-actions">
+    <button
+      class="rm-btn rm-btn-submit"
+      [disabled]="isSubmitting"
+      (click)="submit()"
+      type="button">
+      <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>
+      <ion-icon *ngIf="!isSubmitting" name="send-outline"></ion-icon>
+      <span>{{ isSubmitting ? 'Enviando…' : 'Enviar reseña' }}</span>
+    </button>
+    <button
+      class="rm-btn rm-btn-skip"
+      (click)="dismiss()"
+      type="button">
+      <span>Después</span>
+    </button>
+  </div>
 
-  <ion-button
-    expand="block"
-    fill="outline"
-    color="medium"
-    (click)="dismiss()"
-    class="ion-margin-top">
-    Después
-  </ion-button>
-
-</ion-content>
+</div>

@@ -206,4 +206,19 @@ export class ProviderInboxPage implements OnInit, OnDestroy {
   onSegmentChange(event: any): void {
     this.currentSegment = event.detail.value;
   }
+
+  toggleFilter(): void {
+    this.filter.set(this.filter() === 'all' ? 'unread' : 'all');
+  }
+
+  isNow(date: Date | string | null | undefined): boolean {
+    if (!date) return false;
+    return (Date.now() - new Date(date).getTime()) < 60_000;
+  }
+
+  deleteConversation(conversationId: number, event: Event): void {
+    event.stopPropagation();
+    // TODO: llamar al servicio para eliminar la conversación
+    console.log('deleteConversation', conversationId);
+  }
 }

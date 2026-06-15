@@ -103,6 +103,22 @@
         </button>
       </div>
 
+      <!-- Actions COMPLETED — calificar servicio -->
+      <div class="bk-actions" *ngIf="booking.status === 'COMPLETED'">
+        <button
+          *ngIf="!booking.has_review"
+          class="bk-btn bk-btn-review"
+          (click)="openReviewModal(booking)"
+          type="button">
+          <ion-icon name="star-outline"></ion-icon>
+          <span>Calificar servicio</span>
+        </button>
+        <div class="bk-reviewed-badge" *ngIf="booking.has_review">
+          <ion-icon name="star"></ion-icon>
+          <span>Ya calificaste este servicio</span>
+        </div>
+      </div>
+
     </div><!-- end booking-card -->
   </div>
 

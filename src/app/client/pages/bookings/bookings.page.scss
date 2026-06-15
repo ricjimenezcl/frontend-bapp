@@ -216,6 +216,24 @@ ion-content.bk-content { --background: var(--bapp-bg-page); }
     border-color: rgba(244,67,54,0.25);
     color: var(--bapp-color-danger);
   }
+
+  &.bk-btn-review {
+    background: rgba(253,215,53,0.1);
+    border-color: rgba(253,215,53,0.35);
+    color: #C89800;
+    flex: 1;
+  }
+}
+
+.bk-reviewed-badge {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-weight-semibold);
+  color: var(--bapp-color-accent, #0ea5e9);
+  padding: var(--bapp-space-1) 0;
+
+  ion-icon { font-size: 14px; color: var(--bapp-color-primary); }
 }
 
 // ── Empty state ───────────────────────────────────────────────────────────────

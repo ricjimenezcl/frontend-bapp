@@ -51,6 +51,7 @@ import {
   logoGoogle,
   logoApple,
   personCircle,
+  personCircleOutline,
   documentText,
   // Solid/generic icons
   cut,
@@ -235,6 +236,7 @@ addIcons({
   cameraOutline,
   send,
   personCircle,
+  personCircleOutline,
   documentText,
   cut,
   paw,

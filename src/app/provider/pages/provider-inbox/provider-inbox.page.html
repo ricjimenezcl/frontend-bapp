@@ -4,114 +4,179 @@
       pullingIcon="chevron-down-outline"
       pullingText="Desliza para actualizar"
       refreshingSpinner="crescent"
-      refreshingText="Actualizando conversaciones...">
+      refreshingText="Actualizando...">
     </ion-refresher-content>
   </ion-refresher>
 
-  <section class="inbox-hero">
-    <div>
-      <p class="eyebrow">Mensajes</p>
-      <h1>Charla con tus clientes</h1>
-      <p class="subtitle">{{ stats().unread }} mensajes pendientes</p>
-    </div>
-    <ion-chip color="light" class="last-sync" *ngIf="stats().lastUpdated">
-      <ion-icon name="time-outline"></ion-icon>
-      <ion-label>Actualizado {{ stats().lastUpdated | date: 'shortTime' }}</ion-label>
-    </ion-chip>
-  </section>
-
-  <section class="stats-grid">
-    <article class="stat-card highlight">
-      <p>Conversaciones totales</p>
-      <h2>{{ stats().total }}</h2>
-    </article>
-    <article class="stat-card">
-      <p>Sin leer</p>
-      <h2>{{ stats().unread }}</h2>
-    </article>
-    <article class="stat-card">
-      <p>Activas</p>
-      <h2>{{ stats().active }}</h2>
-    </article>
-  </section>
-
-  <section class="search-card">
-    <ion-searchbar
-      placeholder="Buscar cliente o mensaje"
-      [value]="searchTerm()"
-      (ionInput)="onSearch($event)"
-      [debounce]="250"
-      showCancelButton="never"
-      animated="true">
-    </ion-searchbar>
-
-    <ion-segment class="filter-segment" [value]="filter()" (ionChange)="onFilterChange($event)">
-      <ion-segment-button value="all">
-        <ion-label>Todo</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="unread">
-        <ion-label>Sin leer</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-  </section>
-
-  <ng-container *ngIf="isLoading(); else conversationsState">
-    <div class="skeleton-card" *ngFor="let _ of skeletonItems">
-      <ion-skeleton-text animated class="skeleton-avatar"></ion-skeleton-text>
-      <div class="skeleton-text-block">
-        <ion-skeleton-text animated style="width: 60%;"></ion-skeleton-text>
-        <ion-skeleton-text animated style="width: 40%;"></ion-skeleton-text>
+  <!-- ══ Header ══ -->
+  <div class="chat-header">
+    <div class="chat-header__title-row">
+      <h2 class="chat-header__title">Mensajes</h2>
+      <div class="chat-header__actions">
+        <button class="action-btn" type="button" aria-label="Filtrar sin leer"
+                (click)="toggleFilter()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 4h18M7 8h10M10 12h4"/>
+          </svg>
+        </button>
       </div>
     </div>
-  </ng-container>
+    <div class="chat-header__search">
+      <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"/>
+      </svg>
+      <input class="search-input" type="text" placeholder="Buscar conversación..."
+             [value]="searchTerm()" (input)="onSearch($event)" />
+    </div>
+  </div>
 
-  <ng-template #conversationsState>
-    <div *ngIf="error(); else conversationList" class="state-card error">
+  <!-- ══ Chat list ══ -->
+  <div class="chat-list">
+
+    <!-- Skeleton -->
+    <ng-container *ngIf="isLoading()">
+      <div class="chat-item chat-item--skeleton" *ngFor="let _ of skeletonItems">
+        <div class="sk-avatar"></div>
+        <div class="sk-body">
+          <div class="sk-line sk-line--name"></div>
+          <div class="sk-line sk-line--preview"></div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Error -->
+    <div *ngIf="!isLoading() && error()" class="state-card state-card--error">
       <ion-icon name="warning-outline"></ion-icon>
       <p>{{ error() }}</p>
-      <ion-button color="tertiary" (click)="refreshConversations()">Reintentar</ion-button>
+      <button class="retry-btn" type="button" (click)="refreshConversations()">Reintentar</button>
     </div>
 
-    <ng-template #conversationList>
-      <div *ngIf="filteredConversations().length === 0; else list" class="state-card empty">
-        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
-        <p>No encontramos conversaciones para esta vista.</p>
-        <p class="muted">Los clientes te contactarán desde sus reservas</p>
+    <!-- Empty -->
+    <div *ngIf="!isLoading() && !error() && filteredConversations().length === 0" class="empty-list">
+      <div class="empty-list-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+      </div>
+      <p class="empty-list-title">Sin conversaciones</p>
+      <p class="empty-list-sub">Los clientes te contactarán desde sus reservas.</p>
+    </div>
+
+    <!-- Conversaciones -->
+    <div class="chat-item"
+         *ngFor="let conversation of filteredConversations(); trackBy: trackByConversation"
+         [class.unread]="(conversation.unreadCount ?? 0) > 0"
+         (click)="openConversation(conversation)">
+
+      <!-- Avatar -->
+      <div class="chat-avatar">
+        <img *ngIf="conversation.otherUser?.avatarUrl"
+             [src]="conversation.otherUser?.avatarUrl"
+             [alt]="conversation.displayName ?? 'Cliente'"
+             (error)="$any($event.target).style.display='none'" />
+        <div class="avatar-fallback" *ngIf="!conversation.otherUser?.avatarUrl">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <div class="status-dot"></div>
       </div>
 
-      <ng-template #list>
-        <button
-          type="button"
-          class="conversation-card"
-          *ngFor="let conversation of filteredConversations(); trackBy: trackByConversation"
-          [class.unread]="(conversation.unreadCount ?? 0) > 0"
-          (click)="openConversation(conversation)">
-          <div class="avatar">
-            <img
-              [src]="conversation.otherUser?.avatarUrl || 'assets/images/default-avatar.png'"
-              alt="Avatar"
-              loading="lazy">
-          </div>
+      <!-- Info -->
+      <div class="chat-info">
+        <div class="chat-top">
+          <span class="chat-name">{{ conversation.displayName ?? 'Cliente' }}</span>
+          <span class="chat-time" [class.chat-time--now]="isNow(conversation.updatedAt)">
+            {{ isNow(conversation.updatedAt) ? 'Ahora' : (conversation.updatedAt ? (conversation.updatedAt | date:'HH:mm') : '') }}
+          </span>
+        </div>
+        <div class="chat-bottom">
+          <span class="chat-preview">{{ conversation.lastMessagePreview || 'Sin mensajes' }}</span>
+          <span class="unread-badge" *ngIf="(conversation.unreadCount ?? 0) > 0">{{ conversation.unreadCount }}</span>
+          <svg class="read-receipt" *ngIf="(conversation.unreadCount ?? 0) === 0"
+               fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M5 13l4 4L19 7M9 17l-4-4"/>
+          </svg>
+        </div>
+      </div>
 
-          <div class="conversation-info">
-            <div class="conversation-header">
-              <h2>{{ conversation.displayName || 'Cliente' }}</h2>
-              <span class="timestamp">{{ conversation.updatedAt | date: 'HH:mm' }}</span>
-            </div>
+      <!-- Botón eliminar -->
+      <button class="conv-delete-btn" type="button"
+              (click)="deleteConversation(conversation.id, $event)"
+              title="Eliminar conversación">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      </button>
+    </div>
 
-            <p class="conversation-preview">{{ conversation.lastMessagePreview || 'Sin mensajes' }}</p>
+  </div>
 
-            <div class="conversation-meta">
-              <ion-badge color="primary" *ngIf="conversation.unreadCount">
-                {{ conversation.unreadCount }} sin leer
-              </ion-badge>
-              <ion-badge color="medium" *ngIf="!conversation.unreadCount">
-                Al día
-              </ion-badge>
-            </div>
-          </div>
-        </button>
-      </ng-template>
-    </ng-template>
-  </ng-template>
+  <!-- ══ Bappie footer ══ -->
+  <div class="sidebar-bappie">
+    <div class="bappie-canvas">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"
+           style="width:100%;height:100%;overflow:visible">
+        <defs>
+          <linearGradient id="bodyGradBapP" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#2A2A2E"/>
+            <stop offset="100%" stop-color="#0A0A0C"/>
+          </linearGradient>
+          <filter id="shadowHeavyBapP">
+            <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.8"/>
+          </filter>
+        </defs>
+        <g transform="translate(50,260)">
+          <rect x="20"  y="40" width="8"   height="40" rx="2" fill="#111"/>
+          <rect x="270" y="40" width="8"   height="40" rx="2" fill="#111"/>
+          <rect x="10"  y="0"  width="280" height="12" rx="4" fill="#1A1A1D"/>
+          <rect x="10"  y="18" width="280" height="12" rx="4" fill="#1A1A1D"/>
+          <rect x="0"   y="40" width="300" height="10" rx="4" fill="#222"/>
+          <ellipse cx="150" cy="40" rx="40" ry="4" fill="#000" opacity="0.6"/>
+        </g>
+        <g transform="translate(150,60)">
+          <g transform="translate(150,20)">
+            <path d="M-10,-10 L10,-10 L-10,10 L10,10 Z"
+                  fill="none" stroke="#FDE68A" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="0" cy="0" r="2" fill="#FDE68A"/>
+          </g>
+          <rect x="145" y="140" width="10" height="20" fill="#333"/>
+          <path d="M 115 160 Q 150 180 185 160 C 190 210 170 240 150 240 C 130 240 110 210 115 160 Z"
+                fill="url(#bodyGradBapP)" stroke="#333" stroke-width="2" filter="url(#shadowHeavyBapP)"/>
+          <g>
+            <path d="M 105 170 Q 70 200 85 240"
+                  fill="none" stroke="url(#bodyGradBapP)" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="85" cy="240" r="5" fill="#111" stroke="#93C5FD" stroke-width="2"/>
+          </g>
+          <path d="M 195 170 Q 220 200 210 230"
+                fill="none" stroke="url(#bodyGradBapP)" stroke-width="11" stroke-linecap="round" opacity="0.8"/>
+          <circle cx="210" cy="230" r="5" fill="#111" stroke="#93C5FD" stroke-width="2" opacity="0.8"/>
+          <g transform="translate(150,105) scale(1.1) translate(-45,-45)" filter="url(#shadowHeavyBapP)">
+            <path d="M45,10 C25.67,10 10,25.67 10,45 C10,65 45,95 45,95 C45,95 80,65 80,45 C80,25.67 64.33,10 45,10 Z"
+                  transform="rotate(-45 45 45)" fill="#BE202E"/>
+            <circle cx="45" cy="45" r="22" fill="#000"/>
+            <circle cx="45" cy="45" r="6"  fill="#93C5FD">
+              <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="45" cy="45" r="17" fill="none" stroke="#fff" stroke-width="8"/>
+            <line   x1="33" y1="57" x2="14" y2="76" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="bappie-status-text">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="bappie-robot-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 3H7a2 2 0 00-2 2v4m4-6h6m-6 0V1m6 2h2a2 2 0 012 2v4m-4-6V1M3 9h18M3 9a9 9 0 000 9h18a9 9 0 000-9M9 9v6m6-6v6"/>
+      </svg>
+      Bappie IA atento a tus mensajes...
+    </div>
+  </div>
+
 </ion-content>

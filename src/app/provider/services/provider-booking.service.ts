@@ -17,12 +17,12 @@ export class ProviderBookingService {
     }
 
     acceptBooking(bookingId: number, notes?: string): Observable<BookingResponse> {
-        return this.http.post<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/approve`, { notes: notes || null });
+        return this.http.post<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/confirm`, {});
     }
 
     rejectBooking(bookingId: number, reason: string = 'PROVIDER_REQUEST', reasonComment?: string): Observable<BookingResponse> {
-        return this.http.patch<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/reject`, { 
-            reason_comment: reasonComment || null 
+        return this.http.put<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/status`, { 
+            status: 'REJECTED'
         });
     }
 }

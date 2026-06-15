@@ -2,8 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
-  IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
-  IonItem, IonLabel, IonRange, IonTextarea, IonIcon, IonSpinner,
+  IonIcon, IonSpinner,
   ModalController, ToastController
 } from '@ionic/angular/standalone';
 import { CoreService } from '../../services/core.service';
@@ -11,13 +10,13 @@ import { CoreService } from '../../services/core.service';
 @Component({
   selector: 'app-review-modal',
   templateUrl: './review-modal.component.html',
+  styleUrls: ['./review-modal.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
-    IonItem, IonLabel, IonRange, IonTextarea, IonIcon, IonSpinner,
+    IonIcon, IonSpinner,
   ]
 })
 export class ReviewModalComponent implements OnInit {

@@ -73,6 +73,7 @@ export interface Booking {
   updated_at?: string;
   completed_at?: string;
   service_provider_id?: number;
+  has_review?: boolean;
 }
 
 export interface Review {
