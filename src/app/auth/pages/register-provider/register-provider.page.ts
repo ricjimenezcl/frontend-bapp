@@ -396,23 +396,19 @@ export class RegisterProviderPage implements OnInit {
         },
         error: async (error) => {
           this.isLoading = false;
+          const detail = error?.error?.detail;
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
-          if (error.status === 422) {
-            const detail = error.error?.detail;
-            if (Array.isArray(detail)) {
-              errorMessage = detail.map((e: any) => `${e.loc?.join('.')}: ${e.msg}`).join('\n');
-            } else if (typeof detail === 'string') {
-              errorMessage = detail;
-            }
-          } else if (error.error?.detail) {
-            errorMessage = error.error.detail;
-          } else if (error.status === 400) {
-            if (error.error.detail === 'Email already registered') {
-              errorMessage = 'El email ya está registrado.';
-            } else if (error.error.detail === 'RUN already registered') {
-              errorMessage = 'El RUN ya está registrado.';
-            }
+          if (detail === 'Email already registered') {
+            errorMessage = 'Este email ya está registrado.';
+          } else if (detail === 'RUN already registered') {
+            errorMessage = 'Este RUT ya está registrado.';
+          } else if (detail === 'Phone already registered') {
+            errorMessage = 'Este teléfono ya está registrado.';
+          } else if (error.status === 422 && Array.isArray(detail)) {
+            errorMessage = detail.map((e: any) => `${e.loc?.join('.')}: ${e.msg}`).join('\n');
+          } else if (detail) {
+            errorMessage = detail;
           }
           
           this.showAlert('Error de Registro', errorMessage);

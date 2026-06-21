@@ -27,18 +27,26 @@ ion-content {
 // ── Logo section ───────────────────────────────────────────────────────────────
 .login-logo {
   @include flex-column-center;
-  gap: var(--bapp-space-2);
+  gap: var(--bapp-space-4);
   text-align: center;
 
-  .logo-img {
-    width: 80px;
+  .logo-container {
+    width: 60px;
     height: 80px;
-    object-fit: contain;
+    background: transparent;
+    border-radius: var(--bapp-radius-xl);
+    display: flex;
+    overflow: hidden;
+    
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   .titulo-img {
-    width: 180px;
-    height: auto;
+    height: 24px;
     object-fit: contain;
   }
 }
@@ -64,10 +72,127 @@ ion-content {
 }
 
 .login-card-title {
-  margin: 0 0 var(--bapp-space-1);
+  margin: 0;
   font-size: var(--bapp-text-xl);
   font-weight: var(--bapp-font-semibold);
   color: var(--bapp-text-primary);
+  text-align: center;
+}
+
+// ── Auth Segment ─────────────────────────────────────────────────────────────
+.auth-segment {
+  --background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--bapp-radius-lg);
+  padding: 4px;
+  margin: var(--bapp-space-2) 0;
+
+  ion-segment-button {
+    --indicator-color: var(--bapp-red);
+    --color-checked: white;
+    --color: rgba(255, 255, 255, 0.6);
+    min-height: 36px;
+    font-size: var(--bapp-text-sm);
+    font-weight: var(--bapp-font-medium);
+  }
+}
+
+// ── Success alert ──────────────────────────────────────────────────────────────
+.success-alert {
+  background: rgba(var(--bapp-green-rgb), 0.1);
+  border: 1px solid var(--bapp-green);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-3);
+  margin-bottom: var(--bapp-space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+
+  ion-icon {
+    color: var(--bapp-green);
+    font-size: 20px;
+  }
+
+  span {
+    color: var(--bapp-green);
+    font-size: var(--bapp-text-sm);
+  }
+}
+
+.provider-link-wrap {
+  margin-top: var(--bapp-space-6);
+  text-align: center;
+  padding-top: var(--bapp-space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  p {
+    margin: 0 0 var(--bapp-space-2) 0;
+    color: var(--bapp-text-secondary);
+    font-size: var(--bapp-text-sm);
+  }
+
+  .accent-link {
+    color: var(--bapp-red);
+    text-decoration: none;
+    font-weight: var(--bapp-font-semibold);
+    font-size: var(--bapp-text-sm);
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// ── Error Message ──────────────────────────────────────────────────────────────
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bapp-space-2);
+  padding: var(--bapp-space-3);
+  background: rgba(var(--bapp-color-success-rgb, 34, 197, 94), 0.12);
+  border: 1px solid rgba(var(--bapp-color-success-rgb, 34, 197, 94), 0.3);
+  border-radius: var(--bapp-radius-md);
+  color: #4ade80;
+  font-size: var(--bapp-text-sm);
+
+  ion-icon {
+    font-size: var(--bapp-text-md);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+// ── Terms section ─────────────────────────────────────────────────────────────
+.terms-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bapp-space-3);
+  margin-top: var(--bapp-space-1);
+
+  .custom-checkbox {
+    --size: 18px;
+    --checkbox-background-checked: var(--bapp-red);
+    --border-color-checked: var(--bapp-red);
+    margin-top: 2px;
+  }
+
+  .terms-text {
+    font-size: var(--bapp-text-xs);
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.4;
+
+    .accent-link {
+      color: var(--bapp-red);
+      text-decoration: none;
+      font-weight: var(--bapp-font-medium);
+      &:hover { text-decoration: underline; }
+    }
+  }
+}
+
+.form-error {
+  display: block;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+  margin-top: 4px;
 }
 
 // ── Error alert ────────────────────────────────────────────────────────────────

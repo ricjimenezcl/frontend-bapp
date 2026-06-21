@@ -692,4 +692,21 @@ export class AuthService {
   resendVerificationEmail(email: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/send-verification-email`, { email });
   }
+
+  /**
+   * Inicia el proceso de recuperación de contraseña
+   */
+  resetPassword(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/reset-password`, { email });
+  }
+
+  /**
+   * Establece una nueva contraseña usando el token de recuperación
+   */
+  setNewPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/set-new-password`, { 
+      token, 
+      new_password: newPassword 
+    });
+  }
 }

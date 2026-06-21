@@ -68,25 +68,25 @@ export class SetNewPasswordPage {
   }
 
   onSubmit(): void {
-    // if (this.setPasswordForm.valid && this.token) {
-    //   this.isLoading = true;
-    //   this.errorMessage = '';
-    //   this.successMessage = '';
-    //   const password = this.setPasswordForm.value.password;
-    //   this.authService.setNewPassword(this.token, password).subscribe({
-    //     next: () => {
-    //       this.isLoading = false;
-    //       this.successMessage = 'Contraseña restablecida correctamente. Ahora puedes iniciar sesión.';
-    //       setTimeout(() => this.router.navigate(['/auth/login']), 2000);
-    //     },
-    //     error: (error) => {
-    //       this.isLoading = false;
-    //       this.errorMessage = error.error?.detail || 'Error al restablecer la contraseña.';
-    //     }
-    //   });
-    // } else {
-    //   this.errorMessage = 'Verifica los campos y el enlace de recuperación.';
-    // }
+    if (this.setPasswordForm.valid && this.token) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+      const password = this.setPasswordForm.value.password;
+      this.authService.setNewPassword(this.token, password).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.successMessage = 'Contraseña restablecida correctamente. Ahora puedes iniciar sesión.';
+          setTimeout(() => this.router.navigate(['/auth/login']), 2000);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.errorMessage = error.error?.detail || 'Error al restablecer la contraseña.';
+        }
+      });
+    } else {
+      this.errorMessage = 'Verifica los campos y el enlace de recuperación.';
+    }
   }
 
   onBack(): void {

@@ -2,35 +2,52 @@
   <div class="login-bg">
     <div class="login-wrap">
 
-      <!-- Logo -->
+      <!-- Logo section from Web -->
       <div class="login-logo">
-        <img src="assets/imgs/logo.png" alt="logo" class="logo-img">
-        <img src="assets/imgs/titulo.png" alt="titulo" class="titulo-img">
+        <div class="logo-container">
+          <img src="https://res.cloudinary.com/dghwotofx/image/upload/f_auto,q_auto,w_320,c_limit/v1774563936/logo_gsgyrf.png" 
+               alt="logo" class="logo-img">
+        </div>
+        <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png" 
+             alt="BappSearch" class="titulo-img">
         <p class="login-subtitle">Conecta con proveedores de servicios</p>
       </div>
 
       <!-- Card -->
       <div class="login-card">
-        <h2 class="login-card-title">Iniciar sesión</h2>
+        <h2 class="login-card-title">{{ activeTab() === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta' }}</h2>
 
-        <!-- Error alert -->
+        <!-- Tabs -->
+        <ion-segment [value]="activeTab()" (ionChange)="setTab($any($event).detail.value)" mode="md" class="auth-segment">
+          <ion-segment-button value="login">
+            <ion-label>Entrar</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="register">
+            <ion-label>Registrar</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+
+        <!-- Messages -->
         <div *ngIf="errorMessage && !isRetrying" class="error-alert">
           <ion-icon name="alert-circle-outline"></ion-icon>
           <span>{{ errorMessage }}</span>
         </div>
 
-        <!-- Server waking up banner -->
-        <div *ngIf="isRetrying" class="retry-alert">
-          <ion-spinner name="dots"></ion-spinner>
-          <span>El servidor está iniciando, reintentando en {{ retryCountdown }}s...</span>
+        <div *ngIf="successMessage" class="success-alert">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <span>{{ successMessage }}</span>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
+        <div *ngIf="isRetrying" class="retry-alert">
+          <ion-spinner name="dots"></ion-spinner>
+          <span>Iniciando servidor, espera {{ retryCountdown }}s...</span>
+        </div>
 
-          <!-- Email -->
+        <!-- LOGIN FORM -->
+        <form *ngIf="activeTab() === 'login'" [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate class="login-form">
           <div class="form-group">
             <label class="form-label">Correo electrónico</label>
-            <div class="input-wrap" [class.input-wrap-error]="emailControl?.invalid && emailControl?.touched">
+            <div class="input-wrap" [class.input-wrap-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
               <ion-icon name="mail-outline" class="input-icon"></ion-icon>
               <ion-input
                 formControlName="email"
@@ -39,14 +56,11 @@
                 autocomplete="email">
               </ion-input>
             </div>
-            <span class="form-error" *ngIf="emailControl?.touched && emailControl?.errors?.['required']">El correo es requerido</span>
-            <span class="form-error" *ngIf="emailControl?.touched && emailControl?.errors?.['email']">Ingresa un correo válido</span>
           </div>
 
-          <!-- Password -->
           <div class="form-group">
             <label class="form-label">Contraseña</label>
-            <div class="input-wrap" [class.input-wrap-error]="passwordControl?.invalid && passwordControl?.touched">
+            <div class="input-wrap" [class.input-wrap-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
               <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
               <ion-input
                 formControlName="password"
@@ -58,16 +72,12 @@
                 <ion-icon [name]="showPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
               </button>
             </div>
-            <span class="form-error" *ngIf="passwordControl?.touched && passwordControl?.errors?.['required']">La contraseña es requerida</span>
-            <span class="form-error" *ngIf="passwordControl?.touched && passwordControl?.errors?.['minlength']">Mínimo 6 caracteres</span>
           </div>
 
-          <!-- Forgot password -->
           <div class="forgot-wrap">
             <button type="button" class="forgot-btn" (click)="onReset()">¿Olvidaste tu contraseña?</button>
           </div>
 
-          <!-- Submit -->
           <ion-button
             type="submit"
             expand="block"
@@ -76,17 +86,94 @@
             <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
             <span>Iniciar Sesión</span>
           </ion-button>
-
         </form>
 
-        <!-- Divider -->
+        <!-- REGISTER FORM -->
+        <form *ngIf="activeTab() === 'register'" [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate class="login-form">
+          <div class="form-group">
+            <label class="form-label">Nombre completo</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('full_name')?.invalid && registerForm.get('full_name')?.touched">
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="full_name"
+                placeholder="Tu nombre">
+              </ion-input>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Correo electrónico</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="email"
+                type="email"
+                placeholder="tu@email.com">
+              </ion-input>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Contraseña</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="password"
+                [type]="showRegisterPassword ? 'text' : 'password'"
+                placeholder="••••••••">
+              </ion-input>
+              <button type="button" class="toggle-pass-btn" (click)="showRegisterPassword = !showRegisterPassword" tabindex="-1">
+                <ion-icon [name]="showRegisterPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirmar contraseña</label>
+            <div class="input-wrap" [class.input-wrap-error]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('mismatch')) && registerForm.get('confirmPassword')?.touched">
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="confirmPassword"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                placeholder="••••••••">
+              </ion-input>
+              <button type="button" class="toggle-pass-btn" (click)="showConfirmPassword = !showConfirmPassword" tabindex="-1">
+                <ion-icon [name]="showConfirmPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+              </button>
+            </div>
+            <span class="form-error" *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched">
+              Las contraseñas no coinciden
+            </span>
+          </div>
+
+          <div class="terms-wrap">
+            <ion-checkbox formControlName="terms_accepted" mode="md" class="custom-checkbox"></ion-checkbox>
+            <label class="terms-text">
+              Acepto los <a routerLink="/auth/terms" class="accent-link">Términos</a> y la <a routerLink="/auth/privacy" class="accent-link">Privacidad</a>
+            </label>
+          </div>
+
+          <ion-button
+            type="submit"
+            expand="block"
+            class="submit-btn"
+            [disabled]="isLoading || registerForm.invalid">
+            <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+            <span>Crear Cuenta</span>
+          </ion-button>
+
+          <div class="provider-link-wrap">
+            <p>¿Quieres ofrecer tus servicios?</p>
+            <a routerLink="/auth/register-provider" class="accent-link">Regístrate como Proveedor aquí</a>
+          </div>
+        </form>
+
         <div class="divider">
           <span class="divider-line"></span>
           <span class="divider-text">o continúa con</span>
           <span class="divider-line"></span>
         </div>
 
-        <!-- Social buttons -->
         <div class="social-btns">
           <button type="button" class="social-btn" (click)="loginWithGoogle()" [disabled]="isLoading">
             <svg width="18" height="18" viewBox="0 0 24 24">
@@ -104,49 +191,7 @@
             Facebook
           </button>
         </div>
-
-        <!-- Register links -->
-        <div class="register-links">
-          <p class="register-text">
-            ¿No tienes cuenta?
-          </p>
-          <button type="button" id="open-custom-dialog" class="register-link">
-            Regístrate como cliente o proveedor
-          </button>
-        </div>
       </div>
-
-      <!-- Terms footer -->
-      <p class="terms-text">
-        Al usar la app, aceptas nuestros
-        <a routerLink="/terms" class="terms-link">Términos</a> y
-        <a routerLink="/privacy" class="terms-link">Política de privacidad</a>
-      </p>
-
     </div>
   </div>
-
-  <!-- Register type modal -->
-  <ion-modal id="example-modal" #modal trigger="open-custom-dialog">
-    <ng-template>
-      <div class="modal-wrapper">
-        <h1 class="modal-title">Selecciona tu tipo de registro</h1>
-        <ion-list lines="none">
-          <ion-item button="true" detail="false" (click)="onRegisterProvider()">
-            <ion-icon name="person-circle" slot="start"></ion-icon>
-            <ion-label>Regístrate como Proveedor</ion-label>
-          </ion-item>
-          <ion-item button="true" detail="false" (click)="onRegisterClient()">
-            <ion-icon name="person-circle" slot="start"></ion-icon>
-            <ion-label>Regístrate como Cliente</ion-label>
-          </ion-item>
-          <ion-item button="true" detail="false" (click)="modal.dismiss()">
-            <ion-icon name="close-circle" slot="start"></ion-icon>
-            <ion-label>Cancelar</ion-label>
-          </ion-item>
-        </ion-list>
-      </div>
-    </ng-template>
-  </ion-modal>
-
 </ion-content>

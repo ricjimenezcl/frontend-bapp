@@ -145,16 +145,19 @@ export class RegisterClientPage {
         },
         error: async (error) => {
           this.isLoading = false;
+          const detail = error?.error?.detail;
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
-          if (error.error?.detail) {
-            errorMessage = error.error.detail;
-          } else if (error.status === 400 && error.error.detail === 'Email already registered') {
-            errorMessage = 'El email ya está registrado.';
+          if (detail === 'Email already registered') {
+            errorMessage = 'Este email ya está registrado.';
+          } else if (detail === 'Phone already registered') {
+            errorMessage = 'Este teléfono ya está registrado.';
+          } else if (detail) {
+            errorMessage = detail;
           }
           
           const alert = await this.alertController.create({
-            header: 'Error',
+            header: 'Error de Registro',
             message: errorMessage,
             buttons: ['OK']
           });

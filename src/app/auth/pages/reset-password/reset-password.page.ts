@@ -39,16 +39,16 @@ export class ResetPasswordPage {
       this.errorMessage = '';
       this.successMessage = '';
       const email: string = this.resetForm.value.email;
-      // this.authService.resetPassword(email).subscribe({
-      //   next: () => {
-      //     this.isLoading = false;
-      //     this.successMessage = 'Si el correo existe, recibirás instrucciones para restablecer tu contraseña.';
-      //   },
-      //   error: (error: any) => {
-      //     this.isLoading = false;
-      //     this.errorMessage = error?.error?.detail || 'Error al solicitar el restablecimiento de contraseña.';
-      //   }
-      // });
+      this.authService.resetPassword(email).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.successMessage = 'Si el correo existe, recibirás instrucciones para restablecer tu contraseña.';
+        },
+        error: (error: any) => {
+          this.isLoading = false;
+          this.errorMessage = error?.error?.detail || 'Error al solicitar el restablecimiento de contraseña.';
+        }
+      });
     } else {
       this.errorMessage = 'Por favor ingresa un correo válido.';
     }

@@ -6,10 +6,11 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import {
   IonContent, IonLabel, IonItem, IonIcon, IonInput, IonButton,
   IonCheckbox, IonRow, IonCol, IonSpinner, IonModal, IonList, IonText,
-  ModalController // ¡AGREGAR ESTO!
+  IonSegment, IonSegmentButton, ModalController // ¡AGREGAR ESTO!
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -33,14 +34,13 @@ import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@
     IonSpinner,
     IonModal,
     IonList,
-    IonText
+    IonText,
+    IonSegment,
+    IonSegmentButton
   ]
 })
 export class LoginPage implements OnInit, OnDestroy {
-    // ...existing code...
-    // ...existing code...
-    // Método para resetear contraseña ya existe: onReset()
-  @ViewChild(IonModal) modal!: IonModal; // Cambiar el tipo
+  @ViewChild(IonModal) modal!: IonModal;
   
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -50,10 +50,15 @@ export class LoginPage implements OnInit, OnDestroy {
   private socialAuthService = inject(SocialAuthService);
   
   loginForm: FormGroup;
+  registerForm: FormGroup;
+  activeTab = signal<'login' | 'register'>('login');
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
   sessionExpired = false;
   showPassword = false;
+  showRegisterPassword = false;
+  showConfirmPassword = false;
   isRetrying = false;
   retryCountdown = 0;
   private retryAttempts = 0;
@@ -66,6 +71,19 @@ export class LoginPage implements OnInit, OnDestroy {
       password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
+
+    this.registerForm = this.fb.group({
+      full_name: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+      terms_accepted: [false, [Validators.requiredTrue]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  passwordMatchValidator(g: FormGroup) {
+    return g.get('password')?.value === g.get('confirmPassword')?.value
+      ? null : { mismatch: true };
   }
 
   ngOnInit(): void {
@@ -75,7 +93,50 @@ export class LoginPage implements OnInit, OnDestroy {
         this.sessionExpired = true;
         this.errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
       }
+      if (params['tab'] === 'register') {
+        this.activeTab.set('register');
+      }
     });
+  }
+
+  setTab(tab: 'login' | 'register') {
+    this.activeTab.set(tab);
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  onRegisterSubmit() {
+    if (this.registerForm.valid) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      const data = {
+        email: this.registerForm.value.email,
+        password: this.registerForm.value.password,
+        full_name: this.registerForm.value.full_name,
+        role: 'CLIENT'
+      };
+
+      console.log("📤 Registrando cliente:", data.email);
+
+      this.authService.registerClient(data).subscribe({
+        next: (resp) => {
+          this.isLoading = false;
+          console.log('✅ Registro exitoso', resp);
+          this.successMessage = 'Cuenta creada exitosamente. Por favor, inicia sesión.';
+          this.activeTab.set('login');
+          this.loginForm.patchValue({ email: data.email });
+        },
+        error: (err) => {
+          this.isLoading = false;
+          console.error('❌ Error en registro:', err);
+          this.errorMessage = err.error?.detail || err.error?.message || 'Error al crear la cuenta';
+        }
+      });
+    } else {
+      this.markFormGroupTouched(this.registerForm);
+    }
   }
 
   onSubmit(): void {
@@ -231,9 +292,9 @@ export class LoginPage implements OnInit, OnDestroy {
     return error.error?.detail || error.error?.message || 'Error en el login';
   }
 
-  private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
-      const control = this.loginForm.get(key);
+  private markFormGroupTouched(form: FormGroup = this.loginForm): void {
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
       if (control) {
         control.markAsTouched();
       }
