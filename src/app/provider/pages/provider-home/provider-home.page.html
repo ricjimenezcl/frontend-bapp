@@ -90,8 +90,27 @@
 
     <ng-container *ngIf="!isLoading">
 
+      <!-- ── Banner perfil incompleto ──────────────────────────── -->
+      <div class="ph-verification-banner ph-verification-banner--incomplete" *ngIf="isProfileIncomplete">
+        <div class="ph-vb-icon ph-vb-icon--incomplete">
+          <ion-icon name="person-add-outline"></ion-icon>
+        </div>
+        <div class="ph-vb-content">
+          <h4>Perfil incompleto</h4>
+          <p>
+            Te falta registrar tu <strong>{{ missingFields.join(' y ') }}</strong>. 
+            Debes completar estos datos para poder publicar tus servicios.
+          </p>
+        </div>
+        <div class="ph-vb-actions">
+          <ion-button (click)="goToCompleteProfile()" class="ph-btn-primary" fill="solid" size="small">
+            Completar perfil
+          </ion-button>
+        </div>
+      </div>
+
       <!-- ── Banner verificación pendiente ────────────────────── -->
-      <div class="ph-verification-banner" *ngIf="showVerificationAlert">
+      <div class="ph-verification-banner" *ngIf="showVerificationAlert && !isProfileIncomplete">
         <div class="ph-vb-icon">
           <ion-icon name="shield-checkmark-outline"></ion-icon>
         </div>

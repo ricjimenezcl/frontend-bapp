@@ -27,6 +27,8 @@ export class ProviderHomePage implements OnInit, OnDestroy {
   validationStatus: string = 'not_submitted';
   showVerificationAlert = false;
   verificationMessage = '';
+  isProfileIncomplete = false;
+  missingFields: string[] = [];
   stats: ProviderStats | null = null;
   reviews: Review[] = [];
   reviewsLoading = false;
@@ -98,6 +100,9 @@ export class ProviderHomePage implements OnInit, OnDestroy {
           this.providerName = profile.full_name || 'Provider';
           this.isLoading = false;
           
+          // Verificar si el perfil está incompleto (RUT o Teléfono)
+          this.checkProfileCompletion(profile);
+          
           // Cargar métricas reales después de obtener el perfil
           this.loadProviderMetrics(profile.id.toString());
           // Cargar reseñas del proveedor
@@ -109,6 +114,24 @@ export class ProviderHomePage implements OnInit, OnDestroy {
           // Mantener el valor por defecto
         }
       });
+  }
+
+  /**
+   * Verificar si el perfil tiene los datos mínimos para operar
+   */
+  private checkProfileCompletion(profile: ProviderProfile) {
+    this.missingFields = [];
+    if (!profile.run) this.missingFields.push('RUN');
+    if (!profile.phone) this.missingFields.push('Teléfono');
+    
+    this.isProfileIncomplete = this.missingFields.length > 0;
+  }
+
+  /**
+   * Ir a completar perfil
+   */
+  goToCompleteProfile() {
+    this.router.navigate(['/provider/account-info']);
   }
 
   /**
