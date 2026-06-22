@@ -51,7 +51,7 @@ export class RegisterProviderPage implements OnInit {
   private createForm(): FormGroup {
     return this.fb.group({
       email: ['', [Validators.required, Validators.email, this.strictEmailValidator]],
-      run: ['', [Validators.required, this.rutValidator]],
+      run: ['', [this.rutValidator]], // Eliminamos Validators.required
       password: ['', [
         Validators.required, 
         Validators.minLength(8),
@@ -60,7 +60,7 @@ export class RegisterProviderPage implements OnInit {
       ]],
       confirmPassword: ['', [Validators.required]],
       fullName: ['', [Validators.required, Validators.minLength(2)]],
-      phone: ['', [Validators.required, this.phoneValidator.bind(this)]],
+      phone: ['', [this.phoneValidator.bind(this)]], // Eliminamos Validators.required
       bio: [''],
       avatar: [''],
       termsAccepted: [false, [Validators.requiredTrue]],

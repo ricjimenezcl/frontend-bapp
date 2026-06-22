@@ -109,6 +109,24 @@
         </div>
       </div>
 
+      <!-- ── Banner perfil incompleto (RUT/Teléfono) ────────────── -->
+      <div class="ph-verification-banner profile-incomplete-banner" 
+           *ngIf="providerProfile && providerProfile.is_profile_complete === false"
+           style="border-left: 4px solid var(--ion-color-danger); margin-bottom: 16px;">
+        <div class="ph-vb-icon" style="color: var(--ion-color-danger)">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+        </div>
+        <div class="ph-vb-content">
+          <h4 style="color: var(--ion-color-danger)">Perfil incompleto</h4>
+          <p>Para publicar servicios debes completar tu RUT y teléfono en tu perfil.</p>
+        </div>
+        <div class="ph-vb-actions">
+          <ion-button class="ph-btn-primary" size="small" (click)="router.navigate(['/provider/provider-profile'])">
+            Completar perfil
+          </ion-button>
+        </div>
+      </div>
+
       <!-- ── Alerta servicios pendientes ──────────────────────── -->
       <div class="ph-pending-alert" *ngIf="metrics.pendingServices > 0" 
         (click)="router.navigate(['/provider/tabs/service-details'])" 

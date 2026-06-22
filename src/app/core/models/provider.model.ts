@@ -21,6 +21,7 @@ export interface ProviderProfile {
   selfie_url?: string;
   validation_status?: 'pending' | 'approved' | 'rejected';
   validation_notes?: string;
+  is_profile_complete?: boolean;
   created_at?: string;
   updated_at?: string;
 }

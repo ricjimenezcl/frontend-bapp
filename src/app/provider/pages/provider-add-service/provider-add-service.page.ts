@@ -518,8 +518,9 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
               console.error('Error guardando servicio:', error);
 
               if (error.status === 403) {
+                const isProfileIncomplete = error.error?.detail?.includes('Perfil incompleto');
                 await this.presentAlert(
-                  'Verificación de identidad requerida',
+                  isProfileIncomplete ? 'Perfil incompleto' : 'Verificación de identidad requerida',
                   error.error?.detail || 'Debes completar la verificación de identidad antes de agregar servicios. Por favor, ve a la sección de verificación y sube tu selfie y documento de identidad.'
                 );
                 return;
