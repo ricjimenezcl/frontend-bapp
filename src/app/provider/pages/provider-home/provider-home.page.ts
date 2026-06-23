@@ -280,7 +280,7 @@ export class ProviderHomePage implements OnInit, OnDestroy {
    * Ir a verificación de identidad
    */
   goToVerifyIdentity() {
-    this.router.navigate(['/auth/document-verification']);
+    this.router.navigate(['/auth/verify-identity']);
   }
 
   /**

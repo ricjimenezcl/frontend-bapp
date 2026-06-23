@@ -304,12 +304,22 @@ export class LoginPage implements OnInit, OnDestroy {
   loginWithFacebook(): void {
     this.isLoading = true;
     this.errorMessage = '';
+    const wasRegistering = this.activeTab() === 'register';
+    
     this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID)
       .then((socialUser) => {
         this.authService.loginWithFacebook(socialUser.authToken || '').subscribe({
           next: (response) => {
             this.isLoading = false;
-            this.handleOAuthNavigation(response.role, response.terms_accepted);
+            
+            if (wasRegistering && !response.is_new_user) {
+              this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
+              setTimeout(() => {
+                this.handleOAuthNavigation(response.role, response.terms_accepted);
+              }, 2000);
+            } else {
+              this.handleOAuthNavigation(response.role, response.terms_accepted);
+            }
           },
           error: (error) => {
             this.isLoading = false;
@@ -328,12 +338,22 @@ export class LoginPage implements OnInit, OnDestroy {
   loginWithGoogle(): void {
     this.isLoading = true;
     this.errorMessage = '';
+    const wasRegistering = this.activeTab() === 'register';
+
     this.signInWithRetry(GoogleLoginProvider.PROVIDER_ID)
       .then((socialUser) => {
         this.authService.loginWithGoogle(socialUser.idToken || '').subscribe({
           next: (response) => {
             this.isLoading = false;
-            this.handleOAuthNavigation(response.role, response.terms_accepted);
+            
+            if (wasRegistering && !response.is_new_user) {
+              this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
+              setTimeout(() => {
+                this.handleOAuthNavigation(response.role, response.terms_accepted);
+              }, 2000);
+            } else {
+              this.handleOAuthNavigation(response.role, response.terms_accepted);
+            }
           },
           error: (error) => {
             this.isLoading = false;

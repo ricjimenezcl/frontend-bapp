@@ -119,10 +119,10 @@
           <p>{{ verificationMessage }}</p>
         </div>
         <div class="ph-vb-actions">
-          <ion-button class="ph-btn-primary" size="small" (click)="goToVerifyIdentity()" (keypress)="goToVerifyIdentity()">
+          <ion-button class="ph-btn-primary" size="small" (click)="goToVerifyIdentity()">
             Verificar ahora
           </ion-button>
-          <ion-button class="ph-btn-ghost" fill="clear" size="small" (click)="dismissVerificationAlert()" (keypress)="dismissVerificationAlert()">
+          <ion-button class="ph-btn-ghost" fill="clear" size="small" (click)="dismissVerificationAlert()">
             Más tarde
           </ion-button>
         </div>
@@ -140,7 +140,7 @@
           <p>Para publicar servicios debes completar tu RUT y teléfono en tu perfil.</p>
         </div>
         <div class="ph-vb-actions">
-          <ion-button class="ph-btn-primary" size="small" (click)="router.navigate(['/provider/provider-profile'])">
+          <ion-button class="ph-btn-primary" size="small" (click)="goToCompleteProfile()">
             Completar perfil
           </ion-button>
         </div>

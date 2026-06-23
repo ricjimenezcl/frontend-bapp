@@ -22,6 +22,7 @@ export interface User {
   status?: string;
   token?: string; // Alias para compatibilidad
   terms_accepted?: boolean;
+  is_new_user?: boolean;
 }
 
 export interface UserProfile extends User {
@@ -455,6 +456,7 @@ export class AuthService {
           name: response.name,
           picture: response.avatar_url,
           terms_accepted: response.terms_accepted,
+          is_new_user: response.is_new_user,
         };
 
         this.setUser(googleUser, response.access_token);
@@ -483,6 +485,7 @@ export class AuthService {
           name: response.name,
           picture: response.avatar_url,
           terms_accepted: response.terms_accepted,
+          is_new_user: response.is_new_user,
         };
         this.setUser(facebookUser, response.access_token);
       }),
