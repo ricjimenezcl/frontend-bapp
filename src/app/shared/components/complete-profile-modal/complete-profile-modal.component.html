@@ -1,0 +1,66 @@
+<!-- Overlay bloqueante — cubre toda la pantalla -->
+<div class="cpm-backdrop">
+  <div class="cpm-card">
+    <!-- Icono y encabezado -->
+    <div class="cpm-header">
+      <div class="cpm-icon-wrap">
+        <ion-icon name="lock-closed-outline" class="cpm-icon"></ion-icon>
+      </div>
+      <h2 class="cpm-title">Completa tu perfil</h2>
+      <p class="cpm-subtitle">
+        Para operar como proveedor en BappSearch necesitamos
+        verificar tu identidad con los siguientes datos.
+      </p>
+    </div>
+
+    <!-- Formulario -->
+    <div class="cpm-form">
+
+      <!-- Teléfono -->
+      <div *ngIf="needPhone" class="cpm-field">
+        <label class="cpm-label">Teléfono de contacto *</label>
+        <input
+          class="cpm-input"
+          type="tel"
+          inputmode="tel"
+          placeholder="+56 9 1234 5678"
+          [(ngModel)]="phone"
+          maxlength="20"
+        />
+      </div>
+
+      <!-- RUN -->
+      <div *ngIf="needRun" class="cpm-field">
+        <label class="cpm-label">RUN (sin puntos, con guión) *</label>
+        <input
+          class="cpm-input"
+          type="text"
+          inputmode="text"
+          placeholder="12345678-9"
+          [(ngModel)]="run"
+          maxlength="12"
+        />
+      </div>
+
+      <!-- Error -->
+      <p *ngIf="error()" class="cpm-error">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ error() }}
+      </p>
+
+      <!-- Botón guardar -->
+      <button
+        class="cpm-btn-save"
+        (click)="save()"
+        [disabled]="saving()"
+      >
+        <ion-spinner *ngIf="saving()" name="crescent" class="cpm-spinner"></ion-spinner>
+        <span *ngIf="!saving()">Guardar y continuar</span>
+      </button>
+
+      <p class="cpm-footer-note">
+        Estos datos son necesarios para recibir solicitudes de clientes y son protegidos conforme a nuestra política de privacidad.
+      </p>
+    </div>
+  </div>
+</div>

@@ -8,9 +8,12 @@
     <div class="ph-cover"></div>
 
     <!-- Badge verificación sobre el cover -->
-    <div class="ph-cover-badge" *ngIf="!isLoading && validationStatus !== 'approved'">
-      <ion-icon name="warning-outline"></ion-icon>
-      <span>Identidad pendiente</span>
+    <div class="ph-cover-badge ph-cover-badge--clickable" 
+         *ngIf="!isLoading && validationStatus !== 'approved'"
+         (click)="goToVerifyIdentity()">
+      <ion-icon name="shield-half-outline"></ion-icon>
+      <span>Verificar Identidad</span>
+      <ion-icon name="chevron-forward" class="ph-badge-arrow"></ion-icon>
     </div>
 
     <!-- Avatar -->

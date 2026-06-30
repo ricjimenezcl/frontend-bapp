@@ -131,7 +131,19 @@ export class LoginPage implements OnInit, OnDestroy {
         error: (err) => {
           this.isLoading = false;
           console.error('❌ Error en registro:', err);
-          this.errorMessage = err.error?.detail || err.error?.message || 'Error al crear la cuenta';
+          
+          const detail = err.error?.detail || err.error?.message;
+          
+          if (detail === 'Email already registered' || (typeof detail === 'string' && detail.includes('already registered'))) {
+            this.errorMessage = 'Este correo ya está registrado. Por favor, inicia sesión.';
+            // Opcional: mover al tab de login automáticamente tras 2 segundos
+            setTimeout(() => {
+              this.activeTab.set('login');
+              this.loginForm.patchValue({ email: this.registerForm.value.email });
+            }, 2000);
+          } else {
+            this.errorMessage = detail || 'Error al crear la cuenta';
+          }
         }
       });
     } else {

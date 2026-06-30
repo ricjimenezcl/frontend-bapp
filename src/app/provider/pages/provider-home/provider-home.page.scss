@@ -45,10 +45,28 @@ ion-content {
   border-radius: 20px;
   padding: 5px 12px;
   z-index: 2;
+  transition: all 0.2s ease;
   
   ion-icon { 
     font-size: 13px; 
   }
+
+  &--clickable {
+    cursor: pointer;
+    background: rgba(var(--bapp-color-primary-rgb), 0.15);
+    color: var(--bapp-color-primary);
+    border-color: var(--bapp-color-primary);
+    
+    &:hover {
+      background: var(--bapp-color-primary);
+      color: var(--bapp-color-primary-contrast);
+    }
+  }
+}
+
+.ph-badge-arrow {
+  font-size: 10px !important;
+  opacity: 0.7;
 }
 
 .ph-avatar-wrap {

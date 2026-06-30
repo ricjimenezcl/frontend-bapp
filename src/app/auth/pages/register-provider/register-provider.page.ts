@@ -400,7 +400,24 @@ export class RegisterProviderPage implements OnInit {
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
           if (detail === 'Email already registered') {
-            errorMessage = 'Este email ya está registrado.';
+            const alert = await this.alertController.create({
+              header: 'Cuenta ya existe',
+              message: 'Este correo electrónico ya está registrado. ¿Deseas iniciar sesión?',
+              buttons: [
+                {
+                  text: 'No',
+                  role: 'cancel'
+                },
+                {
+                  text: 'Ir al Login',
+                  handler: () => {
+                    this.router.navigate(['/auth/login']);
+                  }
+                }
+              ]
+            });
+            await alert.present();
+            return;
           } else if (detail === 'RUN already registered') {
             errorMessage = 'Este RUT ya está registrado.';
           } else if (detail === 'Phone already registered') {
@@ -497,6 +514,15 @@ export class RegisterProviderPage implements OnInit {
       this.router.navigate(['/auth/terms-acceptance']);
       return;
     }
+
+    if (role !== 'PROVIDER') {
+      this.showAlert('Cuenta de Cliente Detectada', 'Esta cuenta está registrada como Cliente. Para registrarte como Proveedor, utiliza un correo diferente o contacta a soporte.');
+      // En lugar de ir a provider, lo mandamos a client o login
+      this.authService.logout();
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
     this.router.navigate(['/provider/tabs']);
   }
 

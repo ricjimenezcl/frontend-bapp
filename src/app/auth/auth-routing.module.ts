@@ -16,6 +16,10 @@ const routes: Routes = [
     loadComponent: () => import('./pages/set-new-password/set-new-password.page').then(m => m.SetNewPasswordPage)
   },
   {
+    path: 'verify-identity',
+    loadComponent: () => import('./pages/document-verification/document-verification.page').then(m => m.DocumentVerificationPage)
+  },
+  {
     path: 'register',
     children: [
       {

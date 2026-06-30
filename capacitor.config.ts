@@ -7,6 +7,9 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https'
   },
+  // Custom URL scheme para deep links: bapp://
+  // El enlace de verificaci\u00f3n en el correo redirige a bapp://home tras verificar en la web
+  appUrlScheme: 'bapp',
   plugins: {
     Keyboard: {
       resize: 'body',

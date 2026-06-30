@@ -205,3 +205,67 @@ ion-input input {
 
   &:active { background: var(--bapp-surface-hover); }
 }
+
+/* ── Verificación de Identidad ── */
+.ep-verification-section {
+  margin-top: var(--bapp-space-8);
+  padding-top: var(--bapp-space-6);
+  border-top: 1px solid var(--bapp-border);
+}
+
+.ep-verification-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+
+  &.approved {
+    border-color: rgba(var(--bapp-color-success-rgb), 0.3);
+    background: rgba(var(--bapp-color-success-rgb), 0.05);
+  }
+  
+  &.rejected {
+    border-color: rgba(var(--bapp-color-danger-rgb), 0.3);
+    background: rgba(var(--bapp-color-danger-rgb), 0.05);
+  }
+}
+
+.ep-vc-info {
+  flex: 1;
+}
+
+.ep-vc-status {
+  display: block;
+  font-size: 14px;
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  margin-bottom: 2px;
+}
+
+.ep-vc-desc {
+  font-size: 12px;
+  color: var(--bapp-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ep-btn-verify {
+  background: var(--bapp-color-primary);
+  color: var(--bapp-color-primary-contrast);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: var(--bapp-font-bold);
+  cursor: pointer;
+}
+
+.ep-vc-done {
+  font-size: 24px;
+  color: var(--bapp-color-success);
+}

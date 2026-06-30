@@ -3,19 +3,30 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Platform, IonApp, IonRouterOutlet, AlertController } from '@ionic/angular/standalone';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { App as CapApp } from '@capacitor/app';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { SqliteService } from './core/storage/sqlite.service';
 import { NotificationRealtimeService } from './core/services/notification-realtime.service';
 import { AuthService } from './auth/services/auth.service';
+import { ProfileCompletionService } from './core/services/profile-completion.service';
+import { CompleteProfileModalComponent } from './shared/components/complete-profile-modal/complete-profile-modal.component';
 import { Subject, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  template: '<ion-app><ion-router-outlet></ion-router-outlet></ion-app>',
+  template: `
+    <ion-app>
+      <ion-router-outlet></ion-router-outlet>
+      @if (profileCompletion.show()) {
+        <app-complete-profile-modal></app-complete-profile-modal>
+      }
+    </ion-app>
+  `,
   standalone: true,
-  imports: [IonApp, IonRouterOutlet]
+  imports: [CommonModule, IonApp, IonRouterOutlet, CompleteProfileModalComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -29,6 +40,7 @@ export class AppComponent implements OnInit, OnDestroy {
     private sqliteService: SqliteService,
     private notificationService: NotificationRealtimeService,
     private authService: AuthService,
+    public profileCompletion: ProfileCompletionService,
     private router: Router,
     private alertCtrl: AlertController
   ) {
@@ -127,7 +139,32 @@ export class AppComponent implements OnInit, OnDestroy {
     if (this.platform.is('capacitor')) {
       await this.configureStatusBar();
       await SplashScreen.hide();
+      this.registerDeepLinkHandler();
     }
+  }
+
+  private registerDeepLinkHandler(): void {
+    CapApp.addListener('appUrlOpen', (event: { url: string }) => {
+      const url = event.url;
+      // bapp://home → ir al home según rol
+      // bapp://auth/verified → mismo comportamiento que home
+      try {
+        const parsed = new URL(url);
+        const host = parsed.hostname; // "home", "auth", etc.
+        if (host === 'home' || parsed.pathname.startsWith('/auth')) {
+          const user = this.authService.getCurrentUser();
+          if (user?.role === 'PROVIDER') {
+            this.router.navigate(['/provider/home']);
+          } else if (user?.role === 'CLIENT') {
+            this.router.navigate(['/client/home']);
+          } else {
+            this.router.navigate(['/auth/login']);
+          }
+        }
+      } catch {
+        this.router.navigate(['/auth/login']);
+      }
+    });
   }
 
   private async configureStatusBar() {

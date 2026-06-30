@@ -6,6 +6,7 @@ import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { SocialUser } from '@abacritt/angularx-social-login';
 import { ProviderService, ProviderProfile, ServiceProviderData } from '../../provider/services/provider.service';
+import { ProfileCompletionService } from '../../core/services/profile-completion.service';
 
 // Interfaces exportadas
 export interface User {
@@ -61,7 +62,10 @@ export class AuthService {
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
   public isLoading$ = this.isLoadingSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private profileCompletion: ProfileCompletionService
+  ) {
     this.loadUserFromStorage();
   }
 
@@ -522,6 +526,7 @@ export class AuthService {
 
   logout(): void {
     console.log('Ejecutando logout...');
+    this.profileCompletion.reset();
     this.clearAllData();
   }
 

@@ -133,6 +133,30 @@
         </div>
       </div>
 
+      <!-- ── Verificación de Identidad ── -->
+      <div class="ep-field-group ep-verification-section">
+        <label class="ep-label">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Estado de Verificación
+        </label>
+        <div class="ep-verification-card" [class]="validationStatus">
+          <div class="ep-vc-info">
+            <span class="ep-vc-status">
+              {{ getStatusLabel() }}
+            </span>
+            <p class="ep-vc-desc">{{ getStatusDesc() }}</p>
+          </div>
+          <button 
+            *ngIf="validationStatus !== 'approved'"
+            class="ep-btn-verify" 
+            (click)="goToVerification()" 
+            type="button">
+            {{ validationStatus === 'rejected' ? 'Reintentar' : 'Verificar' }}
+          </button>
+          <ion-icon *ngIf="validationStatus === 'approved'" name="checkmark-circle" class="ep-vc-done"></ion-icon>
+        </div>
+      </div>
+
     </div><!-- end .ep-form -->
 
     <!-- ── Actions ─────────────────────────────────────────────────── -->

@@ -7,6 +7,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 import { ProviderService, ProviderStats } from '../../services/provider.service';
 import { ProviderProfile } from '../../../core/models/provider.model';
 import { WebSocketService } from '../../../core/services/websocket.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { NotificationType } from '../../../core/models/chat.model';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { ServiceViewersModalComponent } from '../../modals/service-viewers-modal/service-viewers-modal.component';
@@ -52,7 +53,8 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     private readonly alertCtrl: AlertController,
     private readonly documentService: DocumentUploadService,
     private readonly modalCtrl: ModalController,
-    private readonly reviewService: ReviewService
+    private readonly reviewService: ReviewService,
+    private readonly authService: AuthService
   ) { }
 
   ngOnInit() {
@@ -111,9 +113,40 @@ export class ProviderHomePage implements OnInit, OnDestroy {
         error: (error) => {
           console.error('❌ Error cargando perfil del proveedor:', error);
           this.isLoading = false;
-          // Mantener el valor por defecto
+          
+          // Si el perfil no se encuentra (404), es probable que el usuario
+          // esté logueado accidentalmente como client o falte su registro de provider
+          if (error.status === 404 || error.status === 401) {
+            this.handleMissingProfile();
+          }
         }
       });
+  }
+
+  /**
+   * Manejar caso de perfil faltante o error de autorización
+   */
+  private async handleMissingProfile() {
+    const alert = await this.alertCtrl.create({
+      header: 'No se encontró tu perfil',
+      message: 'Parece que tu cuenta no está registrada como proveedor o tu sesión ha expirado.',
+      buttons: [
+        {
+          text: 'Completar Registro',
+          handler: () => {
+            this.router.navigate(['/auth/register-provider']);
+          }
+        },
+        {
+          text: 'Ir a Inicio',
+          handler: () => {
+            this.authService.logout();
+            this.router.navigate(['/auth/login']);
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   /**

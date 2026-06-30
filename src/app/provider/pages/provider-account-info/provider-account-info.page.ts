@@ -6,6 +6,8 @@ import { IonicModule, ModalController, AlertController, LoadingController, Actio
 import { ProviderService, ProviderProfile } from '../../services/provider.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { CameraService } from '../../../shared/services/camera.service';
+import { Router } from '@angular/router';
+import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 
 @Component({
   selector: 'app-provider-account-info',
@@ -25,6 +27,7 @@ export class ProviderAccountInfoPage implements OnInit {
   bio: string = '';
   avatar: string | null = null;
   avatarBase64: string | null = null;
+  validationStatus: string = 'not_submitted';
 
   originalName: string = '';
   originalFono: string = '';
@@ -48,11 +51,52 @@ export class ProviderAccountInfoPage implements OnInit {
     private alertCtrl: AlertController,
     private cameraService: CameraService,
     private loadingCtrl: LoadingController,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private router: Router,
+    private documentService: DocumentUploadService
   ) { }
 
   async ngOnInit() {
     await this.loadUserData();
+    this.checkVerificationStatus();
+  }
+
+  private checkVerificationStatus() {
+    this.documentService.getVerificationStatus().subscribe({
+      next: (verification: any) => {
+        if (verification && verification.face_match_status) {
+          this.validationStatus = verification.face_match_status === 'APPROVED' ? 'approved' : verification.face_match_status?.toLowerCase();
+        }
+      },
+      error: (error) => {
+        console.warn('Error al verificar estado:', error);
+        this.validationStatus = 'not_submitted';
+      }
+    });
+  }
+
+  getStatusLabel(): string {
+    switch (this.validationStatus) {
+      case 'approved': return 'Verificado';
+      case 'pending': return 'Pendiente';
+      case 'processing': return 'Procesando';
+      case 'rejected': return 'Rechazado';
+      default: return 'No verificado';
+    }
+  }
+
+  getStatusDesc(): string {
+    switch (this.validationStatus) {
+      case 'approved': return 'Tu identidad ha sido validada exitosamente.';
+      case 'pending': return 'Estamos revisando tus documentos.';
+      case 'processing': return 'La validación biométrica está en curso.';
+      case 'rejected': return 'Hubo un problema con la validación. Por favor intenta de nuevo.';
+      default: return 'Debes verificar tu identidad para publicar servicios.';
+    }
+  }
+
+  goToVerification() {
+    this.router.navigate(['/auth/verify-identity']);
   }
 
   private async loadUserData() {

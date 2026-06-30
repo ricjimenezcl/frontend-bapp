@@ -2,6 +2,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, providerGuard, clientGuard } from './auth/guards/auth.guard';
 import { providerVerificationGuard } from './auth/guards/verification.guard';
+import { profileCompletionGuard } from './auth/guards/profile-completion.guard';
 
 export const routes: Routes = [
   {
@@ -124,7 +125,7 @@ export const routes: Routes = [
   // ==================== PROVIDER ====================
   {
     path: 'provider',
-    canActivate: [authGuard, providerGuard, providerVerificationGuard],
+    canActivate: [authGuard, providerGuard, providerVerificationGuard, profileCompletionGuard],
     children: [
       {
         path: 'tabs',
