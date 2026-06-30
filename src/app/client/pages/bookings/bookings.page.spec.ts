@@ -1,12 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BookingsPage } from './bookings.page';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { provideIonicAngular } from '@ionic/angular/standalone';
+import { ClientBookingsPage } from './bookings.page';
 
-describe('BookingsPage', () => {
-  let component: BookingsPage;
-  let fixture: ComponentFixture<BookingsPage>;
+describe('ClientBookingsPage', () => {
+  let component: ClientBookingsPage;
+  let fixture: ComponentFixture<ClientBookingsPage>;
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(BookingsPage);
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ClientBookingsPage],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideIonicAngular(),
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ClientBookingsPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

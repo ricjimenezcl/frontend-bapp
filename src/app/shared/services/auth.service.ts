@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { StateService } from './state.service';
 import { ErrorHandlerService } from './error-handler.service';
@@ -132,7 +132,7 @@ export class AuthService {
    * ✅ CORRECTO - Usa throwError en catchError
    */
   updateProfile(data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/profile`, data).pipe(
+    return this.http.put<any>(`${this.apiUrl}/profile`, data).pipe(
       tap(response => {
         this.stateService.setUser(response.user);
       }),
@@ -190,7 +190,7 @@ export class AuthService {
    * ✅ CORRECTO - Usa throwError en catchError
    */
   refreshToken(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/refresh`, {}).pipe(
+    return this.http.post<any>(`${this.apiUrl}/refresh`, {}).pipe(
       tap(response => {
         this.stateService.setToken(response.token);
       }),

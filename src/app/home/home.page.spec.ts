@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HomePage } from './home.page';
 
 describe('HomePage', () => {
@@ -10,7 +11,8 @@ describe('HomePage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [HomePage],
-      imports: [IonicModule.forRoot()]
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomePage);

@@ -29,16 +29,31 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
+        { type: 'lcovonly', file: 'lcov.info' },
         { type: 'text-summary' }
-      ]
+      ],
+      check: {
+        global: {
+          statements: 5,
+          branches: 1,
+          functions: 5,
+          lines: 5,
+        },
+      },
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
+    browsers: [process.env.CI ? 'ChromeHeadlessCI' : 'Chrome'],
+    customLaunchers: {
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+      },
+    },
+    singleRun: !!process.env.CI,
     restartOnFileChange: true
   });
 };

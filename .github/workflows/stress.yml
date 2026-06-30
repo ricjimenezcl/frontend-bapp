@@ -1,0 +1,62 @@
+name: Stress Tests — frontend-bapp
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Escenario a ejecutar'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+          - spike
+  workflow_call:
+    inputs:
+      scenario:
+        type: string
+        default: smoke
+
+env:
+  BASE_URL: https://backend-bapp.onrender.com/api/v1
+
+jobs:
+  stress:
+    name: k6 — ${{ inputs.scenario || 'smoke' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] \
+            https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update && sudo apt-get install -y k6
+
+      - name: Ejecutar stress test — ${{ inputs.scenario || 'smoke' }}
+        env:
+          TEST_CLIENT_EMAIL: ${{ secrets.TEST_CLIENT_EMAIL }}
+          TEST_CLIENT_PASSWORD: ${{ secrets.TEST_CLIENT_PASSWORD }}
+          TEST_PROVIDER_ID: ${{ secrets.TEST_PROVIDER_ID }}
+        run: |
+          SCENARIO="${{ inputs.scenario || 'smoke' }}"
+          k6 run \
+            -e BASE_URL=$BASE_URL \
+            -e TEST_CLIENT_EMAIL="$TEST_CLIENT_EMAIL" \
+            -e TEST_CLIENT_PASSWORD="$TEST_CLIENT_PASSWORD" \
+            -e TEST_PROVIDER_ID="$TEST_PROVIDER_ID" \
+            --out json=stress-results.json \
+            stress/${SCENARIO}.js
+
+      - name: Subir resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-results-mobile-${{ inputs.scenario || 'smoke' }}
+          path: stress-results.json
+          retention-days: 30

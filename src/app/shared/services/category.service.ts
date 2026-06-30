@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, tap, shareReplay } from 'rxjs/operators';
 import { ErrorHandlerService } from './error-handler.service';
 import { APP_CONSTANTS } from '../constants/app.constants';
 

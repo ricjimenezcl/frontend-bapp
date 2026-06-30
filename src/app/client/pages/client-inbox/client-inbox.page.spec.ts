@@ -1,36 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { of } from 'rxjs';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ClientInboxPage } from './client-inbox.page';
-import { ChatService } from '../../../core/services/chat.service';
-import { WebSocketService } from '../../../core/services/websocket.service';
 
 describe('ClientInboxPage', () => {
   let component: ClientInboxPage;
   let fixture: ComponentFixture<ClientInboxPage>;
 
-  const chatServiceMock = {
-    loadConversations: jasmine.createSpy('loadConversations').and.returnValue(of([]))
-  };
-
-  const routerMock = {
-    navigate: jasmine.createSpy('navigate')
-  };
-
-  const webSocketServiceMock = {
-    connectToNotifications: jasmine.createSpy('connectToNotifications').and.returnValue(Promise.resolve()),
-    getNotifications$: jasmine.createSpy('getNotifications$').and.returnValue(of())
-  };
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ClientInboxPage],
-      providers: [
-        { provide: ChatService, useValue: chatServiceMock },
-        { provide: Router, useValue: routerMock },
-        { provide: WebSocketService, useValue: webSocketServiceMock }
-      ]
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ClientInboxPage);
