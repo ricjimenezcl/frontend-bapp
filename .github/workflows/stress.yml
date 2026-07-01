@@ -43,6 +43,7 @@ jobs:
           TEST_CLIENT_EMAIL: ${{ secrets.TEST_CLIENT_EMAIL }}
           TEST_CLIENT_PASSWORD: ${{ secrets.TEST_CLIENT_PASSWORD }}
           TEST_PROVIDER_ID: ${{ secrets.TEST_PROVIDER_ID }}
+          TEST_SERVICE_ID: ${{ secrets.TEST_SERVICE_ID }}
         run: |
           SCENARIO="${{ inputs.scenario || 'smoke' }}"
           k6 run \

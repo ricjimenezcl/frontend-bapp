@@ -15,7 +15,7 @@ export const DEFAULT_HEADERS = {
 export function getAuthToken(email, password) {
   const res = http.post(
     `${BASE_URL}/auth/login`,
-    JSON.stringify({ email, password }),
+    JSON.stringify({ username: email, password }),
     { headers: DEFAULT_HEADERS },
   );
   check(res, { 'login OK': (r) => r.status === 200 });

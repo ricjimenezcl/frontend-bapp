@@ -1,17 +1,31 @@
 /**
- * LOAD TEST — frontend-bapp (app móvil)
- * Añade escenario de proveedor además de los comunes.
- * Uso: k6 run stress/load.js -e TEST_CLIENT_EMAIL=x -e TEST_CLIENT_PASSWORD=y
+ * LOAD TEST — Cobertura completa de todos los flujos
+ *
+ * Escenarios paralelos:
+ *   busqueda_anonima      — búsqueda + geocoding (mayor volumen, sin auth)
+ *   clientes_autenticados — booking completo + chat + reviews + notificaciones
+ *   registro_emails       — registro + reset-password (dispara emails)
+ *   proveedores           — gestión proveedor + reportes + premium
+ *   pagos                 — payment intent (requiere auth)
+ *
+ * Uso:
+ *   npm run stress:load
+ *   npm run stress:load -- -e TEST_CLIENT_EMAIL=x -e TEST_CLIENT_PASSWORD=y \
+ *     -e TEST_PROVIDER_ID=1 -e TEST_SERVICE_ID=1
  */
 import { sleep } from 'k6';
 import http from 'k6/http';
 import { getAuthToken } from './utils/helpers.js';
 import { authScenario } from './scenarios/auth.js';
 import { searchScenario } from './scenarios/search.js';
-import { bookingScenario } from './scenarios/bookings.js';
+import { bookingFullScenario } from './scenarios/booking-full.js';
 import { chatScenario } from './scenarios/chat.js';
-import { providerScenario } from './scenarios/provider.js';
+import { registrationScenario, registrationProviderScenario } from './scenarios/registration.js';
+import { paymentScenario } from './scenarios/payment.js';
+import { reviewsScenario, notificationsScenario, premiumScenario, geocodingScenario } from './scenarios/support.js';
+import { providerManagementScenario, reportsScenario } from './scenarios/provider-management.js';
 
+// Solo contar 5xx como fallos
 http.setResponseCallback(http.expectedStatuses({ min: 200, max: 499 }));
 
 export const options = {
@@ -34,6 +48,15 @@ export const options = {
       ],
       exec: 'scenarioCliente',
     },
+    registro_emails: {
+      executor: 'ramping-vus',
+      stages: [
+        { duration: '1m', target: 3 },
+        { duration: '3m', target: 3 },
+        { duration: '1m', target: 0 },
+      ],
+      exec: 'scenarioRegistro',
+    },
     proveedores: {
       executor: 'ramping-vus',
       stages: [
@@ -43,10 +66,22 @@ export const options = {
       ],
       exec: 'scenarioProveedor',
     },
+    pagos: {
+      executor: 'ramping-vus',
+      stages: [
+        { duration: '1m', target: 2 },
+        { duration: '3m', target: 2 },
+        { duration: '1m', target: 0 },
+      ],
+      exec: 'scenarioPago',
+    },
   },
   thresholds: {
     http_req_failed: ['rate<0.05'],
-    http_req_duration: ['p(90)<3000', 'p(95)<5000'],
+    http_req_duration: ['p(90)<5000', 'p(95)<8000'],
+    'http_req_duration{scenario:busqueda_anonima}': ['p(95)<5000'],
+    'http_req_duration{scenario:registro_emails}': ['p(95)<10000'],
+    'http_req_duration{scenario:clientes_autenticados}': ['p(95)<8000'],
   },
 };
 
@@ -59,17 +94,36 @@ export function setup() {
 
 export function scenarioBusqueda() {
   searchScenario(null);
+  geocodingScenario();
   sleep(1);
 }
 
 export function scenarioCliente(data) {
-  searchScenario(data?.token);
-  bookingScenario(data?.token);
-  chatScenario(data?.token);
+  const token = data?.token;
+  searchScenario(token);
+  bookingFullScenario(token);
+  chatScenario(token);
+  reviewsScenario(token);
+  notificationsScenario(token);
   sleep(1);
 }
 
+export function scenarioRegistro() {
+  registrationScenario();
+  registrationProviderScenario();
+  sleep(2);
+}
+
 export function scenarioProveedor(data) {
-  providerScenario(data?.token);
+  const token = data?.token;
+  providerManagementScenario(token);
+  reportsScenario(token);
+  premiumScenario(token);
+  authScenario(token);
   sleep(1);
+}
+
+export function scenarioPago(data) {
+  paymentScenario(data?.token);
+  sleep(2);
 }
