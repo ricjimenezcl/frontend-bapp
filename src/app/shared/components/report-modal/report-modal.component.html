@@ -65,6 +65,12 @@
     <p class="char-count ion-text-end ion-padding-horizontal">
       {{ (reportForm.value.description?.length || 0) }}/500
     </p>
+    <p class="char-count ion-padding-horizontal" *ngIf="isCheckingContent">
+      Validando contenido...
+    </p>
+    <ion-text color="danger" *ngIf="contentError">
+      <p class="ion-padding-horizontal ion-no-margin">{{ contentError }}</p>
+    </ion-text>
 
     <!-- Privacy Notice -->
     <div class="privacy-notice ion-margin-vertical">
@@ -80,7 +86,7 @@
     <ion-button
       expand="block"
       color="danger"
-      [disabled]="!reportForm.valid || isSubmitting"
+      [disabled]="!reportForm.valid || isSubmitting || isCheckingContent"
       (click)="submitReport()"
       class="ion-margin-top">
       <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>

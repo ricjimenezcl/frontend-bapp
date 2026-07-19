@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule, ToastController, LoadingController, AlertController, ModalController, IonDatetime  } from '@ionic/angular';
+import { firstValueFrom } from 'rxjs';
 import { CoreService, ServiceProvider } from '../../../shared/services/core.service'; // Keeping CoreService for provider info fetch
 import { SelectionService } from '../../../shared/services/selection.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -19,6 +20,7 @@ import { ChatService } from '../../../core/services/chat.service';
 import { Review, TimeSlot } from '../../../shared/services/core.service';
 import { ReportButtonComponent } from '../../../shared/components/report-button/report-button.component';
 import { ReportedEntityType } from '../../../core/models/report.model';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
 
 @Component({
   selector: 'app-provider-info',
@@ -82,6 +84,8 @@ export class ProviderInfoPage implements OnInit {
   // Validación de reserva
   bookingAttempted = false;
   isBookingLoading = false;
+  isCheckingDescription = false;
+  descriptionError = '';
 
   get isBookingValid(): boolean {
     return !!this.selectedDate && !!this.selectedTime && !!this.locationAddress;
@@ -100,7 +104,8 @@ export class ProviderInfoPage implements OnInit {
     private alertCtrl: AlertController,
     private mapboxService: MapboxService,
     private chatService: ChatService,
-    private modalCtrl: ModalController
+    private modalCtrl: ModalController,
+    private contentFilterService: ContentFilterService
   ) { }
 
   ngOnInit() {
@@ -468,6 +473,7 @@ export class ProviderInfoPage implements OnInit {
 
   bookService = async () => {
     this.bookingAttempted = true;
+    this.descriptionError = '';
 
     // Check auth
     const currentUser = this.authService.getCurrentUser();
@@ -487,6 +493,24 @@ export class ProviderInfoPage implements OnInit {
     if (!this.selectedDate || !this.selectedTime) {
       this.showToast('Por favor completa fecha y hora', 'warning');
       return;
+    }
+
+    const description = this.description.trim();
+    if (description.length >= 2) {
+      this.isCheckingDescription = true;
+      try {
+        const result = await firstValueFrom(this.contentFilterService.validateText(description, 'generic'));
+        if (result.blocked) {
+          this.isCheckingDescription = false;
+          this.descriptionError = 'Las notas contienen lenguaje no permitido.';
+          this.showToast('Corrige las notas antes de continuar', 'warning');
+          return;
+        }
+      } catch {
+        // fail-open
+      } finally {
+        this.isCheckingDescription = false;
+      }
     }
 
     this.isBookingLoading = true;

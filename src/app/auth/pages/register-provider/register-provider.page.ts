@@ -12,6 +12,8 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { CameraService } from '../../../shared/services/camera.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
 @Component({
   selector: 'app-register-provider',
@@ -36,6 +38,7 @@ export class RegisterProviderPage implements OnInit {
   private alertController = inject(AlertController);
   private loadingController = inject(LoadingController);
   private socialAuthService = inject(SocialAuthService);
+  private contentFilterService = inject(ContentFilterService);
 
   registerForm: FormGroup;
   isLoading = false;
@@ -59,7 +62,11 @@ export class RegisterProviderPage implements OnInit {
         this.numberValidator
       ]],
       confirmPassword: ['', [Validators.required]],
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      fullName: ['', {
+        validators: [Validators.required, Validators.minLength(2)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'profile')],
+        updateOn: 'change',
+      }],
       phone: ['', [this.phoneValidator.bind(this)]], // Eliminamos Validators.required
       bio: [''],
       avatar: [''],
@@ -345,6 +352,10 @@ export class RegisterProviderPage implements OnInit {
   // ==================== SUBMIT ====================
 
   async onSubmit(): Promise<void> {
+    if (this.registerForm.pending) {
+      return;
+    }
+
     if (this.registerForm.valid && !this.isLoading) {
       this.isLoading = true;
       

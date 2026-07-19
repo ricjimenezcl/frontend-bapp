@@ -396,6 +396,12 @@
             placeholder="Describe brevemente lo que necesitas..."
           ></ion-textarea>
         </ion-item>
+        <div *ngIf="isCheckingDescription" class="bm-hint">
+          Validando contenido...
+        </div>
+        <div *ngIf="descriptionError" class="bm-error">
+          <ion-icon name="alert-circle" color="danger"></ion-icon> {{ descriptionError }}
+        </div>
       </div>
 
       <!-- Botones confirmación -->
@@ -404,7 +410,7 @@
         color="primary"
         size="large"
         (click)="confirmBooking()"
-        [disabled]="!isBookingValid || isConfirmingBooking"
+        [disabled]="!isBookingValid || isConfirmingBooking || isCheckingDescription"
       >
         <ion-spinner *ngIf="isConfirmingBooking" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
         <ion-icon *ngIf="!isConfirmingBooking" name="checkmark-circle" slot="start"></ion-icon>

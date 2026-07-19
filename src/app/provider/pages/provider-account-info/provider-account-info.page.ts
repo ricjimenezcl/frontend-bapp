@@ -8,6 +8,8 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { CameraService } from '../../../shared/services/camera.service';
 import { Router } from '@angular/router';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-provider-account-info',
@@ -39,24 +41,31 @@ export class ProviderAccountInfoPage implements OnInit {
   isLoading: boolean = true;
   isUpdating: boolean = false;
   isEditing: boolean = false;
+  isCheckingContent: boolean = false;
+  contentError: string = '';
 
   // Validación
   fieldTouched: Record<string, boolean> = {};
   fieldErrors: Record<string, string> = {};
 
   constructor(
-    private modalController: ModalController,
-    private providerService: ProviderService,
-    private authService: AuthService,
-    private alertCtrl: AlertController,
-    private cameraService: CameraService,
-    private loadingCtrl: LoadingController,
-    private actionSheetCtrl: ActionSheetController,
-    private router: Router,
-    private documentService: DocumentUploadService
+    private readonly modalController: ModalController,
+    private readonly providerService: ProviderService,
+    private readonly authService: AuthService,
+    private readonly alertCtrl: AlertController,
+    private readonly cameraService: CameraService,
+    private readonly loadingCtrl: LoadingController,
+    private readonly actionSheetCtrl: ActionSheetController,
+    private readonly router: Router,
+    private readonly documentService: DocumentUploadService,
+    private readonly contentFilterService: ContentFilterService
   ) { }
 
-  async ngOnInit() {
+  ngOnInit(): void {
+    void this.initializePage();
+  }
+
+  private async initializePage(): Promise<void> {
     await this.loadUserData();
     this.checkVerificationStatus();
   }
@@ -301,6 +310,8 @@ export class ProviderAccountInfoPage implements OnInit {
     this.avatar = this.originalAvatar;
     this.avatarBase64 = null;
     this.isEditing = false;
+    this.isCheckingContent = false;
+    this.contentError = '';
   }
 
   async confirmEdit() {
@@ -308,7 +319,42 @@ export class ProviderAccountInfoPage implements OnInit {
       this.presentAlert('Validación', 'Por favor corrige los errores antes de continuar');
       return;
     }
+
+    const contentAllowed = await this.validateEditableContent();
+    if (!contentAllowed) {
+      return;
+    }
+
     await this.putProviderEdit();
+  }
+
+  private async validateEditableContent(): Promise<boolean> {
+    const fieldsToValidate = [
+      { value: this.name, context: 'profile' as const },
+      { value: this.bio, context: 'profile' as const },
+    ];
+
+    this.isCheckingContent = true;
+    this.contentError = '';
+
+    try {
+      for (const field of fieldsToValidate) {
+        const text = field.value?.trim();
+        if (!text) continue;
+
+        const result = await firstValueFrom(this.contentFilterService.validateText(text, field.context));
+        if (result.blocked) {
+          this.contentError = 'Encontramos lenguaje no permitido en tu perfil. Ajusta el texto para continuar.';
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return true;
+    } finally {
+      this.isCheckingContent = false;
+    }
   }
 
   private async putProviderEdit() {

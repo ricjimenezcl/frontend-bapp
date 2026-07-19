@@ -95,9 +95,11 @@
         type="submit"
         class="chat-send-btn"
         [class.chat-send-btn-active]="newMessage && newMessage.trim()"
-        [disabled]="!newMessage || loading">
+        [disabled]="!newMessage || loading || isSendingMessage || isValidatingMessage">
         <ion-icon name="send"></ion-icon>
       </button>
     </div>
+    <p *ngIf="isValidatingMessage" style="margin:6px 12px 0;color:#9ca3af;font-size:12px;">Validando contenido...</p>
+    <p *ngIf="chatInputError" style="margin:6px 12px 0;color:#ef4444;font-size:12px;">{{ chatInputError }}</p>
   </form>
 </ion-footer>

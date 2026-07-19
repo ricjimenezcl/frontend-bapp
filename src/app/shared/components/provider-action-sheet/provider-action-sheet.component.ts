@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, ModalController, ToastController, LoadingController, AlertController } from '@ionic/angular';
-import { Subject, of, forkJoin } from 'rxjs';
+import { Subject, of, forkJoin, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, takeUntil } from 'rxjs/operators';
 
 import { CoreService, Review, WorkingHours, ServiceSchedule } from '../../services/core.service';
@@ -13,6 +13,7 @@ import { ChatService } from '../../../core/services/chat.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { MapboxService } from '../../services/mapbox.service';
 import { StateService } from '../../services/state.service';
+import { ContentFilterService } from '../../services/content-filter.service';
 import { ProviderImagePipe } from '../../pipes/provider-image.pipe';
 
 interface CalendarDay {
@@ -76,6 +77,8 @@ export class ProviderActionSheetComponent implements OnInit {
   isSearching = false;
   isStartingChat = false;
   isConfirmingBooking = false;
+  isCheckingDescription = false;
+  descriptionError = '';
   providerEmail = '';
   activeDetailTab: string = 'profile';
   userLocation: { lat: number; lng: number } | null = null;
@@ -142,7 +145,8 @@ export class ProviderActionSheetComponent implements OnInit {
     private stateService: StateService,
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private contentFilterService: ContentFilterService
   ) {}
 
   ngOnInit() {
@@ -596,6 +600,27 @@ export class ProviderActionSheetComponent implements OnInit {
     this.isConfirmingBooking = true;
 
     try {
+      const notes = this.description.trim();
+      if (notes) {
+        this.isCheckingDescription = true;
+        this.descriptionError = '';
+        try {
+          const result = await firstValueFrom(this.contentFilterService.validateText(notes, 'generic'));
+          if (result.blocked) {
+            this.isCheckingDescription = false;
+            this.isConfirmingBooking = false;
+            this.descriptionError = 'Las notas contienen lenguaje no permitido. Ajusta el texto para continuar.';
+            return;
+          }
+        } catch {
+          // UX fail-open: backend vuelve a validar al persistir.
+        } finally {
+          this.isCheckingDescription = false;
+        }
+      } else {
+        this.descriptionError = '';
+      }
+
       const datePart = this.selectedDate.includes('T') ? this.selectedDate.split('T')[0] : this.selectedDate;
       let timePart = this.selectedTime;
       if (timePart.length === 5) timePart = `${timePart}:00`;
@@ -634,7 +659,7 @@ export class ProviderActionSheetComponent implements OnInit {
         scheduled_time: timePart,
         duration,
         total_price: totalPrice,
-        description: this.description || 'Sin descripción',
+        description: notes || 'Sin descripción',
         location_address: this.locationAddress || 'Mi ubicación actual',
         location_lat: this.userLocation?.lat,
         location_lng: this.userLocation?.lng,

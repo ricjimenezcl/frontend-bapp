@@ -108,6 +108,12 @@
           <div class="as-field-error" *ngIf="servicioForm.get('nombre_prestador')?.errors && servicioForm.get('nombre_prestador')?.touched">
             {{ getError('nombre_prestador') }}
           </div>
+          <p class="as-hint" *ngIf="servicioForm.get('nombre_prestador')?.pending && servicioForm.get('nombre_prestador')?.dirty">
+            Validando contenido...
+          </p>
+          <div class="as-field-error" *ngIf="servicioForm.get('nombre_prestador')?.touched && servicioForm.get('nombre_prestador')?.errors?.['offensiveContent']">
+            El nombre contiene lenguaje no permitido.
+          </div>
         </div>
 
         <!-- Descripción -->
@@ -120,6 +126,12 @@
             maxlength="100"
             class="as-textarea">
           </ion-textarea>
+          <p class="as-hint" *ngIf="servicioForm.get('detalle')?.pending && servicioForm.get('detalle')?.dirty">
+            Validando contenido...
+          </p>
+          <div class="as-field-error" *ngIf="servicioForm.get('detalle')?.touched && servicioForm.get('detalle')?.errors?.['offensiveContent']">
+            La descripción contiene lenguaje no permitido.
+          </div>
         </div>
 
         <!-- Teléfono y Tarifa (2 columnas en > 480px) -->
@@ -344,7 +356,7 @@
         (click)="confirm()"
         expand="block"
         class="as-btn as-btn--primary"
-        [disabled]="!servicioForm.valid || !selectedService">
+        [disabled]="!servicioForm.valid || servicioForm.pending || !selectedService">
         Crear servicio
       </ion-button>
     </div>

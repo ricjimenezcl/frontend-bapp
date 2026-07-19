@@ -59,6 +59,8 @@
             </div>
             <span class="form-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['required']">El nombre es requerido</span>
             <span class="form-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['minlength']">El nombre debe tener al menos 2 caracteres</span>
+            <span class="form-error" *ngIf="registerForm.get('fullName')?.dirty && registerForm.get('fullName')?.pending">Validando contenido...</span>
+            <span class="form-error" *ngIf="registerForm.get('fullName')?.touched && registerForm.get('fullName')?.errors?.['offensiveContent']">El nombre contiene lenguaje no permitido. Ajusta el texto para continuar.</span>
           </div>
 
           <!-- RUT -->
@@ -168,7 +170,7 @@
             type="submit"
             expand="block"
             class="submit-btn"
-            [disabled]="!registerForm.valid || isLoading || isTakingPhoto">
+            [disabled]="!registerForm.valid || registerForm.pending || isLoading || isTakingPhoto">
             <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
             <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
             <span>{{ isLoading ? "Registrando..." : "Registrarse" }}</span>

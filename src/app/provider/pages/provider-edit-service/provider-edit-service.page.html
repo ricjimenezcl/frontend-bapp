@@ -81,6 +81,12 @@
           <div class="as-field-error" *ngIf="servicioForm.get('business_name')?.errors && servicioForm.get('business_name')?.touched">
             {{ getError('business_name') }}
           </div>
+          <p class="as-hint" *ngIf="servicioForm.get('business_name')?.pending && servicioForm.get('business_name')?.dirty">
+            Validando contenido...
+          </p>
+          <div class="as-field-error" *ngIf="servicioForm.get('business_name')?.touched && servicioForm.get('business_name')?.errors?.['offensiveContent']">
+            El nombre contiene lenguaje no permitido.
+          </div>
         </div>
 
         <!-- Descripción -->
@@ -93,6 +99,12 @@
             maxlength="100"
             class="as-textarea">
           </ion-textarea>
+          <p class="as-hint" *ngIf="servicioForm.get('description')?.pending && servicioForm.get('description')?.dirty">
+            Validando contenido...
+          </p>
+          <div class="as-field-error" *ngIf="servicioForm.get('description')?.touched && servicioForm.get('description')?.errors?.['offensiveContent']">
+            La descripción contiene lenguaje no permitido.
+          </div>
         </div>
 
         <!-- Teléfono -->
@@ -303,7 +315,7 @@
         (click)="updateService()"
         expand="block"
         class="as-btn as-btn--primary"
-        [disabled]="servicioForm.invalid || isSaving">
+        [disabled]="servicioForm.invalid || servicioForm.pending || isSaving">
         <ion-spinner *ngIf="isSaving" slot="start" name="crescent"></ion-spinner>
         Guardar cambios
       </ion-button>

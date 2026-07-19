@@ -49,6 +49,8 @@
       rows="4"
       maxlength="500">
     </textarea>
+    <p class="rm-char-count" *ngIf="isCheckingContent">Validando contenido...</p>
+    <p class="rm-char-count" *ngIf="contentError" style="color:#ef4444;">{{ contentError }}</p>
     <p class="rm-char-count">{{ (reviewForm.value.comment?.length || 0) }}/500</p>
   </div>
 
@@ -56,7 +58,7 @@
   <div class="rm-actions">
     <button
       class="rm-btn rm-btn-submit"
-      [disabled]="isSubmitting"
+      [disabled]="isSubmitting || isCheckingContent"
       (click)="submit()"
       type="button">
       <ion-spinner *ngIf="isSubmitting" name="crescent"></ion-spinner>

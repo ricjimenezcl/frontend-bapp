@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 import { DEFAULT_AVATAR_URL } from '../../../core/constants/default-avatar';
 import { ClientService, ClientProfile } from '../../services/client.service';
 import { CameraService } from '../../../shared/services/camera.service';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
 
 @Component({
   selector: 'app-edit-profile',
@@ -36,6 +38,8 @@ export class EditProfilePage implements OnInit {
   isLoading: boolean = true;
   isUpdating: boolean = false;
   isEditing: boolean = false;
+  isCheckingContent = false;
+  contentError = '';
 
   // Validación
   fieldTouched: Record<string, boolean> = {};
@@ -51,7 +55,8 @@ export class EditProfilePage implements OnInit {
     private clientService: ClientService,
     private alertCtrl: AlertController,
     private cameraService: CameraService,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private contentFilterService: ContentFilterService
   ) {}
 
   ngOnInit() {
@@ -345,6 +350,11 @@ export class EditProfilePage implements OnInit {
       this.presentAlert('Validación', 'Por favor corrige los errores antes de continuar');
       return;
     }
+
+    if (!(await this.validateEditableContent())) {
+      return;
+    }
+
     const alert = await this.alertCtrl.create({
       header: 'Guardar cambios',
       message: '¿Confirmas los cambios en tu perfil?',
@@ -357,6 +367,47 @@ export class EditProfilePage implements OnInit {
       ]
     });
     await alert.present();
+  }
+
+  private async validateEditableContent(): Promise<boolean> {
+    this.contentError = '';
+    this.fieldErrors['fullName'] = this.fieldErrors['fullName'] && !this.fieldErrors['fullName'].includes('lenguaje')
+      ? this.fieldErrors['fullName']
+      : '';
+    this.fieldErrors['bio'] = this.fieldErrors['bio'] && !this.fieldErrors['bio'].includes('lenguaje')
+      ? this.fieldErrors['bio']
+      : '';
+    this.isCheckingContent = true;
+
+    try {
+      const fullName = this.fullName.trim();
+      if (fullName.length >= 2) {
+        const nameResult = await firstValueFrom(this.contentFilterService.validateText(fullName, 'profile'));
+        if (nameResult.blocked) {
+          this.fieldTouched['fullName'] = true;
+          this.fieldErrors['fullName'] = 'El nombre contiene lenguaje no permitido';
+          this.contentError = 'Corrige el nombre para continuar.';
+          return false;
+        }
+      }
+
+      const bio = this.bio.trim();
+      if (bio.length >= 2) {
+        const bioResult = await firstValueFrom(this.contentFilterService.validateText(bio, 'profile'));
+        if (bioResult.blocked) {
+          this.fieldTouched['bio'] = true;
+          this.fieldErrors['bio'] = 'La descripción contiene lenguaje no permitido';
+          this.contentError = 'Corrige la sección Sobre mí para continuar.';
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return true;
+    } finally {
+      this.isCheckingContent = false;
+    }
   }
 
   private async putProviderEdit() {

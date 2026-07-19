@@ -6,6 +6,7 @@ import {
   ModalController, ToastController
 } from '@ionic/angular/standalone';
 import { CoreService } from '../../services/core.service';
+import { ContentFilterService } from '../../services/content-filter.service';
 
 @Component({
   selector: 'app-review-modal',
@@ -25,6 +26,8 @@ export class ReviewModalComponent implements OnInit {
 
   reviewForm: FormGroup;
   isSubmitting = false;
+  isCheckingContent = false;
+  contentError = '';
   selectedRating = 5;
   stars = [1, 2, 3, 4, 5];
 
@@ -33,6 +36,7 @@ export class ReviewModalComponent implements OnInit {
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private coreService: CoreService,
+    private contentFilterService: ContentFilterService,
   ) {
     this.reviewForm = this.fb.group({
       comment: ['', [Validators.maxLength(500)]],
@@ -47,6 +51,35 @@ export class ReviewModalComponent implements OnInit {
 
   async submit() {
     if (this.isSubmitting) return;
+    const comment = this.reviewForm.value.comment?.trim();
+
+    if (!comment) {
+      this.contentError = '';
+      this.sendReview();
+      return;
+    }
+
+    this.isCheckingContent = true;
+    this.contentError = '';
+
+    this.contentFilterService.validateText(comment, 'review').subscribe({
+      next: (result) => {
+        this.isCheckingContent = false;
+        if (result.blocked) {
+          this.contentError = 'Tu comentario contiene lenguaje no permitido. Ajusta el texto para continuar.';
+          return;
+        }
+        this.sendReview();
+      },
+      // UX fail-open: backend vuelve a validar al persistir.
+      error: () => {
+        this.isCheckingContent = false;
+        this.sendReview();
+      }
+    });
+  }
+
+  private sendReview(): void {
     this.isSubmitting = true;
 
     const payload = {

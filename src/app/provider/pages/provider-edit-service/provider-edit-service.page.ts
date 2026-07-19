@@ -12,6 +12,8 @@ import { DocumentUploadService } from '../../../shared/services/document-upload.
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -80,6 +82,7 @@ export class ProviderEditServicePage implements OnInit {
   private searchTerms = new Subject<string>();
   isSearching: boolean = false;
   serviceCategoryName: string = '';
+  private readonly contentFilterService = inject(ContentFilterService);
 
   constructor(
     private route: ActivatedRoute,
@@ -159,8 +162,14 @@ export class ProviderEditServicePage implements OnInit {
 
   private createForm(): FormGroup {
     return this.fb.group({
-          business_name: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(45)]],
-      description: ['', [Validators.maxLength(100)]],
+          business_name: this.fb.control('', {
+        validators: [Validators.required, Validators.minLength(5), Validators.maxLength(45)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'service')],
+      }),
+      description: this.fb.control('', {
+        validators: [Validators.maxLength(100)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'service')],
+      }),
       address: ['', [Validators.required]],
       latitude: ['', [Validators.required]],
       longitude: ['', [Validators.required]],
@@ -345,6 +354,12 @@ export class ProviderEditServicePage implements OnInit {
   }
 
   async updateService() {
+    if (this.servicioForm.pending) {
+      this.servicioForm.markAllAsTouched();
+      await this.presentAlert('Validación', 'Validando contenido. Espera un momento e inténtalo otra vez.');
+      return;
+    }
+
     // Validar formulario
     if (this.servicioForm.invalid) {
       // Marcar todos los campos como tocados para mostrar errores

@@ -8,6 +8,7 @@ import { ChatMessage } from '../core/models/chat.model';
 import { WebSocketService } from '../core/services/websocket.service';
 import { takeUntil, filter } from 'rxjs/operators';
 import { Subject, forkJoin } from 'rxjs';
+import { ContentFilterService } from '../shared/services/content-filter.service';
 
 @Component({
   selector: 'app-chat',
@@ -22,6 +23,9 @@ export class ChatPage implements OnInit, OnDestroy {
   loading = false;
   newMessage = '';
   conversationName = 'Chat';
+  isSendingMessage = false;
+  isValidatingMessage = false;
+  chatInputError = '';
   private currentUserId: number | null = null;
   private destroy$ = new Subject<void>();
 
@@ -30,6 +34,7 @@ export class ChatPage implements OnInit, OnDestroy {
     private router: Router,
     private chatService: ChatService,
     private webSocketService: WebSocketService,
+    private contentFilterService: ContentFilterService,
     private location: Location
   ) {
     // Obtener el usuario actual al inicializar
@@ -157,22 +162,52 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   sendMessage() {
-    if (!this.conversationId || !this.newMessage.trim()) return;
+    if (!this.conversationId || !this.newMessage.trim() || this.isSendingMessage || this.isValidatingMessage) return;
 
     const messageContent = this.newMessage.trim();
+    this.chatInputError = '';
+    this.isValidatingMessage = true;
+
+    this.contentFilterService.validateText(messageContent, 'chat').subscribe({
+      next: (result) => {
+        this.isValidatingMessage = false;
+        if (result.blocked) {
+          this.chatInputError = 'El mensaje contiene lenguaje no permitido. Ajusta el texto para continuar.';
+          return;
+        }
+        this.sendMessageToApi(messageContent);
+      },
+      // UX fail-open: backend vuelve a validar al persistir.
+      error: () => {
+        this.isValidatingMessage = false;
+        this.sendMessageToApi(messageContent);
+      }
+    });
+  }
+
+  private sendMessageToApi(messageContent: string): void {
+    if (!this.conversationId) {
+      return;
+    }
+
+    const conversationId = this.conversationId;
+    this.isSendingMessage = true;
     this.newMessage = ''; // Limpiar inmediatamente
 
-    this.chatService.sendMessage(this.conversationId, {
+    this.chatService.sendMessage(conversationId, {
       content: messageContent
     }).subscribe({
       next: (newMsg) => {
         // Agregar el mensaje nuevo a la lista
         this.messages = [...this.messages, newMsg];
+        this.isSendingMessage = false;
       },
       error: (error) => {
         console.error('Error sending message:', error);
         // Restaurar el mensaje si falló
         this.newMessage = messageContent;
+        this.chatInputError = 'No pudimos enviar el mensaje. Intenta nuevamente.';
+        this.isSendingMessage = false;
       }
     });
   }

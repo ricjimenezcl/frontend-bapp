@@ -16,6 +16,8 @@ import {
   REPORT_TYPE_DESCRIPTIONS,
   REPORT_TYPE_ICONS
 } from '../../../core/models/report.model';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { firstValueFrom } from 'rxjs';
 
 interface ReportTypeOption {
   value: ReportType;
@@ -51,11 +53,14 @@ export class ReportModalComponent implements OnInit {
   private readonly reportService = inject(ReportService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
+  private readonly contentFilterService = inject(ContentFilterService);
 
   reportForm!: FormGroup;
   reportTypes: ReportTypeOption[] = [];
   selectedReportType: ReportType | null = null;
   isSubmitting = false;
+  isCheckingContent = false;
+  contentError = '';
 
   // Labels para UI
   readonly entityTypeLabels = {
@@ -109,6 +114,26 @@ export class ReportModalComponent implements OnInit {
       return;
     }
 
+    const description = this.reportForm.value.description?.trim();
+    if (description) {
+      this.isCheckingContent = true;
+      this.contentError = '';
+      try {
+        const result = await firstValueFrom(this.contentFilterService.validateText(description, 'generic'));
+        if (result.blocked) {
+          this.isCheckingContent = false;
+          this.contentError = 'La descripción contiene lenguaje no permitido. Ajusta el texto para continuar.';
+          return;
+        }
+      } catch {
+        // UX fail-open: backend vuelve a validar al persistir.
+      } finally {
+        this.isCheckingContent = false;
+      }
+    } else {
+      this.contentError = '';
+    }
+
     this.isSubmitting = true;
 
     const report: ReportCreate = {
@@ -116,7 +141,7 @@ export class ReportModalComponent implements OnInit {
       reported_entity_type: this.entityType,
       reported_entity_id: this.entityId,
       reported_user_id: this.userId,
-      description: this.reportForm.value.description?.trim() || undefined
+      description: description || undefined
     };
 
     this.reportService.createReport(report).subscribe({

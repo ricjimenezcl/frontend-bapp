@@ -17,6 +17,8 @@ import {
   IonCheckbox } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
 @Component({
   selector: 'app-register-client',
@@ -36,6 +38,7 @@ export class RegisterClientPage {
   private router = inject(Router);
   private alertController = inject(AlertController);
   private socialAuthService = inject(SocialAuthService);
+  private contentFilterService = inject(ContentFilterService);
 
   registerForm: FormGroup;
   isLoading = false;
@@ -47,7 +50,11 @@ export class RegisterClientPage {
   private createForm(): FormGroup {
     return this.fb.group({
       email: ['', [Validators.required, Validators.email, this.strictEmailValidator]],
-      fullName: ['', [Validators.required, Validators.minLength(2)]],
+      fullName: ['', {
+        validators: [Validators.required, Validators.minLength(2)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'profile')],
+        updateOn: 'change',
+      }],
       phone: ['', [Validators.required, Validators.pattern(/^(\+56|56)?\s?9\s?[0-9]{4}\s?[0-9]{4}$/)]],
       password: ['', [
         Validators.required,
@@ -106,6 +113,10 @@ export class RegisterClientPage {
   // ==================== SUBMIT ====================
 
   async onSubmit(): Promise<void> {
+    if (this.registerForm.pending) {
+      return;
+    }
+
     if (this.registerForm.valid && !this.isLoading) {
       this.isLoading = true;
       

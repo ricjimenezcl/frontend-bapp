@@ -12,6 +12,8 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { ProviderService } from '../../services/provider.service';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { CameraService } from '../../../shared/services/camera.service';
+import { ContentFilterService } from '../../../shared/services/content-filter.service';
+import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -73,6 +75,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private readonly coreService  = inject(CoreService);
   private readonly authService  = inject(AuthService);
   private readonly providerService = inject(ProviderService);
+  private readonly contentFilterService = inject(ContentFilterService);
 
   // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -135,9 +138,15 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     return this.fb.group({
       servicio: ['', [Validators.required]],
       categoria: ['', [Validators.required]],
-      nombre_prestador: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(45)]],
+      nombre_prestador: this.fb.control('', {
+        validators: [Validators.required, Validators.minLength(5), Validators.maxLength(45)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'service')],
+      }),
       fono: ['', [Validators.required, CustomValidators.phone()]],
-      detalle: ['', [Validators.maxLength(100)]],
+      detalle: this.fb.control('', {
+        validators: [Validators.maxLength(100)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'service')],
+      }),
       hourly_rate: [null],
       direccion: ['', [Validators.required]],
       lat: ['', [Validators.required]],
@@ -453,6 +462,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   //     try {
   // Enviar servicio al backend
   async submitService() {
+    if (this.servicioForm.pending) {
+      this.servicioForm.markAllAsTouched();
+      await this.presentToast('Validando contenido...', 'primary');
+      return;
+    }
+
     if (this.servicioForm.valid && this.currentUser) {
       const loading = await this.loadingCtrl.create({
         message: 'Guardando servicio...'

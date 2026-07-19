@@ -343,13 +343,21 @@
           </div>
 
           <!-- Action Buttons -->
+            <div class="error-hint" *ngIf="isCheckingDescription">
+              <ion-spinner name="crescent" color="medium"></ion-spinner>
+              <span>Validando contenido...</span>
+            </div>
+            <div class="error-hint" *ngIf="descriptionError && !isCheckingDescription">
+              <ion-icon name="alert-circle" color="danger"></ion-icon>
+              <span>{{ descriptionError }}</span>
+            </div>
           <div class="action-buttons">
             <ion-button 
               expand="block" 
               color="primary"
               size="large"
               (click)="confirmBookingFromSheet()"
-              [disabled]="!isBookingValid"
+              [disabled]="!isBookingValid || isCheckingDescription || isBookingLoading"
               class="confirm-button">
               <ion-icon name="checkmark-circle" slot="start"></ion-icon>
               Confirmar Reserva
