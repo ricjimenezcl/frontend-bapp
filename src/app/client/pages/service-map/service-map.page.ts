@@ -197,26 +197,32 @@ export class ServiceMapPage implements OnInit, OnDestroy {
 
     this.mapService.clearUserMarker();
 
-    const userIconPath = 'assets/icon/user-location.ico';
-    
+    // SVG Cloudinary: mismo que web (ubi_cli_2)
+    const userIconUrl = 'https://res.cloudinary.com/dghwotofx/image/upload/v1782705912/ubi_cli_2_nlnxac.svg';
+
     // Contenedor: 34px (levemente más grande que proveedores de 30px)
     const el = document.createElement('div');
     el.className = 'user-marker-container';
 
     const img = new Image();
-    img.src = userIconPath;
+    img.src = userIconUrl;
 
     img.onload = () => {
       el.innerHTML = `
         <div class="pulse-ring"></div>
-        <img class="user-icon" src="${userIconPath}" alt="Tu ubicación" />
+        <img class="user-icon" src="${userIconUrl}" alt="Tu ubicación" />
       `;
     };
 
     img.onerror = () => {
+      // Fallback: SVG inline idéntico al pin rojo del hero de la web
       el.innerHTML = `
         <div class="pulse-ring"></div>
-        <div class="user-icon-fallback">📍</div>
+        <svg class="user-icon" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1C6.48 1 2 5.48 2 11c0 7.3 10 20 10 20s10-12.7 10-20C22 5.48 17.52 1 12 1z" fill="#BE202E" stroke="#FFFFFF" stroke-width="1.5"/>
+          <circle cx="12" cy="11" r="4.2" fill="#FFFFFF"/>
+          <circle cx="12" cy="11" r="2.1" fill="#1F2937"/>
+        </svg>
       `;
     };
 

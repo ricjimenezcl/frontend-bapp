@@ -249,30 +249,46 @@ export class ProviderActionSheetComponent implements OnInit {
    * Extrae imágenes de portfolio_images de cada servicio y crea array flat
    */
   private loadProviderPortfolioAndServices() {
+    // Usar provider_id (providers.id) para /providers/{id}/services
+    // Si no está disponible, usar id (service_providers.id) como fallback
     const providerId = this.provider?.provider_id ?? this.provider?.id;
     if (!providerId) return;
 
     this.isLoadingPortfolio = true;
     this.isLoadingServices = true;
 
-    this.coreService.getProviderServices(providerId).pipe(
-      catchError(() => of([]))
+    this.coreService.getProviderById(providerId).pipe(
+      catchError(() => of(null))
     ).subscribe({
-      next: (services: any[]) => {
+      next: (detailedData: any) => {
+        // Usar el endpoint /detailed que siempre incluye services[] con portfolio_images
+        const services: any[] = Array.isArray(detailedData?.services) ? detailedData.services : [];
         this.providerServices = services;
         this.isLoadingServices = false;
 
         // Extraer portfolio_images de todos los servicios
         this.portfolioImages = [];
         services.forEach((svc: any) => {
-          if (svc.portfolio_images && Array.isArray(svc.portfolio_images)) {
-            svc.portfolio_images.forEach((img: any) => {
+          const rawImages = svc?.portfolio_images;
+          if (!rawImages) return;
+
+          // portfolio_images puede ser: string[] | {url:string}[] | string (JSON stringificado)
+          let imageList: any[] = [];
+          if (Array.isArray(rawImages)) {
+            imageList = rawImages;
+          } else if (typeof rawImages === 'string') {
+            try { imageList = JSON.parse(rawImages); } catch { /* skip */ }
+          }
+
+          imageList.forEach((img: any) => {
+            const url = typeof img === 'string' ? img : (img?.url ?? '');
+            if (url) {
               this.portfolioImages.push({
-                url: img.url || img,
+                url,
                 serviceName: svc.business_name || svc.service_name || 'Servicio'
               });
-            });
-          }
+            }
+          });
         });
 
         this.isLoadingPortfolio = false;

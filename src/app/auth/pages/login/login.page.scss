@@ -52,8 +52,15 @@ ion-content {
   }
 
   .titulo-img {
-    height: 16px;
+    height: 20px;   // aumentado de 16px para mejor legibilidad
     object-fit: contain;
+  }
+
+  .titulo-fallback {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--bapp-color-primary, #FDD735);
+    letter-spacing: 0.5px;
   }
 }
 
@@ -69,7 +76,6 @@ ion-content {
     }
   }
 }
-
 @media (min-width: 1024px) {
   .login-logo {
     .logo-container {

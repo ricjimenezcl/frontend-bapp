@@ -93,6 +93,14 @@ export class MapService {
 
     this.map.on('style.load', () => {
       console.log('✓ Estilo MapLibre cargado');
+      // Al cambiar de estilo, las imágenes se borran: re-cargar el pin de proveedor
+      this.map!.loadImage(MapService.PROVIDER_PIN_URL)
+        .then(({ data: image }) => {
+          if (this.map && !this.map.hasImage('custom-marker')) {
+            this.map.addImage('custom-marker', image);
+          }
+        })
+        .catch(() => { /* no-op: el layer ya usa fallback de círculos */ });
     });
 
     return this.map;
@@ -249,6 +257,10 @@ export class MapService {
 
   // ── Cluster layer ──────────────────────────────────────────────────────
 
+  // URL del pin de proveedor (SVG Cloudinary — mismo que web)
+  private static readonly PROVIDER_PIN_URL =
+    'https://res.cloudinary.com/dghwotofx/image/upload/v1782705912/ubi_prov_1_o7rzel.svg';
+
   addProviderCluster(collection: GeoJSONFeatureCollection): void {
     if (!this.map) return;
     this.clearProviderCluster();
@@ -257,7 +269,7 @@ export class MapService {
       this.addProviderClusterWithIcon(collection);
     } else {
       // MapLibre v4+: loadImage() retorna Promise
-      this.map.loadImage('/assets/icon/ubicacion.ico')
+      this.map.loadImage(MapService.PROVIDER_PIN_URL)
         .then(({ data: image }) => {
           if (this.map) {
             this.map.addImage('custom-marker', image);
@@ -265,7 +277,12 @@ export class MapService {
           }
         })
         .catch(() => {
-          this.addProviderClusterFallback(collection);
+          // fallback: intentar con asset local antes de círculos
+          this.map!.loadImage('/assets/icon/ubicacion.ico')
+            .then(({ data: img2 }) => {
+              if (this.map) { this.map.addImage('custom-marker', img2); this.addProviderClusterWithIcon(collection); }
+            })
+            .catch(() => this.addProviderClusterFallback(collection));
         });
     }
   }

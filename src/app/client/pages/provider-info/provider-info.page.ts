@@ -132,7 +132,16 @@ export class ProviderInfoPage implements OnInit {
     } else {
       const selected = this.coreService.selectedProvider();
       if (selected) {
+        // Mostrar datos básicos del proveedor mientras carga el perfil completo
         this.provider = selected;
+        // Cargar datos completos usando provider_id (providers.id) o id como fallback
+        const fullProviderId = (selected as any).provider_id ?? selected.id;
+        if (fullProviderId) {
+          this.loadProvider(Number(fullProviderId), serviceId);
+        } else {
+          this.isLoading = false;
+        }
+      } else {
         this.isLoading = false;
       }
     }
@@ -240,10 +249,23 @@ export class ProviderInfoPage implements OnInit {
           this.providerServices = services;
 
           // Consolidar portafolio de todos los servicios (sin duplicados)
-          const allPortfolio = services.flatMap((svc: any) =>
-            Array.isArray(svc?.portfolio_images) ? svc.portfolio_images : []
-          );
-          this.portfolioImages = [...new Set(allPortfolio.filter((img: string) => !!img))];
+          const allPortfolio: string[] = services.flatMap((svc: any) => {
+            const raw = svc?.portfolio_images;
+            if (!raw) return [];
+            if (Array.isArray(raw)) {
+              return raw.map((img: any) => (typeof img === 'string' ? img : (img?.url ?? ''))).filter(Boolean);
+            }
+            if (typeof raw === 'string') {
+              try { 
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) 
+                  ? parsed.map((img: any) => (typeof img === 'string' ? img : (img?.url ?? ''))).filter(Boolean)
+                  : [];
+              } catch { return []; }
+            }
+            return [];
+          });
+          this.portfolioImages = [...new Set(allPortfolio)];
 
           // Buscar el servicio específico o usar el primero disponible
           const targetService = serviceId

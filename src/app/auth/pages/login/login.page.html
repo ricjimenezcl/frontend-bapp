@@ -7,10 +7,18 @@
         <div class="web-brand-row">
           <div class="logo-container">
             <img src="https://res.cloudinary.com/dghwotofx/image/upload/f_auto,q_auto,w_320,c_limit/v1774563936/logo_gsgyrf.png"
-                 alt="Logo BappSearch" class="logo-img">
+                 alt="Logo BappSearch"
+                 class="logo-img"
+                 loading="eager"
+                 (error)="$any($event.target).style.display='none'">
           </div>
           <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png"
-               alt="BappSearch" class="titulo-img">
+               alt="BappSearch"
+               class="titulo-img"
+               loading="eager"
+               (error)="$any($event.target).replaceWith(fallbackTitle)">
+          <!-- Fallback text si Cloudinary no carga -->
+          <span #fallbackTitle class="titulo-fallback" style="display:none">BappSearch</span>
         </div>
         <p class="login-subtitle">Conecta con proveedores de servicios</p>
       </div>
