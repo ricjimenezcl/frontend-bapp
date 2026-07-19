@@ -232,6 +232,19 @@
             Facebook
           </button>
         </div>
+        
+          <div *ngIf="socialRolePrompt" class="role-prompt">
+            <p>Este correo social tiene dos perfiles. ¿Cómo quieres entrar?</p>
+            <div class="role-buttons">
+              <button
+                type="button"
+                class="role-option"
+                *ngFor="let role of socialRoleOptions"
+                (click)="selectSocialLoginRole(role)">
+                {{ role === 'PROVIDER' ? 'Proveedor' : 'Cliente' }}
+              </button>
+            </div>
+          </div>
       </div>
     </div>
   </div>
