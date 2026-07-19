@@ -390,20 +390,29 @@ export class RegisterProviderPage implements OnInit {
 
       this.authService.registerProvider(providerData).subscribe({
         next: async () => {
-          this.isLoading = false;
-          
-          const alert = await this.alertController.create({
-            header: '✅ Registro Exitoso',
-            message: 'Tu cuenta de proveedor ha sido creada. Ahora necesitas verificar tu identidad para poder agregar servicios.',
-            buttons: [{
-              text: 'Continuar a Verificación',
-              handler: () => {
-                // Redirigir a verificación de identidad (BLOQUEANTE)
-                this.router.navigate(['/auth/verify-identity']);
-              }
-            }]
+          this.isLoading = true;
+          // Auto-login para llevar al dashboard inmediatamente
+          this.authService.loginClient({ email: formData.email, password: formData.password }).subscribe({
+            next: () => {
+              this.isLoading = false;
+              this.router.navigate(['/provider/tabs'], { replaceUrl: true });
+            },
+            error: async () => {
+              // Fallback: si el auto-login falla, ir al login con credenciales precargadas
+              this.isLoading = false;
+              const alert = await this.alertController.create({
+                header: '✅ Registro Exitoso',
+                message: 'Tu cuenta de proveedor ha sido creada. Inicia sesión para continuar.',
+                buttons: [{
+                  text: 'Ir al Login',
+                  handler: () => {
+                    this.router.navigate(['/auth/login']);
+                  }
+                }]
+              });
+              await alert.present();
+            }
           });
-          await alert.present();
         },
         error: async (error) => {
           this.isLoading = false;
