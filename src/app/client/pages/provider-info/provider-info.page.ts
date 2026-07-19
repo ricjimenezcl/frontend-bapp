@@ -35,6 +35,9 @@ export class ProviderInfoPage implements OnInit {
   readonly ReportedEntityType = ReportedEntityType;
 
   provider: ServiceProvider | null = null;
+  providerServices: ServiceProvider[] = [];
+  portfolioImages: string[] = [];
+  activeTab: 'profile' | 'reviews' | 'contact' = 'profile';
   isLoading = true;
   reviews: Review[] = [];
   isLoadingReviews = false;
@@ -233,7 +236,14 @@ export class ProviderInfoPage implements OnInit {
       next: ({ providerData, reviews }) => {
         if (providerData) {
           const pd: any = providerData;
-          const services: any[] = pd.services || [];
+          const services: ServiceProvider[] = Array.isArray(pd.services) ? pd.services : [];
+          this.providerServices = services;
+
+          // Consolidar portafolio de todos los servicios (sin duplicados)
+          const allPortfolio = services.flatMap((svc: any) =>
+            Array.isArray(svc?.portfolio_images) ? svc.portfolio_images : []
+          );
+          this.portfolioImages = [...new Set(allPortfolio.filter((img: string) => !!img))];
 
           // Buscar el servicio específico o usar el primero disponible
           const targetService = serviceId
@@ -253,10 +263,12 @@ export class ProviderInfoPage implements OnInit {
               business_name: targetService.business_name,
               address: targetService.address,
               description: targetService.description,
-              hourly_rate: targetService.hourly_rate
+              hourly_rate: targetService.hourly_rate,
+              portfolio_images: targetService.portfolio_images || []
             } as ServiceProvider;
 
-            const svcId = targetService.service_id || targetService.service_category_id || targetService.id;
+            const targetServiceAny = targetService as any;
+            const svcId = targetServiceAny.service_id || targetServiceAny.service_category_id || targetServiceAny.id;
             if (svcId) this.selectedServiceId = Number(svcId);
           } else {
             this.provider = { ...pd, email: pd.email || '' } as ServiceProvider;
@@ -274,6 +286,20 @@ export class ProviderInfoPage implements OnInit {
   }
 
   // ── Métodos del lightbox de portafolio ──────────────────────────
+
+  setActiveTab(tab: 'profile' | 'reviews' | 'contact') {
+    this.activeTab = tab;
+  }
+
+  get providerDescription(): string {
+    if (this.provider?.description) return this.provider.description;
+    if (this.provider?.bio) return this.provider.bio;
+    return 'Proveedor de servicios profesional. Contacta para más información.';
+  }
+
+  get hasPortfolio(): boolean {
+    return this.portfolioImages.length > 0;
+  }
 
   openLightbox(images: string[], index: number) {
     this.lightboxImages = images;

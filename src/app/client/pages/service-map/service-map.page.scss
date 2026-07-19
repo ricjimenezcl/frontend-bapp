@@ -243,13 +243,13 @@ ion-content.map-content {
 }
 
 // ============ MARCADORES ============
-// Marcador de usuario: 34px (levemente más grande que proveedores de 30px)
-// Marcador de proveedor: 30px
+// Marcador de usuario: 44px (más visible)
+// Marcador de proveedor: 40px
 
 // Contenedor del marcador de usuario
 .user-marker-container {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   position: relative;
   display: flex;
   align-items: center;
@@ -261,10 +261,10 @@ ion-content.map-content {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 50px;
-  height: 50px;
-  margin-top: -25px;
-  margin-left: -25px;
+  width: 62px;
+  height: 62px;
+  margin-top: -31px;
+  margin-left: -31px;
   border-radius: 50%;
   background: rgba(253, 215, 53, 0.3);
   animation: pulse-animation 2s ease-out infinite;
@@ -273,8 +273,8 @@ ion-content.map-content {
 
 // Ícono del usuario
 .user-icon {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 3px solid white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -286,8 +286,8 @@ ion-content.map-content {
 
 // Fallback del ícono del usuario
 .user-icon-fallback {
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 3px solid #FDE68A;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -302,8 +302,8 @@ ion-content.map-content {
 
 // Contenedor del marcador de proveedor
 .provider-marker-container {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -317,8 +317,8 @@ ion-content.map-content {
 
 // Ícono del proveedor
 .provider-icon {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -328,8 +328,8 @@ ion-content.map-content {
 
 // Fallback del ícono del proveedor
 .provider-icon-fallback {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);

@@ -1,16 +1,15 @@
 // src/app/auth/pages/login/login.page.ts
-import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import {
-  IonContent, IonLabel, IonItem, IonIcon, IonInput, IonButton,
-  IonCheckbox, IonRow, IonCol, IonSpinner, IonModal, IonList, IonText,
-  IonSegment, IonSegmentButton, ModalController // ¡AGREGAR ESTO!
+  IonContent, IonLabel, IonIcon, IonInput, IonButton,
+  IonCheckbox, IonSpinner,
+  IonSegment, IonSegmentButton, ModalController
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
-import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-login',
@@ -24,34 +23,27 @@ import { signal } from '@angular/core';
     RouterModule,
     IonContent,
     IonLabel,
-    IonItem,
     IonIcon,
     IonInput,
     IonButton,
     IonCheckbox,
-    IonRow,
-    IonCol,
     IonSpinner,
-    IonModal,
-    IonList,
-    IonText,
     IonSegment,
     IonSegmentButton
   ]
 })
 export class LoginPage implements OnInit, OnDestroy {
-  @ViewChild(IonModal) modal!: IonModal;
-  
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private authService = inject(AuthService);
-  private modalController = inject(ModalController);
-  private socialAuthService = inject(SocialAuthService);
+  private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly authService = inject(AuthService);
+  private readonly modalController = inject(ModalController);
+  private readonly socialAuthService = inject(SocialAuthService);
   
   loginForm: FormGroup;
   registerForm: FormGroup;
   activeTab = signal<'login' | 'register'>('login');
+  registerRole = signal<'client' | 'provider'>('client');
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -64,6 +56,12 @@ export class LoginPage implements OnInit, OnDestroy {
   private retryAttempts = 0;
   private readonly maxRetryAttempts = 2;
   private retryTimerRef: any = null;
+  loginRolePrompt = false;
+  loginRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
+  private pendingLoginCredentials: { email: string; password: string } | null = null;
+  socialRolePrompt = false;
+  socialRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
+  private pendingSocialLogin: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean } | null = null;
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -75,6 +73,8 @@ export class LoginPage implements OnInit, OnDestroy {
     this.registerForm = this.fb.group({
       full_name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      run: [''],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
       terms_accepted: [false, [Validators.requiredTrue]]
@@ -101,12 +101,26 @@ export class LoginPage implements OnInit, OnDestroy {
 
   setTab(tab: 'login' | 'register') {
     this.activeTab.set(tab);
+    if (tab === 'register') this.registerRole.set('client');
+    this.loginRolePrompt = false;
+    this.pendingLoginCredentials = null;
+    this.socialRolePrompt = false;
+    this.pendingSocialLogin = null;
     this.errorMessage = '';
     this.successMessage = '';
   }
 
+  setRegisterRole(role: 'client' | 'provider') {
+    this.registerRole.set(role);
+  }
+
   onRegisterSubmit() {
     if (this.registerForm.valid) {
+      if (this.registerRole() === 'provider' && !this.registerForm.value.run) {
+        this.errorMessage = 'El RUT es requerido para proveedores';
+        return;
+      }
+
       this.isLoading = true;
       this.errorMessage = '';
       this.successMessage = '';
@@ -115,18 +129,37 @@ export class LoginPage implements OnInit, OnDestroy {
         email: this.registerForm.value.email,
         password: this.registerForm.value.password,
         full_name: this.registerForm.value.full_name,
-        role: 'CLIENT'
+        phone: this.registerForm.value.phone,
+        run: this.registerForm.value.run,
+        terms_accepted: this.registerForm.value.terms_accepted,
+        role: this.registerRole() === 'provider' ? 'PROVIDER' : 'CLIENT'
       };
 
-      console.log("📤 Registrando cliente:", data.email);
+      console.log("📤 Registrando usuario:", data.email, data.role);
 
-      this.authService.registerClient(data).subscribe({
+      const register$ = data.role === 'PROVIDER'
+        ? this.authService.registerProvider(data)
+        : this.authService.registerClient(data);
+
+      register$.subscribe({
         next: (resp) => {
           this.isLoading = false;
           console.log('✅ Registro exitoso', resp);
-          this.successMessage = 'Cuenta creada exitosamente. Por favor, inicia sesión.';
-          this.activeTab.set('login');
-          this.loginForm.patchValue({ email: data.email });
+          this.successMessage = 'Cuenta creada exitosamente. Iniciando sesión...';
+          this.authService.loginClient({
+            email: data.email,
+            password: data.password,
+            role: data.role as 'CLIENT' | 'PROVIDER'
+          }).subscribe({
+            next: (loginResp) => {
+              this.handleRoleBasedNavigation(loginResp.role);
+            },
+            error: () => {
+              this.successMessage = 'Cuenta creada exitosamente. Por favor, inicia sesión.';
+              this.activeTab.set('login');
+              this.loginForm.patchValue({ email: data.email });
+            }
+          });
         },
         error: (err) => {
           this.isLoading = false;
@@ -135,7 +168,9 @@ export class LoginPage implements OnInit, OnDestroy {
           const detail = err.error?.detail || err.error?.message;
           
           if (detail === 'Email already registered' || (typeof detail === 'string' && detail.includes('already registered'))) {
-            this.errorMessage = 'Este correo ya está registrado. Por favor, inicia sesión.';
+            this.errorMessage = this.registerRole() === 'provider'
+              ? 'Este correo ya tiene perfil proveedor. Inicia sesión para continuar.'
+              : 'Este correo ya tiene perfil cliente. Inicia sesión para continuar.';
             // Opcional: mover al tab de login automáticamente tras 2 segundos
             setTimeout(() => {
               this.activeTab.set('login');
@@ -156,6 +191,7 @@ export class LoginPage implements OnInit, OnDestroy {
       this.isLoading = true;
       this.errorMessage = '';
       this.sessionExpired = false;
+      this.loginRolePrompt = false;
 
       const credentials = {
         email: this.loginForm.value.email,
@@ -164,29 +200,62 @@ export class LoginPage implements OnInit, OnDestroy {
 
       console.log("📤 Credenciales a enviar:", credentials.email);
 
-      this.authService.loginClient(credentials).subscribe({
+      this.authService.getLoginRoles(credentials.email).subscribe({
+        next: (rolesResponse) => {
+          const roles = rolesResponse.roles || [];
+          if (roles.length > 1) {
+            this.pendingLoginCredentials = credentials;
+            this.loginRoleOptions = roles;
+            this.loginRolePrompt = true;
+            this.isLoading = false;
+            return;
+          }
+
+          const role = roles.length === 1 ? roles[0] : undefined;
+          this.executeLogin(credentials, role);
+        },
+        error: () => {
+          this.executeLogin(credentials);
+        }
+      });
+    } else {
+      this.markFormGroupTouched();
+      this.errorMessage = 'Por favor completa todos los campos correctamente';
+    }
+  }
+
+  selectLoginRole(role: 'CLIENT' | 'PROVIDER'): void {
+    if (!this.pendingLoginCredentials) return;
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.executeLogin(this.pendingLoginCredentials, role);
+  }
+
+  private executeLogin(credentials: { email: string; password: string }, role?: 'CLIENT' | 'PROVIDER'): void {
+    this.authService.loginClient({ ...credentials, role }).subscribe({
         next: (response) => {
           this.isLoading = false;
           this.retryAttempts = 0;
+          this.loginRolePrompt = false;
+          this.pendingLoginCredentials = null;
           console.log('✅ Login exitoso', response);
-
-          if (response.role === 'CLIENT') {
-            console.log("👤 CLIENTE - Redirigiendo a categorías");
-            this.router.navigate(['/client/categories']);
-          } else if (response.role === 'PROVIDER') {
-            console.log("🔧 PROVEEDOR - Redirigiendo a tabs");
-            this.redirectToMainCategories();
-          } else {
-            this.router.navigate(['/home']);
-          }
+          this.handleRoleBasedNavigation(response.role);
         },
         error: (error) => {
           this.isLoading = false;
           console.error('❌ Error en login:', error);
 
+          const detail = error?.error?.detail;
+          if (error?.status === 409 && detail?.code === 'ROLE_SELECTION_REQUIRED') {
+            this.pendingLoginCredentials = credentials;
+            this.loginRoleOptions = detail.roles || [];
+            this.loginRolePrompt = true;
+            return;
+          }
+
           if (error.status === 0 && this.retryAttempts < this.maxRetryAttempts) {
             this.retryAttempts++;
-            this.scheduleLoginRetry(credentials);
+            this.scheduleLoginRetry({ ...credentials, role });
           } else if (error.status === 422) {
             this.retryAttempts = 0;
             this.errorMessage = 'Error de validación: ' + this.getValidationErrors(error);
@@ -205,10 +274,6 @@ export class LoginPage implements OnInit, OnDestroy {
           }
         }
       });
-    } else {
-      this.markFormGroupTouched();
-      this.errorMessage = 'Por favor completa todos los campos correctamente';
-    }
   }
 
   ngOnDestroy(): void {
@@ -217,7 +282,7 @@ export class LoginPage implements OnInit, OnDestroy {
     }
   }
 
-  private scheduleLoginRetry(credentials: { email: string; password: string }): void {
+  private scheduleLoginRetry(credentials: { email: string; password: string; role?: 'CLIENT' | 'PROVIDER' }): void {
     this.isRetrying = true;
     this.retryCountdown = 10;
 
@@ -232,13 +297,7 @@ export class LoginPage implements OnInit, OnDestroy {
           next: (response) => {
             this.isLoading = false;
             this.retryAttempts = 0;
-            if (response.role === 'CLIENT') {
-              this.router.navigate(['/client/categories']);
-            } else if (response.role === 'PROVIDER') {
-              this.redirectToMainCategories();
-            } else {
-              this.router.navigate(['/home']);
-            }
+            this.handleRoleBasedNavigation(response.role);
           },
           error: (error) => {
             this.isLoading = false;
@@ -260,8 +319,20 @@ export class LoginPage implements OnInit, OnDestroy {
     this.router.navigate(['/provider/tabs']);
   }
 
+  private handleRoleBasedNavigation(role: string): void {
+    if (role === 'PROVIDER') {
+      this.redirectToMainCategories();
+      return;
+    }
+    if (role === 'CLIENT') {
+      this.router.navigate(['/client/categories']);
+      return;
+    }
+    this.router.navigate(['/home']);
+  }
+
   private getValidationErrors(error: any): string {
-    if (error.error && error.error.detail) {
+    if (error.error?.detail) {
       if (Array.isArray(error.error.detail)) {
         return error.error.detail.map((err: any) => err.msg).join(', ');
       }
@@ -320,24 +391,7 @@ export class LoginPage implements OnInit, OnDestroy {
     
     this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID)
       .then((socialUser) => {
-        this.authService.loginWithFacebook(socialUser.authToken || '').subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            
-            if (wasRegistering && !response.is_new_user) {
-              this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
-              setTimeout(() => {
-                this.handleOAuthNavigation(response.role, response.terms_accepted);
-              }, 2000);
-            } else {
-              this.handleOAuthNavigation(response.role, response.terms_accepted);
-            }
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessage = error.error?.detail || 'Error en login con Facebook';
-          }
-        });
+        this.resolveSocialLoginRole('facebook', socialUser.authToken || '', socialUser.email || '', wasRegistering);
       })
       .catch((error) => {
         this.isLoading = false;
@@ -354,24 +408,7 @@ export class LoginPage implements OnInit, OnDestroy {
 
     this.signInWithRetry(GoogleLoginProvider.PROVIDER_ID)
       .then((socialUser) => {
-        this.authService.loginWithGoogle(socialUser.idToken || '').subscribe({
-          next: (response) => {
-            this.isLoading = false;
-            
-            if (wasRegistering && !response.is_new_user) {
-              this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
-              setTimeout(() => {
-                this.handleOAuthNavigation(response.role, response.terms_accepted);
-              }, 2000);
-            } else {
-              this.handleOAuthNavigation(response.role, response.terms_accepted);
-            }
-          },
-          error: (error) => {
-            this.isLoading = false;
-            this.errorMessage = error.error?.detail || 'Error en login con Google';
-          }
-        });
+        this.resolveSocialLoginRole('google', socialUser.idToken || '', socialUser.email || '', wasRegistering);
       })
       .catch((error) => {
         this.isLoading = false;
@@ -379,6 +416,85 @@ export class LoginPage implements OnInit, OnDestroy {
         this.errorMessage = this.getSocialErrorMessage(error, 'Google');
         console.error('Error en Google signIn:', error);
       });
+  }
+
+  selectSocialLoginRole(role: 'CLIENT' | 'PROVIDER'): void {
+    if (!this.pendingSocialLogin) return;
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.continueSocialLogin(this.pendingSocialLogin, role);
+  }
+
+  private resolveSocialLoginRole(
+    provider: 'google' | 'facebook',
+    token: string,
+    email: string,
+    wasRegistering: boolean,
+  ): void {
+    const pending = { provider, token, email, wasRegistering };
+    const requestedRole = (wasRegistering ? this.registerRole().toUpperCase() : 'CLIENT') as 'CLIENT' | 'PROVIDER';
+
+    this.socialRolePrompt = false;
+    this.pendingSocialLogin = null;
+
+    if (wasRegistering) {
+      this.continueSocialLogin(pending, requestedRole);
+      return;
+    }
+
+    if (!email) {
+      this.continueSocialLogin(pending, 'CLIENT');
+      return;
+    }
+
+    this.authService.getLoginRoles(email).subscribe({
+      next: (rolesResponse) => {
+        const roles = rolesResponse.roles || [];
+        if (roles.length > 1) {
+          this.pendingSocialLogin = pending;
+          this.socialRoleOptions = roles;
+          this.socialRolePrompt = true;
+          this.isLoading = false;
+          return;
+        }
+
+        const role = roles.length === 1 ? roles[0] : 'CLIENT';
+        this.continueSocialLogin(pending, role);
+      },
+      error: () => {
+        this.continueSocialLogin(pending, 'CLIENT');
+      }
+    });
+  }
+
+  private continueSocialLogin(
+    pending: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean },
+    role: 'CLIENT' | 'PROVIDER'
+  ): void {
+    const request$ = pending.provider === 'google'
+      ? this.authService.loginWithGoogle(pending.token, role)
+      : this.authService.loginWithFacebook(pending.token, role);
+
+    request$.subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.socialRolePrompt = false;
+        this.pendingSocialLogin = null;
+
+        if (pending.wasRegistering && !response.is_new_user) {
+          this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
+          setTimeout(() => {
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          }, 2000);
+        } else {
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.error?.detail || `Error en login con ${pending.provider === 'google' ? 'Google' : 'Facebook'}`;
+      }
+    });
   }
 
   /**
@@ -451,37 +567,11 @@ export class LoginPage implements OnInit, OnDestroy {
   // ========== CORRECCIÓN DEL MODAL ==========
   
   async onRegisterClient(): Promise<void> {
-    try {
-      // Primero cerrar el modal
-      if (this.modal) {
-        await this.modal.dismiss();
-      }
-      // Luego navegar después de que el modal se cierre
-      setTimeout(() => {
-        this.router.navigate(['/auth/register-client']);
-      }, 100);
-    } catch (error) {
-      console.error('Error cerrando modal:', error);
-      // Si hay error cerrando el modal, navegar de todos modos
-      this.router.navigate(['/auth/register-client']);
-    }
+    await this.closeModalAndNavigate('/auth/register-client');
   }
   
   async onRegisterProvider(): Promise<void> {
-    try {
-      // Primero cerrar el modal
-      if (this.modal) {
-        await this.modal.dismiss();
-      }
-      // Luego navegar después de que el modal se cierre
-      setTimeout(() => {
-        this.router.navigate(['/auth/register-provider']);
-      }, 100);
-    } catch (error) {
-      console.error('Error cerrando modal:', error);
-      // Si hay error cerrando el modal, navegar de todos modos
-      this.router.navigate(['/auth/register-provider']);
-    }
+    await this.closeModalAndNavigate('/auth/register-provider');
   }
 
   // Método alternativo usando ModalController

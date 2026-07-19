@@ -275,46 +275,16 @@ export class MapService {
 
     this.map.addSource(this.clusterSourceId, {
       type: 'geojson',
-      data: collection as any,
-      cluster: true,
-      clusterMaxZoom: 14,
-      clusterRadius: 50
-    });
-
-    this.map.addLayer({
-      id: 'cluster-circles',
-      type: 'circle',
-      source: this.clusterSourceId,
-      filter: ['has', 'point_count'],
-      paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#FDE68A', 10, '#f28cb1', 30, '#f1f075'],
-        'circle-radius': ['step', ['get', 'point_count'], 22, 10, 32, 30, 42],
-        'circle-stroke-width': 2,
-        'circle-stroke-color': 'rgba(0,0,0,0.3)'
-      }
-    });
-
-    this.map.addLayer({
-      id: 'cluster-count',
-      type: 'symbol',
-      source: this.clusterSourceId,
-      filter: ['has', 'point_count'],
-      layout: {
-        'text-field': '{point_count_abbreviated}',
-        'text-size': 13,
-        'text-allow-overlap': true
-      },
-      paint: { 'text-color': '#000' }
+      data: collection as any
     });
 
     this.map.addLayer({
       id: 'unclustered-point',
       type: 'symbol',
       source: this.clusterSourceId,
-      filter: ['!', ['has', 'point_count']],
       layout: {
         'icon-image': 'custom-marker',
-        'icon-size': 0.5,
+        'icon-size': 0.82,
         'icon-allow-overlap': true
       },
       paint: {
@@ -334,43 +304,13 @@ export class MapService {
 
     this.map.addSource(this.clusterSourceId, {
       type: 'geojson',
-      data: collection as any,
-      cluster: true,
-      clusterMaxZoom: 14,
-      clusterRadius: 50
-    });
-
-    this.map.addLayer({
-      id: 'cluster-circles',
-      type: 'circle',
-      source: this.clusterSourceId,
-      filter: ['has', 'point_count'],
-      paint: {
-        'circle-color': ['step', ['get', 'point_count'], '#FDE68A', 10, '#f28cb1', 30, '#f1f075'],
-        'circle-radius': ['step', ['get', 'point_count'], 22, 10, 32, 30, 42],
-        'circle-stroke-width': 2,
-        'circle-stroke-color': 'rgba(0,0,0,0.3)'
-      }
-    });
-
-    this.map.addLayer({
-      id: 'cluster-count',
-      type: 'symbol',
-      source: this.clusterSourceId,
-      filter: ['has', 'point_count'],
-      layout: {
-        'text-field': '{point_count_abbreviated}',
-        'text-size': 13,
-        'text-allow-overlap': true
-      },
-      paint: { 'text-color': '#000' }
+      data: collection as any
     });
 
     this.map.addLayer({
       id: 'unclustered-point',
       type: 'circle',
       source: this.clusterSourceId,
-      filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': [
           'case',
@@ -378,8 +318,8 @@ export class MapService {
           ['>=', ['coalesce', ['get', 'rating_avg'], 0], 3], '#2196F3',
           '#FF9800'
         ],
-        'circle-radius': 10,
-        'circle-stroke-width': 2,
+        'circle-radius': 16,
+        'circle-stroke-width': 3,
         'circle-stroke-color': '#fff'
       }
     });
@@ -390,18 +330,6 @@ export class MapService {
   private setupClusterEventHandlers(): void {
     if (!this.map) return;
 
-    const clusterClickFn = (e: any) => {
-      const features = this.map!.queryRenderedFeatures(e.point, { layers: ['cluster-circles'] });
-      if (!features.length) return;
-      const clusterId = (features[0].properties as any).cluster_id;
-      // MapLibre v4+: getClusterExpansionZoom() retorna Promise
-      (this.map!.getSource(this.clusterSourceId) as maplibregl.GeoJSONSource)
-        .getClusterExpansionZoom(clusterId)
-        .then((zoom: number) => {
-          this.map!.easeTo({ center: (features[0].geometry as any).coordinates, zoom });
-        });
-    };
-
     const pointClickFn = (e: any) => {
       if (!e.features?.length) return;
       this.clusterPointClickSubject.next(e.features[0].properties);
@@ -410,22 +338,16 @@ export class MapService {
     const cursorOn  = () => { if (this.map) this.map.getCanvas().style.cursor = 'pointer'; };
     const cursorOff = () => { if (this.map) this.map.getCanvas().style.cursor = ''; };
 
-    this.map.on('click', 'cluster-circles', clusterClickFn);
     this.map.on('click', 'unclustered-point', pointClickFn);
-    this.map.on('mouseenter', 'cluster-circles', cursorOn);
-    this.map.on('mouseleave', 'cluster-circles', cursorOff);
     this.map.on('mouseenter', 'unclustered-point', cursorOn);
     this.map.on('mouseleave', 'unclustered-point', cursorOff);
 
     this.clusterClickHandlers = [
-      { layer: 'cluster-circles', fn: clusterClickFn },
       { layer: 'unclustered-point', fn: pointClickFn }
     ];
 
     // ✅ Fix memory leak: Guardar referencias de hover handlers para limpieza
     this.hoverHandlers = [
-      { layer: 'cluster-circles', event: 'mouseenter', fn: cursorOn },
-      { layer: 'cluster-circles', event: 'mouseleave', fn: cursorOff },
       { layer: 'unclustered-point', event: 'mouseenter', fn: cursorOn },
       { layer: 'unclustered-point', event: 'mouseleave', fn: cursorOff }
     ];

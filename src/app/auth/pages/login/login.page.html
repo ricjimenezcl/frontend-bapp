@@ -2,14 +2,16 @@
   <div class="login-bg">
     <div class="login-wrap">
 
-      <!-- Logo section from Web -->
+      <!-- Logo y título (mismo origen que web) -->
       <div class="login-logo">
-        <div class="logo-container">
-          <img src="https://res.cloudinary.com/dghwotofx/image/upload/f_auto,q_auto,w_320,c_limit/v1774563936/logo_gsgyrf.png" 
-               alt="logo" class="logo-img">
+        <div class="web-brand-row">
+          <div class="logo-container">
+            <img src="https://res.cloudinary.com/dghwotofx/image/upload/f_auto,q_auto,w_320,c_limit/v1774563936/logo_gsgyrf.png"
+                 alt="Logo BappSearch" class="logo-img">
+          </div>
+          <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png"
+               alt="BappSearch" class="titulo-img">
         </div>
-        <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png" 
-             alt="BappSearch" class="titulo-img">
         <p class="login-subtitle">Conecta con proveedores de servicios</p>
       </div>
 
@@ -78,6 +80,15 @@
             <button type="button" class="forgot-btn" (click)="onReset()">¿Olvidaste tu contraseña?</button>
           </div>
 
+          <div *ngIf="loginRolePrompt" class="role-select-box">
+            <p>Este correo tiene dos perfiles. Elige cómo quieres ingresar:</p>
+            <div class="role-select-actions">
+              <button type="button" class="role-btn" *ngFor="let role of loginRoleOptions" (click)="selectLoginRole(role)">
+                {{ role === 'PROVIDER' ? 'Proveedor' : 'Cliente' }}
+              </button>
+            </div>
+          </div>
+
           <ion-button
             type="submit"
             expand="block"
@@ -91,12 +102,47 @@
         <!-- REGISTER FORM -->
         <form *ngIf="activeTab() === 'register'" [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate class="login-form">
           <div class="form-group">
+            <label class="form-label">Tipo de cuenta</label>
+            <ion-segment [value]="registerRole()" (ionChange)="setRegisterRole($any($event).detail.value)" mode="md" class="auth-segment">
+              <ion-segment-button value="client">
+                <ion-label>Cliente</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="provider">
+                <ion-label>Proveedor</ion-label>
+              </ion-segment-button>
+            </ion-segment>
+          </div>
+
+          <div class="form-group">
             <label class="form-label">Nombre completo</label>
             <div class="input-wrap" [class.input-wrap-error]="registerForm.get('full_name')?.invalid && registerForm.get('full_name')?.touched">
               <ion-icon name="person-outline" class="input-icon"></ion-icon>
               <ion-input
                 formControlName="full_name"
                 placeholder="Tu nombre">
+              </ion-input>
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="registerRole() === 'provider'">
+            <label class="form-label">RUT</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerRole() === 'provider' && !registerForm.get('run')?.value && registerForm.get('run')?.touched">
+              <ion-icon name="card-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="run"
+                placeholder="12345678-9">
+              </ion-input>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Teléfono (opcional)</label>
+            <div class="input-wrap">
+              <ion-icon name="call-outline" class="input-icon"></ion-icon>
+              <ion-input
+                formControlName="phone"
+                type="tel"
+                placeholder="+56 9 1234 5678">
               </ion-input>
             </div>
           </div>
@@ -159,13 +205,8 @@
             class="submit-btn"
             [disabled]="isLoading || registerForm.invalid">
             <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
-            <span>Crear Cuenta</span>
+            <span>{{ registerRole() === 'provider' ? 'Crear Cuenta de Proveedor' : 'Crear Cuenta de Cliente' }}</span>
           </ion-button>
-
-          <div class="provider-link-wrap">
-            <p>¿Quieres ofrecer tus servicios?</p>
-            <a routerLink="/auth/register/provider" class="accent-link">Regístrate como Proveedor aquí</a>
-          </div>
         </form>
 
         <div class="divider">

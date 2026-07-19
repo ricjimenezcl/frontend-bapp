@@ -1012,3 +1012,86 @@ ion-modal.booking-modal {
   from { transform: scale(0.88); opacity: 0; }
   to   { transform: scale(1);    opacity: 1; }
 }
+
+/* Tabs: Perfil y servicios / Reseñas / Contacto */
+.tabs-wrap {
+  padding: 0 16px 16px;
+
+  ion-segment {
+    --background: var(--ion-color-dark);
+    border: 1px solid var(--ion-color-medium);
+    border-radius: 12px;
+    padding: 4px;
+  }
+
+  ion-segment-button {
+    --color: var(--ion-color-medium);
+    --color-checked: #000;
+    --indicator-color: var(--ion-color-primary);
+    min-height: 34px;
+    font-size: var(--bapp-text-xs);
+    text-transform: none;
+  }
+}
+
+.services-list {
+  padding: 0 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-card {
+  background: var(--ion-color-medium);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.service-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+
+  h3 {
+    margin: 0;
+    color: #fff;
+    font-size: var(--bapp-text-sm);
+    font-family: 'bold';
+  }
+}
+
+.service-price {
+  color: var(--ion-color-primary);
+  font-size: var(--bapp-text-xs);
+  font-family: 'semi-bold';
+  white-space: nowrap;
+}
+
+.service-desc {
+  margin: 8px 0;
+  color: #fff;
+  opacity: 0.9;
+  font-size: var(--bapp-text-xs);
+  line-height: 1.45;
+}
+
+.service-address {
+  margin: 0;
+  color: var(--ion-color-light);
+  font-size: var(--bapp-text-xs);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty-block {
+  margin: 0 16px 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ion-color-medium);
+  font-size: var(--bapp-text-xs);
+  text-align: center;
+}

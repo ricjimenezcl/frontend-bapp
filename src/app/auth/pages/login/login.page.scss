@@ -30,9 +30,15 @@ ion-content {
   gap: var(--bapp-space-4);
   text-align: center;
 
+  .web-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .logo-container {
-    width: 60px;
-    height: 80px;
+    width: 44px;
+    height: 68px;
     background: transparent;
     border-radius: var(--bapp-radius-xl);
     display: flex;
@@ -46,8 +52,34 @@ ion-content {
   }
 
   .titulo-img {
-    height: 24px;
+    height: 16px;
     object-fit: contain;
+  }
+}
+
+@media (min-width: 640px) {
+  .login-logo {
+    .logo-container {
+      width: 56px;
+      height: 86px;
+    }
+
+    .titulo-img {
+      height: 22px;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .login-logo {
+    .logo-container {
+      width: 70px;
+      height: 108px;
+    }
+
+    .titulo-img {
+      height: 30px;
+    }
   }
 }
 
@@ -311,6 +343,35 @@ ion-content {
   font-size: var(--bapp-text-xs);
   color: var(--bapp-color-danger);
   padding-left: var(--bapp-space-1);
+}
+
+.role-select-box {
+  border: 1px solid rgba(253, 215, 53, 0.35);
+  background: rgba(253, 215, 53, 0.08);
+  border-radius: var(--bapp-radius-md);
+  padding: var(--bapp-space-3);
+
+  p {
+    margin: 0 0 var(--bapp-space-2) 0;
+    color: var(--bapp-text-primary);
+    font-size: var(--bapp-text-xs);
+  }
+}
+
+.role-select-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.role-btn {
+  border: 1px solid rgba(253, 215, 53, 0.4);
+  background: transparent;
+  color: var(--bapp-color-primary);
+  border-radius: var(--bapp-radius-md);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+  padding: 8px 10px;
 }
 
 // ── Forgot password ────────────────────────────────────────────────────────────

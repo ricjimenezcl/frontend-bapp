@@ -1,6 +1,6 @@
 // auth.service.ts (versión corregida)
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -38,6 +38,12 @@ export interface UserProfile extends User {
   status?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface LoginRolesResponse {
+  email: string;
+  roles: Array<'CLIENT' | 'PROVIDER'>;
+  multiple_roles: boolean;
 }
 
 @Injectable({
@@ -387,11 +393,18 @@ export class AuthService {
    * Métodos de autenticación existentes
    */
 
-  loginClient(credentials: { email: string, password: string }): Observable<any> {
+  getLoginRoles(email: string): Observable<LoginRolesResponse> {
+    return this.http.get<LoginRolesResponse>(`${this.apiUrl}/auth/login-roles`, {
+      params: { email: email.trim().toLowerCase() }
+    });
+  }
+
+  loginClient(credentials: { email: string, password: string, role?: 'CLIENT' | 'PROVIDER' }): Observable<any> {
     // Enviar como JSON en lugar de URLSearchParams
     const body = {
       username: credentials.email,
-      password: credentials.password
+      password: credentials.password,
+      role: credentials.role,
     };
 
     return this.http.post(`${this.apiUrl}/auth/login`, body).pipe(

@@ -84,67 +84,108 @@
 
     <div class="break"></div>
 
-    <!-- About Section -->
-    <div class="main-title">
-      <ion-label class="title">Acerca de</ion-label>
+    <!-- Tabs coherentes con web -->
+    <div class="tabs-wrap">
+      <ion-segment [value]="activeTab" (ionChange)="setActiveTab($any($event.detail.value))">
+        <ion-segment-button value="profile">
+          <ion-label>Perfil y servicios</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="reviews">
+          <ion-label>Reseñas</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="contact">
+          <ion-label>Contacto</ion-label>
+        </ion-segment-button>
+      </ion-segment>
     </div>
 
-    <ion-label class="desc">
-      {{ provider.description || 'Proveedor de servicios profesional. Contacta para más información.' }}
-    </ion-label>
-
-    <!-- Portafolio de imágenes -->
-    <ng-container *ngIf="provider && $any(provider).portfolio_images?.length > 0">
-      <div class="break"></div>
+    <!-- TAB: Perfil y Servicios -->
+    <div *ngIf="activeTab === 'profile'">
       <div class="main-title">
-        <ion-label class="title">Portafolio</ion-label>
+        <ion-label class="title">Perfil</ion-label>
       </div>
-      <div class="pi-portfolio-grid">
-        <div class="pi-portfolio-thumb"
-          *ngFor="let img of $any(provider).portfolio_images; let i = index"
-          (click)="openLightbox($any(provider).portfolio_images, i)"
-          (keypress)="openLightbox($any(provider).portfolio_images, i)"
-          role="button" tabindex="0">
-          <img [src]="img" [alt]="'Foto ' + (i + 1)" loading="lazy" />
+
+      <ion-label class="desc">
+        {{ providerDescription }}
+      </ion-label>
+
+      <!-- Portafolio dentro de Perfil (como referencia web) -->
+      <ng-container *ngIf="hasPortfolio">
+        <div class="main-title">
+          <ion-label class="title">Portafolio</ion-label>
+        </div>
+        <div class="pi-portfolio-grid">
+          <div class="pi-portfolio-thumb"
+            *ngFor="let img of portfolioImages; let i = index"
+            (click)="openLightbox(portfolioImages, i)"
+            (keypress)="openLightbox(portfolioImages, i)"
+            role="button" tabindex="0">
+            <img [src]="img" [alt]="'Foto ' + (i + 1)" loading="lazy"
+              (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+          </div>
+        </div>
+      </ng-container>
+
+      <div class="main-title">
+        <ion-label class="title">Nuestros Servicios</ion-label>
+      </div>
+
+      <div class="services-list" *ngIf="providerServices.length > 0; else noServicesTpl">
+        <div class="service-card" *ngFor="let svc of providerServices">
+          <div class="service-top">
+            <h3>{{ svc.business_name || 'Servicio' }}</h3>
+            <span class="service-price" *ngIf="svc.hourly_rate">
+              ${{ svc.hourly_rate | number:'1.0-0' }}/hr
+            </span>
+          </div>
+          <p class="service-desc" *ngIf="svc.description">{{ svc.description }}</p>
+          <p class="service-address" *ngIf="svc.address">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ svc.address }}
+          </p>
         </div>
       </div>
-    </ng-container>
 
-    <div class="break"></div>
-
-    <!-- Contact Information Section -->
-    <div class="main-title">
-      <ion-label class="title">Información de Contacto</ion-label>
+      <ng-template #noServicesTpl>
+        <div class="empty-block">Sin servicios disponibles aún.</div>
+      </ng-template>
     </div>
 
-    <div class="contact-list">
-      <div class="contact-item" *ngIf="provider.phone">
-        <ion-icon name="call-outline" color="primary"></ion-icon>
-        <div class="contact-info">
-          <span class="value">{{ provider.phone }}</span>
-        </div>
+    <!-- TAB: Contacto -->
+    <div *ngIf="activeTab === 'contact'">
+      <div class="main-title">
+        <ion-label class="title">Información de Contacto</ion-label>
       </div>
 
-      <div class="contact-item" *ngIf="provider.email">
-        <ion-icon name="mail-outline" color="primary"></ion-icon>
-        <div class="contact-info">
-          <span class="label">Email</span>
-          <span class="value">{{ provider.email }}</span>
+      <div class="contact-list">
+        <div class="contact-item" *ngIf="provider.phone">
+          <ion-icon name="call-outline" color="primary"></ion-icon>
+          <div class="contact-info">
+            <span class="value">{{ provider.phone }}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="contact-item">
-        <ion-icon name="location" color="primary"></ion-icon>
-        <div class="contact-info">
-          <span class="label">Ubicación</span>
-          <span class="value">{{ provider.address || 'No disponible' }}</span>
+        <div class="contact-item" *ngIf="provider.email">
+          <ion-icon name="mail-outline" color="primary"></ion-icon>
+          <div class="contact-info">
+            <span class="label">Email</span>
+            <span class="value">{{ provider.email }}</span>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <ion-icon name="location" color="primary"></ion-icon>
+          <div class="contact-info">
+            <span class="label">Ubicación</span>
+            <span class="value">{{ provider.address || 'No disponible' }}</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Reviews Section -->
-  <div class="info-container" *ngIf="!isLoading && provider">
+  <!-- TAB: Reseñas -->
+  <div class="info-container" *ngIf="!isLoading && provider && activeTab === 'reviews'">
     <div class="main-title">
       <ion-label class="title">Reseñas ({{ reviews.length }})</ion-label>
     </div>
@@ -198,11 +239,11 @@
       <ion-content class="booking-modal-content">
         <div class="booking-form-container">
           <!-- Provider Info Summary -->
-          <div class="provider-summary">
+          <div class="provider-summary" *ngIf="provider as currentProvider">
             <ion-icon name="business" color="primary"></ion-icon>
             <div class="provider-info">
-              <strong>{{ provider?.business_name }}</strong>
-              <span class="provider-rate" *ngIf="provider?.hourly_rate">${{ provider?.hourly_rate | number }}/hora</span>
+              <strong>{{ currentProvider.business_name }}</strong>
+              <span class="provider-rate" *ngIf="currentProvider.hourly_rate">${{ currentProvider.hourly_rate | number }}/hora</span>
             </div>
           </div>
 
