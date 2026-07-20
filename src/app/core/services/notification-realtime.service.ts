@@ -194,7 +194,10 @@ export class NotificationRealtimeService {
     const colorMap: { [key: string]: string } = {
       'booking_created': 'primary',
       'booking_accepted': 'success',
+      'booking_confirmed': 'success',
       'booking_rejected': 'warning',
+      'booking_reminder_24h': 'warning',
+      'booking_completed': 'success',
       'chat_message': 'info'
     };
 

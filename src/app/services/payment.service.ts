@@ -305,6 +305,7 @@ export class PaymentService {
       PROVIDER_LEADS_7: 'Leads premium 7 días',
       PROVIDER_LEADS_30: 'Leads premium 30 días',
       PROVIDER_PREMIUM_MONTHLY: 'Premium mensual',
+      PROVIDER_PREMIUM_ANNUAL: 'Premium anual',
     };
     return labels[productType] || productType;
   }

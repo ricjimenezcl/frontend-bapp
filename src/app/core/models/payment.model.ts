@@ -16,7 +16,8 @@ export type ProductType =
   | 'PROVIDER_SERVICE_YEAR'
   | 'PROVIDER_LEADS_7'
   | 'PROVIDER_LEADS_30'
-  | 'PROVIDER_PREMIUM_MONTHLY';
+  | 'PROVIDER_PREMIUM_MONTHLY'
+  | 'PROVIDER_PREMIUM_ANNUAL';
 
 /**
  * Plataformas de pago soportadas
@@ -157,6 +158,7 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   PROVIDER_LEADS_7: 'Leads premium 7 días',
   PROVIDER_LEADS_30: 'Leads premium 30 días',
   PROVIDER_PREMIUM_MONTHLY: 'Premium mensual',
+  PROVIDER_PREMIUM_ANNUAL: 'Premium anual',
 };
 
 /**
@@ -170,4 +172,5 @@ export const PRODUCT_DURATIONS: Record<ProductType, number> = {
   PROVIDER_LEADS_7: 7,
   PROVIDER_LEADS_30: 30,
   PROVIDER_PREMIUM_MONTHLY: 30,
+  PROVIDER_PREMIUM_ANNUAL: 365,
 };
