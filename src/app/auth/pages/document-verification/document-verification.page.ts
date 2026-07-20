@@ -22,7 +22,7 @@ import { FeedbackService } from '../../../shared/services/feedback.service';
 import { AuthService } from '../../services/auth.service';
 import { SelfieCaptureComponent } from '../../../shared/components/selfie-capture/selfie-capture.component';
 import { addIcons } from 'ionicons';
-import { camera, checkmarkCircle, closeCircle, document, cloudUpload, image, alertCircle, arrowForward, refresh } from 'ionicons/icons';
+import { camera, checkmarkCircle, closeCircle, document, cloudUpload, image, alertCircle, arrowForward, refresh, shieldCheckmarkOutline, cameraOutline, cloudUploadOutline, documentOutline, imageOutline, alertCircleOutline, checkmarkCircleOutline, arrowForwardOutline, refreshOutline } from 'ionicons/icons';
 import { Subject, firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -114,7 +114,7 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
     private readonly toastController: ToastController,
     private readonly authService: AuthService
   ) {
-    addIcons({camera,checkmarkCircle,cloudUpload,document,image,alertCircle,arrowForward,closeCircle,refresh});
+    addIcons({shieldCheckmarkOutline,cameraOutline,checkmarkCircle,cloudUploadOutline,documentOutline,imageOutline,alertCircleOutline,checkmarkCircleOutline,arrowForwardOutline,closeCircle,refreshOutline,camera,cloudUpload,document,image,alertCircle,arrowForward,refresh});
   }
 
   ngOnInit(): void {
