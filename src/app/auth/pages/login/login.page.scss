@@ -37,8 +37,8 @@ ion-content {
   }
 
   .logo-container {
-    width: 44px;
-    height: 68px;
+    width: 88px;
+    height: 136px;
     background: transparent;
     border-radius: var(--bapp-radius-xl);
     display: flex;
@@ -52,12 +52,12 @@ ion-content {
   }
 
   .titulo-img {
-    height: 20px;   // aumentado de 16px para mejor legibilidad
+    height: 40px;
     object-fit: contain;
   }
 
   .titulo-fallback {
-    font-size: 20px;
+    font-size: 40px;
     font-weight: 700;
     color: var(--bapp-color-primary, #FDD735);
     letter-spacing: 0.5px;
@@ -67,24 +67,24 @@ ion-content {
 @media (min-width: 640px) {
   .login-logo {
     .logo-container {
-      width: 56px;
-      height: 86px;
+      width: 112px;
+      height: 172px;
     }
 
     .titulo-img {
-      height: 22px;
+      height: 44px;
     }
   }
 }
 @media (min-width: 1024px) {
   .login-logo {
     .logo-container {
-      width: 70px;
-      height: 108px;
+      width: 140px;
+      height: 216px;
     }
 
     .titulo-img {
-      height: 30px;
+      height: 60px;
     }
   }
 }
