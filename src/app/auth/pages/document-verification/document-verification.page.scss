@@ -39,6 +39,10 @@ ion-content {
   gap: var(--bapp-space-3);
 }
 
+.dv-page-header--with-close {
+  align-items: flex-start;
+}
+
 .dv-page-icon {
   width: 48px;
   height: 48px;
@@ -62,6 +66,31 @@ ion-content {
   margin: 2px 0 0;
   font-size: var(--bapp-text-xs);
   color: var(--bapp-text-tertiary);
+}
+
+.dv-close-btn {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--bapp-border);
+  background: var(--bapp-bg-card);
+  color: var(--bapp-text-tertiary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  line-height: 1;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.dv-close-btn:active {
+  transform: scale(0.96);
+}
+
+.dv-close-btn:hover {
+  color: var(--bapp-text-primary);
+  border-color: rgba(253, 215, 53, 0.35);
 }
 
 // ── Stepper ───────────────────────────────────────────────────────────────────

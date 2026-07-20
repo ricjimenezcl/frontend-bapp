@@ -9,7 +9,7 @@
       </div>
 
       <!-- Page title -->
-      <div class="dv-page-header">
+      <div class="dv-page-header dv-page-header--with-close">
         <div class="dv-page-icon">
           <ion-icon name="shield-checkmark-outline"></ion-icon>
         </div>
@@ -17,6 +17,9 @@
           <h1 class="dv-page-title">Verificación de identidad</h1>
           <p class="dv-page-sub">Verificación facial automática con IA</p>
         </div>
+        <button type="button" class="dv-close-btn" (click)="closeVerification()" aria-label="Cerrar verificación de identidad">
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
 
       <!-- Stepper -->

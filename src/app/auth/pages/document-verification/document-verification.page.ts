@@ -122,6 +122,12 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
    */
   async captureSelfie(): Promise<void> {
     try {
+      const hasCameraPermission = await this.ensurePermission('camera');
+      if (!hasCameraPermission) {
+        await this.showToast('Debes permitir el acceso a la cámara para validar tu identidad');
+        return;
+      }
+
       await this.selfieCaptureModal.open();
     } catch (error) {
       console.error('Error abriendo modal de captura:', error);
@@ -142,6 +148,12 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
    */
   async selectIdDocument(): Promise<void> {
     try {
+      const hasPhotosPermission = await this.ensurePermission('photos');
+      if (!hasPhotosPermission) {
+        await this.showToast('Debes permitir acceso a tus fotos para seleccionar el documento');
+        return;
+      }
+
       const image = await Camera.getPhoto({
         quality: 90,
         allowEditing: false,
@@ -156,6 +168,29 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       console.error('ID document selection failed:', error);
       await this.showToast('Error al seleccionar documento');
     }
+  }
+
+  private async ensurePermission(kind: 'camera' | 'photos'): Promise<boolean> {
+    try {
+      const current = await Camera.checkPermissions();
+      const currentState = kind === 'camera' ? current.camera : current.photos;
+
+      if (this.isPermissionGranted(currentState)) {
+        return true;
+      }
+
+      const requested = await Camera.requestPermissions({ permissions: [kind] });
+      const requestedState = kind === 'camera' ? requested.camera : requested.photos;
+
+      return this.isPermissionGranted(requestedState);
+    } catch (error) {
+      console.error(`Error solicitando permiso de ${kind}:`, error);
+      return false;
+    }
+  }
+
+  private isPermissionGranted(state?: string): boolean {
+    return state === 'granted' || state === 'limited';
   }
 
   /**
@@ -515,6 +550,32 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       console.error('Error al actualizar usuario:', error);
       this.showToast('Error al procesar la verificación');
     }
+  }
+
+  closeVerification(): void {
+    const currentUser = this.authService.getCurrentUser();
+
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+
+    if (!currentUser) {
+      this.router.navigate(['/auth/login'], { replaceUrl: true });
+      return;
+    }
+
+    if (currentUser.role === 'CLIENT') {
+      this.router.navigate(['/client/categories'], { replaceUrl: true });
+      return;
+    }
+
+    if (currentUser.role === 'PROVIDER' && currentUser.status === 'ACTIVE') {
+      this.router.navigate(['/provider/tabs'], { replaceUrl: true });
+      return;
+    }
+
+    this.router.navigate(['/auth/login'], { replaceUrl: true });
   }
 
   /**
