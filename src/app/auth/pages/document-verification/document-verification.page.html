@@ -94,33 +94,67 @@
             type="determinate" [value]="state.uploadProgress / 100" class="dv-progress"></ion-progress-bar>
         </div>
 
-        <!-- Documento card -->
+        <!-- Documento frente card -->
         <div class="dv-card dv-upload-card">
           <div class="dv-upload-header">
             <ion-icon name="document-outline" class="dv-upload-icon"></ion-icon>
-            <span class="dv-upload-title">Documento de identidad</span>
-            <span class="dv-upload-check" *ngIf="state.idDocumentId">
+            <span class="dv-upload-title">Cédula - Frente</span>
+            <span class="dv-upload-check" *ngIf="state.idDocumentFrontId">
               <ion-icon name="checkmark-circle"></ion-icon>
             </span>
           </div>
 
-          <div class="dv-preview-wrap" *ngIf="state.idDocumentUrl">
-            <img [src]="state.idDocumentUrl" class="dv-preview-img" alt="Documento" />
+          <div class="dv-preview-wrap" *ngIf="state.idDocumentFrontUrl">
+            <img [src]="state.idDocumentFrontUrl" class="dv-preview-img" alt="Documento frente" />
           </div>
-          <div class="dv-placeholder" *ngIf="!state.idDocumentUrl">
+          <div class="dv-placeholder" *ngIf="!state.idDocumentFrontUrl">
             <ion-icon name="document-outline"></ion-icon>
-            <span>Sin documento</span>
+            <span>Sin frente</span>
           </div>
 
           <div class="dv-btn-group">
-            <ion-button expand="block" class="dv-btn-primary" (click)="selectIdDocument()" [disabled]="state.uploading">
+            <ion-button expand="block" class="dv-btn-primary" (click)="selectIdDocument('front')" [disabled]="state.uploading">
               <ion-icon name="image-outline" slot="start"></ion-icon>
-              {{ state.idDocumentUrl ? 'Cambiar documento' : 'Seleccionar documento' }}
+              {{ state.idDocumentFrontUrl ? 'Cambiar frente' : 'Seleccionar frente' }}
             </ion-button>
-            <ion-button expand="block" class="dv-btn-success" (click)="uploadIdDocument()" [disabled]="!state.idDocumentUrl || state.uploading">
+            <ion-button expand="block" class="dv-btn-success" (click)="uploadIdDocument('front')" [disabled]="!state.idDocumentFrontUrl || state.uploading">
               <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
               <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
-              {{ state.idDocumentId ? 'Documento subido ✓' : 'Subir documento' }}
+              {{ state.idDocumentFrontId ? 'Frente subido ✓' : 'Subir frente' }}
+            </ion-button>
+          </div>
+
+          <ion-progress-bar *ngIf="state.uploading && state.uploadProgress > 0"
+            type="determinate" [value]="state.uploadProgress / 100" class="dv-progress"></ion-progress-bar>
+        </div>
+
+        <!-- Documento reverso card -->
+        <div class="dv-card dv-upload-card">
+          <div class="dv-upload-header">
+            <ion-icon name="document-outline" class="dv-upload-icon"></ion-icon>
+            <span class="dv-upload-title">Cédula - Reverso</span>
+            <span class="dv-upload-check" *ngIf="state.idDocumentBackId">
+              <ion-icon name="checkmark-circle"></ion-icon>
+            </span>
+          </div>
+
+          <div class="dv-preview-wrap" *ngIf="state.idDocumentBackUrl">
+            <img [src]="state.idDocumentBackUrl" class="dv-preview-img" alt="Documento reverso" />
+          </div>
+          <div class="dv-placeholder" *ngIf="!state.idDocumentBackUrl">
+            <ion-icon name="document-outline"></ion-icon>
+            <span>Sin reverso</span>
+          </div>
+
+          <div class="dv-btn-group">
+            <ion-button expand="block" class="dv-btn-primary" (click)="selectIdDocument('back')" [disabled]="state.uploading">
+              <ion-icon name="image-outline" slot="start"></ion-icon>
+              {{ state.idDocumentBackUrl ? 'Cambiar reverso' : 'Seleccionar reverso' }}
+            </ion-button>
+            <ion-button expand="block" class="dv-btn-success" (click)="uploadIdDocument('back')" [disabled]="!state.idDocumentBackUrl || state.uploading">
+              <ion-spinner *ngIf="state.uploading" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!state.uploading" name="cloud-upload-outline" slot="start"></ion-icon>
+              {{ state.idDocumentBackId ? 'Reverso subido ✓' : 'Subir reverso' }}
             </ion-button>
           </div>
 
@@ -129,7 +163,7 @@
         </div>
 
         <!-- Preview de rostros -->
-        <div class="dv-card" *ngIf="state.selfieDocumentId && state.idDocumentId">
+        <div class="dv-card" *ngIf="state.selfieDocumentId && state.idDocumentFrontId">
           <p class="dv-upload-title">Vista previa de rostros</p>
 
           <div class="dv-face-loading" *ngIf="state.loadingPreview">
@@ -140,6 +174,7 @@
           <div class="dv-face-error" *ngIf="state.facePreviewError && !state.loadingPreview">
             <ion-icon name="alert-circle-outline"></ion-icon>
             <span>{{ state.facePreviewError }}</span>
+            <p class="dv-face-error-hint">Vuelve a subir las imágenes corregidas antes de continuar.</p>
           </div>
 
           <div class="dv-face-grid" *ngIf="state.selfieFacePreview && state.idFacePreview && !state.loadingPreview && !state.facePreviewError">
@@ -161,7 +196,13 @@
             Verificar identidad
           </ion-button>
           <p class="dv-hint" *ngIf="!bothDocumentsUploaded">
-            Debes subir la selfie y el documento para continuar
+            Debes subir selfie, frente y reverso del documento para continuar
+          </p>
+          <p class="dv-hint dv-hint--warning" *ngIf="bothDocumentsUploaded && state.faceDetectionFailed">
+            ⚠️ Corrige las imágenes indicadas arriba antes de verificar
+          </p>
+          <p class="dv-hint dv-hint--warning" *ngIf="state.idCardValidationError">
+            ⚠️ {{ state.idCardValidationError }}
           </p>
         </div>
 
@@ -198,11 +239,20 @@
           <ion-icon name="close-circle"></ion-icon>
         </div>
         <h2 class="dv-state-title">Verificación rechazada</h2>
-        <p class="dv-state-text">La verificación de identidad no pudo completarse.</p>
+
+        <!-- Razón específica del rechazo -->
+        <p class="dv-state-text dv-rejection-reason" *ngIf="state.rejectionReason">
+          {{ state.rejectionReason }}
+        </p>
+        <p class="dv-state-text" *ngIf="!state.rejectionReason">
+          La verificación de identidad no pudo completarse.
+        </p>
+
         <ul class="dv-tips-list">
-          <li>La selfie debe mostrar tu rostro con claridad</li>
-          <li>El documento debe ser legible y completo</li>
-          <li>Los rostros deben ser claramente visibles</li>
+          <li>Usa tu <strong>cédula de identidad chilena vigente</strong> (no pasaporte ni licencia)</li>
+          <li>La foto del documento debe mostrar claramente tu rostro</li>
+          <li>La selfie debe mostrar tu rostro de frente, sin obstrucciones</li>
+          <li>Usa buena iluminación y fondo neutro</li>
         </ul>
         <ion-button expand="block" class="dv-btn-danger" (click)="retryVerification()"
           *ngIf="state.retryCount < state.maxRetries">

@@ -28,9 +28,11 @@ import { takeUntil } from 'rxjs/operators';
 
 interface VerificationState {
   selfieUrl: string | null;
-  idDocumentUrl: string | null;
+  idDocumentFrontUrl: string | null;
+  idDocumentBackUrl: string | null;
   selfieDocumentId: number | null;
-  idDocumentId: number | null;
+  idDocumentFrontId: number | null;
+  idDocumentBackId: number | null;
   uploading: boolean;
   uploadProgress: number;
   verificationInitiated: boolean;
@@ -45,6 +47,11 @@ interface VerificationState {
   idFacePreview: string | null;
   loadingPreview: boolean;
   facePreviewError: string | null;
+  // Detección de problemas específicos
+  faceDetectionFailed: boolean;   // true cuando no se detectó rostro (bloquea verificación)
+  rejectionReason: string | null; // razón descriptiva de rechazo del backend
+  idCardValidationError: string | null;
+  idCardValidated: boolean;
 }
 
 @Component({
@@ -74,9 +81,11 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
 
   state: VerificationState = {
     selfieUrl: null,
-    idDocumentUrl: null,
+    idDocumentFrontUrl: null,
+    idDocumentBackUrl: null,
     selfieDocumentId: null,
-    idDocumentId: null,
+    idDocumentFrontId: null,
+    idDocumentBackId: null,
     uploading: false,
     uploadProgress: 0,
     verificationInitiated: false,
@@ -89,6 +98,10 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
     idFacePreview: null,
     loadingPreview: false,
     facePreviewError: null,
+    faceDetectionFailed: false,
+    rejectionReason: null,
+    idCardValidationError: null,
+    idCardValidated: false,
   };
 
   private readonly destroy$ = new Subject<void>();
@@ -146,7 +159,7 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   /**
    * Seleccionar documento de identidad
    */
-  async selectIdDocument(): Promise<void> {
+  async selectIdDocument(side: 'front' | 'back'): Promise<void> {
     try {
       const hasPhotosPermission = await this.ensurePermission('photos');
       if (!hasPhotosPermission) {
@@ -162,7 +175,16 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       });
 
       if (image.webPath) {
-        this.state.idDocumentUrl = image.webPath;
+        if (side === 'front') {
+          this.state.idDocumentFrontUrl = image.webPath;
+          this.state.idDocumentFrontId = null;
+        } else {
+          this.state.idDocumentBackUrl = image.webPath;
+          this.state.idDocumentBackId = null;
+        }
+
+        this.state.idCardValidated = false;
+        this.state.idCardValidationError = null;
       }
     } catch (error) {
       console.error('ID document selection failed:', error);
@@ -238,17 +260,23 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   /**
    * Subir documento de identidad a Cloudinary
    */
-  async uploadIdDocument(): Promise<void> {
-    if (!this.state.idDocumentUrl) {
-      this.feedback.showToast('Por favor selecciona tu documento');
+  async uploadIdDocument(side: 'front' | 'back'): Promise<void> {
+    const docUrl = side === 'front' ? this.state.idDocumentFrontUrl : this.state.idDocumentBackUrl;
+
+    if (!docUrl) {
+      this.feedback.showToast(
+        side === 'front'
+          ? 'Por favor selecciona el frente del documento'
+          : 'Por favor selecciona el reverso del documento'
+      );
       return;
     }
 
     try {
       this.state.uploading = true;
       const file = await this.fileUrlToFile(
-        this.state.idDocumentUrl,
-        'id_document.jpg'
+        docUrl,
+        side === 'front' ? 'id_document_front.jpg' : 'id_document_back.jpg'
       );
       
       // Validate image before upload
@@ -268,12 +296,38 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
         file,
         'IDENTITY_DOCUMENT'
       ));
-      this.state.idDocumentId = result.id;
-      
-      this.feedback.showToast('✅ Documento subido correctamente');
+      if (side === 'front') {
+        this.state.idDocumentFrontId = result.id;
+      } else {
+        this.state.idDocumentBackId = result.id;
+      }
+
+      this.feedback.showToast(
+        side === 'front'
+          ? '✅ Frente del documento subido correctamente'
+          : '✅ Reverso del documento subido correctamente'
+      );
+
+      if (this.state.idDocumentFrontUrl && this.state.idDocumentBackUrl) {
+        const [frontFile, backFile] = await Promise.all([
+          this.fileUrlToFile(this.state.idDocumentFrontUrl, 'id_document_front.jpg'),
+          this.fileUrlToFile(this.state.idDocumentBackUrl, 'id_document_back.jpg')
+        ]);
+
+        const idValidation = await this.uploadService.validateChileanIdPair(frontFile, backFile);
+        if (!idValidation.valid) {
+          this.state.idCardValidated = false;
+          this.state.idCardValidationError = idValidation.error || 'No se pudo validar la cédula chilena.';
+          this.feedback.showToast(`❌ ${this.state.idCardValidationError}`);
+          return;
+        }
+
+        this.state.idCardValidated = true;
+        this.state.idCardValidationError = null;
+      }
       
       // Si ambos documentos están listos, cargar el preview de los rostros
-      if (this.state.selfieDocumentId && this.state.idDocumentId) {
+      if (this.state.selfieDocumentId && this.state.idDocumentFrontId) {
         await this.loadFacePreview();
       }
     } catch (error) {
@@ -289,17 +343,18 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
    * Cargar preview de los rostros cropped
    */
   async loadFacePreview(): Promise<void> {
-    if (!this.state.selfieDocumentId || !this.state.idDocumentId) {
+    if (!this.state.selfieDocumentId || !this.state.idDocumentFrontId) {
       return;
     }
 
     try {
       this.state.loadingPreview = true;
       this.state.facePreviewError = null;
+      this.state.faceDetectionFailed = false;
 
       const result = await firstValueFrom(this.uploadService.getFacePreview(
         this.state.selfieDocumentId,
-        this.state.idDocumentId
+        this.state.idDocumentFrontId
       ));
 
       if (result) {
@@ -317,36 +372,24 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
           this.state.idFacePreview;
         
         if (facesDetected) {
-          this.feedback.showToast('✅ Preview de rostros cargado');
+          this.feedback.showToast('✅ Rostros detectados correctamente');
         } else {
-          // No mostrar error si es problema de configuración de AWS
-          const errorMsg = result.error || 'No se pudieron detectar rostros';
-          const isAwsConfigError = [
-            'AWS_ACCESS_KEY_ID',
-            'UnrecognizedClientException',
-            'security token',
-            'InvalidClientTokenId',
-            'ExpiredTokenException',
-          ].some(token => errorMsg.includes(token));
+          const rawError = result.error || '';
+          const isAwsConfigError = this.isAwsError(rawError);
           if (!isAwsConfigError) {
-            this.state.facePreviewError = errorMsg;
+            this.state.facePreviewError = this.mapFacePreviewError(rawError, result);
+            this.state.faceDetectionFailed = true;
+            this.feedback.showToast(`⚠️ ${this.state.facePreviewError}`);
           }
-          console.warn('Face preview no disponible:', errorMsg);
+          console.warn('Face preview no disponible:', rawError);
         }
       }
     } catch (error: any) {
       console.warn('Failed to load face preview:', error);
-      // No mostrar error visual si es problema de AWS, solo en consola
       const errorMessage = error?.error?.detail || error?.message || 'Error';
-      const isAwsConfigError = [
-        'AWS_ACCESS_KEY_ID',
-        'UnrecognizedClientException',
-        'security token',
-        'InvalidClientTokenId',
-        'ExpiredTokenException',
-      ].some(token => errorMessage.includes(token));
-      if (!isAwsConfigError) {
-        this.state.facePreviewError = `Error: ${errorMessage}`;
+      if (!this.isAwsError(errorMessage)) {
+        this.state.facePreviewError = this.mapFacePreviewError(errorMessage, null);
+        this.state.faceDetectionFailed = true;
       }
     } finally {
       this.state.loadingPreview = false;
@@ -354,11 +397,93 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   }
 
   /**
+   * Verifica si un mensaje de error corresponde a un problema de configuración AWS
+   */
+  private isAwsError(msg: string): boolean {
+    return [
+      'AWS_ACCESS_KEY_ID',
+      'UnrecognizedClientException',
+      'security token',
+      'InvalidClientTokenId',
+      'ExpiredTokenException',
+    ].some(token => msg.includes(token));
+  }
+
+  /**
+   * Mapea mensajes de error del backend a mensajes descriptivos en español
+   */
+  private mapFacePreviewError(msg: string, result: any): string {
+    const lower = msg.toLowerCase();
+    const noSelfie = !result?.selfie_preview;
+    const noDoc = !result?.id_preview;
+
+    if (noSelfie && noDoc) {
+      return 'No se detectó un rostro ni en la selfie ni en el documento. Vuelve a capturarlos asegurándote de que el rostro sea visible y con buena iluminación.';
+    }
+    if (noSelfie || lower.includes('selfie') && (lower.includes('no face') || lower.includes('not detected'))) {
+      return 'No se detectó un rostro en tu selfie. Vuelve a capturarla de frente, con buena iluminación y sin obstrucciones en la cara.';
+    }
+    if (noDoc || lower.includes('document') || lower.includes('id') && (lower.includes('no face') || lower.includes('not detected'))) {
+      return 'No se detectó un rostro en el documento de identidad. Asegúrate de fotografiar tu cédula de identidad chilena mostrando claramente la foto.';
+    }
+    if (lower.includes('multiple') || lower.includes('more than one')) {
+      return 'Se detectaron múltiples rostros. La selfie debe mostrar únicamente tu rostro.';
+    }
+    if (lower.includes('blurry') || lower.includes('blur') || lower.includes('quality')) {
+      return 'La imagen es de baja calidad o está borrosa. Captura nuevamente con mejor iluminación.';
+    }
+    if (msg) {
+      return `No se pudieron detectar los rostros: ${msg}`;
+    }
+    return 'No se pudieron detectar los rostros en las imágenes. Verifica que ambas muestren rostros con claridad.';
+  }
+
+  /**
+   * Mapea la razón de rechazo del backend a un mensaje descriptivo en español
+   */
+  private mapRejectionReason(result: any): string {
+    const reason = (result?.rejection_reason || result?.error || result?.detail || '').toLowerCase();
+    const score = result?.face_match_score ? parseFloat(result.face_match_score) : null;
+
+    if (reason.includes('no face') && reason.includes('selfie')) {
+      return 'No se detectó un rostro en tu selfie.';
+    }
+    if (reason.includes('no face') && (reason.includes('document') || reason.includes('id'))) {
+      return 'No se detectó un rostro en el documento de identidad. Asegúrate de usar tu cédula de identidad chilena.';
+    }
+    if (reason.includes('no face')) {
+      return 'No se detectaron rostros en las imágenes proporcionadas.';
+    }
+    if (reason.includes('match') || reason.includes('differ') || reason.includes('not the same')) {
+      const scoreText = score !== null ? ` (similitud: ${score.toFixed(1)}%)` : '';
+      return `Los rostros de la selfie y el documento no corresponden a la misma persona${scoreText}.`;
+    }
+    if (reason.includes('quality') || reason.includes('blurry') || reason.includes('blur')) {
+      return 'La calidad de las imágenes no es suficiente. Intenta con mejores condiciones de iluminación.';
+    }
+    if (reason.includes('expired') || reason.includes('vencid')) {
+      return 'El documento de identidad parece estar vencido o no es válido.';
+    }
+    if (score !== null && score < 50) {
+      return `Los rostros no coinciden (similitud: ${score.toFixed(1)}%). Asegúrate de que la selfie y el documento correspondan a la misma persona.`;
+    }
+    if (result?.face_match_status === 'REJECTED') {
+      return 'La verificación fue rechazada. Asegúrate de usar una cédula de identidad chilena vigente y que tu selfie muestre tu rostro con claridad.';
+    }
+    return 'La verificación no pudo completarse. Verifica que hayas subido tu cédula de identidad chilena y una selfie clara.';
+  }
+
+  /**
    * Iniciar verificación de rostro
    */
   async initiateVerification(): Promise<void> {
-    if (!this.state.selfieDocumentId || !this.state.idDocumentId) {
-      this.feedback.showToast('Debe subir selfie y documento de identidad');
+    if (!this.state.selfieDocumentId || !this.state.idDocumentFrontId || !this.state.idDocumentBackId) {
+      this.feedback.showToast('Debe subir selfie, frente y reverso del documento de identidad');
+      return;
+    }
+
+    if (!this.state.idCardValidated) {
+      this.feedback.showToast(this.state.idCardValidationError || 'La cédula no está validada. Revisa frente/reverso y RUN.');
       return;
     }
 
@@ -367,7 +492,7 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       const result = await firstValueFrom(this.uploadService
         .initiateVerification(
           this.state.selfieDocumentId,
-          this.state.idDocumentId
+          this.state.idDocumentFrontId
         ));
       
       this.state.verificationInitiated = true;
@@ -379,11 +504,13 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
         if (result.face_match_status === 'APPROVED') {
           this.state.step = 'APPROVED';
           this.state.confidenceScore = parseFloat(result.face_match_score || '0');
+          this.state.rejectionReason = null;
           this.feedback.showToast('✅ Verificación exitosa. Puedes continuar al panel de proveedor.');
         } else if (result.face_match_status === 'REJECTED') {
           this.state.step = 'REJECTED';
           this.state.confidenceScore = parseFloat(result.face_match_score || '0');
-          this.feedback.showToast('❌ Verificación rechazada. Las caras no coinciden.');
+          this.state.rejectionReason = this.mapRejectionReason(result);
+          this.feedback.showToast(`❌ ${this.state.rejectionReason}`);
         } else if (result.face_match_status === 'PROCESSING') {
           this.state.step = 'WAITING';
           this.state.verificationStatus = 'PROCESSING';
@@ -475,10 +602,8 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
             if (this.statusCheckTimeout) {
               clearTimeout(this.statusCheckTimeout);
             }
-            const scoreText = this.state.confidenceScore 
-              ? `Confianza: ${this.state.confidenceScore.toFixed(1)}% - ` 
-              : '';
-            this.showToast(`❌ ${scoreText}Verificación Rechazada`);
+            this.state.rejectionReason = this.mapRejectionReason(status);
+            this.showToast(`❌ ${this.state.rejectionReason}`);
           } else if (status.face_match_status === 'PENDING') {
             // Si sigue PENDING, reintentar con backoff
             this.retryWithExponentialBackoff();
@@ -579,15 +704,16 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   }
 
   /**
-   * Reintentar verificación
+   * Reintentar verificación (limpia el estado para volver al paso de subida)
    */
-  async retryVerification(): Promise<void> {
+  retryVerification(): void {
     this.state = {
-      ...this.state,
       selfieUrl: null,
-      idDocumentUrl: null,
+      idDocumentFrontUrl: null,
+      idDocumentBackUrl: null,
       selfieDocumentId: null,
-      idDocumentId: null,
+      idDocumentFrontId: null,
+      idDocumentBackId: null,
       uploading: false,
       uploadProgress: 0,
       verificationInitiated: false,
@@ -595,8 +721,16 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
       step: 'UPLOAD',
       confidenceScore: null,
       retryCount: 0,
+      maxRetries: 3,
+      selfieFacePreview: null,
+      idFacePreview: null,
+      loadingPreview: false,
+      facePreviewError: null,
+      faceDetectionFailed: false,
+      rejectionReason: null,
+      idCardValidationError: null,
+      idCardValidated: false,
     };
-    await this.showToast('Puedes intentar nuevamente');
   }
 
   /**
@@ -657,14 +791,20 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
    * Validaciones
    */
   get bothDocumentsUploaded(): boolean {
-    return this.state.selfieDocumentId !== null && this.state.idDocumentId !== null;
+    return (
+      this.state.selfieDocumentId !== null &&
+      this.state.idDocumentFrontId !== null &&
+      this.state.idDocumentBackId !== null
+    );
   }
 
   get canInitiateVerification(): boolean {
     return (
       this.bothDocumentsUploaded &&
       !this.state.uploading &&
-      !this.state.verificationInitiated
+      !this.state.verificationInitiated &&
+      !this.state.faceDetectionFailed &&
+      this.state.idCardValidated
     );
   }
 

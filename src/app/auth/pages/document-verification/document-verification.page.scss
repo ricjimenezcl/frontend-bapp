@@ -344,8 +344,16 @@ ion-content {
 }
 
 .dv-face-error {
+  flex-direction: column;
+  align-items: flex-start;
   color: var(--bapp-color-danger);
   ion-icon { font-size: 18px; }
+}
+
+.dv-face-error-hint {
+  margin: 4px 0 0;
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
 }
 
 // ── Hint text ─────────────────────────────────────────────────────────────────
@@ -354,6 +362,22 @@ ion-content {
   font-size: var(--bapp-text-xs);
   color: var(--bapp-text-tertiary);
   text-align: center;
+}
+
+.dv-hint--warning {
+  color: #f59e0b;
+  font-weight: var(--bapp-font-semibold);
+}
+
+// ── Rejection reason ──────────────────────────────────────────────────────────
+.dv-rejection-reason {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-3);
+  color: #fca5a5;
+  font-size: var(--bapp-text-sm);
+  text-align: left;
 }
 
 // ── State cards (WAITING / APPROVED / REJECTED) ───────────────────────────────
