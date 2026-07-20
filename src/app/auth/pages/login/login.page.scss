@@ -37,8 +37,8 @@ ion-content {
   }
 
   .logo-container {
-    width: 44px;
-    height: 68px;
+    width: 88px;
+    height: 136px;
     background: transparent;
     border-radius: var(--bapp-radius-xl);
     display: flex;
@@ -52,12 +52,12 @@ ion-content {
   }
 
   .titulo-img {
-    height: 20px;   // aumentado de 16px para mejor legibilidad
+    height: 40px;
     object-fit: contain;
   }
 
   .titulo-fallback {
-    font-size: 20px;
+    font-size: 40px;
     font-weight: 700;
     color: var(--bapp-color-primary, #FDD735);
     letter-spacing: 0.5px;
@@ -67,24 +67,24 @@ ion-content {
 @media (min-width: 640px) {
   .login-logo {
     .logo-container {
-      width: 56px;
-      height: 86px;
+      width: 112px;
+      height: 172px;
     }
 
     .titulo-img {
-      height: 22px;
+      height: 44px;
     }
   }
 }
 @media (min-width: 1024px) {
   .login-logo {
     .logo-container {
-      width: 70px;
-      height: 108px;
+      width: 140px;
+      height: 216px;
     }
 
     .titulo-img {
-      height: 30px;
+      height: 60px;
     }
   }
 }
@@ -111,7 +111,7 @@ ion-content {
 
 .login-card-title {
   margin: 0;
-  font-size: var(--bapp-text-xl);
+  font-size: var(--bapp-text-md);
   font-weight: var(--bapp-font-semibold);
   color: var(--bapp-text-primary);
   text-align: center;
@@ -121,16 +121,35 @@ ion-content {
 .auth-segment {
   --background: rgba(255, 255, 255, 0.05);
   border-radius: var(--bapp-radius-lg);
-  padding: 4px;
-  margin: var(--bapp-space-2) 0;
+  padding: 2px;
+  margin: var(--bapp-space-1) 0;
+  height: 30px;
 
   ion-segment-button {
     --indicator-color: var(--bapp-red);
     --color-checked: white;
     --color: rgba(255, 255, 255, 0.6);
-    min-height: 36px;
-    font-size: var(--bapp-text-sm);
-    font-weight: var(--bapp-font-medium);
+    --padding-top: 0px;
+    --padding-bottom: 0px;
+    min-height: 26px;
+  }
+}
+
+::ng-deep .auth-segment ion-segment-button {
+  min-height: 26px !important;
+
+  &::part(native) {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    min-height: 26px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  ion-label {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
   }
 }
 

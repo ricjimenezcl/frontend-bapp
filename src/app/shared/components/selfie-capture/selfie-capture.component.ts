@@ -12,6 +12,7 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { close, camera, checkmarkCircle, alertCircle } from 'ionicons/icons';
+import { Camera } from '@capacitor/camera';
 
 type LivenessStep = 'READY' | 'INIT_CAMERA' | 'CENTER' | 'TURN_RIGHT' | 'TURN_LEFT' | 'PROCESSING' | 'COMPLETE' | 'ERROR';
 
@@ -178,6 +179,13 @@ export class SelfieCaptureComponent implements OnDestroy {
    * Inicia el proceso de liveness detection
    */
   async startLivenessCheck(): Promise<void> {
+    const hasCameraPermission = await this.ensureCameraPermission();
+    if (!hasCameraPermission) {
+      this.state.error = 'Debes permitir el acceso a la cámara para continuar';
+      this.state.currentStep = 'ERROR';
+      return;
+    }
+
     this.state.stepIndex = 0;
     this.state.isCapturing = true;
     this.state.capturedFrames = [];
@@ -321,6 +329,21 @@ export class SelfieCaptureComponent implements OnDestroy {
     if (this.faceDetectionInterval) {
       clearInterval(this.faceDetectionInterval);
       this.faceDetectionInterval = undefined;
+    }
+  }
+
+  private async ensureCameraPermission(): Promise<boolean> {
+    try {
+      const current = await Camera.checkPermissions();
+      if (current.camera === 'granted' || current.camera === 'limited') {
+        return true;
+      }
+
+      const requested = await Camera.requestPermissions({ permissions: ['camera'] });
+      return requested.camera === 'granted' || requested.camera === 'limited';
+    } catch (error) {
+      console.error('Error solicitando permiso de cámara:', error);
+      return false;
     }
   }
 

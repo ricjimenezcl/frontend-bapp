@@ -52,18 +52,26 @@ export class NotificationsPage implements OnInit {
 
     getIcon(type: string): string {
         switch (type) {
+            case 'booking_created':
             case 'BOOKING_CREATED': return 'calendar-number-outline';
+            case 'booking_accepted':
             case 'BOOKING_ACCEPTED': return 'checkmark-circle-outline';
+            case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'close-circle-outline';
+            case 'booking_reminder_24h': return 'time-outline';
             default: return 'notifications-outline';
         }
     }
 
     getColor(type: string): string {
         switch (type) {
+            case 'booking_created':
             case 'BOOKING_CREATED': return 'primary';
+            case 'booking_accepted':
             case 'BOOKING_ACCEPTED': return 'success';
+            case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'danger';
+            case 'booking_reminder_24h': return 'warning';
             default: return 'medium';
         }
     }

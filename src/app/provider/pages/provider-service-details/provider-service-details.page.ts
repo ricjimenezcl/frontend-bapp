@@ -1,5 +1,6 @@
 import { Component,  OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { IonButton, IonContent, IonToggle, IonIcon, AlertController, LoadingController, ModalController, ToastController, NavController } from '@ionic/angular/standalone';
 import { Subject, firstValueFrom } from 'rxjs';
@@ -10,6 +11,15 @@ import { CoreService } from '../../../shared/services/core.service';
 import { ProviderAddServicePage } from '../provider-add-service/provider-add-service.page';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { environment } from '../../../../environments/environment';
+
+type ServiceLimitProductType = 'PROVIDER_SERVICE_30' | 'PROVIDER_PREMIUM_MONTHLY' | 'PROVIDER_PREMIUM_ANNUAL';
+
+interface ServiceLimitResult {
+  canCreate: boolean;
+  suggestedProductType: ServiceLimitProductType;
+  message: string;
+}
 
 @Component({
   selector: 'app-provider-service-details',
@@ -35,6 +45,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   private readonly coreService = inject(CoreService);
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
+  private readonly http = inject(HttpClient);
   private readonly documentService = inject(DocumentUploadService);
   private readonly paymentRedirect = inject(PaymentRedirectService);
 
@@ -266,10 +277,9 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   }
 
   async openAddServiceModal() {
-    // Pre-chequeo de límite usando datos ya cargados (sin HTTP extra)
-    const activeCount = this.servicios.filter(s => s.is_available).length;
-    if (activeCount >= 2) {
-      await this.mostrarOfertaPlanServicio();
+    const entitlement = await this.evaluateServiceCreationEntitlement();
+    if (!entitlement.canCreate) {
+      await this.mostrarOfertaPlanServicio(entitlement);
       return;
     }
     await this.verificarYAbrirModal();
@@ -301,10 +311,10 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
       });
   }
 
-  private async mostrarOfertaPlanServicio() {
+  private async mostrarOfertaPlanServicio(result: ServiceLimitResult) {
     const alert = await this.alertCtrl.create({
       header: 'Plan requerido',
-      message: 'Ya tienes 2 servicios activos. Para agregar más servicios debes activar un plan de publicación.',
+      message: result.message,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
         { text: 'Activar plan', role: 'confirm' }
@@ -314,8 +324,79 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     const { role } = await alert.onDidDismiss();
     if (role === 'confirm') {
       const returnTo = this.router.url.split('?')[0];
-      this.paymentRedirect.openProviderServicePlan(returnTo, 'add-service');
+      this.paymentRedirect.openPayment({
+        productType: result.suggestedProductType,
+        returnTo,
+        action: 'add-service',
+      });
     }
+  }
+
+  private async evaluateServiceCreationEntitlement(): Promise<ServiceLimitResult> {
+    const activeServices = this.servicios.filter(s => s.is_available).length;
+    const transactions = await this.getMyTransactions();
+    const now = Date.now();
+
+    const activeTypes = (transactions ?? [])
+      .filter((tx: any) => this.isActiveTransaction(tx, now))
+      .map((tx: any) => this.readProductType(tx));
+
+    const hasPremium = activeTypes.some((pt: string) =>
+      pt.includes('PROVIDER_PREMIUM_MONTHLY') ||
+      pt.includes('PROVIDER_PREMIUM_ANNUAL') ||
+      (pt.includes('PROVIDER_PREMIUM') && (pt.includes('YEAR') || pt.includes('ANNUAL')))
+    );
+
+    const hasBasePlan = activeTypes.some((pt: string) =>
+      pt.includes('PROVIDER_SERVICE_30') || pt.includes('PROVIDER_SERVICE_YEAR') || pt.includes('PROVIDER_SERVICE_ANNUAL')
+    );
+
+    const maxServices = hasPremium ? 7 : hasBasePlan ? 3 : 2;
+    if (activeServices < maxServices) {
+      return { canCreate: true, suggestedProductType: 'PROVIDER_SERVICE_30', message: '' };
+    }
+
+    if (!hasBasePlan && activeServices >= 2) {
+      return {
+        canCreate: false,
+        suggestedProductType: 'PROVIDER_SERVICE_30',
+        message: 'Ya alcanzaste los 2 servicios gratuitos. Activa un plan mensual o anual para crear tu tercer servicio.',
+      };
+    }
+
+    if (!hasPremium && activeServices >= 3) {
+      return {
+        canCreate: false,
+        suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
+        message: 'Tu plan actual permite hasta 3 servicios. Activa Premium mensual o anual para llegar hasta 7 servicios activos.',
+      };
+    }
+
+    return {
+      canCreate: false,
+      suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
+      message: 'Ya alcanzaste el máximo de 7 servicios activos para planes Premium.',
+    };
+  }
+
+  private async getMyTransactions(): Promise<any[]> {
+    try {
+      return await firstValueFrom(this.http.get<any[]>(`${environment.apiUrl}/transactions/me`));
+    } catch {
+      return [];
+    }
+  }
+
+  private isActiveTransaction(tx: any, nowMs: number): boolean {
+    const status = String(tx?.status ?? '').toLowerCase();
+    if (!(status === 'completed' || status === 'authorized')) return false;
+    if (!tx?.expires_at) return true;
+    const exp = new Date(tx.expires_at).getTime();
+    return Number.isFinite(exp) && exp > nowMs;
+  }
+
+  private readProductType(tx: any): string {
+    return String(tx?.product_type ?? tx?.product?.sku ?? tx?.product?.product_type ?? tx?.sku ?? '').toUpperCase();
   }
 
   private async loadCategoriesAndOpenModal() {

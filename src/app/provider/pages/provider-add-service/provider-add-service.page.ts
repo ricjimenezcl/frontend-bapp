@@ -1,6 +1,7 @@
 // src/app/provider/pages/provider-add-service/provider-add-service.page.ts
 import { Component, OnInit, OnDestroy, Input, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../shared/validators/custom-validators';
 import { IonicModule, ModalController, AlertController, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
@@ -14,6 +15,8 @@ import { DocumentUploadService } from '../../../shared/services/document-upload.
 import { CameraService } from '../../../shared/services/camera.service';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { environment } from '../../../../environments/environment';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -49,6 +52,14 @@ export interface ServiceCategory {
   created_at: string;
 }
 
+type ServiceLimitProductType = 'PROVIDER_SERVICE_30' | 'PROVIDER_PREMIUM_MONTHLY' | 'PROVIDER_PREMIUM_ANNUAL';
+
+interface ServiceLimitResult {
+  canCreate: boolean;
+  suggestedProductType: ServiceLimitProductType;
+  message: string;
+}
+
 @Component({
   selector: 'app-provider-add-service',
   templateUrl: './provider-add-service.page.html',
@@ -75,7 +86,9 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private readonly coreService  = inject(CoreService);
   private readonly authService  = inject(AuthService);
   private readonly providerService = inject(ProviderService);
+  private readonly http = inject(HttpClient);
   private readonly contentFilterService = inject(ContentFilterService);
+  private readonly paymentRedirect = inject(PaymentRedirectService);
 
   // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -177,15 +190,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     this.providerService.getMyProfile()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (profile) => {
+        next: async (profile) => {
           this.providerProfile = profile;
-          // Pre-check: verificar límite de servicios activos
-          const activeCount = this.providerService.providerServices().filter(s => s.is_available).length;
-          if (activeCount >= 2) {
-            this.presentAlert(
-              'Plan requerido',
-              'Ya tienes 2 servicios activos. Para agregar más debes activar un plan de publicación.'
-            ).then(() => this.cancel());
+          const entitlement = await this.evaluateServiceCreationEntitlement();
+          if (!entitlement.canCreate) {
+            await this.presentServiceLimitAlert(entitlement);
+            this.cancel();
           }
         },
         error: () => { /* no-critical — id_contacto usará fallback */ }
@@ -204,6 +214,106 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
     // Inicializar mapa con ubicación por defecto (Santiago, Chile)
     this.initMap(-33.4489, -70.6693);
+  }
+
+  private async evaluateServiceCreationEntitlement(): Promise<ServiceLimitResult> {
+    const activeServices = await this.getActiveServicesCount();
+    const transactions = await this.getMyTransactions();
+    const now = Date.now();
+
+    const activeTypes = (transactions ?? [])
+      .filter((tx: any) => this.isActiveTransaction(tx, now))
+      .map((tx: any) => this.readProductType(tx));
+
+    const hasPremium = activeTypes.some((pt: string) =>
+      pt.includes('PROVIDER_PREMIUM_MONTHLY') ||
+      pt.includes('PROVIDER_PREMIUM_ANNUAL') ||
+      (pt.includes('PROVIDER_PREMIUM') && (pt.includes('YEAR') || pt.includes('ANNUAL')))
+    );
+
+    const hasBasePlan = activeTypes.some((pt: string) =>
+      pt.includes('PROVIDER_SERVICE_30') || pt.includes('PROVIDER_SERVICE_YEAR') || pt.includes('PROVIDER_SERVICE_ANNUAL')
+    );
+
+    const maxServices = hasPremium ? 7 : hasBasePlan ? 3 : 2;
+    if (activeServices < maxServices) {
+      return { canCreate: true, suggestedProductType: 'PROVIDER_SERVICE_30', message: '' };
+    }
+
+    if (!hasBasePlan && activeServices >= 2) {
+      return {
+        canCreate: false,
+        suggestedProductType: 'PROVIDER_SERVICE_30',
+        message: 'Ya alcanzaste los 2 servicios gratuitos. Activa un plan mensual o anual para crear tu tercer servicio.',
+      };
+    }
+
+    if (!hasPremium && activeServices >= 3) {
+      return {
+        canCreate: false,
+        suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
+        message: 'Tu plan actual permite hasta 3 servicios. Activa Premium mensual o anual para llegar hasta 7 servicios activos.',
+      };
+    }
+
+    return {
+      canCreate: false,
+      suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
+      message: 'Ya alcanzaste el máximo de 7 servicios activos para planes Premium.',
+    };
+  }
+
+  private async getActiveServicesCount(): Promise<number> {
+    try {
+      const providerId = this.providerProfile?.id ?? this.currentUser?.provider_id ?? this.currentUser?.id;
+      if (!providerId) return this.providerService.providerServices().filter(s => s.is_available).length;
+      const services = await firstValueFrom(this.providerService.getProviderServices(String(providerId)));
+      return (services ?? []).filter((s: any) => !!s?.is_available).length;
+    } catch {
+      return this.providerService.providerServices().filter(s => s.is_available).length;
+    }
+  }
+
+  private async getMyTransactions(): Promise<any[]> {
+    try {
+      return await firstValueFrom(this.http.get<any[]>(`${environment.apiUrl}/transactions/me`));
+    } catch {
+      return [];
+    }
+  }
+
+  private isActiveTransaction(tx: any, nowMs: number): boolean {
+    const status = String(tx?.status ?? '').toLowerCase();
+    if (!(status === 'completed' || status === 'authorized')) return false;
+    if (!tx?.expires_at) return true;
+    const exp = new Date(tx.expires_at).getTime();
+    return Number.isFinite(exp) && exp > nowMs;
+  }
+
+  private readProductType(tx: any): string {
+    return String(tx?.product_type ?? tx?.product?.sku ?? tx?.product?.product_type ?? tx?.sku ?? '').toUpperCase();
+  }
+
+  private async presentServiceLimitAlert(result: ServiceLimitResult): Promise<void> {
+    const alert = await this.alertCtrl.create({
+      header: 'Plan requerido',
+      message: result.message,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Activar plan',
+          role: 'confirm',
+          handler: () => {
+            this.paymentRedirect.openPayment({
+              productType: result.suggestedProductType,
+              returnTo: '/provider/tabs/service-details',
+              action: 'add-service',
+            });
+          }
+        }
+      ]
+    });
+    await alert.present();
   }
 
   // ── Selección inline 2 pasos (reemplaza flujo modal) ─────────────────

@@ -90,4 +90,8 @@ export class PaymentRedirectService {
   openProviderPremium(returnTo?: string): void {
     this.openPayment({ productType: 'PROVIDER_PREMIUM_MONTHLY', returnTo });
   }
+
+  openProviderPremiumAnnual(returnTo?: string): void {
+    this.openPayment({ productType: 'PROVIDER_PREMIUM_ANNUAL', returnTo });
+  }
 }

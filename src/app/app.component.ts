@@ -151,12 +151,17 @@ export class AppComponent implements OnInit, OnDestroy {
       try {
         const parsed = new URL(url);
         const host = parsed.hostname; // "home", "auth", etc.
+        if (host === 'payment-result') {
+          this.handlePaymentDeepLink(parsed);
+          return;
+        }
+
         if (host === 'home' || parsed.pathname.startsWith('/auth')) {
           const user = this.authService.getCurrentUser();
           if (user?.role === 'PROVIDER') {
-            this.router.navigate(['/provider/home']);
+            this.router.navigate(['/provider/tabs/home']);
           } else if (user?.role === 'CLIENT') {
-            this.router.navigate(['/client/home']);
+            this.router.navigate(['/client/tabs/home']);
           } else {
             this.router.navigate(['/auth/login']);
           }
@@ -165,6 +170,36 @@ export class AppComponent implements OnInit, OnDestroy {
         this.router.navigate(['/auth/login']);
       }
     });
+  }
+
+  private handlePaymentDeepLink(parsed: URL): void {
+    const status = (parsed.searchParams.get('status') ?? '').toLowerCase();
+    const returnTo = parsed.searchParams.get('returnTo');
+    const action = parsed.searchParams.get('action');
+
+    if (status === 'success') {
+      this.authService.fetchUserProfileFromApi().subscribe({ error: () => {} });
+    }
+
+    const target = this.resolveReturnTarget(returnTo);
+    const queryParams: Record<string, string> = {
+      paymentSuccess: status === 'success' ? 'true' : 'false',
+    };
+
+    if (action) {
+      queryParams['action'] = action;
+    }
+
+    this.router.navigate([target], { queryParams, replaceUrl: true });
+  }
+
+  private resolveReturnTarget(returnTo: string | null): string {
+    if (returnTo && returnTo.startsWith('/')) {
+      return returnTo;
+    }
+
+    const role = this.authService.getCurrentUser()?.role;
+    return role === 'PROVIDER' ? '/provider/tabs/service-details' : '/client/tabs/home';
   }
 
   private async configureStatusBar() {
