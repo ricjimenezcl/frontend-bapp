@@ -123,14 +123,33 @@ ion-content {
   border-radius: var(--bapp-radius-lg);
   padding: 2px;
   margin: var(--bapp-space-1) 0;
+  height: 30px;
 
   ion-segment-button {
     --indicator-color: var(--bapp-red);
     --color-checked: white;
     --color: rgba(255, 255, 255, 0.6);
-    min-height: 28px;
-    font-size: var(--bapp-text-xs);
-    font-weight: var(--bapp-font-medium);
+    --padding-top: 0px;
+    --padding-bottom: 0px;
+    min-height: 26px;
+  }
+}
+
+::ng-deep .auth-segment ion-segment-button {
+  min-height: 26px !important;
+
+  &::part(native) {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    min-height: 26px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  ion-label {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
   }
 }
 
