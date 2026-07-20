@@ -111,7 +111,7 @@ ion-content {
 
 .login-card-title {
   margin: 0;
-  font-size: var(--bapp-text-xl);
+  font-size: var(--bapp-text-md);
   font-weight: var(--bapp-font-semibold);
   color: var(--bapp-text-primary);
   text-align: center;
@@ -121,15 +121,15 @@ ion-content {
 .auth-segment {
   --background: rgba(255, 255, 255, 0.05);
   border-radius: var(--bapp-radius-lg);
-  padding: 4px;
-  margin: var(--bapp-space-2) 0;
+  padding: 2px;
+  margin: var(--bapp-space-1) 0;
 
   ion-segment-button {
     --indicator-color: var(--bapp-red);
     --color-checked: white;
     --color: rgba(255, 255, 255, 0.6);
-    min-height: 36px;
-    font-size: var(--bapp-text-sm);
+    min-height: 28px;
+    font-size: var(--bapp-text-xs);
     font-weight: var(--bapp-font-medium);
   }
 }
