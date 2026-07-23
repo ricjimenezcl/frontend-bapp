@@ -14,6 +14,7 @@ import { CompleteProfileModalComponent } from './shared/components/complete-prof
 import { Subject, takeUntil } from 'rxjs';
 import { environment } from '../environments/environment';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -40,10 +41,13 @@ export class AppComponent implements OnInit, OnDestroy {
     private sqliteService: SqliteService,
     private notificationService: NotificationRealtimeService,
     private authService: AuthService,
+    private themeService: ThemeService,
     public profileCompletion: ProfileCompletionService,
     private router: Router,
     private alertCtrl: AlertController
   ) {
+    // Fuerza inicialización temprana del tema para evitar pantallas con estilos inconsistentes.
+    this.themeService.isDarkMode();
     this.initializeApp();
   }
 

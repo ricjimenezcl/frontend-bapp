@@ -100,6 +100,14 @@ export const routes: Routes = [
         path: 'settings',
         loadComponent: () => import('./client/pages/settings/settings.page').then(m => m.SettingsPage)
       },
+      {
+        path: 'settings/languages',
+        loadComponent: () => import('./client/pages/settings/languages/languages.page').then(m => m.LanguagesPage)
+      },
+      {
+        path: 'settings/help',
+        loadComponent: () => import('./client/pages/settings/help/help.page').then(m => m.HelpPage)
+      },
 
       {
         path: 'categories',

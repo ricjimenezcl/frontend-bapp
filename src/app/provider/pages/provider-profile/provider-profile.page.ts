@@ -140,6 +140,18 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
     this.router.navigate(['/transactions']);
   }
 
+  goToLanguages() {
+    this.router.navigate(['/client/settings/languages']);
+  }
+
+  goToHelp() {
+    this.router.navigate(['/client/settings/help']);
+  }
+
+  goToTerms() {
+    this.router.navigate(['/terms']);
+  }
+
   goToCatalog() {
     this.paymentRedirect.openProviderServicePlan('/provider/tabs/profile');
   }

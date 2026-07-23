@@ -32,6 +32,9 @@ import { environment } from '../../../environments/environment';
 export class WebSocketService {
   private chatWebSocket: WebSocket | null = null;
   private notificationWebSocket: WebSocket | null = null;
+  private intentionalChatClose = false;
+  private intentionalNotificationClose = false;
+  private intentionalUnifiedClose = false;
 
   // Connection states
   private chatConnected$ = new BehaviorSubject<boolean>(false);
@@ -100,6 +103,11 @@ export class WebSocketService {
   connectToChat(conversationId: number): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
+        if (!this.authService.isAuthenticated()) {
+          reject(new Error('Session is not authenticated'));
+          return;
+        }
+
         if (this.chatWebSocket && (
           this.chatWebSocket.readyState === WebSocket.OPEN ||
           this.chatWebSocket.readyState === WebSocket.CONNECTING
@@ -126,6 +134,7 @@ export class WebSocketService {
         const wsUrl = this.buildWebSocketUrl(`/api/v1/ws/chat/${conversationId}?token=${token}`);
 
         console.log(`📡 Connecting to chat: ${conversationId}`);
+        this.intentionalChatClose = false;
         this.chatWebSocket = new WebSocket(wsUrl);
 
         this.chatWebSocket.onopen = () => {
@@ -158,7 +167,9 @@ export class WebSocketService {
             return;
           }
 
-          this.attemptChatReconnect(conversationId);
+          if (!this.intentionalChatClose && this.authService.isAuthenticated()) {
+            this.attemptChatReconnect(conversationId);
+          }
         };
 
       } catch (error) {
@@ -174,6 +185,11 @@ export class WebSocketService {
   connectToNotifications(): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
+        if (!this.authService.isAuthenticated()) {
+          reject(new Error('Session is not authenticated'));
+          return;
+        }
+
         if (this.notificationWebSocket && (
           this.notificationWebSocket.readyState === WebSocket.OPEN ||
           this.notificationWebSocket.readyState === WebSocket.CONNECTING
@@ -199,6 +215,7 @@ export class WebSocketService {
         const wsUrl = this.buildWebSocketUrl(`/api/v1/ws/notifications?token=${token}`);
 
         console.log('📡 Connecting to notifications');
+        this.intentionalNotificationClose = false;
         this.notificationWebSocket = new WebSocket(wsUrl);
 
         this.notificationWebSocket.onopen = () => {
@@ -235,7 +252,9 @@ export class WebSocketService {
             return;
           }
 
-          this.attemptNotificationReconnect();
+          if (!this.intentionalNotificationClose && this.authService.isAuthenticated()) {
+            this.attemptNotificationReconnect();
+          }
         };
 
       } catch (error) {
@@ -339,6 +358,7 @@ export class WebSocketService {
    * Disconnect from chat
    */
   disconnectFromChat(): void {
+    this.intentionalChatClose = true;
     if (this.chatWebSocket && this.chatWebSocket.readyState === WebSocket.OPEN) {
       console.log('🔌 Disconnecting from chat');
       this.chatWebSocket.close(1000, 'User disconnected');
@@ -351,6 +371,7 @@ export class WebSocketService {
    * Disconnect from notifications
    */
   disconnectFromNotifications(): void {
+    this.intentionalNotificationClose = true;
     if (this.notificationWebSocket && this.notificationWebSocket.readyState === WebSocket.OPEN) {
       console.log('🔌 Disconnecting from notifications');
       this.notificationWebSocket.close(1000, 'User disconnected');
@@ -554,6 +575,10 @@ export class WebSocketService {
     console.log(`🔄 Chat reconnect attempt ${this.chatReconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
 
     setTimeout(async () => {
+      if (!this.authService.isAuthenticated()) {
+        return;
+      }
+
       const token = this.authService.getToken();
       if (!token || this.isTokenExpired(token)) {
         console.error('🔒 Chat WS: token expirado, deteniendo reconexión');
@@ -584,6 +609,10 @@ export class WebSocketService {
     console.log(`🔄 Notification reconnect attempt ${this.notifReconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
 
     setTimeout(async () => {
+      if (!this.authService.isAuthenticated()) {
+        return;
+      }
+
       const token = this.authService.getToken();
       if (!token || this.isTokenExpired(token)) {
         console.error('🔒 Notifications WS: token expirado, deteniendo reconexión');
@@ -645,6 +674,11 @@ export class WebSocketService {
    */
   connectToUnified(): Promise<void> {
     return new Promise(async (resolve, reject) => {
+      if (!this.authService.isAuthenticated()) {
+        reject(new Error('Session is not authenticated'));
+        return;
+      }
+
       if (this.unifiedWebSocket && (
         this.unifiedWebSocket.readyState === WebSocket.OPEN ||
         this.unifiedWebSocket.readyState === WebSocket.CONNECTING
@@ -663,6 +697,7 @@ export class WebSocketService {
 
       const wsUrl = this.buildWebSocketUrl(`/api/v1/ws/unified?token=${token}`);
       console.log('📡 Connecting to unified WS');
+      this.intentionalUnifiedClose = false;
       this.unifiedWebSocket = new WebSocket(wsUrl);
 
       this.unifiedWebSocket.onopen = () => {
@@ -694,13 +729,16 @@ export class WebSocketService {
           this.authExpired$.next();
           return;
         }
-        this._attemptUnifiedReconnect();
+        if (!this.intentionalUnifiedClose && this.authService.isAuthenticated()) {
+          this._attemptUnifiedReconnect();
+        }
       };
     });
   }
 
   /** Desconecta el WebSocket unificado */
   disconnectFromUnified(): void {
+    this.intentionalUnifiedClose = true;
     if (this.unifiedWebSocket && this.unifiedWebSocket.readyState === WebSocket.OPEN) {
       this.unifiedWebSocket.close(1000, 'User disconnected');
     }
@@ -787,6 +825,10 @@ export class WebSocketService {
     );
     console.log(`🔄 Unified WS reconnect attempt ${this.unifiedReconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
     setTimeout(() => {
+      if (!this.authService.isAuthenticated()) {
+        return;
+      }
+
       const token = this.authService.getToken();
       if (!token || this.isTokenExpired(token)) {
         this.authExpired$.next();

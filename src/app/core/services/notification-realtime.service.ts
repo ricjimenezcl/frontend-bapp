@@ -43,6 +43,11 @@ export class NotificationRealtimeService {
   public connect(): void {
     this.intentionalDisconnect = false;
 
+    if (!this.authService.isAuthenticated()) {
+      this.connectionStatusSubject.next('disconnected');
+      return;
+    }
+
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       console.log('✓ WebSocket already connected or connecting');
       return;
@@ -54,6 +59,12 @@ export class NotificationRealtimeService {
       const token = this.authService.getToken();
       if (!token) {
         console.warn('⚠️ No auth token available for WebSocket connection');
+        this.connectionStatusSubject.next('disconnected');
+        return;
+      }
+
+      if (!this.authService.isTokenValid()) {
+        console.warn('⚠️ Auth token expired, skipping WebSocket connection');
         this.connectionStatusSubject.next('disconnected');
         return;
       }
@@ -98,12 +109,17 @@ export class NotificationRealtimeService {
       };
 
       // Connection closed
-      this.ws.onclose = () => {
+      this.ws.onclose = (event) => {
         console.log('❌ WebSocket disconnected');
         this.connectionStatusSubject.next('disconnected');
         this.stopHeartbeat();
 
-        if (!this.intentionalDisconnect) {
+        if (event.code === 4401) {
+          console.warn('⚠️ WebSocket auth expired (4401), stopping reconnect attempts');
+          return;
+        }
+
+        if (!this.intentionalDisconnect && this.authService.isAuthenticated() && this.authService.isTokenValid()) {
           this.reconnectTimeout = setTimeout(() => {
             console.log('🔄 Attempting to reconnect WebSocket...');
             this.connect();

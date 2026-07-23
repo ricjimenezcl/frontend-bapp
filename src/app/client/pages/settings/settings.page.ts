@@ -50,10 +50,15 @@ export class SettingsPage implements OnInit {
   onDarkModeToggle(event: any): void {
     const isDark = event.detail.checked;
     this.themeService.toggleDarkMode(isDark);
+    this.userSettingsService.updateSettings({
+      darkMode: isDark,
+      theme: isDark ? 'dark' : 'light',
+    });
   }
 
   onLanguageChange(): void {
     this.i18nService.setLanguage(this.currentLanguage);
+    this.userSettingsService.updateSettings({ preferredLanguage: this.currentLanguage });
   }
 
   onPage(page: string): void {

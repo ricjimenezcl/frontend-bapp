@@ -1,50 +1,54 @@
-/* Estilos básicos para la página de ayuda */
 :host {
   display: block;
 }
 
 ion-content {
-  --background: url('../../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: var(--bapp-bg-page);
 }
 
-ion-item {
-  --background: var(--ion-color-dark);
-  --border-radius: 12px;
+.help-card {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.help-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: var(--bapp-text-primary);
+}
+
+.faq-item {
+  border: 1px solid var(--bapp-border);
   border-radius: 12px;
-  margin-bottom: 12px;
-  border: 1px solid var(--ion-color-primary);
-  
-  ion-icon {
-    color: var(--ion-color-primary);
-    margin-right: 16px;
-    font-size: 24px;
-  }
-  
-  ion-label {
-    font-weight: 500;
-    color: #fff;
-  }
-  
-  ion-input {
-    --padding-start: 8px;
-    --color: #fff;
-    --background: var(--ion-color-dark);
-    --placeholder-color: rgba(255,255,255,0.4);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--bapp-bg-input);
 
-    input {
-      color: #fff !important;
-      caret-color: var(--ion-color-primary);
+  summary {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bapp-text-primary);
+    cursor: pointer;
+  }
 
-      &:-webkit-autofill,
-      &:-webkit-autofill:hover,
-      &:-webkit-autofill:focus,
-      &:-webkit-autofill:active {
-        -webkit-text-fill-color: #fff !important;
-        -webkit-box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        box-shadow: 0 0 0 1000px var(--ion-color-dark) inset !important;
-        caret-color: var(--ion-color-primary);
-        transition: background-color 99999s ease-in-out 0s;
-      }
-    }
+  p {
+    margin: 8px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--bapp-text-secondary);
+  }
+}
+
+.help-actions {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  ion-button {
+    --border-color: var(--bapp-border-medium);
+    --color: var(--bapp-text-primary);
   }
 }

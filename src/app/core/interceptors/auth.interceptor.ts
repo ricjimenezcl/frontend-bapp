@@ -96,6 +96,7 @@ export const authInterceptor: HttpInterceptorFn = (
 let isRefreshing = false;
 let refreshToken$ = new BehaviorSubject<string | null>(null);
 let isShowingSessionAlert = false;
+const REFRESH_FAILED_SENTINEL = '__refresh_failed__';
 
 /**
  * Verifica si el token JWT almacenado está expirado (decodificación client-side, no criptográfica).
@@ -178,11 +179,20 @@ export const errorInterceptor: HttpInterceptorFn = (
       }
 
       if (error.status === 401 && !isAuthCall && !isExternal) {
+        const hasLocalSession = storageService.hasToken() || !!localStorage.getItem('token') || !!localStorage.getItem('refresh_token');
+        if (!hasLocalSession) {
+          return throwError(() => error);
+        }
+
         if (isRefreshing) {
           return refreshToken$.pipe(
             filter(t => t !== null),
             take(1),
             switchMap(newToken => {
+              if (newToken === REFRESH_FAILED_SENTINEL) {
+                return throwError(() => error);
+              }
+
               const retried = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
               return next(retried);
             })
@@ -207,12 +217,14 @@ export const errorInterceptor: HttpInterceptorFn = (
               return throwError(() => error);
             }
             // null → token verdaderamente expirado → mostrar alert y limpiar sesión
+            refreshToken$.next(REFRESH_FAILED_SENTINEL);
             return from(showSessionExpiredAlert(alertController, storageService, router)).pipe(
               switchMap(() => throwError(() => error))
             );
           }),
           catchError(refreshErr => {
             isRefreshing = false;
+            refreshToken$.next(REFRESH_FAILED_SENTINEL);
             // Si es el error original relanzado (skip), no mostrar alert
             if (refreshErr === error) {
               return throwError(() => refreshErr);
