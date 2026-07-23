@@ -1,9 +1,28 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Languages</ion-title>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()" (keydown.enter)="goBack()" (keydown.space)="goBack()" aria-label="Volver a configuración">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Idioma de la plataforma</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Página de selección de idioma (en construcción).</p>
+  <div class="language-card">
+    <p class="language-copy">Elige cómo quieres ver la interfaz en esta sesión y en futuros ingresos.</p>
+
+    <ion-list lines="none">
+      <button
+        type="button"
+        class="language-option"
+        *ngFor="let language of availableLanguages"
+        (click)="applyLanguage(language.code)"
+      >
+        <span class="language-name">{{ language.name }}</span>
+        <ion-icon *ngIf="isSelected(language.code)" name="checkmark-circle" class="language-selected-icon"></ion-icon>
+      </button>
+    </ion-list>
+  </div>
 </ion-content>

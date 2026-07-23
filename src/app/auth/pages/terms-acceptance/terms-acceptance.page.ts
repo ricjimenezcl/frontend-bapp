@@ -8,6 +8,7 @@ import {
   AlertController
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
+import { I18nService } from '../../../shared/services/i18n.service';
 
 @Component({
   selector: 'app-terms-acceptance',
@@ -24,6 +25,7 @@ export class TermsAcceptancePage {
   private authService = inject(AuthService);
   private router = inject(Router);
   private alertController = inject(AlertController);
+  readonly i18n = inject(I18nService);
 
   termsAccepted = false;
   emailOptIn = false;
@@ -51,8 +53,8 @@ export class TermsAcceptancePage {
         this.isLoading = false;
         console.error('Error aceptando términos:', err);
         const alert = await this.alertController.create({
-          header: 'Error',
-          message: 'No se pudo registrar la aceptación. Intenta nuevamente.',
+          header: this.i18n.translate('termsAcceptance.errorTitle'),
+          message: this.i18n.translate('termsAcceptance.errorMessage'),
           buttons: ['OK']
         });
         await alert.present();

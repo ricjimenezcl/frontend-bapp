@@ -82,6 +82,44 @@
   font-family: "regular";
 }
 
+html.dark-mode,
+body.dark-mode {
+  color-scheme: dark;
+}
+
+html.light-mode,
+body.light-mode {
+  color-scheme: light;
+}
+
+body.dark-mode,
+html.dark-mode body {
+  background: var(--bapp-bg-page);
+  color: var(--bapp-text-primary);
+}
+
+body.light-mode,
+html.light-mode body {
+  background: var(--bapp-bg-page);
+  color: var(--bapp-text-primary);
+}
+
+body.dark-mode ion-content,
+html.dark-mode ion-content,
+body.light-mode ion-content,
+html.light-mode ion-content {
+  --background: var(--bapp-bg-page);
+  --color: var(--bapp-text-primary);
+  color: var(--bapp-text-primary);
+}
+
+body.dark-mode ion-item,
+html.dark-mode ion-item,
+body.light-mode ion-item,
+html.light-mode ion-item {
+  color: var(--bapp-text-primary);
+}
+
 ion-label {
   display: block !important;
 }

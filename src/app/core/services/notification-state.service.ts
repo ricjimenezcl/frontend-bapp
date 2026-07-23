@@ -33,9 +33,16 @@ export class NotificationStateService {
     }
 
     refreshNotifications(): void {
+        if (!this.authService.isAuthenticated()) {
+            this.clearState();
+            return;
+        }
+
         this.notificationService.getMyNotifications().subscribe((notifications: Notification[]) => {
             this.notificationsSubject.next(notifications);
             this.updateUnreadCount(notifications);
+        }, () => {
+            this.clearState();
         });
     }
 

@@ -16,24 +16,24 @@
           <div class="ta-icon-wrap">
             <ion-icon name="shield-checkmark-outline"></ion-icon>
           </div>
-          <h2 class="ta-title">Términos y condiciones</h2>
-          <p class="ta-subtitle">Por favor revisa y acepta los términos para continuar</p>
+          <h2 class="ta-title">{{ i18n.translate('termsAcceptance.title') }}</h2>
+          <p class="ta-subtitle">{{ i18n.translate('termsAcceptance.subtitle') }}</p>
         </div>
 
         <!-- Resumen scrollable -->
         <div class="ta-terms-box">
-          <p class="ta-terms-heading">Términos de uso de BAPP</p>
-          <p class="ta-terms-text">Al usar nuestra plataforma, aceptas que tus datos serán utilizados para conectarte con proveedores de servicios cercanos. Nos comprometemos a proteger tu privacidad y datos personales conforme a la ley aplicable.</p>
-          <p class="ta-terms-text">No está permitido usar la plataforma para actividades ilegales, spam o cualquier comportamiento que viole los derechos de otros usuarios.</p>
-          <p class="ta-terms-text">BAPP actúa como intermediario y no se responsabiliza por la calidad de los servicios prestados por proveedores independientes.</p>
+          <p class="ta-terms-heading">{{ i18n.translate('termsAcceptance.summaryTitle') }}</p>
+          <p class="ta-terms-text">{{ i18n.translate('termsAcceptance.summaryBody1') }}</p>
+          <p class="ta-terms-text">{{ i18n.translate('termsAcceptance.summaryBody2') }}</p>
+          <p class="ta-terms-text">{{ i18n.translate('termsAcceptance.summaryBody3') }}</p>
           <div class="ta-terms-links">
             <ion-button fill="clear" size="small" routerLink="/terms" class="ta-link-btn">
               <ion-icon name="document-text-outline" slot="start"></ion-icon>
-              Términos y condiciones completos
+              {{ i18n.translate('termsAcceptance.termsLink') }}
             </ion-button>
             <ion-button fill="clear" size="small" routerLink="/privacy" class="ta-link-btn">
               <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-              Política de privacidad completa
+              {{ i18n.translate('termsAcceptance.privacyLink') }}
             </ion-button>
           </div>
         </div>
@@ -43,17 +43,17 @@
           <ion-item lines="none" class="ta-check-item">
             <ion-checkbox slot="start" [(ngModel)]="termsAccepted"></ion-checkbox>
             <ion-label class="ion-text-wrap ta-check-label">
-              He leído y acepto los
-              <a routerLink="/terms" class="ta-link">Términos y condiciones</a>
-              y la
-              <a routerLink="/privacy" class="ta-link">Política de privacidad</a> *
+              {{ i18n.translate('termsAcceptance.checkPrefix') }}
+              <a routerLink="/terms" class="ta-link">{{ i18n.translate('terms.pageTitle') }}</a>
+              {{ i18n.translate('termsAcceptance.checkConnector') }}
+              <a routerLink="/privacy" class="ta-link">{{ i18n.translate('privacy.pageTitle') }}</a> *
             </ion-label>
           </ion-item>
 
           <ion-item lines="none" class="ta-check-item">
             <ion-checkbox slot="start" [(ngModel)]="emailOptIn"></ion-checkbox>
             <ion-label class="ion-text-wrap ta-check-label ta-check-optional">
-              Acepto recibir comunicaciones por correo electrónico <span class="ta-optional">(opcional)</span>
+              {{ i18n.translate('termsAcceptance.emailOptIn') }} <span class="ta-optional">{{ i18n.translate('termsAcceptance.optional') }}</span>
             </ion-label>
           </ion-item>
         </div>
@@ -67,11 +67,11 @@
             (click)="onAccept()">
             <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
             <ion-icon *ngIf="!isLoading" name="checkmark-circle-outline" slot="start"></ion-icon>
-            {{ isLoading ? 'Guardando...' : 'Aceptar y continuar' }}
+            {{ isLoading ? i18n.translate('termsAcceptance.loading') : i18n.translate('termsAcceptance.accept') }}
           </ion-button>
 
           <button type="button" class="ta-decline-btn" (click)="onDecline()" [disabled]="isLoading">
-            Rechazar y cerrar sesión
+            {{ i18n.translate('termsAcceptance.decline') }}
           </button>
         </div>
 

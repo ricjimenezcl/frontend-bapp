@@ -1,9 +1,26 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>Centro de Ayuda</ion-title>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="goBack()" (keydown.enter)="goBack()" (keydown.space)="goBack()" [attr.aria-label]="i18n.translate('help.backToSettings')">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ i18n.translate('help.title') }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Página de ayuda y soporte (en construcción).</p>
+  <div class="help-card">
+    <h2 class="help-title">{{ i18n.translate('help.faqTitle') }}</h2>
+
+    <details class="faq-item" *ngFor="let item of faqs">
+      <summary>{{ i18n.translate(item.questionKey) }}</summary>
+      <p>{{ i18n.translate(item.answerKey) }}</p>
+    </details>
+
+    <div class="help-actions">
+      <ion-button expand="block" fill="outline" (click)="goToTerms()" (keydown.enter)="goToTerms()" (keydown.space)="goToTerms()">{{ i18n.translate('help.termsButton') }}</ion-button>
+      <ion-button expand="block" fill="outline" (click)="goToPrivacy()" (keydown.enter)="goToPrivacy()" (keydown.space)="goToPrivacy()">{{ i18n.translate('help.privacyButton') }}</ion-button>
+    </div>
+  </div>
 </ion-content>
