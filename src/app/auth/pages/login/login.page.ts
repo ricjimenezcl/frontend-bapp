@@ -6,7 +6,7 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import {
   IonContent, IonLabel, IonIcon, IonInput, IonButton,
   IonCheckbox, IonSpinner,
-  IonSegment, IonSegmentButton, ModalController
+  IonSegment, IonSegmentButton, ModalController, AlertController
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
@@ -38,6 +38,7 @@ export class LoginPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly modalController = inject(ModalController);
+  private readonly alertController = inject(AlertController);
   private readonly socialAuthService = inject(SocialAuthService);
   
   loginForm: FormGroup;
@@ -389,7 +390,11 @@ export class LoginPage implements OnInit, OnDestroy {
     this.errorMessage = '';
     const wasRegistering = this.activeTab() === 'register';
     
-    this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID)
+    this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID, {
+      scope: 'public_profile,email',
+      return_scopes: true,
+      auth_type: 'rerequest',
+    })
       .then((socialUser) => {
         this.resolveSocialLoginRole('facebook', socialUser.authToken || '', socialUser.email || '', wasRegistering);
       })
@@ -473,7 +478,7 @@ export class LoginPage implements OnInit, OnDestroy {
   ): void {
     const request$ = pending.provider === 'google'
       ? this.authService.loginWithGoogle(pending.token, role)
-      : this.authService.loginWithFacebook(pending.token, role);
+      : this.authService.loginWithFacebook(pending.token, role, pending.email);
 
     request$.subscribe({
       next: (response) => {
@@ -491,20 +496,94 @@ export class LoginPage implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
+        if (pending.provider === 'facebook' && this.isFacebookMissingEmailError(error)) {
+          this.handleFacebookEmailFallback(pending, role);
+          return;
+        }
+
         this.isLoading = false;
         this.errorMessage = error.error?.detail || `Error en login con ${pending.provider === 'google' ? 'Google' : 'Facebook'}`;
       }
     });
   }
 
+  private isFacebookMissingEmailError(error: any): boolean {
+    const detail = String(error?.error?.detail ?? error?.message ?? '').toLowerCase();
+    return detail.includes('facebook') && detail.includes('email') && detail.includes('no proporcion');
+  }
+
+  private async handleFacebookEmailFallback(
+    pending: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean },
+    role: 'CLIENT' | 'PROVIDER'
+  ): Promise<void> {
+    const manualEmail = await this.promptFacebookEmailFallback();
+    if (!manualEmail) {
+      this.isLoading = false;
+      this.errorMessage = 'Facebook no devolvió tu correo. Debes ingresarlo para continuar.';
+      return;
+    }
+
+    this.authService.loginWithFacebook(pending.token, role, manualEmail).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.socialRolePrompt = false;
+        this.pendingSocialLogin = null;
+        if (pending.wasRegistering && !response.is_new_user) {
+          this.successMessage = 'Ya tienes una cuenta con este correo. Hemos iniciado sesión por ti.';
+          setTimeout(() => {
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          }, 2000);
+        } else {
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        }
+      },
+      error: (fallbackError) => {
+        this.isLoading = false;
+        this.errorMessage = fallbackError?.error?.detail || 'No fue posible completar el login con Facebook';
+      }
+    });
+  }
+
+  private async promptFacebookEmailFallback(): Promise<string | null> {
+    const alert = await this.alertController.create({
+      header: 'Correo requerido',
+      message: 'Facebook no devolvió tu correo. Ingresa tu email para continuar.',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'tu@email.com',
+        },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Continuar', role: 'confirm' },
+      ],
+    });
+
+    await alert.present();
+    const result = await alert.onDidDismiss();
+    if (result.role !== 'confirm') return null;
+    const email = String(result.data?.values?.email ?? '').trim().toLowerCase();
+    if (!email) return null;
+    return this.isBasicValidEmail(email) ? email : null;
+  }
+
+  private isBasicValidEmail(email: string): boolean {
+    if (!email || email.includes(' ')) return false;
+    const at = email.indexOf('@');
+    const dot = email.lastIndexOf('.');
+    return at > 0 && dot > at + 1 && dot < email.length - 1;
+  }
+
   /**
    * Intenta signIn y reintenta una vez si el SDK aún no está listo (timing).
    * El SDK de Google/Facebook puede tardar 1-2s en inicializarse tras cargar la página.
    */
-  private async signInWithRetry(providerId: string, retries = 2): Promise<any> {
+  private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await this.socialAuthService.signIn(providerId);
+        return await this.socialAuthService.signIn(providerId, options);
       } catch (err: any) {
         const notReady = err?.message?.toLowerCase().includes('not ready');
         if (notReady && attempt < retries) {

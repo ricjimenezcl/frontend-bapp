@@ -15,6 +15,9 @@ export class ChangePasswordPage {
   oldPassword = '';
   newPassword = '';
   confirmPassword = '';
+  showOldPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
   loading = false;
   submitted = false;
 
@@ -36,6 +39,18 @@ export class ChangePasswordPage {
   get isFormValid(): boolean {
     return !!this.oldPassword && !!this.newPassword && !!this.confirmPassword
       && this.passwordErrors.length === 0 && this.passwordsMatch;
+  }
+
+  togglePasswordVisibility(field: 'old' | 'new' | 'confirm'): void {
+    if (field === 'old') {
+      this.showOldPassword = !this.showOldPassword;
+      return;
+    }
+    if (field === 'new') {
+      this.showNewPassword = !this.showNewPassword;
+      return;
+    }
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   async changePassword() {

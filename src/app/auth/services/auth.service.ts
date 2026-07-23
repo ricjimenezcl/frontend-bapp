@@ -1,5 +1,5 @@
 // auth.service.ts (versión corregida)
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
@@ -7,6 +7,8 @@ import { environment } from '../../../environments/environment';
 import { SocialUser } from '@abacritt/angularx-social-login';
 import { ProviderService, ProviderProfile, ServiceProviderData } from '../../provider/services/provider.service';
 import { ProfileCompletionService } from '../../core/services/profile-completion.service';
+import { StorageService } from '../../core/storage/storage.service';
+import { Capacitor } from '@capacitor/core';
 
 // Interfaces exportadas
 export interface User {
@@ -22,6 +24,7 @@ export interface User {
   verified?: boolean;
   status?: string;
   token?: string; // Alias para compatibilidad
+  refresh_token?: string;
   terms_accepted?: boolean;
   is_new_user?: boolean;
 }
@@ -51,6 +54,7 @@ export interface LoginRolesResponse {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl;
+  private readonly storageService = inject(StorageService);
   
   // Subject para datos básicos del usuario
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -100,6 +104,24 @@ export class AuthService {
         this.clearLocalStorage();
       }
     }
+
+    // Si no hay token en localStorage (modo nativo endurecido), intentar cargarlo desde SQLite.
+    if (userData && !token) {
+      this.storageService.getAccessToken().then((storedToken) => {
+        if (!storedToken) return;
+        try {
+          const user = JSON.parse(userData) as User;
+          const userWithToken: User = {
+            ...user,
+            token: storedToken,
+            access_token: storedToken,
+          };
+          this.currentUserSubject.next(userWithToken);
+        } catch {
+          // noop
+        }
+      }).catch(() => undefined);
+    }
     
     // Cargar perfil completo
     const profileData = localStorage.getItem('user_profile');
@@ -148,9 +170,9 @@ export class AuthService {
     localStorage.setItem('user_data', JSON.stringify(userWithToken));
     
     if (token) {
-      localStorage.setItem('token', token);
+      this.persistTokens(token, userWithToken.refresh_token);
     } else if (userWithToken.token) {
-      localStorage.setItem('token', userWithToken.token);
+      this.persistTokens(userWithToken.token, userWithToken.refresh_token);
     }
     
     this.currentUserSubject.next(userWithToken);
@@ -385,8 +407,25 @@ export class AuthService {
     localStorage.removeItem('user_profile');
     localStorage.removeItem('provider_services');
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
 
-    
+    this.storageService.removeAccessToken().catch(() => undefined);
+    this.storageService.removeRefreshToken().catch(() => undefined);
+  }
+
+  private persistTokens(accessToken: string, refreshToken?: string): void {
+    // En nativo priorizamos SQLite (menos expuesto que localStorage).
+    if (!Capacitor.isNativePlatform()) {
+      localStorage.setItem('token', accessToken);
+    }
+    this.storageService.setAccessToken(accessToken).catch(() => undefined);
+
+    if (refreshToken) {
+      if (!Capacitor.isNativePlatform()) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+      this.storageService.setRefreshToken(refreshToken).catch(() => undefined);
+    }
   }
 
   /**
@@ -410,7 +449,7 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/login`, body).pipe(
       tap((response: any) => {
         console.log('Login exitoso:', response);
-        localStorage.setItem('token', response.access_token);
+        this.persistTokens(response.access_token, response.refresh_token);
         
         let tempUser: User;
       
@@ -460,7 +499,7 @@ export class AuthService {
       tap((response: any) => {
         console.log('Respuesta del backend Google:', response);
 
-        localStorage.setItem('token', response.access_token);
+        this.persistTokens(response.access_token, response.refresh_token);
 
         const googleUser: User = {
           id: response.user_id,
@@ -485,12 +524,16 @@ export class AuthService {
     );
   }
 
-  loginWithFacebook(accessToken: string, role: string = 'CLIENT'): Observable<any> {
+  loginWithFacebook(accessToken: string, role: string = 'CLIENT', emailHint?: string): Observable<any> {
     // Backend espera: { access_token: string, role: string }
     // Backend retorna: { access_token, user_id, role, provider_id, client_id, email, name, avatar_url, terms_accepted }
-    return this.http.post(`${this.apiUrl}/auth/oauth/facebook`, { access_token: accessToken, role }).pipe(
+    return this.http.post(`${this.apiUrl}/auth/oauth/facebook`, {
+      access_token: accessToken,
+      role,
+      email_hint: emailHint?.trim().toLowerCase() || undefined,
+    }).pipe(
       tap((response: any) => {
-        localStorage.setItem('token', response.access_token);
+        this.persistTokens(response.access_token, response.refresh_token);
         const facebookUser: User = {
           id: response.user_id,
           email: response.email,
@@ -539,18 +582,30 @@ export class AuthService {
 
   logout(): void {
     console.log('Ejecutando logout...');
+    const accessToken = this.getToken();
+    if (accessToken) {
+      this.storageService.getRefreshToken()
+        .then((refreshToken) => {
+          this.http.post(`${this.apiUrl}/auth/logout`, {
+            refresh_token: refreshToken || undefined,
+          }).subscribe({ error: () => {} });
+        })
+        .catch(() => {
+          this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
+        });
+    }
     this.profileCompletion.reset();
     this.clearAllData();
   }
 
   isAuthenticated(): boolean {
-    const hasToken = !!localStorage.getItem('token');
+    const hasToken = !!this.currentUserSubject.value?.access_token || !!this.currentUserSubject.value?.token;
     const hasUser = !!this.currentUserSubject.value;
     return hasToken && hasUser;
   }
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return this.currentUserSubject.value?.access_token || this.currentUserSubject.value?.token || localStorage.getItem('token');
   }
 
   /**
@@ -572,7 +627,7 @@ export class AuthService {
   loginClientJson(credentials: { email: string, password: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login-json`, credentials).pipe(
       tap((response: any) => {
-        localStorage.setItem('token', response.access_token);
+        this.persistTokens(response.access_token, response.refresh_token);
         const userFromResponse = response.user as User;
         this.setUser(userFromResponse, response.access_token);
       }),

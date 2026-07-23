@@ -36,12 +36,13 @@ export interface StoredProfile {
 export class StorageService {
   private _isInitialized = signal<boolean>(false);
   private _initPromise: Promise<boolean> | null = null;
+  private _hasTokenSignal = signal<boolean>(!!localStorage.getItem('auth_access_token') || !!localStorage.getItem('token'));
   
   public readonly isInitialized = this._isInitialized.asReadonly();
   
   // Computed para verificar autenticación
   public readonly isAuthenticated = computed(() => {
-    return this._isInitialized() && this.hasToken();
+    return this._isInitialized() && this._hasTokenSignal();
   });
 
   constructor(private sqliteService: SqliteService) {}
@@ -66,6 +67,8 @@ export class StorageService {
       
       if (sqliteReady) {
         console.log('✅ StorageService: SQLite inicializado correctamente');
+        const persistedToken = await this.sqliteService.getAuthToken('access_token');
+        this._hasTokenSignal.set(!!persistedToken || !!localStorage.getItem('token'));
       } else if (typeof window !== 'undefined') {
         // En navegador web, esto es esperado
         console.debug('ℹ️ StorageService: SQLite no disponible en web, usando localStorage');
@@ -96,6 +99,7 @@ export class StorageService {
 
   async setAccessToken(token: string): Promise<void> {
     await this.sqliteService.setAuthToken('access_token', token);
+    this._hasTokenSignal.set(!!token);
   }
 
   async getAccessToken(): Promise<string | null> {
@@ -104,12 +108,23 @@ export class StorageService {
 
   async removeAccessToken(): Promise<void> {
     await this.sqliteService.removeAuthToken('access_token');
+    this._hasTokenSignal.set(false);
+  }
+
+  async setRefreshToken(token: string): Promise<void> {
+    await this.sqliteService.setAuthToken('refresh_token', token);
+  }
+
+  async getRefreshToken(): Promise<string | null> {
+    return this.sqliteService.getAuthToken('refresh_token');
+  }
+
+  async removeRefreshToken(): Promise<void> {
+    await this.sqliteService.removeAuthToken('refresh_token');
   }
 
   hasToken(): boolean {
-    // Para verificación sincrónica, usar localStorage como fallback
-    return !!localStorage.getItem('auth_access_token') || 
-           !!localStorage.getItem('token');
+    return this._hasTokenSignal();
   }
 
   // ==================== USER DATA ====================
@@ -281,9 +296,12 @@ export class StorageService {
     
     // También limpiar localStorage por compatibilidad
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_data');
     localStorage.removeItem('user_profile');
     localStorage.removeItem('provider_services');
+
+    this._hasTokenSignal.set(false);
     
     console.log('✅ StorageService: Sesión limpiada');
   }
@@ -307,6 +325,10 @@ export class StorageService {
     const token = localStorage.getItem('token');
     if (token) {
       await this.setAccessToken(token);
+    }
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (refreshToken) {
+      await this.setRefreshToken(refreshToken);
     }
     
     // Migrar user_data

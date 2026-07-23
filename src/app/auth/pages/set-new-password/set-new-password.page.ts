@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { IonContent, IonInput, IonButton, IonLabel, IonText, IonSpinner } from '@ionic/angular/standalone';
+import { IonContent, IonInput, IonButton, IonLabel, IonText, IonSpinner, IonIcon } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './set-new-password.page.html',
   styleUrls: ['./set-new-password.page.scss'],
   standalone: true,
-  imports: [IonSpinner, 
+  imports: [IonSpinner, IonIcon,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
@@ -27,6 +27,8 @@ export class SetNewPasswordPage {
   errorMessage = '';
   successMessage = '';
   token = '';
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -91,5 +93,13 @@ export class SetNewPasswordPage {
 
   onBack(): void {
     this.router.navigate(['/auth/login']);
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirm'): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+      return;
+    }
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 }
