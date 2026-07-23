@@ -42,9 +42,14 @@ export const authInterceptor: HttpInterceptorFn = (
   // URLs que no requieren autenticación
   const publicUrls = [
     '/auth/login',
+    '/auth/login-roles',
     '/auth/register',
-    '/auth/google',
-    '/auth/facebook',
+    '/auth/oauth/google',
+    '/auth/oauth/facebook',
+    '/auth/reset-password',
+    '/auth/set-new-password',
+    '/auth/verify-email',
+    '/auth/send-verification-email',
     '/categories/main-categories',
     '/categories/services'
   ];
@@ -56,25 +61,23 @@ export const authInterceptor: HttpInterceptorFn = (
     return next(req);
   }
   
-  // Intentar obtener token de forma síncrona primero (localStorage)
-  let token = localStorage.getItem('token');
-  
-  if (token) {
-    const authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return next(authReq);
-  }
-  
-  // Si no hay token en localStorage, intentar obtenerlo de SQLite
+  // Priorizar token persistido en SQLite (nativo) y mantener fallback legacy localStorage.
   return from(storageService.getAccessToken()).pipe(
     switchMap(asyncToken => {
+      const token = asyncToken || localStorage.getItem('token');
       if (asyncToken) {
         const authReq = req.clone({
           setHeaders: {
-            Authorization: `Bearer ${asyncToken}`
+            Authorization: `Bearer ${token}`
+          }
+        });
+        return next(authReq);
+      }
+
+      if (token) {
+        const authReq = req.clone({
+          setHeaders: {
+            Authorization: `Bearer ${token}`
           }
         });
         return next(authReq);
@@ -114,18 +117,24 @@ function isTokenExpired(token: string): boolean {
  *   - 'skip'  → endpoint de refresh no existe (404/405) — NO cerrar sesión
  */
 async function attemptTokenRefresh(http: HttpClient, storageService: StorageService): Promise<string | null | 'skip'> {
-  const currentToken = localStorage.getItem('token');
+  const currentToken = await storageService.getAccessToken() || localStorage.getItem('token');
+  const refreshToken = await storageService.getRefreshToken() || localStorage.getItem('refresh_token');
   if (!currentToken) return null;
   try {
     const response: any = await http.post(
       `${environment.apiUrl}/auth/refresh`,
-      {},
+      { refresh_token: refreshToken || undefined },
       { headers: { Authorization: `Bearer ${currentToken}` } }
     ).toPromise();
     const newToken: string = response?.access_token;
+    const newRefreshToken: string | undefined = response?.refresh_token;
     if (newToken) {
       localStorage.setItem('token', newToken);
       await storageService.setAccessToken(newToken);
+      if (newRefreshToken) {
+        localStorage.setItem('refresh_token', newRefreshToken);
+        await storageService.setRefreshToken(newRefreshToken);
+      }
       return newToken;
     }
   } catch (err: any) {

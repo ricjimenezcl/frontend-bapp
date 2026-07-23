@@ -123,10 +123,13 @@
             <div class="input-wrap" [class.input-wrap-error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
               <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
               <ion-input
-                type="password"
+                [type]="showPassword ? 'text' : 'password'"
                 formControlName="password"
                 placeholder="Mín. 8 caracteres, mayúscula y número">
               </ion-input>
+              <button type="button" class="toggle-pass-btn" (click)="togglePasswordVisibility('password')" tabindex="-1">
+                <ion-icon [name]="showPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+              </button>
             </div>
             <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['required']">La contraseña es requerida</span>
             <span class="form-error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.errors?.['minlength']">Mínimo 8 caracteres</span>
@@ -140,10 +143,13 @@
             <div class="input-wrap" [class.input-wrap-error]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
               <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
               <ion-input
-                type="password"
+                [type]="showConfirmPassword ? 'text' : 'password'"
                 formControlName="confirmPassword"
                 placeholder="Repite tu contraseña">
               </ion-input>
+              <button type="button" class="toggle-pass-btn" (click)="togglePasswordVisibility('confirm')" tabindex="-1">
+                <ion-icon [name]="showConfirmPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+              </button>
             </div>
             <span class="form-error" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['required']">Confirma tu contraseña</span>
             <span class="form-error" *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.get('confirmPassword')?.errors?.['mismatch']">Las contraseñas no coinciden</span>

@@ -82,8 +82,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private async handleSessionExpiredOnResume(): Promise<void> {
-    // Limpiar solo el token (no user_data) para que el login pueda pre-cargar datos
-    localStorage.removeItem('token');
     this.authService.logout();
 
     const alert = await this.alertCtrl.create({

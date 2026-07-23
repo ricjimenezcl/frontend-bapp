@@ -44,6 +44,8 @@ export class RegisterProviderPage implements OnInit {
   isLoading = false;
   avatarPreview: string | null = null;
   isTakingPhoto = false;
+  showPassword = false;
+  showConfirmPassword = false;
 
   constructor() {
     this.registerForm = this.createForm();
@@ -169,6 +171,14 @@ export class RegisterProviderPage implements OnInit {
   removeAvatar(): void {
     this.avatarPreview = null;
     this.registerForm.patchValue({ avatar: '' });
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirm'): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+      return;
+    }
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   // ==================== VALIDADORES ====================
@@ -508,14 +518,26 @@ export class RegisterProviderPage implements OnInit {
 
   registerWithFacebook(): void {
     this.isLoading = true;
-    this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID)
+    this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID, {
+      scope: 'public_profile,email',
+      return_scopes: true,
+      auth_type: 'rerequest',
+    })
       .then((socialUser) => {
-        this.authService.loginWithFacebook(socialUser.authToken || '', 'PROVIDER').subscribe({
+        this.authService.loginWithFacebook(
+          socialUser.authToken || '',
+          'PROVIDER',
+          socialUser.email || ''
+        ).subscribe({
           next: (response) => {
             this.isLoading = false;
             this.handleOAuthNavigation(response.role, response.terms_accepted);
           },
           error: (error) => {
+            if (this.isFacebookMissingEmailError(error)) {
+              this.retryFacebookWithManualEmail('PROVIDER', socialUser.authToken || '');
+              return;
+            }
             this.isLoading = false;
             this.showAlert('Error', error.error?.detail || 'Error al registrarse con Facebook');
           }
@@ -546,10 +568,10 @@ export class RegisterProviderPage implements OnInit {
     this.router.navigate(['/provider/tabs']);
   }
 
-  private async signInWithRetry(providerId: string, retries = 2): Promise<any> {
+  private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await this.socialAuthService.signIn(providerId);
+        return await this.socialAuthService.signIn(providerId, options);
       } catch (err: any) {
         if (err?.message?.toLowerCase().includes('not ready') && attempt < retries) {
           await new Promise(r => setTimeout(r, 1500));
@@ -558,6 +580,64 @@ export class RegisterProviderPage implements OnInit {
         throw err;
       }
     }
+  }
+
+  private isFacebookMissingEmailError(error: any): boolean {
+    const detail = String(error?.error?.detail ?? error?.message ?? '').toLowerCase();
+    return detail.includes('facebook') && detail.includes('email') && detail.includes('no proporcion');
+  }
+
+  private async retryFacebookWithManualEmail(role: 'CLIENT' | 'PROVIDER', accessToken: string): Promise<void> {
+    const manualEmail = await this.promptFacebookEmailFallback();
+    if (!manualEmail) {
+      this.isLoading = false;
+      await this.showAlert('Correo requerido', 'Debes ingresar un correo válido para continuar con Facebook.');
+      return;
+    }
+
+    this.authService.loginWithFacebook(accessToken, role, manualEmail).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.handleOAuthNavigation(response.role, response.terms_accepted);
+      },
+      error: (fallbackError) => {
+        this.isLoading = false;
+        this.showAlert('Error', fallbackError?.error?.detail || 'No fue posible completar el registro con Facebook');
+      }
+    });
+  }
+
+  private async promptFacebookEmailFallback(): Promise<string | null> {
+    const alert = await this.alertController.create({
+      header: 'Correo requerido',
+      message: 'Facebook no devolvió tu correo. Ingresa tu email para continuar.',
+      cssClass: 'custom-alert-dark',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'tu@email.com'
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Continuar', role: 'confirm' }
+      ]
+    });
+
+    await alert.present();
+    const result = await alert.onDidDismiss();
+    if (result.role !== 'confirm') return null;
+
+    const email = String(result.data?.values?.email ?? '').trim().toLowerCase();
+    return this.isBasicValidEmail(email) ? email : null;
+  }
+
+  private isBasicValidEmail(email: string): boolean {
+    if (!email || email.includes(' ')) return false;
+    const at = email.indexOf('@');
+    const dot = email.lastIndexOf('.');
+    return at > 0 && dot > at + 1 && dot < email.length - 1;
   }
 
   private getSocialErrorMessage(error: any, provider: string): string {

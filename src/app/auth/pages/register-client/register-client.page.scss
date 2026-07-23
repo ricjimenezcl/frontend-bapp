@@ -147,6 +147,25 @@ ion-content {
       }
     }
   }
+
+  .toggle-pass-btn {
+    background: none;
+    border: none;
+    padding: 0 0 0 var(--bapp-space-2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
 }
 
 .form-error {
