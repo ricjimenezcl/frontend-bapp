@@ -2,8 +2,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController, IonicModule } from '@ionic/angular';
 import { CoreService, MainCategory, ServiceCategory } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
@@ -12,6 +12,8 @@ import { MapboxService } from '../../../shared/services/mapbox.service';
 import { MapPickerComponent } from '../../../shared/components/map-picker/map-picker.component';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { AuthService } from '../../../auth/services/auth.service';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-main-categories',
@@ -46,14 +48,20 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   showMapPicker = false;
   mapPickerInitialLat = -33.4489;  // Santiago Centro por defecto
   mapPickerInitialLng = -70.6693;
+  readonly maxFreeServices = 3;
+  readonly freeDailySearchLimit = 3;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
+    private alertCtrl: AlertController,
     private coreService: CoreService,
     private selectionService: SelectionService,
     private stateService: StateService,
     private geoLocationService: GeoLocationService,
-    private mapboxService: MapboxService
+    private mapboxService: MapboxService,
+    private authService: AuthService,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -70,6 +78,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.handlePremiumReasonFromQuery();
+
     this.loadMainCategories();
     this.coreService.getServiceCategories().subscribe({
       next: (cats) => { this.allCategories = cats; },
@@ -186,9 +196,68 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     if (index >= 0) {
       this.selectedServices.splice(index, 1);
     } else {
+      if (!this.hasPremiumAccess() && this.selectedServices.length >= this.maxFreeServices) {
+        this.presentPremiumLimitAlert('FREE_SERVICE_SELECTION_LIMIT');
+        return;
+      }
       this.selectedServices.push(service);
     }
     console.log('Servicios seleccionados:', this.selectedServices);
+  }
+
+  private hasPremiumAccess(): boolean {
+    const currentUser = this.authService.getCurrentUser() as any;
+    const profile = this.authService.getUserProfile() as any;
+    return Boolean(currentUser?.has_premium || profile?.has_premium);
+  }
+
+  private handlePremiumReasonFromQuery(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const reason = params.get('premium_reason');
+      if (!this.hasPremiumAccess() && (reason === 'DAILY_SEARCH_LIMIT_REACHED' || reason === 'FREE_SERVICE_SELECTION_LIMIT')) {
+        this.presentPremiumLimitAlert(reason);
+      }
+    });
+  }
+
+  private async presentPremiumLimitAlert(
+    reason: 'DAILY_SEARCH_LIMIT_REACHED' | 'FREE_SERVICE_SELECTION_LIMIT'
+  ): Promise<void> {
+    const isDailyLimit = reason === 'DAILY_SEARCH_LIMIT_REACHED';
+    const header = isDailyLimit ? 'Límite diario alcanzado' : 'Límite de selección gratuita';
+    const message = isDailyLimit
+      ? `Ya usaste tus ${this.freeDailySearchLimit} búsquedas gratuitas del día. Desbloquea Premium para seguir buscando.`
+      : `Con plan gratuito puedes seleccionar hasta ${this.maxFreeServices} servicios. Desbloquea Premium para seleccionar más.`;
+
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: 'Más tarde',
+          role: 'cancel',
+          handler: () => this.clearPremiumReasonQueryParam(),
+        },
+        {
+          text: 'Desbloquear Premium',
+          handler: () => {
+            this.clearPremiumReasonQueryParam();
+            this.paymentRedirect.openClientUnlock('/client/tabs/categories');
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private clearPremiumReasonQueryParam(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { premium_reason: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   isServiceSelected(service: ServiceCategory): boolean {

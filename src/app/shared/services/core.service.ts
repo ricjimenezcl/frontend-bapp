@@ -405,5 +405,24 @@ export class CoreService {
     return this.http.get<Provider[]>(`${this.apiUrl}/${url}`);
   }
 
+  getNearbyProvidersByServiceIds(
+    lat: number,
+    lng: number,
+    radius: number,
+    serviceIds: number[],
+    skip: number = 0,
+    limit: number = 10
+  ): Observable<Provider[]> {
+    const params = new HttpParams()
+      .set('lat', String(lat))
+      .set('lng', String(lng))
+      .set('radius', String(radius))
+      .set('skip', String(skip))
+      .set('limit', String(limit))
+      .set('service_ids', serviceIds.join(','));
+
+    return this.http.get<Provider[]>(`${this.apiUrl}/providers/nearby/services`, { params });
+  }
+
 
 }

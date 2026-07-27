@@ -158,14 +158,17 @@ export class AppComponent implements OnInit, OnDestroy {
           return;
         }
 
-        if (host === 'home' || parsed.pathname.startsWith('/auth')) {
+        if (host === 'home' || host === 'auth' || parsed.pathname.startsWith('/auth')) {
+          const verifiedEmail = parsed.searchParams.get('emailVerified') === 'true';
           const user = this.authService.getCurrentUser();
           if (user?.role === 'PROVIDER') {
             this.router.navigate(['/provider/tabs/home']);
           } else if (user?.role === 'CLIENT') {
             this.router.navigate(['/client/tabs/home']);
           } else {
-            this.router.navigate(['/auth/login']);
+            this.router.navigate(['/auth/login'], {
+              queryParams: verifiedEmail ? { emailVerified: 'true' } : undefined,
+            });
           }
         }
       } catch {

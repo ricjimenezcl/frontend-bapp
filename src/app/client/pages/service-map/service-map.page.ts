@@ -201,24 +201,32 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     const userIconUrl = 'https://res.cloudinary.com/dghwotofx/image/upload/v1782705912/ubi_cli_2_nlnxac.svg';
 
     // Contenedor: 34px (levemente más grande que proveedores de 30px)
+    const markerSize = 34;
+    const pulseSize = 50;
     const el = document.createElement('div');
     el.className = 'user-marker-container';
+    el.style.width = `${markerSize}px`;
+    el.style.height = `${markerSize}px`;
+    el.style.position = 'relative';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
 
     const img = new Image();
     img.src = userIconUrl;
 
     img.onload = () => {
       el.innerHTML = `
-        <div class="pulse-ring"></div>
-        <img class="user-icon" src="${userIconUrl}" alt="Tu ubicación" />
+        <div class="pulse-ring" style="position:absolute;top:50%;left:50%;width:${pulseSize}px;height:${pulseSize}px;margin-top:-${pulseSize / 2}px;margin-left:-${pulseSize / 2}px;border-radius:50%;background:rgba(253,215,53,0.3);animation:pulse-animation 2s ease-out infinite;pointer-events:none;"></div>
+        <img class="user-icon" src="${userIconUrl}" alt="Tu ubicación" style="width:${markerSize}px;height:${markerSize}px;display:block;object-fit:contain;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.3);position:relative;z-index:1;" />
       `;
     };
 
     img.onerror = () => {
       // Fallback: SVG inline idéntico al pin rojo del hero de la web
       el.innerHTML = `
-        <div class="pulse-ring"></div>
-        <svg class="user-icon" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+        <div class="pulse-ring" style="position:absolute;top:50%;left:50%;width:${pulseSize}px;height:${pulseSize}px;margin-top:-${pulseSize / 2}px;margin-left:-${pulseSize / 2}px;border-radius:50%;background:rgba(253,215,53,0.3);animation:pulse-animation 2s ease-out infinite;pointer-events:none;"></div>
+        <svg class="user-icon" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" style="width:${markerSize}px;height:${markerSize}px;display:block;position:relative;z-index:1;">
           <path d="M12 1C6.48 1 2 5.48 2 11c0 7.3 10 20 10 20s10-12.7 10-20C22 5.48 17.52 1 12 1z" fill="#BE202E" stroke="#FFFFFF" stroke-width="1.5"/>
           <circle cx="12" cy="11" r="4.2" fill="#FFFFFF"/>
           <circle cx="12" cy="11" r="2.1" fill="#1F2937"/>

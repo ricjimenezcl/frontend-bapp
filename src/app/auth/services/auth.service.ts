@@ -1,14 +1,14 @@
 // auth.service.ts (versión corregida)
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
+import { Observable, BehaviorSubject, forkJoin, from } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { SocialUser } from '@abacritt/angularx-social-login';
 import { ProviderService, ProviderProfile, ServiceProviderData } from '../../provider/services/provider.service';
 import { ProfileCompletionService } from '../../core/services/profile-completion.service';
 import { StorageService } from '../../core/storage/storage.service';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 
 // Interfaces exportadas
 export interface User {
@@ -639,7 +639,10 @@ export class AuthService {
   }
 
   registerClient(clientData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/register-client`, clientData).pipe(
+    return this.http.post(`${this.apiUrl}/auth/register-client`, {
+      ...clientData,
+      registration_source: 'mobile',
+    }).pipe(
       catchError((error) => {
         console.error('Error en registerClient:', error);
         throw error;
@@ -658,6 +661,7 @@ export class AuthService {
     if (providerData.phone) {
       formData.append('phone', providerData.phone);
     }
+    formData.append('registration_source', 'mobile');
     formData.append('bio', providerData.bio || '');
     // El backend espera UploadFile para avatar, no string.
     // Solo enviar si es base64 (foto cargada por el usuario), convertida a Blob.
@@ -765,14 +769,32 @@ export class AuthService {
   /**
    * Solicita (o reenvía) el email de verificación
    */
-  resendVerificationEmail(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/send-verification-email`, { email });
+  resendVerificationEmail(email: string, source: 'web' | 'mobile' = 'mobile'): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/send-verification-email`, {
+      email,
+      source,
+    });
   }
 
   /**
    * Inicia el proceso de recuperación de contraseña
    */
   resetPassword(email: string): Observable<any> {
+    // En app nativa (WebView), usar transporte nativo para evitar bloqueos CORS del origen localhost:*.
+    if (Capacitor.isNativePlatform()) {
+      return from(CapacitorHttp.request({
+        method: 'POST',
+        url: `${this.apiUrl}/auth/reset-password`,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        data: { email },
+      })).pipe(
+        map((response) => response?.data ?? {}),
+      );
+    }
+
     return this.http.post(`${this.apiUrl}/auth/reset-password`, { email });
   }
 
@@ -780,6 +802,23 @@ export class AuthService {
    * Establece una nueva contraseña usando el token de recuperación
    */
   setNewPassword(token: string, newPassword: string): Observable<any> {
+    if (Capacitor.isNativePlatform()) {
+      return from(CapacitorHttp.request({
+        method: 'POST',
+        url: `${this.apiUrl}/auth/set-new-password`,
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        data: {
+          token,
+          new_password: newPassword,
+        },
+      })).pipe(
+        map((response) => response?.data ?? {}),
+      );
+    }
+
     return this.http.post(`${this.apiUrl}/auth/set-new-password`, { 
       token, 
       new_password: newPassword 

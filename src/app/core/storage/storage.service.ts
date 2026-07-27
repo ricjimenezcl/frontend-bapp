@@ -37,6 +37,8 @@ export class StorageService {
   private _isInitialized = signal<boolean>(false);
   private _initPromise: Promise<boolean> | null = null;
   private _hasTokenSignal = signal<boolean>(!!localStorage.getItem('auth_access_token') || !!localStorage.getItem('token'));
+  private _accessTokenCache: string | null = localStorage.getItem('token');
+  private _refreshTokenCache: string | null = localStorage.getItem('refresh_token');
   
   public readonly isInitialized = this._isInitialized.asReadonly();
   
@@ -68,6 +70,9 @@ export class StorageService {
       if (sqliteReady) {
         console.log('✅ StorageService: SQLite inicializado correctamente');
         const persistedToken = await this.sqliteService.getAuthToken('access_token');
+        const persistedRefreshToken = await this.sqliteService.getAuthToken('refresh_token');
+        this._accessTokenCache = persistedToken || this._accessTokenCache;
+        this._refreshTokenCache = persistedRefreshToken || this._refreshTokenCache;
         this._hasTokenSignal.set(!!persistedToken || !!localStorage.getItem('token'));
       } else if (typeof window !== 'undefined') {
         // En navegador web, esto es esperado
@@ -98,28 +103,50 @@ export class StorageService {
   // ==================== TOKEN MANAGEMENT ====================
 
   async setAccessToken(token: string): Promise<void> {
-    await this.sqliteService.setAuthToken('access_token', token);
+    // Cache inmediato para evitar condiciones de carrera entre login y primeras requests.
+    this._accessTokenCache = token;
     this._hasTokenSignal.set(!!token);
+    await this.sqliteService.setAuthToken('access_token', token);
   }
 
   async getAccessToken(): Promise<string | null> {
-    return this.sqliteService.getAuthToken('access_token');
+    if (this._accessTokenCache) {
+      return this._accessTokenCache;
+    }
+
+    const token = await this.sqliteService.getAuthToken('access_token');
+    if (token) {
+      this._accessTokenCache = token;
+      this._hasTokenSignal.set(true);
+    }
+    return token;
   }
 
   async removeAccessToken(): Promise<void> {
+    this._accessTokenCache = null;
     await this.sqliteService.removeAuthToken('access_token');
     this._hasTokenSignal.set(false);
   }
 
   async setRefreshToken(token: string): Promise<void> {
+    this._refreshTokenCache = token;
     await this.sqliteService.setAuthToken('refresh_token', token);
   }
 
   async getRefreshToken(): Promise<string | null> {
-    return this.sqliteService.getAuthToken('refresh_token');
+    if (this._refreshTokenCache) {
+      return this._refreshTokenCache;
+    }
+
+    const token = await this.sqliteService.getAuthToken('refresh_token');
+    if (token) {
+      this._refreshTokenCache = token;
+    }
+    return token;
   }
 
   async removeRefreshToken(): Promise<void> {
+    this._refreshTokenCache = null;
     await this.sqliteService.removeAuthToken('refresh_token');
   }
 
@@ -290,6 +317,8 @@ export class StorageService {
 
   async clearSession(): Promise<void> {
     console.log('🔄 StorageService: Limpiando sesión...');
+    this._accessTokenCache = null;
+    this._refreshTokenCache = null;
     
     await this.sqliteService.clearAuthTokens();
     await this.sqliteService.clearUserData();

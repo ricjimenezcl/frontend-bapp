@@ -12,7 +12,7 @@ import { ProviderActionSheetComponent } from '../../../shared/components/provide
 import { StateService, SelectedService } from '../../../shared/services/state.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GeoLocationService } from '../../../shared/services/geo-location.service';
-import { Subject } from 'rxjs';
+import { Subject, catchError, firstValueFrom, forkJoin } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 
@@ -163,34 +163,68 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     let newCount = 0;
 
     try {
-      const allPromises = this.selectedServices.map((service: any) =>
-        this.coreService.getNearbyProvidersByServiceId(
-          location.latitude,
-          location.longitude,
-          20,
-          service.id,
-          this.currentSkip,
-          this.PAGE_SIZE
-        ).toPromise()
-      );
+      const serviceIds = this.selectedServices.map((s: any) => Number(s.id)).filter((id: number) => Number.isFinite(id));
 
-      const allResults = await Promise.all(allPromises);
+      let newProviders: any[] = [];
+      try {
+        const unified = await firstValueFrom(
+          this.coreService.getNearbyProvidersByServiceIds(
+            location.latitude,
+            location.longitude,
+            20,
+            serviceIds,
+            this.currentSkip,
+            this.PAGE_SIZE
+          )
+        );
 
-      const newProviders: any[] = [];
-      allResults.forEach((providers, index) => {
-        if (providers && providers.length > 0) {
-          const service = this.selectedServices[index];
-          providers.forEach((provider: any) => {
-            newProviders.push({
-              ...provider,
-              serviceId: service.id,
-              serviceName: service.name,
-              mainCategoryId: service.main_category_id
-            });
-          });
-          newCount = Math.max(newCount, providers.length);
+        newProviders = (unified ?? []).map((provider: any) => ({
+          ...provider,
+          services: Array.isArray(provider?.services) && provider.services.length > 0
+            ? provider.services
+            : this.selectedServices.map((s: any) => s.name).filter(Boolean),
+        }));
+        newCount = newProviders.length;
+      } catch (unifiedErr: any) {
+        if (this.handleBusinessLimitError(unifiedErr)) {
+          return 0;
         }
-      });
+
+        // Fallback de compatibilidad: si el endpoint unificado no está disponible, consultar por servicio.
+        const byService$ = this.selectedServices.map((service: any) =>
+          this.coreService.getNearbyProvidersByServiceId(
+            location.latitude,
+            location.longitude,
+            20,
+            service.id,
+            this.currentSkip,
+            this.PAGE_SIZE
+          )
+        );
+
+        const allResults = await firstValueFrom(
+          forkJoin(byService$).pipe(
+            catchError((fallbackErr) => {
+              throw fallbackErr;
+            })
+          )
+        );
+
+        allResults.forEach((providers, index) => {
+          if (providers && providers.length > 0) {
+            const service = this.selectedServices[index];
+            providers.forEach((provider: any) => {
+              newProviders.push({
+                ...provider,
+                serviceId: service.id,
+                serviceName: service.name,
+                mainCategoryId: service.main_category_id
+              });
+            });
+            newCount = Math.max(newCount, providers.length);
+          }
+        });
+      }
 
       const deduped = this.removeDuplicates([...this.providers, ...newProviders]);
       this.providers = deduped;
@@ -201,6 +235,11 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
       this.currentSkip += this.PAGE_SIZE;
 
     } catch (error: any) {
+      if (this.handleBusinessLimitError(error)) {
+        this.isLoading = false;
+        return 0;
+      }
+
       console.error('Error cargando proveedores:', error);
       // ✅ Mensaje más informativo para el usuario
       let errorMsg = 'Error al cargar proveedores';
@@ -221,6 +260,24 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
       this.isLoading = false;
     }
     return newCount;
+  }
+
+  private getBusinessLimitCode(err: any): 'DAILY_SEARCH_LIMIT_REACHED' | 'FREE_SERVICE_SELECTION_LIMIT' | null {
+    const code = err?.error?.detail?.code;
+    if (code === 'DAILY_SEARCH_LIMIT_REACHED' || code === 'FREE_SERVICE_SELECTION_LIMIT') {
+      return code;
+    }
+    return null;
+  }
+
+  private handleBusinessLimitError(err: any): boolean {
+    const code = this.getBusinessLimitCode(err);
+    if (!code) return false;
+    this.router.navigate(['/client/tabs/categories'], {
+      queryParams: { premium_reason: code },
+      replaceUrl: true,
+    });
+    return true;
   }
 
   removeDuplicates(providers: any[]): any[] {

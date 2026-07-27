@@ -74,7 +74,7 @@ export class LoginPage implements OnInit, OnDestroy {
     this.registerForm = this.fb.group({
       full_name: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      phone: [''],
+      phone: ['', [Validators.required, Validators.pattern(/^(\+56|56)?\s?9\s?\d{4}\s?\d{4}$/)]],
       run: [''],
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
@@ -96,6 +96,10 @@ export class LoginPage implements OnInit, OnDestroy {
       }
       if (params['tab'] === 'register') {
         this.activeTab.set('register');
+      }
+      if (params['emailVerified'] === 'true') {
+        this.activeTab.set('login');
+        this.successMessage = 'Correo verificado correctamente. Ahora puedes iniciar sesión.';
       }
     });
   }
@@ -127,12 +131,13 @@ export class LoginPage implements OnInit, OnDestroy {
       this.successMessage = '';
 
       const data = {
-        email: this.registerForm.value.email,
+        email: this.normalizeEmail(this.registerForm.value.email),
         password: this.registerForm.value.password,
         full_name: this.registerForm.value.full_name,
         phone: this.registerForm.value.phone,
         run: this.registerForm.value.run,
         terms_accepted: this.registerForm.value.terms_accepted,
+        registration_source: 'mobile' as const,
         role: this.registerRole() === 'provider' ? 'PROVIDER' : 'CLIENT'
       };
 
@@ -146,21 +151,9 @@ export class LoginPage implements OnInit, OnDestroy {
         next: (resp) => {
           this.isLoading = false;
           console.log('✅ Registro exitoso', resp);
-          this.successMessage = 'Cuenta creada exitosamente. Iniciando sesión...';
-          this.authService.loginClient({
-            email: data.email,
-            password: data.password,
-            role: data.role as 'CLIENT' | 'PROVIDER'
-          }).subscribe({
-            next: (loginResp) => {
-              this.handleRoleBasedNavigation(loginResp.role);
-            },
-            error: () => {
-              this.successMessage = 'Cuenta creada exitosamente. Por favor, inicia sesión.';
-              this.activeTab.set('login');
-              this.loginForm.patchValue({ email: data.email });
-            }
-          });
+          this.successMessage = 'Cuenta creada exitosamente. Revisa tu correo y valida tu cuenta desde el enlace para iniciar sesión.';
+          this.activeTab.set('login');
+          this.loginForm.patchValue({ email: data.email });
         },
         error: (err) => {
           this.isLoading = false;
@@ -185,6 +178,10 @@ export class LoginPage implements OnInit, OnDestroy {
     } else {
       this.markFormGroupTouched(this.registerForm);
     }
+  }
+
+  private normalizeEmail(value: string): string {
+    return String(value || '').trim().toLowerCase();
   }
 
   onSubmit(): void {
@@ -251,6 +248,11 @@ export class LoginPage implements OnInit, OnDestroy {
             this.pendingLoginCredentials = credentials;
             this.loginRoleOptions = detail.roles || [];
             this.loginRolePrompt = true;
+            return;
+          }
+
+          if (error?.status === 403 && detail?.code === 'EMAIL_NOT_VERIFIED') {
+            this.errorMessage = detail?.message || 'Debes verificar tu correo electrónico para iniciar sesión.';
             return;
           }
 
@@ -684,6 +686,9 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   onReset(): void {
+    // Evita dejar foco dentro de una vista que Ionic ocultará con aria-hidden al navegar.
+    const activeEl = document.activeElement as HTMLElement | null;
+    activeEl?.blur();
     this.router.navigate(['/auth/reset-password']);
   }
 }

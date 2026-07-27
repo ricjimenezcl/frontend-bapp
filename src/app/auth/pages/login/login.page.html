@@ -85,19 +85,6 @@
             </div>
           </div>
 
-          <div class="forgot-wrap">
-            <button type="button" class="forgot-btn" (click)="onReset()">¿Olvidaste tu contraseña?</button>
-          </div>
-
-          <div *ngIf="loginRolePrompt" class="role-select-box">
-            <p>Este correo tiene dos perfiles. Elige cómo quieres ingresar:</p>
-            <div class="role-select-actions">
-              <button type="button" class="role-btn" *ngFor="let role of loginRoleOptions" (click)="selectLoginRole(role)">
-                {{ role === 'PROVIDER' ? 'Proveedor' : 'Cliente' }}
-              </button>
-            </div>
-          </div>
-
           <ion-button
             type="submit"
             expand="block"
@@ -145,8 +132,8 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Teléfono (opcional)</label>
-            <div class="input-wrap">
+            <label class="form-label">Teléfono</label>
+            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
               <ion-icon name="call-outline" class="input-icon"></ion-icon>
               <ion-input
                 formControlName="phone"
@@ -165,6 +152,9 @@
                 type="email"
                 placeholder="tu@email.com">
               </ion-input>
+            </div>
+            <div class="mt-2">
+              <span style="color:#94a3b8;font-size:12px;">Después de crear tu cuenta te enviaremos un correo para verificar tu email.</span>
             </div>
           </div>
 
