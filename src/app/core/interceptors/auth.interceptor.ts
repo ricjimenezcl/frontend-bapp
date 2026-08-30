@@ -97,6 +97,7 @@ let isRefreshing = false;
 let refreshToken$ = new BehaviorSubject<string | null>(null);
 let isShowingSessionAlert = false;
 const REFRESH_FAILED_SENTINEL = '__refresh_failed__';
+const REFRESH_RETRY_LATER_SENTINEL = '__refresh_retry_later__';
 
 /**
  * Verifica si el token JWT almacenado está expirado (decodificación client-side, no criptográfica).
@@ -116,8 +117,9 @@ function isTokenExpired(token: string): boolean {
  *   - string  → nuevo token válido
  *   - null    → token expirado y refresh falló (mostrar alert de sesión)
  *   - 'skip'  → endpoint de refresh no existe (404/405) — NO cerrar sesión
+ *   - 'retry_later' → error transitorio (429/red/5xx) — NO cerrar sesión
  */
-async function attemptTokenRefresh(http: HttpClient, storageService: StorageService): Promise<string | null | 'skip'> {
+async function attemptTokenRefresh(http: HttpClient, storageService: StorageService): Promise<string | null | 'skip' | 'retry_later'> {
   const currentToken = await storageService.getAccessToken() || localStorage.getItem('token');
   const refreshToken = await storageService.getRefreshToken() || localStorage.getItem('refresh_token');
   if (!currentToken) return null;
@@ -149,7 +151,11 @@ async function attemptTokenRefresh(http: HttpClient, storageService: StorageServ
         return 'skip';
       }
     }
-    // Para cualquier otro error (401, 500, red), el token está inválido → mostrar alert
+    if (status === 429 || status === 0 || status >= 500) {
+      console.warn('⚠️ [Auth] Refresh falló por condición transitoria (status=%s). Se mantiene la sesión.', status);
+      return 'retry_later';
+    }
+    // Para 401/403 y demás errores no transitorios, tratar como sesión inválida.
     console.error('❌ [Auth] Refresh falló con status:', status);
   }
   return null;
@@ -192,6 +198,9 @@ export const errorInterceptor: HttpInterceptorFn = (
               if (newToken === REFRESH_FAILED_SENTINEL) {
                 return throwError(() => error);
               }
+              if (newToken === REFRESH_RETRY_LATER_SENTINEL) {
+                return throwError(() => error);
+              }
 
               const retried = req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } });
               return next(retried);
@@ -205,7 +214,7 @@ export const errorInterceptor: HttpInterceptorFn = (
         return from(attemptTokenRefresh(http, storageService)).pipe(
           switchMap(result => {
             isRefreshing = false;
-            if (typeof result === 'string' && result !== 'skip') {
+              if (typeof result === 'string' && result !== 'skip' && result !== 'retry_later') {
               // Refresh exitoso — reintentar la request original con el nuevo token
               refreshToken$.next(result);
               const retried = req.clone({ setHeaders: { Authorization: `Bearer ${result}` } });
@@ -214,6 +223,10 @@ export const errorInterceptor: HttpInterceptorFn = (
             if (result === 'skip') {
               // Endpoint de refresh no existe Y token aún válido → relanzar error sin logout
               refreshToken$.next(null);
+              return throwError(() => error);
+            }
+            if (result === 'retry_later') {
+              refreshToken$.next(REFRESH_RETRY_LATER_SENTINEL);
               return throwError(() => error);
             }
             // null → token verdaderamente expirado → mostrar alert y limpiar sesión

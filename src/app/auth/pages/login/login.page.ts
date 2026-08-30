@@ -243,16 +243,18 @@ export class LoginPage implements OnInit, OnDestroy {
           this.isLoading = false;
           console.error('❌ Error en login:', error);
 
-          const detail = error?.error?.detail;
-          if (error?.status === 409 && detail?.code === 'ROLE_SELECTION_REQUIRED') {
+          const authError = this.parseAuthError(error);
+          if (error?.status === 409 && authError.code === 'ROLE_SELECTION_REQUIRED') {
             this.pendingLoginCredentials = credentials;
-            this.loginRoleOptions = detail.roles || [];
+            this.loginRoleOptions = authError.roles || [];
             this.loginRolePrompt = true;
             return;
           }
 
-          if (error?.status === 403 && detail?.code === 'EMAIL_NOT_VERIFIED') {
-            this.errorMessage = detail?.message || 'Debes verificar tu correo electrónico para iniciar sesión.';
+          if (error?.status === 403 && (authError.code === 'EMAIL_NOT_VERIFIED' || authError.isEmailNotVerified)) {
+            this.authService.resendVerificationEmail(credentials.email, 'mobile').subscribe({ error: () => {} });
+            this.errorMessage = authError.message || 'Debes verificar tu correo electrónico para iniciar sesión.';
+            this.successMessage = 'Te reenviamos un correo de verificación. Revisa tu bandeja de entrada y spam.';
             return;
           }
 
@@ -273,10 +275,35 @@ export class LoginPage implements OnInit, OnDestroy {
             this.errorMessage = 'El servidor no responde. Espera unos segundos e inténtalo nuevamente.';
           } else {
             this.retryAttempts = 0;
-            this.errorMessage = error.error?.detail || error.error?.message || 'Error desconocido';
+            this.errorMessage = authError.message || error.error?.detail || error.error?.message || 'Error desconocido';
           }
         }
       });
+  }
+
+  private parseAuthError(error: any): { code?: string; message?: string; roles?: Array<'CLIENT' | 'PROVIDER'>; isEmailNotVerified: boolean } {
+    const response = error?.error ?? {};
+    const detail = response?.detail;
+    const detailObject = (detail && typeof detail === 'object') ? detail : undefined;
+    const topLevelObject = (response && typeof response === 'object') ? response : undefined;
+
+    const code = detailObject?.code ?? topLevelObject?.code;
+    const rolesRaw = detailObject?.roles ?? topLevelObject?.roles;
+    const messageFromDetail = typeof detail === 'string' ? detail : detailObject?.message;
+    const message = messageFromDetail || topLevelObject?.message || '';
+
+    const normalized = String(message || '').toLowerCase();
+    const isEmailNotVerified =
+      code === 'EMAIL_NOT_VERIFIED' ||
+      normalized.includes('verificar tu correo') ||
+      normalized.includes('email_not_verified');
+
+    return {
+      code,
+      message: message || undefined,
+      roles: Array.isArray(rolesRaw) ? rolesRaw : undefined,
+      isEmailNotVerified,
+    };
   }
 
   ngOnDestroy(): void {
