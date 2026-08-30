@@ -53,13 +53,33 @@
           </div>
         </div>
 
-        <!-- Cargando subcategorías -->
+        <!-- Cargando -->
         <div class="as-loading-row" *ngIf="loadingSubServices">
           <ion-spinner name="crescent" class="as-spinner"></ion-spinner>
-          <span class="as-loading-text">Cargando servicios...</span>
+          <span class="as-loading-text">Cargando...</span>
         </div>
 
-        <!-- Servicio (dependiente de categoría) -->
+        <!-- Subcategoría (dependiente de categoría principal) -->
+        <div class="as-field" *ngIf="!loadingSubServices && subcategoryOptions.length > 0">
+          <label class="as-label">Subcategoría <span class="as-required">*</span></label>
+          <ion-select
+            formControlName="subcategoria"
+            placeholder="Selecciona una subcategoría"
+            interface="action-sheet"
+            cancelText="Cancelar"
+            class="as-select"
+            [class.as-select--error]="servicioForm.get('subcategoria')?.touched && servicioForm.get('subcategoria')?.errors?.['required']"
+            (ionChange)="onSubcategoryChange($event)">
+            <ion-select-option *ngFor="let sub of subcategoryOptions" [value]="sub.id">
+              {{ sub.name }}
+            </ion-select-option>
+          </ion-select>
+          <div class="as-field-error" *ngIf="servicioForm.get('subcategoria')?.touched && servicioForm.get('subcategoria')?.errors?.['required']">
+            Selecciona una subcategoría
+          </div>
+        </div>
+
+        <!-- Servicio (dependiente de subcategoría) -->
         <div class="as-field" *ngIf="!loadingSubServices && subServices.length > 0">
           <label class="as-label">Servicio <span class="as-required">*</span></label>
           <ion-select
@@ -79,10 +99,16 @@
           </div>
         </div>
 
-        <!-- Sin servicios en la categoría -->
-        <p class="as-hint" *ngIf="!loadingSubServices && selectedMainCategoryId && subServices.length === 0">
+        <!-- Sin subcategorías en la categoría -->
+        <p class="as-hint" *ngIf="!loadingSubServices && selectedMainCategoryId && subcategoryOptions.length === 0">
           <ion-icon name="alert-circle-outline"></ion-icon>
-          No hay servicios disponibles para esta categoría.
+          No hay subcategorías disponibles para esta categoría.
+        </p>
+
+        <!-- Sin servicios en la subcategoría -->
+        <p class="as-hint" *ngIf="!loadingSubServices && selectedSubcategoryId && subServices.length === 0">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          No hay servicios disponibles para esta subcategoría.
         </p>
       </div>
 

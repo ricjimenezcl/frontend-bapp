@@ -283,9 +283,12 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
   removeDuplicates(providers: any[]): any[] {
     const seen = new Set();
     return providers.filter(provider => {
-      const duplicate = seen.has(provider.id);
+      // Usar provider_id como clave: evita repetir el mismo proveedor
+      // aunque tenga múltiples service_providers registrados
+      const key = provider.provider_id ?? provider.id;
+      const duplicate = seen.has(key);
       if (!duplicate) {
-        seen.add(provider.id);
+        seen.add(key);
         if (provider.serviceId) {
           provider.services = provider.services || [];
           if (!provider.services.includes(provider.serviceName)) {

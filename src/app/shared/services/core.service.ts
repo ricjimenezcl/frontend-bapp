@@ -24,6 +24,23 @@ export interface ServiceCategory {
   is_active: boolean;
   created_at: string;
 }
+
+export interface Subcategory {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  main_category_id: number;
+}
+
+export interface ServiceItem {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  subcategory_id: number;
+  service_category_id?: number;
+}
 export interface ServiceProvider {
   id: number;
   provider_id: number;  // ✅ OPCIÓN B: Added for provider ID mapping
@@ -209,6 +226,18 @@ export class CoreService {
         .pipe(
             map((response: MainCategoryWithServices) => response.services)
         );
+  }
+
+  getSubcategories(mainCategoryId: number): Observable<Subcategory[]> {
+    return this.http.get<Subcategory[]>(
+      `${this.apiUrl}/categories/main-categories/${mainCategoryId}/subcategories`
+    );
+  }
+
+  getServicesBySubcategory(subcategoryId: number): Observable<ServiceItem[]> {
+    return this.http.get<ServiceItem[]>(
+      `${this.apiUrl}/categories/subcategories/${subcategoryId}/services`
+    );
   }
   getServiceCategories(mainCategoryId?: number): Observable<ServiceCategory[]> {
     let url = `${this.apiUrl}/categories/services`;

@@ -186,23 +186,49 @@
 
         <!-- Panel header -->
         <div class="subcat-panel-hd">
-          <button class="back-btn" (click)="selectedMainCategory = null" type="button">
+          <button class="back-btn"
+                  (click)="selectedSubcategory ? clearSubcategory() : selectedMainCategory = null"
+                  type="button">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </button>
           <div>
             <h2 class="subcat-title">{{ selectedMainCategory.name }}</h2>
-            <p class="subcat-subtitle">Selecciona uno o más servicios</p>
+            <p class="subcat-subtitle">
+              {{ selectedSubcategory ? selectedSubcategory.name + ' — Selecciona servicios' : 'Selecciona una subcategoría' }}
+            </p>
           </div>
         </div>
 
-        <!-- Loading services -->
+        <!-- Loading -->
         <div class="services-loading" *ngIf="isLoading">
           <ion-spinner name="crescent" color="primary"></ion-spinner>
-          <span>Cargando servicios...</span>
+          <span>Cargando...</span>
         </div>
 
-        <!-- Services list -->
-        <div class="services-list" *ngIf="!isLoading && subcategories.length > 0">
+        <!-- PASO 2: select de subcategoría -->
+        <div class="subcat-select-wrap" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length > 0">
+          <ion-item lines="none" class="subcat-ion-item">
+            <ion-label position="stacked" class="subcat-ion-label">Subcategoría</ion-label>
+            <ion-select
+              placeholder="Selecciona una subcategoría..."
+              (ionChange)="onSubcategoryChange($event.detail.value)"
+              interface="action-sheet"
+              class="subcat-ion-select">
+              <ion-select-option *ngFor="let sub of subcategoryOptions" [value]="sub.id">
+                {{ sub.name }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </div>
+
+        <!-- Sin subcategorías -->
+        <div class="empty-state-box" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length === 0">
+          <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
+          <p class="empty-text">Sin subcategorías en esta categoría</p>
+        </div>
+
+        <!-- PASO 3: lista de servicios -->
+        <div class="services-list" *ngIf="!isLoading && selectedSubcategory && subcategories.length > 0">
           <button
             class="service-item"
             *ngFor="let svc of subcategories"
@@ -219,10 +245,10 @@
           </button>
         </div>
 
-        <!-- Empty services -->
-        <div class="empty-state-box" *ngIf="!isLoading && subcategories.length === 0">
+        <!-- Sin servicios en subcategoría -->
+        <div class="empty-state-box" *ngIf="!isLoading && selectedSubcategory && subcategories.length === 0">
           <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
-          <p class="empty-text">Sin servicios en esta categoría</p>
+          <p class="empty-text">Sin servicios en esta subcategoría</p>
         </div>
 
         <!-- Selection summary -->

@@ -97,8 +97,10 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
   servicioForm: FormGroup;
 
-  // Selección de categoría / servicio (2 pasos inline)
+  // Selección de categoría / servicio (3 pasos inline)
   selectedMainCategoryId: number = 0;
+  subcategoryOptions: Array<{ id: number; name: string }> = [];
+  selectedSubcategoryId: number = 0;
   selectedServiceId: number = 0;
   selectedService: ServiceCategory | null = null;
   subServices: ServiceCategory[] = [];
@@ -151,6 +153,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     return this.fb.group({
       servicio: ['', [Validators.required]],
       categoria: ['', [Validators.required]],
+      subcategoria: ['', [Validators.required]],
       nombre_prestador: this.fb.control('', {
         validators: [Validators.required, Validators.minLength(5), Validators.maxLength(45)],
         asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'service')],
@@ -316,13 +319,40 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  // ── Selección inline 2 pasos (reemplaza flujo modal) ─────────────────
+  // ── Selección inline 3 pasos (categoría → subcategoría → servicio) ──────
 
   /** Paso 1: usuario cambia categoría principal → cargar subcategorías */
   onMainCategoryChange(event: any): void {
     const id = Number(event?.detail?.value ?? 0);
     this.selectedMainCategoryId = id;
-    // Resetear selección de servicio
+    this.servicioForm.patchValue({ subcategoria: '', categoria: '' });
+    this.selectedSubcategoryId = 0;
+    this.selectedServiceId = 0;
+    this.selectedService = null;
+    this.subcategoryOptions = [];
+    this.subServices = [];
+    if (!id) return;
+
+    this.loadingSubServices = true;
+    this.coreService.getSubcategories(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (subs) => {
+          this.subcategoryOptions = subs;
+          this.loadingSubServices = false;
+        },
+        error: () => {
+          this.subcategoryOptions = [];
+          this.loadingSubServices = false;
+          this.presentToast('Error al cargar subcategorías', 'danger');
+        }
+      });
+  }
+
+  /** Paso 2: usuario selecciona subcategoría → cargar servicios */
+  onSubcategoryChange(event: any): void {
+    const id = Number(event?.detail?.value ?? 0);
+    this.selectedSubcategoryId = id;
     this.servicioForm.patchValue({ categoria: '' });
     this.selectedServiceId = 0;
     this.selectedService = null;
@@ -330,11 +360,19 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     if (!id) return;
 
     this.loadingSubServices = true;
-    this.coreService.getMainCategoryWithServices(id)
+    this.coreService.getServicesBySubcategory(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (services: ServiceCategory[]) => {
-          this.subServices = services || [];
+        next: (services) => {
+          this.subServices = services.map(s => ({
+            id: s.service_category_id ?? s.id,
+            name: s.name,
+            description: s.description ?? '',
+            main_category_id: this.selectedMainCategoryId,
+            icon: s.icon ?? '',
+            is_active: true,
+            created_at: '',
+          }));
           this.loadingSubServices = false;
         },
         error: () => {
@@ -345,7 +383,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       });
   }
 
-  /** Paso 2: usuario selecciona servicio específico */
+  /** Paso 3: usuario selecciona servicio específico */
   onServiceChange(event: any): void {
     const id = Number(event?.detail?.value ?? 0);
     this.selectedServiceId = id;

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular';
-import { CoreService, MainCategory, ServiceCategory } from '../../../shared/services/core.service';
+import { CoreService, MainCategory, ServiceCategory, Subcategory, ServiceItem } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
 import { GeoLocationService } from  '../../../shared/services/geo-location.service';
@@ -28,6 +28,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   mainCategories: MainCategory[] = [];
   selectedServices: ServiceCategory[] = [];
   selectedMainCategory: MainCategory | null = null;
+  subcategoryOptions: Subcategory[] = [];
+  selectedSubcategory: Subcategory | null = null;
   subcategories: ServiceCategory[] = [];
   isLoading = true;
 
@@ -137,28 +139,62 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   selectMainCategory(category: MainCategory) {
-    console.log("selectMainCategory : ", category);
     this.selectedMainCategory = category;
+    this.selectedSubcategory = null;
+    this.subcategoryOptions = [];
+    this.subcategories = [];
     this.selectedServices = [];
-    this.loadSubcategories(category.id);
+    this.isLoading = true;
+
+    this.coreService.getSubcategories(category.id).subscribe({
+      next: (subs) => {
+        this.subcategoryOptions = subs;
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  onSubcategoryChange(subcategoryId: number) {
+    if (!subcategoryId) {
+      this.selectedSubcategory = null;
+      this.subcategories = [];
+      this.selectedServices = [];
+      return;
+    }
+    this.selectedSubcategory = this.subcategoryOptions.find(s => s.id === subcategoryId) ?? null;
+    this.subcategories = [];
+    this.selectedServices = [];
+    this.isLoading = true;
+
+    this.coreService.getServicesBySubcategory(subcategoryId).subscribe({
+      next: (services: ServiceItem[]) => {
+        this.subcategories = services.map(s => ({
+          id: s.service_category_id ?? s.id,
+          name: s.name,
+          description: s.description ?? '',
+          main_category_id: this.selectedMainCategory?.id ?? 0,
+          icon: s.icon ?? '',
+          is_active: true,
+          created_at: '',
+        }));
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  clearSubcategory() {
+    this.selectedSubcategory = null;
+    this.subcategories = [];
+    this.selectedServices = [];
   }
 
   loadSubcategories(mainCategoryId: number) {
-    this.isLoading = true;
-    console.log("loadSubcategories : ", mainCategoryId);
-    
-    this.coreService.getMainCategoryWithServices(mainCategoryId).subscribe({
-      next: (subcategories: ServiceCategory[]) => {
-        this.subcategories = subcategories || [];
-        this.isLoading = false;
-        console.log("subcategories : ", subcategories);
-      },
-      error: (error) => {
-        console.error('Error loading subcategories:', error);
-        this.subcategories = [];
-        this.isLoading = false;
-       
-      }
+    // Mantenido por compatibilidad — ya no se usa en el flujo principal
+    this.coreService.getSubcategories(mainCategoryId).subscribe({
+      next: (subs) => { this.subcategoryOptions = subs; this.isLoading = false; },
+      error: () => { this.isLoading = false; }
     });
   }
 
