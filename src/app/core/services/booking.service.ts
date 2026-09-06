@@ -23,6 +23,7 @@ export interface CancelBookingRequest {
  */
 export interface ConfirmBookingRequest {
   notes?: string;
+  source?: 'web' | 'mobile';
 }
 
 /**
@@ -176,7 +177,11 @@ export class BookingService {
    * @returns Observable con la reserva actualizada
    */
   confirmBooking(bookingId: number, request?: ConfirmBookingRequest): Observable<BookingResponse> {
-    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/confirm`, {}).pipe(
+    const payload: ConfirmBookingRequest = {
+      notes: request?.notes,
+      source: request?.source ?? 'mobile',
+    };
+    return this.http.post<BookingResponse>(`${this.apiUrl}/${bookingId}/confirm`, payload).pipe(
       tap(() => this.refreshProviderBookings())
     );
   }

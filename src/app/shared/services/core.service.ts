@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
@@ -291,6 +291,45 @@ export class CoreService {
       catchError(error => {
         this._isLoading.set(false);
         console.error('Error fetching providers:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getServiceCatalog(query?: string): Observable<ServiceCategory[]> {
+    this._isLoading.set(true);
+    let params = new HttpParams();
+    const normalizedQuery = (query ?? '').trim();
+    if (normalizedQuery.length > 0) {
+      params = params.set('q', normalizedQuery);
+    }
+
+    return this.http.get<Array<{
+      id: number;
+      name: string;
+      description?: string | null;
+      icon?: string | null;
+      subcategory_id: number;
+      service_category_id?: number | null;
+    }>>(`${this.apiUrl}/categories/services-catalog`, { params }).pipe(
+      map(services => services
+        .map(service => ({
+          id: service.service_category_id ?? service.id,
+          name: service.name,
+          description: service.description ?? '',
+          main_category_id: 0,
+          icon: service.icon ?? '',
+          is_active: true,
+          created_at: '',
+        }))
+      ),
+      tap(categories => {
+        this._serviceCategories.set(categories);
+        this._isLoading.set(false);
+      }),
+      catchError(error => {
+        this._isLoading.set(false);
+        console.error('Error fetching service catalog:', error);
         return throwError(() => error);
       })
     );

@@ -17,7 +17,10 @@ export class ProviderBookingService {
     }
 
     acceptBooking(bookingId: number, notes?: string): Observable<BookingResponse> {
-        return this.http.post<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/confirm`, {});
+        return this.http.post<BookingResponse>(`${this.apiUrl}/bookings/${bookingId}/confirm`, {
+            notes,
+            source: 'mobile'
+        });
     }
 
     rejectBooking(bookingId: number, reason: string = 'PROVIDER_REQUEST', reasonComment?: string): Observable<BookingResponse> {

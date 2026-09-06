@@ -31,9 +31,13 @@
           <span class="loc-text">{{ selectedLocationName }}</span>
         </div>
         <ion-icon
+          role="button"
+          tabindex="0"
           [name]="selectedLocationName !== 'Tu ubicación actual' ? 'close-circle' : 'chevron-down'"
           class="loc-chevron"
-          (click)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()">
+          (click)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()"
+          (keydown.enter)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()"
+          (keydown.space)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()">
         </ion-icon>
       </button>
 
@@ -47,7 +51,9 @@
       <div class="loc-dropdown" *ngIf="showLocationSearch">
         <div class="loc-input-row">
           <ion-icon name="search-outline" class="loc-input-icon"></ion-icon>
+          <label class="sr-only" for="mc-location-input">Zona, ciudad o dirección</label>
           <input
+            id="mc-location-input"
             class="loc-input"
             placeholder="Zona, ciudad o dirección..."
             [(ngModel)]="locationQuery"
@@ -121,20 +127,6 @@
           <p class="hint-text">Para ver los servicios disponibles</p>
         </div>
       </div>
-      <!-- ── Hero banner ────────────────────────────────────────────── -->
-      <!-- <div class="hero-banner" *ngIf="!selectedMainCategory">
-        <div class="hero-inner">
-          <div class="hero-badge">
-            <ion-icon name="flash"></ion-icon>
-            <span>Disponible ahora</span>
-          </div>
-          <h2 class="hero-title">Proveedores verificados<br>cerca de ti</h2>
-          <p class="hero-sub">Elige una categoría para ver quién puede ayudarte</p>
-        </div>
-        <div class="hero-orb hero-orb-1"></div>
-        <div class="hero-orb hero-orb-2"></div>
-      </div> -->
-
       <!-- ── Categories grid ─────────────────────────────────────────── -->
       <div class="section" *ngIf="!selectedMainCategory">
         <div class="section-hd">

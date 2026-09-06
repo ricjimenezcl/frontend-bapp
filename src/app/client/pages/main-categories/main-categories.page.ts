@@ -45,6 +45,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   selectedLocationName = 'Tu ubicación actual';
   isLocationSearching = false;
   private locationSearch$ = new Subject<string>();
+  private catalogSearchTimeout?: ReturnType<typeof setTimeout>;
 
   // Map picker
   showMapPicker = false;
@@ -83,8 +84,11 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.handlePremiumReasonFromQuery();
 
     this.loadMainCategories();
-    this.coreService.getServiceCategories().subscribe({
-      next: (cats) => { this.allCategories = cats; },
+    this.coreService.getServiceCatalog().subscribe({
+      next: (cats) => {
+        this.allCategories = cats;
+        this.applySearchFilter();
+      },
       error: () => {}
     });
 
@@ -302,42 +306,42 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
 
   async confirmSelection() {
-    if (this.selectedMainCategory && this.selectedServices.length > 0) {
-      // Convertir a SelectedService para el SelectionService
-      const selectedServicesData = this.selectedServices.map(service => ({
-        id: service.id,
-        name: service.name,
-        description: service.description,
-        main_category_id: this.selectedMainCategory!.id,
-        mainCategoryName: this.selectedMainCategory!.name
-      }));
-
-      // Guardar en el servicio compartido
-      this.stateService.setSelectedServices(selectedServicesData);
-
-      // Obtener y guardar ubicación actual del usuario
-      try {
-        const position = await this.geoLocationService.getCurrentLocation();
-        this.stateService.setUserLocation({
-          latitude: position.latitude,
-          longitude: position.longitude,
-          timestamp: Date.now()
-        });
-      } catch (error) {
-        console.error('Error obteniendo ubicación:', error);
-        // Usar ubicación por defecto de Santiago para no bloquear navegación
-        this.stateService.setUserLocation({
-          latitude: -33.4489,
-          longitude: -70.6693,
-          timestamp: Date.now()
-        });
-      }
-
-      // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)
-      this.router.navigate(['/client/tabs'], { replaceUrl: true });
-    } else {
-
+    if (!this.selectedMainCategory || this.selectedServices.length === 0) {
+      return;
     }
+
+    // Convertir a SelectedService para el SelectionService
+    const selectedServicesData = this.selectedServices.map(service => ({
+      id: service.id,
+      name: service.name,
+      description: service.description,
+      main_category_id: this.selectedMainCategory!.id,
+      mainCategoryName: this.selectedMainCategory!.name
+    }));
+
+    // Guardar en el servicio compartido
+    this.stateService.setSelectedServices(selectedServicesData);
+
+    // Obtener y guardar ubicación actual del usuario
+    try {
+      const position = await this.geoLocationService.getCurrentLocation();
+      this.stateService.setUserLocation({
+        latitude: position.latitude,
+        longitude: position.longitude,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Error obteniendo ubicación:', error);
+      // Si el GPS falla, seguimos con Santiago Centro como fallback para no bloquear la búsqueda.
+      this.stateService.setUserLocation({
+        latitude: -33.4489,
+        longitude: -70.6693,
+        timestamp: Date.now()
+      });
+    }
+
+    // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)
+    this.router.navigate(['/client/tabs'], { replaceUrl: true });
   }
 
   // ── Location search ──────────────────────────────────────────────────
@@ -389,13 +393,12 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
         this.mapPickerInitialLng = userLocation.longitude;
       } else {
         // Intentar obtener ubicación GPS actual
-        try {
-          const position = await this.geoLocationService.getCurrentLocation();
+        const position = await this.geoLocationService.getCurrentLocation().catch(() => null);
+        if (position) {
           this.mapPickerInitialLat = position.latitude;
           this.mapPickerInitialLng = position.longitude;
-        } catch (error) {
+        } else {
           console.log('No se pudo obtener ubicación GPS, usando Santiago Centro');
-          // Mantener valores por defecto
         }
       }
     }
@@ -421,17 +424,57 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   onSearchInput(event: any) {
-    const q = (event.target?.value ?? '').toLowerCase().trim();
+    const q = String(event?.detail?.value ?? event?.target?.value ?? '')
+      .trim();
     this.searchQuery = q;
-    if (!q) { this.filteredCategories = []; return; }
-    this.filteredCategories = this.allCategories
-      .filter(c => c.name.toLowerCase().includes(q) || (c.description ?? '').toLowerCase().includes(q))
-      .slice(0, 8);
+
+    if (this.catalogSearchTimeout) {
+      clearTimeout(this.catalogSearchTimeout);
+    }
+
+    if (q.length >= 2) {
+      this.catalogSearchTimeout = globalThis.setTimeout(() => {
+        this.coreService.getServiceCatalog(q).subscribe({
+          next: (cats) => {
+            this.allCategories = cats;
+            this.applySearchFilter();
+          },
+          error: () => {
+            this.applySearchFilter();
+          }
+        });
+      }, 250);
+      return;
+    }
+
+    this.applySearchFilter();
   }
 
   clearSearch() {
     this.searchQuery = '';
-    this.filteredCategories = [];
+    this.applySearchFilter();
+  }
+
+  private applySearchFilter(): void {
+    const q = this.normalizeSearchText(this.searchQuery).trim();
+    if (q.length < 2) {
+      this.filteredCategories = [];
+      return;
+    }
+
+    this.filteredCategories = this.allCategories
+      .filter(c =>
+        this.normalizeSearchText(c.name).includes(q) ||
+        this.normalizeSearchText(c.description).includes(q)
+      )
+      .slice(0, 8);
+  }
+
+  private normalizeSearchText(value: string | null | undefined): string {
+    return (value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   }
 
   selectServiceCategory(cat: ServiceCategory) {
