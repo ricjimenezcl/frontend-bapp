@@ -451,6 +451,12 @@ ion-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--bapp-space-3);
+
+  asl-google-signin-button {
+    display: block;
+    width: 100%;
+    min-width: 200px;
+  }
 }
 
 .social-btn {
