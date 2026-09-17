@@ -487,18 +487,19 @@ $bp-xl: 1280px;
 
 // Clase light mode (preparado para futuro)
 .light-mode {
-  --bapp-bg-base:         #FFFFFF;
-  --bapp-bg-page:         #F3F4F6;
-  --bapp-bg-card:         #FFFFFF;
-  --bapp-bg-card-raised:  #F9FAFB;
-  --bapp-bg-input:        #F3F4F6;
-  --bapp-border:          rgba(0, 0, 0, 0.08);
-  --bapp-border-medium:   rgba(0, 0, 0, 0.14);
+  --bapp-bg-base:         #F4F1EC;
+  --bapp-bg-page:         #F0EFEA;
+  --bapp-bg-card:         #F7F6F3;
+  --bapp-bg-card-raised:  #FFFFFF;
+  --bapp-bg-input:        #F7F7F5;
+  --bapp-border:          rgba(17, 24, 39, 0.10);
+  --bapp-border-medium:   rgba(17, 24, 39, 0.16);
   --bapp-text-primary:    #111827;
-  --bapp-text-secondary:  #6B7280;
-  --bapp-text-tertiary:   #9CA3AF;
+  --bapp-text-secondary:  #495465;
+  --bapp-text-tertiary:   #6B7280;
   --bapp-text-inverse:    #FFFFFF;
-  --ion-background-color: #F3F4F6;
-  --ion-text-color:        #111827;
-  --ion-card-background:   #FFFFFF;
+  --ion-background-color: #F0EFEA;
+  --ion-text-color:       #111827;
+  --ion-card-background:  #F7F6F3;
+  --ion-item-background:  transparent;
 }

@@ -7,7 +7,7 @@
 }
 
 ion-content {
-  --background: url('../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+  --background: #F0EFEA;
 }
 
 // ── Outer layout ───────────────────────────────────────────────────────────────
@@ -15,6 +15,7 @@ ion-content {
   min-height: 100%;
   @include flex-column-center;
   padding: var(--bapp-space-6) var(--bapp-space-4);
+  background: #F0EFEA;
 }
 
 .login-wrap {
@@ -33,17 +34,19 @@ ion-content {
   .web-brand-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   .logo-container {
-    width: 88px;
-    height: 136px;
+    width: 84px;
+    height: 128px;
     background: transparent;
     border-radius: var(--bapp-radius-xl);
     display: flex;
     overflow: hidden;
-    
+
     .logo-img {
       width: 100%;
       height: 100%;
@@ -52,14 +55,16 @@ ion-content {
   }
 
   .titulo-img {
-    height: 40px;
+    height: 42px;
     object-fit: contain;
+    display: block;
   }
 
   .titulo-fallback {
+    display: none;
     font-size: 40px;
     font-weight: 700;
-    color: var(--bapp-color-primary, #FDD735);
+    color: rgba(17, 24, 39, 0.18);
     letter-spacing: 0.5px;
   }
 }
@@ -92,17 +97,17 @@ ion-content {
 .login-subtitle {
   margin: 0;
   font-size: var(--bapp-text-sm);
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(17, 24, 39, 0.60);
   text-align: center;
 }
 
 // ── Card ───────────────────────────────────────────────────────────────────────
 .login-card {
   width: 100%;
-  background: var(--bapp-bg-card);
-  border: 1px solid var(--bapp-border);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: var(--bapp-radius-xl);
-  box-shadow: var(--bapp-shadow-card);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
   padding: var(--bapp-space-6);
   display: flex;
   flex-direction: column;

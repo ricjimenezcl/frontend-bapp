@@ -32,8 +32,8 @@ export class ThemeService {
     if (legacyTheme === 'dark') return true;
     if (legacyTheme === 'light') return false;
 
-    // La app es dark-first. Si no hay preferencia válida, arrancar en oscuro.
-    return true;
+    // La referencia web usa un tono neutro claro por defecto.
+    return false;
   }
 
   private initTheme(): void {
@@ -85,13 +85,13 @@ export class ThemeService {
         app.classList.add('theme-light', 'light-mode');
       }
 
-      root.style.backgroundColor = '#FFFFFF';
-      root.style.color = '#141414';
-      body.style.backgroundColor = '#FFFFFF';
-      body.style.color = '#141414';
+      root.style.backgroundColor = '#F3F1ED';
+      root.style.color = '#111827';
+      body.style.backgroundColor = '#F3F1ED';
+      body.style.color = '#111827';
       if (app) {
-        app.style.backgroundColor = '#FFFFFF';
-        app.style.color = '#141414';
+        app.style.backgroundColor = '#F3F1ED';
+        app.style.color = '#111827';
       }
     }
   }
