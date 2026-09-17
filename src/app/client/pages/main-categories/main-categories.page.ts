@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular';
-import { CoreService, MainCategory, ServiceCategory, Subcategory, ServiceItem } from '../../../shared/services/core.service';
+import { CoreService, MainCategory, ServiceCategory } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
 import { GeoLocationService } from  '../../../shared/services/geo-location.service';
@@ -29,8 +29,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   mainCategories: MainCategory[] = [];
   selectedServices: ServiceCategory[] = [];
   selectedMainCategory: MainCategory | null = null;
-  subcategoryOptions: Subcategory[] = [];
-  selectedSubcategory: Subcategory | null = null;
+  subcategoryOptions: ServiceCategory[] = [];
+  selectedSubcategory: ServiceCategory | null = null;
   subcategories: ServiceCategory[] = [];
   isLoading = true;
 
@@ -89,7 +89,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.handlePremiumReasonFromQuery();
 
     this.loadMainCategories();
-    this.coreService.getServiceCatalog().subscribe({
+    this.coreService.getServiceCategories().subscribe({
       next: (cats) => {
         this.allCategories = cats;
         this.applySearchFilter();
@@ -155,7 +155,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.selectedServices = [];
     this.isLoading = true;
 
-    this.coreService.getSubcategories(category.id).subscribe({
+    this.coreService.getMainCategoryWithServices(category.id).subscribe({
       next: (subs) => {
         this.subcategoryOptions = subs;
         this.isLoading = false;
@@ -176,17 +176,10 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.selectedServices = [];
     this.isLoading = true;
 
-    this.coreService.getServicesBySubcategory(subcategoryId).subscribe({
-      next: (services: ServiceItem[]) => {
-        this.subcategories = services.map(s => ({
-          id: s.service_category_id ?? s.id,
-          name: s.name,
-          description: s.description ?? '',
-          main_category_id: this.selectedMainCategory?.id ?? 0,
-          icon: s.icon ?? '',
-          is_active: true,
-          created_at: '',
-        }));
+    // Filtrar servicios de la subcategoría seleccionada
+    this.coreService.getServiceCategories(subcategoryId).subscribe({
+      next: (services) => {
+        this.subcategories = services;
         this.isLoading = false;
       },
       error: () => { this.isLoading = false; }
@@ -201,7 +194,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
   loadSubcategories(mainCategoryId: number) {
     // Mantenido por compatibilidad — ya no se usa en el flujo principal
-    this.coreService.getSubcategories(mainCategoryId).subscribe({
+    this.coreService.getMainCategoryWithServices(mainCategoryId).subscribe({
       next: (subs) => { this.subcategoryOptions = subs; this.isLoading = false; },
       error: () => { this.isLoading = false; }
     });
@@ -439,7 +432,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
     if (q.length >= 2) {
       this.catalogSearchTimeout = globalThis.setTimeout(() => {
-        this.coreService.getServiceCatalog(q).subscribe({
+        this.coreService.getServiceCategories().subscribe({
           next: (cats) => {
             this.allCategories = cats;
             this.applySearchFilter();
