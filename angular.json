@@ -53,9 +53,20 @@
                 "glob": "images/**",
                 "input": "node_modules/leaflet/dist",
                 "output": "/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@fortawesome/fontawesome-free/css",
+                "output": "fontawesome/css"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/@fortawesome/fontawesome-free/webfonts",
+                "output": "fontawesome/webfonts"
               }
             ],
             "styles": [
+              "src/theme/variables.scss",
               "src/global.scss",
               "node_modules/leaflet/dist/leaflet.css"
             ],

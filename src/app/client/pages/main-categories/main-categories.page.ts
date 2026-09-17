@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { isFontAwesomeIcon, isImageIcon } from '../../../shared/utils/icon-kind.util';
 
 @Component({
   selector: 'app-main-categories',
@@ -73,11 +74,15 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
   /**
    * Verifica si el icono es una URL de imagen (http/https)
-   * Si no lo es, se asume que es un nombre de ion-icon
+   * Si no lo es, se asume que es un nombre de ion-icon o de Font Awesome
    */
   isImageUrl(icon: string | null | undefined): boolean {
-    if (!icon) return false;
-    return icon.startsWith('http://') || icon.startsWith('https://');
+    return isImageIcon(icon);
+  }
+
+  /** true cuando el icono viene como clase(s) de Font Awesome (ej. "fa-solid fa-house") */
+  isFontAwesomeIcon(icon: string | null | undefined): boolean {
+    return isFontAwesomeIcon(icon);
   }
 
   ngOnInit() {

@@ -99,7 +99,12 @@
         (click)="selectServiceCategory(cat)"
         type="button">
         <div class="autocomplete-icon-wrap">
-          <ion-icon [name]="cat.icon || getCategoryIcon(cat.name)"></ion-icon>
+          <img *ngIf="isImageUrl(cat.icon)"
+               [src]="cat.icon"
+               [alt]="cat.name" />
+          <i *ngIf="isFontAwesomeIcon(cat.icon)" class="{{ cat.icon }}" aria-hidden="true"></i>
+          <ion-icon *ngIf="!isImageUrl(cat.icon) && !isFontAwesomeIcon(cat.icon)"
+                    [name]="cat.icon || getCategoryIcon(cat.name)"></ion-icon>
         </div>
         <div class="autocomplete-info">
           <span class="autocomplete-name">{{ cat.name }}</span>
@@ -150,13 +155,16 @@
             (click)="selectMainCategory(cat)"
             type="button">
             <div class="cat-tile-icon-wrap">
-              <!-- 🔥 Condicional: imagen o ion-icon (homologado con web) -->
+              <!-- 🔥 Condicional: imagen, Font Awesome o ion-icon (homologado con web) -->
               <img *ngIf="isImageUrl(cat.icon)" 
                    [src]="cat.icon" 
                    [alt]="cat.name" 
                    class="cat-tile-img"
                    loading="lazy" />
-              <ion-icon *ngIf="!isImageUrl(cat.icon)" 
+              <i *ngIf="isFontAwesomeIcon(cat.icon)"
+                 class="cat-tile-icon {{ cat.icon }}"
+                 aria-hidden="true"></i>
+              <ion-icon *ngIf="!isImageUrl(cat.icon) && !isFontAwesomeIcon(cat.icon)" 
                         [name]="cat.icon || 'construct-outline'" 
                         class="cat-tile-icon"></ion-icon>
             </div>
@@ -197,20 +205,34 @@
           <span>Cargando...</span>
         </div>
 
-        <!-- PASO 2: select de subcategoría -->
-        <div class="subcat-select-wrap" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length > 0">
-          <ion-item lines="none" class="subcat-ion-item">
-            <ion-label position="stacked" class="subcat-ion-label">Subcategoría</ion-label>
-            <ion-select
-              placeholder="Selecciona una subcategoría..."
-              (ionChange)="onSubcategoryChange($event.detail.value)"
-              interface="action-sheet"
-              class="subcat-ion-select">
-              <ion-select-option *ngFor="let sub of subcategoryOptions" [value]="sub.id">
-                {{ sub.name }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
+        <!-- PASO 2: grid de subcategorías con icono (homologado con web) -->
+        <div class="section" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length > 0">
+          <div class="section-hd">
+            <span class="section-title-txt">Subcategorías</span>
+          </div>
+          <div class="cat-grid">
+            <button
+              class="cat-tile"
+              *ngFor="let sub of subcategoryOptions; let i = index"
+              [attr.data-idx]="i % 6"
+              (click)="onSubcategoryChange(sub.id)"
+              type="button">
+              <div class="cat-tile-icon-wrap">
+                <img *ngIf="isImageUrl(sub.icon)"
+                     [src]="sub.icon"
+                     [alt]="sub.name"
+                     class="cat-tile-img"
+                     loading="lazy" />
+                <i *ngIf="isFontAwesomeIcon(sub.icon)"
+                   class="cat-tile-icon {{ sub.icon }}"
+                   aria-hidden="true"></i>
+                <ion-icon *ngIf="!isImageUrl(sub.icon) && !isFontAwesomeIcon(sub.icon)"
+                          [name]="sub.icon || selectedMainCategory.icon || 'construct-outline'"
+                          class="cat-tile-icon"></ion-icon>
+              </div>
+              <span class="cat-tile-label">{{ sub.name }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Sin subcategorías -->
