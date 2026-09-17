@@ -2,9 +2,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
-import { CoreService, MainCategory, ServiceCategory } from '../../../shared/services/core.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AlertController, IonicModule } from '@ionic/angular';
+import { CoreService, MainCategory, ServiceCategory, Subcategory, ServiceItem } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
 import { GeoLocationService } from  '../../../shared/services/geo-location.service';
@@ -12,6 +12,9 @@ import { MapboxService } from '../../../shared/services/mapbox.service';
 import { MapPickerComponent } from '../../../shared/components/map-picker/map-picker.component';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { AuthService } from '../../../auth/services/auth.service';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { isFontAwesomeIcon, isImageIcon } from '../../../shared/utils/icon-kind.util';
 
 @Component({
   selector: 'app-main-categories',
@@ -26,6 +29,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   mainCategories: MainCategory[] = [];
   selectedServices: ServiceCategory[] = [];
   selectedMainCategory: MainCategory | null = null;
+  subcategoryOptions: Subcategory[] = [];
+  selectedSubcategory: Subcategory | null = null;
   subcategories: ServiceCategory[] = [];
   isLoading = true;
 
@@ -41,19 +46,26 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   selectedLocationName = 'Tu ubicación actual';
   isLocationSearching = false;
   private locationSearch$ = new Subject<string>();
+  private catalogSearchTimeout?: ReturnType<typeof setTimeout>;
 
   // Map picker
   showMapPicker = false;
   mapPickerInitialLat = -33.4489;  // Santiago Centro por defecto
   mapPickerInitialLng = -70.6693;
+  readonly maxFreeServices = 3;
+  readonly freeDailySearchLimit = 3;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
+    private alertCtrl: AlertController,
     private coreService: CoreService,
     private selectionService: SelectionService,
     private stateService: StateService,
     private geoLocationService: GeoLocationService,
-    private mapboxService: MapboxService
+    private mapboxService: MapboxService,
+    private authService: AuthService,
+    private paymentRedirect: PaymentRedirectService
   ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -62,17 +74,26 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
   /**
    * Verifica si el icono es una URL de imagen (http/https)
-   * Si no lo es, se asume que es un nombre de ion-icon
+   * Si no lo es, se asume que es un nombre de ion-icon o de Font Awesome
    */
   isImageUrl(icon: string | null | undefined): boolean {
-    if (!icon) return false;
-    return icon.startsWith('http://') || icon.startsWith('https://');
+    return isImageIcon(icon);
+  }
+
+  /** true cuando el icono viene como clase(s) de Font Awesome (ej. "fa-solid fa-house") */
+  isFontAwesomeIcon(icon: string | null | undefined): boolean {
+    return isFontAwesomeIcon(icon);
   }
 
   ngOnInit() {
+    this.handlePremiumReasonFromQuery();
+
     this.loadMainCategories();
-    this.coreService.getServiceCategories().subscribe({
-      next: (cats) => { this.allCategories = cats; },
+    this.coreService.getServiceCatalog().subscribe({
+      next: (cats) => {
+        this.allCategories = cats;
+        this.applySearchFilter();
+      },
       error: () => {}
     });
 
@@ -127,28 +148,62 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   selectMainCategory(category: MainCategory) {
-    console.log("selectMainCategory : ", category);
     this.selectedMainCategory = category;
+    this.selectedSubcategory = null;
+    this.subcategoryOptions = [];
+    this.subcategories = [];
     this.selectedServices = [];
-    this.loadSubcategories(category.id);
+    this.isLoading = true;
+
+    this.coreService.getSubcategories(category.id).subscribe({
+      next: (subs) => {
+        this.subcategoryOptions = subs;
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  onSubcategoryChange(subcategoryId: number) {
+    if (!subcategoryId) {
+      this.selectedSubcategory = null;
+      this.subcategories = [];
+      this.selectedServices = [];
+      return;
+    }
+    this.selectedSubcategory = this.subcategoryOptions.find(s => s.id === subcategoryId) ?? null;
+    this.subcategories = [];
+    this.selectedServices = [];
+    this.isLoading = true;
+
+    this.coreService.getServicesBySubcategory(subcategoryId).subscribe({
+      next: (services: ServiceItem[]) => {
+        this.subcategories = services.map(s => ({
+          id: s.service_category_id ?? s.id,
+          name: s.name,
+          description: s.description ?? '',
+          main_category_id: this.selectedMainCategory?.id ?? 0,
+          icon: s.icon ?? '',
+          is_active: true,
+          created_at: '',
+        }));
+        this.isLoading = false;
+      },
+      error: () => { this.isLoading = false; }
+    });
+  }
+
+  clearSubcategory() {
+    this.selectedSubcategory = null;
+    this.subcategories = [];
+    this.selectedServices = [];
   }
 
   loadSubcategories(mainCategoryId: number) {
-    this.isLoading = true;
-    console.log("loadSubcategories : ", mainCategoryId);
-    
-    this.coreService.getMainCategoryWithServices(mainCategoryId).subscribe({
-      next: (subcategories: ServiceCategory[]) => {
-        this.subcategories = subcategories || [];
-        this.isLoading = false;
-        console.log("subcategories : ", subcategories);
-      },
-      error: (error) => {
-        console.error('Error loading subcategories:', error);
-        this.subcategories = [];
-        this.isLoading = false;
-       
-      }
+    // Mantenido por compatibilidad — ya no se usa en el flujo principal
+    this.coreService.getSubcategories(mainCategoryId).subscribe({
+      next: (subs) => { this.subcategoryOptions = subs; this.isLoading = false; },
+      error: () => { this.isLoading = false; }
     });
   }
 
@@ -186,9 +241,68 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     if (index >= 0) {
       this.selectedServices.splice(index, 1);
     } else {
+      if (!this.hasPremiumAccess() && this.selectedServices.length >= this.maxFreeServices) {
+        this.presentPremiumLimitAlert('FREE_SERVICE_SELECTION_LIMIT');
+        return;
+      }
       this.selectedServices.push(service);
     }
     console.log('Servicios seleccionados:', this.selectedServices);
+  }
+
+  private hasPremiumAccess(): boolean {
+    const currentUser = this.authService.getCurrentUser() as any;
+    const profile = this.authService.getUserProfile() as any;
+    return Boolean(currentUser?.has_premium || profile?.has_premium);
+  }
+
+  private handlePremiumReasonFromQuery(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const reason = params.get('premium_reason');
+      if (!this.hasPremiumAccess() && (reason === 'DAILY_SEARCH_LIMIT_REACHED' || reason === 'FREE_SERVICE_SELECTION_LIMIT')) {
+        this.presentPremiumLimitAlert(reason);
+      }
+    });
+  }
+
+  private async presentPremiumLimitAlert(
+    reason: 'DAILY_SEARCH_LIMIT_REACHED' | 'FREE_SERVICE_SELECTION_LIMIT'
+  ): Promise<void> {
+    const isDailyLimit = reason === 'DAILY_SEARCH_LIMIT_REACHED';
+    const header = isDailyLimit ? 'Límite diario alcanzado' : 'Límite de selección gratuita';
+    const message = isDailyLimit
+      ? `Ya usaste tus ${this.freeDailySearchLimit} búsquedas gratuitas del día. Desbloquea Premium para seguir buscando.`
+      : `Con plan gratuito puedes seleccionar hasta ${this.maxFreeServices} servicios. Desbloquea Premium para seleccionar más.`;
+
+    const alert = await this.alertCtrl.create({
+      header,
+      message,
+      buttons: [
+        {
+          text: 'Más tarde',
+          role: 'cancel',
+          handler: () => this.clearPremiumReasonQueryParam(),
+        },
+        {
+          text: 'Desbloquear Premium',
+          handler: () => {
+            this.clearPremiumReasonQueryParam();
+            this.paymentRedirect.openClientUnlock('/client/tabs/categories');
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private clearPremiumReasonQueryParam(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { premium_reason: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   isServiceSelected(service: ServiceCategory): boolean {
@@ -197,42 +311,42 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
 
   async confirmSelection() {
-    if (this.selectedMainCategory && this.selectedServices.length > 0) {
-      // Convertir a SelectedService para el SelectionService
-      const selectedServicesData = this.selectedServices.map(service => ({
-        id: service.id,
-        name: service.name,
-        description: service.description,
-        main_category_id: this.selectedMainCategory!.id,
-        mainCategoryName: this.selectedMainCategory!.name
-      }));
-
-      // Guardar en el servicio compartido
-      this.stateService.setSelectedServices(selectedServicesData);
-
-      // Obtener y guardar ubicación actual del usuario
-      try {
-        const position = await this.geoLocationService.getCurrentLocation();
-        this.stateService.setUserLocation({
-          latitude: position.latitude,
-          longitude: position.longitude,
-          timestamp: Date.now()
-        });
-      } catch (error) {
-        console.error('Error obteniendo ubicación:', error);
-        // Usar ubicación por defecto de Santiago para no bloquear navegación
-        this.stateService.setUserLocation({
-          latitude: -33.4489,
-          longitude: -70.6693,
-          timestamp: Date.now()
-        });
-      }
-
-      // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)
-      this.router.navigate(['/client/tabs'], { replaceUrl: true });
-    } else {
-
+    if (!this.selectedMainCategory || this.selectedServices.length === 0) {
+      return;
     }
+
+    // Convertir a SelectedService para el SelectionService
+    const selectedServicesData = this.selectedServices.map(service => ({
+      id: service.id,
+      name: service.name,
+      description: service.description,
+      main_category_id: this.selectedMainCategory!.id,
+      mainCategoryName: this.selectedMainCategory!.name
+    }));
+
+    // Guardar en el servicio compartido
+    this.stateService.setSelectedServices(selectedServicesData);
+
+    // Obtener y guardar ubicación actual del usuario
+    try {
+      const position = await this.geoLocationService.getCurrentLocation();
+      this.stateService.setUserLocation({
+        latitude: position.latitude,
+        longitude: position.longitude,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Error obteniendo ubicación:', error);
+      // Si el GPS falla, seguimos con Santiago Centro como fallback para no bloquear la búsqueda.
+      this.stateService.setUserLocation({
+        latitude: -33.4489,
+        longitude: -70.6693,
+        timestamp: Date.now()
+      });
+    }
+
+    // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)
+    this.router.navigate(['/client/tabs'], { replaceUrl: true });
   }
 
   // ── Location search ──────────────────────────────────────────────────
@@ -284,13 +398,12 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
         this.mapPickerInitialLng = userLocation.longitude;
       } else {
         // Intentar obtener ubicación GPS actual
-        try {
-          const position = await this.geoLocationService.getCurrentLocation();
+        const position = await this.geoLocationService.getCurrentLocation().catch(() => null);
+        if (position) {
           this.mapPickerInitialLat = position.latitude;
           this.mapPickerInitialLng = position.longitude;
-        } catch (error) {
+        } else {
           console.log('No se pudo obtener ubicación GPS, usando Santiago Centro');
-          // Mantener valores por defecto
         }
       }
     }
@@ -316,17 +429,57 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   onSearchInput(event: any) {
-    const q = (event.target?.value ?? '').toLowerCase().trim();
+    const q = String(event?.detail?.value ?? event?.target?.value ?? '')
+      .trim();
     this.searchQuery = q;
-    if (!q) { this.filteredCategories = []; return; }
-    this.filteredCategories = this.allCategories
-      .filter(c => c.name.toLowerCase().includes(q) || (c.description ?? '').toLowerCase().includes(q))
-      .slice(0, 8);
+
+    if (this.catalogSearchTimeout) {
+      clearTimeout(this.catalogSearchTimeout);
+    }
+
+    if (q.length >= 2) {
+      this.catalogSearchTimeout = globalThis.setTimeout(() => {
+        this.coreService.getServiceCatalog(q).subscribe({
+          next: (cats) => {
+            this.allCategories = cats;
+            this.applySearchFilter();
+          },
+          error: () => {
+            this.applySearchFilter();
+          }
+        });
+      }, 250);
+      return;
+    }
+
+    this.applySearchFilter();
   }
 
   clearSearch() {
     this.searchQuery = '';
-    this.filteredCategories = [];
+    this.applySearchFilter();
+  }
+
+  private applySearchFilter(): void {
+    const q = this.normalizeSearchText(this.searchQuery).trim();
+    if (q.length < 2) {
+      this.filteredCategories = [];
+      return;
+    }
+
+    this.filteredCategories = this.allCategories
+      .filter(c =>
+        this.normalizeSearchText(c.name).includes(q) ||
+        this.normalizeSearchText(c.description).includes(q)
+      )
+      .slice(0, 8);
+  }
+
+  private normalizeSearchText(value: string | null | undefined): string {
+    return (value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   }
 
   selectServiceCategory(cat: ServiceCategory) {

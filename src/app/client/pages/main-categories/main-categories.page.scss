@@ -293,10 +293,16 @@ ion-content.mc-content {
       position: relative;
       overflow: hidden;
 
-      ion-icon {
+      ion-icon, i {
         font-size: 26px;  // 18px → 26px (proporcional al tamaño)
         color: var(--bapp-text-secondary);
         transition: color 0.3s;
+      }
+
+      img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
       }
     }
 
@@ -309,7 +315,7 @@ ion-content.mc-content {
         transform: scale(0.95);
         border-color: rgba(253, 215, 53, 0.3);
 
-        ion-icon {
+        ion-icon, i {
           color: var(--bapp-color-primary);
         }
       }
@@ -326,7 +332,7 @@ ion-content.mc-content {
           border-color: rgba(253, 215, 53, 0.3);
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 
-          ion-icon {
+          ion-icon, i {
             color: var(--bapp-color-primary);
           }
         }

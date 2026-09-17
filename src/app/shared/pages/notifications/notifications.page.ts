@@ -53,9 +53,15 @@ export class NotificationsPage implements OnInit {
     getIcon(type: string): string {
         switch (type) {
             case 'booking_created':
-            case 'BOOKING_CREATED': return 'calendar-number-outline';
+            case 'BOOKING_CREATED':
+            case 'booking_received':
+            case 'BOOKING_RECEIVED': return 'calendar-number-outline';
+            case 'booking_request_sent':
+            case 'BOOKING_REQUEST_SENT': return 'paper-plane-outline';
             case 'booking_accepted':
-            case 'BOOKING_ACCEPTED': return 'checkmark-circle-outline';
+            case 'BOOKING_ACCEPTED':
+            case 'booking_confirmed':
+            case 'BOOKING_CONFIRMED': return 'checkmark-circle-outline';
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'close-circle-outline';
             case 'booking_reminder_24h': return 'time-outline';
@@ -66,9 +72,15 @@ export class NotificationsPage implements OnInit {
     getColor(type: string): string {
         switch (type) {
             case 'booking_created':
-            case 'BOOKING_CREATED': return 'primary';
+            case 'BOOKING_CREATED':
+            case 'booking_received':
+            case 'BOOKING_RECEIVED':
+            case 'booking_request_sent':
+            case 'BOOKING_REQUEST_SENT': return 'primary';
             case 'booking_accepted':
-            case 'BOOKING_ACCEPTED': return 'success';
+            case 'BOOKING_ACCEPTED':
+            case 'booking_confirmed':
+            case 'BOOKING_CONFIRMED': return 'success';
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'danger';
             case 'booking_reminder_24h': return 'warning';

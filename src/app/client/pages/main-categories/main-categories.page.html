@@ -31,9 +31,13 @@
           <span class="loc-text">{{ selectedLocationName }}</span>
         </div>
         <ion-icon
+          role="button"
+          tabindex="0"
           [name]="selectedLocationName !== 'Tu ubicación actual' ? 'close-circle' : 'chevron-down'"
           class="loc-chevron"
-          (click)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()">
+          (click)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()"
+          (keydown.enter)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()"
+          (keydown.space)="selectedLocationName !== 'Tu ubicación actual' ? clearLocation() : null; $event.stopPropagation()">
         </ion-icon>
       </button>
 
@@ -47,7 +51,9 @@
       <div class="loc-dropdown" *ngIf="showLocationSearch">
         <div class="loc-input-row">
           <ion-icon name="search-outline" class="loc-input-icon"></ion-icon>
+          <label class="sr-only" for="mc-location-input">Zona, ciudad o dirección</label>
           <input
+            id="mc-location-input"
             class="loc-input"
             placeholder="Zona, ciudad o dirección..."
             [(ngModel)]="locationQuery"
@@ -93,7 +99,12 @@
         (click)="selectServiceCategory(cat)"
         type="button">
         <div class="autocomplete-icon-wrap">
-          <ion-icon [name]="cat.icon || getCategoryIcon(cat.name)"></ion-icon>
+          <img *ngIf="isImageUrl(cat.icon)"
+               [src]="cat.icon"
+               [alt]="cat.name" />
+          <i *ngIf="isFontAwesomeIcon(cat.icon)" class="{{ cat.icon }}" aria-hidden="true"></i>
+          <ion-icon *ngIf="!isImageUrl(cat.icon) && !isFontAwesomeIcon(cat.icon)"
+                    [name]="cat.icon || getCategoryIcon(cat.name)"></ion-icon>
         </div>
         <div class="autocomplete-info">
           <span class="autocomplete-name">{{ cat.name }}</span>
@@ -121,20 +132,6 @@
           <p class="hint-text">Para ver los servicios disponibles</p>
         </div>
       </div>
-      <!-- ── Hero banner ────────────────────────────────────────────── -->
-      <!-- <div class="hero-banner" *ngIf="!selectedMainCategory">
-        <div class="hero-inner">
-          <div class="hero-badge">
-            <ion-icon name="flash"></ion-icon>
-            <span>Disponible ahora</span>
-          </div>
-          <h2 class="hero-title">Proveedores verificados<br>cerca de ti</h2>
-          <p class="hero-sub">Elige una categoría para ver quién puede ayudarte</p>
-        </div>
-        <div class="hero-orb hero-orb-1"></div>
-        <div class="hero-orb hero-orb-2"></div>
-      </div> -->
-
       <!-- ── Categories grid ─────────────────────────────────────────── -->
       <div class="section" *ngIf="!selectedMainCategory">
         <div class="section-hd">
@@ -158,13 +155,16 @@
             (click)="selectMainCategory(cat)"
             type="button">
             <div class="cat-tile-icon-wrap">
-              <!-- 🔥 Condicional: imagen o ion-icon (homologado con web) -->
+              <!-- 🔥 Condicional: imagen, Font Awesome o ion-icon (homologado con web) -->
               <img *ngIf="isImageUrl(cat.icon)" 
                    [src]="cat.icon" 
                    [alt]="cat.name" 
                    class="cat-tile-img"
                    loading="lazy" />
-              <ion-icon *ngIf="!isImageUrl(cat.icon)" 
+              <i *ngIf="isFontAwesomeIcon(cat.icon)"
+                 class="cat-tile-icon {{ cat.icon }}"
+                 aria-hidden="true"></i>
+              <ion-icon *ngIf="!isImageUrl(cat.icon) && !isFontAwesomeIcon(cat.icon)" 
                         [name]="cat.icon || 'construct-outline'" 
                         class="cat-tile-icon"></ion-icon>
             </div>
@@ -186,23 +186,63 @@
 
         <!-- Panel header -->
         <div class="subcat-panel-hd">
-          <button class="back-btn" (click)="selectedMainCategory = null" type="button">
+          <button class="back-btn"
+                  (click)="selectedSubcategory ? clearSubcategory() : selectedMainCategory = null"
+                  type="button">
             <ion-icon name="arrow-back-outline"></ion-icon>
           </button>
           <div>
             <h2 class="subcat-title">{{ selectedMainCategory.name }}</h2>
-            <p class="subcat-subtitle">Selecciona uno o más servicios</p>
+            <p class="subcat-subtitle">
+              {{ selectedSubcategory ? selectedSubcategory.name + ' — Selecciona servicios' : 'Selecciona una subcategoría' }}
+            </p>
           </div>
         </div>
 
-        <!-- Loading services -->
+        <!-- Loading -->
         <div class="services-loading" *ngIf="isLoading">
           <ion-spinner name="crescent" color="primary"></ion-spinner>
-          <span>Cargando servicios...</span>
+          <span>Cargando...</span>
         </div>
 
-        <!-- Services list -->
-        <div class="services-list" *ngIf="!isLoading && subcategories.length > 0">
+        <!-- PASO 2: grid de subcategorías con icono (homologado con web) -->
+        <div class="section" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length > 0">
+          <div class="section-hd">
+            <span class="section-title-txt">Subcategorías</span>
+          </div>
+          <div class="cat-grid">
+            <button
+              class="cat-tile"
+              *ngFor="let sub of subcategoryOptions; let i = index"
+              [attr.data-idx]="i % 6"
+              (click)="onSubcategoryChange(sub.id)"
+              type="button">
+              <div class="cat-tile-icon-wrap">
+                <img *ngIf="isImageUrl(sub.icon)"
+                     [src]="sub.icon"
+                     [alt]="sub.name"
+                     class="cat-tile-img"
+                     loading="lazy" />
+                <i *ngIf="isFontAwesomeIcon(sub.icon)"
+                   class="cat-tile-icon {{ sub.icon }}"
+                   aria-hidden="true"></i>
+                <ion-icon *ngIf="!isImageUrl(sub.icon) && !isFontAwesomeIcon(sub.icon)"
+                          [name]="sub.icon || selectedMainCategory.icon || 'construct-outline'"
+                          class="cat-tile-icon"></ion-icon>
+              </div>
+              <span class="cat-tile-label">{{ sub.name }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sin subcategorías -->
+        <div class="empty-state-box" *ngIf="!isLoading && !selectedSubcategory && subcategoryOptions.length === 0">
+          <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
+          <p class="empty-text">Sin subcategorías en esta categoría</p>
+        </div>
+
+        <!-- PASO 3: lista de servicios -->
+        <div class="services-list" *ngIf="!isLoading && selectedSubcategory && subcategories.length > 0">
           <button
             class="service-item"
             *ngFor="let svc of subcategories"
@@ -219,10 +259,10 @@
           </button>
         </div>
 
-        <!-- Empty services -->
-        <div class="empty-state-box" *ngIf="!isLoading && subcategories.length === 0">
+        <!-- Sin servicios en subcategoría -->
+        <div class="empty-state-box" *ngIf="!isLoading && selectedSubcategory && subcategories.length === 0">
           <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
-          <p class="empty-text">Sin servicios en esta categoría</p>
+          <p class="empty-text">Sin servicios en esta subcategoría</p>
         </div>
 
         <!-- Selection summary -->
