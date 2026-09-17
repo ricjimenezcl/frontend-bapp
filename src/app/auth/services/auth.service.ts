@@ -492,6 +492,7 @@ export class AuthService {
 
   loginWithGoogle(idToken: string, role: string = 'CLIENT'): Observable<any> {
     console.log('Enviando token Google al backend:', idToken?.substring(0, 50) + '...');
+    console.log('Payload Google completo:', { id_token: idToken, role });
 
     // Backend espera: { id_token: string, role: string }
     // Backend retorna: { access_token, user_id, role, provider_id, client_id, email, name, avatar_url, terms_accepted }
@@ -573,11 +574,13 @@ export class AuthService {
   }
 
   handleGoogleSocialUser(socialUser: SocialUser): Observable<any> {
-    if (!socialUser || !socialUser.idToken) {
+    const googleIdToken = socialUser?.idToken || socialUser?.authToken || (socialUser as any)?.response?.id_token;
+
+    if (!socialUser || !googleIdToken) {
       throw new Error('Usuario de Google no válido');
     }
-    
-    return this.loginWithGoogle(socialUser.idToken);
+
+    return this.loginWithGoogle(googleIdToken);
   }
 
   logout(): void {

@@ -9,7 +9,7 @@ import {
   IonSegment, IonSegmentButton, ModalController, AlertController
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
-import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +29,8 @@ import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@
     IonCheckbox,
     IonSpinner,
     IonSegment,
-    IonSegmentButton
+    IonSegmentButton,
+    GoogleSigninButtonModule
   ]
 })
 export class LoginPage implements OnInit, OnDestroy {
@@ -88,6 +89,19 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.socialAuthService.authState.subscribe((socialUser) => {
+      if (!socialUser || socialUser.provider !== 'GOOGLE') return;
+
+      const googleIdToken = socialUser.idToken || socialUser.authToken || (socialUser as any)?.response?.id_token || '';
+      if (!googleIdToken) {
+        this.isLoading = false;
+        this.errorMessage = 'Google no devolvió un token válido. Revisa la configuración de OAuth en Google Console.';
+        return;
+      }
+
+      this.resolveSocialLoginRole('google', googleIdToken, socialUser.email || '', this.activeTab() === 'register');
+    });
+
     // Verificar si la sesión expiró
     this.route.queryParams.subscribe(params => {
       if (params['sessionExpired']) {
@@ -413,7 +427,19 @@ export class LoginPage implements OnInit, OnDestroy {
 
     this.signInWithRetry(GoogleLoginProvider.PROVIDER_ID)
       .then((socialUser) => {
-        this.resolveSocialLoginRole('google', socialUser.idToken || '', socialUser.email || '', wasRegistering);
+        const googleIdToken = socialUser?.idToken || socialUser?.authToken || (socialUser as any)?.response?.id_token || '';
+
+        console.log('Google socialUser raw:', socialUser);
+        console.log('Google idToken:', googleIdToken || 'NO_HAY_ID_TOKEN');
+        console.log('Google email:', socialUser?.email);
+
+        if (!googleIdToken) {
+          this.isLoading = false;
+          this.errorMessage = 'Google no devolvió un token válido. Revisa la configuración de OAuth en Google Console.';
+          return;
+        }
+
+        this.resolveSocialLoginRole('google', googleIdToken, socialUser.email || '', wasRegistering);
       })
       .catch((error) => {
         this.isLoading = false;

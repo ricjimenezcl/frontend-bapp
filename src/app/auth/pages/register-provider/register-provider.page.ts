@@ -11,7 +11,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { CameraService } from '../../../shared/services/camera.service';
-import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
@@ -27,7 +27,8 @@ import { offensiveContentAsyncValidator } from '../../../shared/validators/conte
     RouterModule,
     IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonIcon,
-    IonInput, IonLabel, IonSpinner, IonCheckbox
+    IonInput, IonLabel, IonSpinner, IonCheckbox,
+    GoogleSigninButtonModule
   ]
 })
 export class RegisterProviderPage implements OnInit {

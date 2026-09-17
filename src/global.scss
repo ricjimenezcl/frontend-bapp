@@ -82,39 +82,48 @@
   font-family: "regular";
 }
 
-html, body {
-  background: #1A1A1A;
-  color: #FFFFFF;
+html, body, ion-app {
+  background: var(--bapp-bg-page);
+  color: var(--bapp-text-primary);
+  min-height: 100%;
+  background-color: var(--bapp-bg-page) !important;
 }
 
 html.dark-mode,
-body.dark-mode {
+body.dark-mode,
+ion-app.dark-mode {
   color-scheme: dark;
 }
 
 html.light-mode,
-body.light-mode {
+body.light-mode,
+ion-app.light-mode {
   color-scheme: light;
 }
 
 body.dark-mode,
-html.dark-mode body {
+html.dark-mode body,
+ion-app.dark-mode {
   background: var(--bapp-bg-page);
   color: var(--bapp-text-primary);
 }
 
 body.light-mode,
-html.light-mode body {
-  background: var(--bapp-bg-page);
-  color: var(--bapp-text-primary);
+html.light-mode body,
+ion-app.light-mode {
+  background: #FFFFFF;
+  color: #141414;
 }
 
 body.dark-mode ion-content,
 html.dark-mode ion-content,
 body.light-mode ion-content,
-html.light-mode ion-content {
+html.light-mode ion-content,
+ion-app.dark-mode ion-content,
+ion-app.light-mode ion-content {
   --background: var(--bapp-bg-page);
   --color: var(--bapp-text-primary);
+  background: var(--bapp-bg-page);
   color: var(--bapp-text-primary);
 }
 

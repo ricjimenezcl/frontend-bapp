@@ -16,7 +16,7 @@ import {
   IonInput, IonSpinner, IonBackButton, AlertController, IonIcon, IonLabel,
   IonCheckbox } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
-import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 
@@ -29,7 +29,8 @@ import { offensiveContentAsyncValidator } from '../../../shared/validators/conte
     CommonModule, FormsModule, ReactiveFormsModule, RouterModule,
     IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem,
-    IonInput, IonSpinner, IonBackButton, IonIcon, IonLabel, IonCheckbox
+    IonInput, IonSpinner, IonBackButton, IonIcon, IonLabel, IonCheckbox,
+    GoogleSigninButtonModule
   ]
 })
 export class RegisterClientPage {
@@ -47,6 +48,28 @@ export class RegisterClientPage {
 
   constructor() {
     this.registerForm = this.createForm();
+
+    this.socialAuthService.authState.subscribe((socialUser) => {
+      if (!socialUser || socialUser.provider !== 'GOOGLE') return;
+
+      const googleIdToken = socialUser.idToken || socialUser.authToken || (socialUser as any)?.response?.id_token || '';
+      if (!googleIdToken) {
+        this.isLoading = false;
+        this.showAlert('Error', 'Google no devolvió un token válido. Revisa la configuración de OAuth en Google Console.');
+        return;
+      }
+
+      this.authService.loginWithGoogle(googleIdToken, 'CLIENT').subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showAlert('Error', error.error?.detail || 'Error al registrarse con Google');
+        }
+      });
+    });
   }
 
   private createForm(): FormGroup {

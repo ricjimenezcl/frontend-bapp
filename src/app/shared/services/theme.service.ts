@@ -55,20 +55,44 @@ export class ThemeService {
   private applyTheme(isDark: boolean): void {
     const root = document.documentElement;
     const body = document.body;
+    const app = document.querySelector('ion-app') as HTMLElement | null;
 
     root.classList.remove('theme-dark', 'theme-light', 'dark-mode', 'light-mode', 'dark');
     body.classList.remove('theme-dark', 'theme-light', 'dark-mode', 'light-mode', 'dark');
+    if (app) {
+      app.classList.remove('theme-dark', 'theme-light', 'dark-mode', 'light-mode', 'dark');
+    }
 
     if (isDark) {
       root.classList.add('theme-dark', 'dark-mode', 'dark');
       body.classList.add('theme-dark', 'dark-mode', 'dark');
-      document.body.style.background = '#1A1A1A';
-      document.body.style.color = '#FFFFFF';
+      if (app) {
+        app.classList.add('theme-dark', 'dark-mode', 'dark');
+      }
+
+      root.style.backgroundColor = 'var(--bapp-bg-page)';
+      root.style.color = 'var(--bapp-text-primary)';
+      body.style.backgroundColor = 'var(--bapp-bg-page)';
+      body.style.color = 'var(--bapp-text-primary)';
+      if (app) {
+        app.style.backgroundColor = 'var(--bapp-bg-page)';
+        app.style.color = 'var(--bapp-text-primary)';
+      }
     } else {
       root.classList.add('theme-light', 'light-mode');
       body.classList.add('theme-light', 'light-mode');
-      document.body.style.background = '#FFFFFF';
-      document.body.style.color = '#141414';
+      if (app) {
+        app.classList.add('theme-light', 'light-mode');
+      }
+
+      root.style.backgroundColor = '#FFFFFF';
+      root.style.color = '#141414';
+      body.style.backgroundColor = '#FFFFFF';
+      body.style.color = '#141414';
+      if (app) {
+        app.style.backgroundColor = '#FFFFFF';
+        app.style.color = '#141414';
+      }
     }
   }
 }
