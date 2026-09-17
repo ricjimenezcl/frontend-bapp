@@ -4,8 +4,8 @@ export const environment = {
   wsUrl: 'wss://backend-bapp.onrender.com/api/v1/ws',
   appName: 'BappSearch',
   version: '1.0.0',
-  // ✅ geoapifyApiKey: Migrada al backend (/api/v1/geocoding/static-map)
-  googleClientId: '181446851130-fc2b6ppn6qpgume9guj49kieu6ac7fet.apps.googleusercontent.com',
+  // Replica la configuración del proyecto web que ya funciona con Google/Facebook.
+  googleClientId: '713984511036-kvn0om47d75dq5gqdpokgj2up7eim6jq.apps.googleusercontent.com',
   facebookAppId: '864227603333716',
   cloudinaryCloudName: '',
   cloudinaryUploadPreset: 'ml_default',

@@ -21,18 +21,18 @@ export class ThemeService {
     const legacyBoolean = localStorage.getItem('darkMode');
     if (legacyBoolean !== null) {
       try {
-        return JSON.parse(legacyBoolean);
+        const parsed = JSON.parse(legacyBoolean);
+        if (typeof parsed === 'boolean') return parsed;
       } catch {
-        return false;
+        // Ignorar y seguir con la política dark-first.
       }
     }
 
-    // Compatibilidad con key legacy usada en web.
     const legacyTheme = localStorage.getItem('theme');
     if (legacyTheme === 'dark') return true;
     if (legacyTheme === 'light') return false;
 
-    // App dark-first: si no hay preferencia guardada, arrancar en modo oscuro.
+    // La app es dark-first. Si no hay preferencia válida, arrancar en oscuro.
     return true;
   }
 
@@ -62,9 +62,13 @@ export class ThemeService {
     if (isDark) {
       root.classList.add('theme-dark', 'dark-mode', 'dark');
       body.classList.add('theme-dark', 'dark-mode', 'dark');
+      document.body.style.background = '#1A1A1A';
+      document.body.style.color = '#FFFFFF';
     } else {
       root.classList.add('theme-light', 'light-mode');
       body.classList.add('theme-light', 'light-mode');
+      document.body.style.background = '#FFFFFF';
+      document.body.style.color = '#141414';
     }
   }
 }

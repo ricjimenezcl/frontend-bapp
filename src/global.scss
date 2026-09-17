@@ -82,6 +82,11 @@
   font-family: "regular";
 }
 
+html, body {
+  background: #1A1A1A;
+  color: #FFFFFF;
+}
+
 html.dark-mode,
 body.dark-mode {
   color-scheme: dark;

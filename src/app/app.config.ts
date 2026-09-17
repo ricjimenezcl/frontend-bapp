@@ -47,24 +47,28 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor, nativeHttpInterceptor])),
     provideIonicAngular({ mode: 'ios' }),
     importProvidersFrom(SocialLoginModule),
-    
-{
-  provide: 'SocialAuthServiceConfig',
-  useValue: {
-    autoLogin: false,
-    providers: [
-      {
-        id: GoogleLoginProvider.PROVIDER_ID,
-        provider: new GoogleLoginProvider(environment.googleClientId),
-      },
-      {
-        id: FacebookLoginProvider.PROVIDER_ID,
-        provider: new FacebookLoginProvider(environment.facebookAppId),
-      },
-    ],
-    onError: (err) => console.error('[SocialAuth] Error:', err),
-  } as SocialAuthServiceConfig,
-}
-,
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(environment.googleClientId, {
+              oneTapEnabled: false,
+              prompt: 'select_account'
+            }),
+          },
+          {
+            id: FacebookLoginProvider.PROVIDER_ID,
+            provider: new FacebookLoginProvider(environment.facebookAppId, {
+              scope: 'public_profile,email',
+              return_scopes: true,
+            }),
+          },
+        ],
+        onError: (err) => console.error('[SocialAuth] Error:', err),
+      } as SocialAuthServiceConfig,
+    },
   ]
 };
