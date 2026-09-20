@@ -270,26 +270,26 @@ export class ProviderAccountInfoPage implements OnInit {
   formatPhone(event: any): void {
     let value = (event.target.value || '').replace(/\D/g, '');
 
-    // Eliminar código de país si está al inicio
     if (value.startsWith('56')) {
       value = value.substring(2);
     }
-
-    // Limitar a 9 dígitos
-    value = value.substring(0, 9);
-
-    // Formatear: +56 9 XXXX XXXX
-    if (value.length > 0) {
-      if (value.length <= 1) {
-        value = `+56 ${value}`;
-      } else if (value.length <= 5) {
-        value = `+56 ${value.substring(0, 1)} ${value.substring(1)}`;
-      } else {
-        value = `+56 ${value.substring(0, 1)} ${value.substring(1, 5)} ${value.substring(5)}`;
-      }
+    if (value.startsWith('9')) {
+      value = value.substring(1);
     }
 
-    this.fono = value;
+    value = value.substring(0, 8);
+
+    if (!value) {
+      this.fono = '+56 9';
+      return;
+    }
+
+    if (value.length <= 4) {
+      this.fono = `+56 9 ${value}`;
+      return;
+    }
+
+    this.fono = `+56 9 ${value.substring(0, 4)} ${value.substring(4)}`;
   }
 
   onPhoneBlur(): void {

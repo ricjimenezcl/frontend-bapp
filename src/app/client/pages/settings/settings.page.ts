@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, AlertController, LoadingController } from '@ionic/angular';
-import { ThemeService } from '../../../shared/services/theme.service';
 import { I18nService } from '../../../shared/services/i18n.service';
 import { UserSettingsService } from '../../../shared/services/user-settings.service';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -17,13 +16,11 @@ import { ApiService } from '../../../shared/services/api.service';
   imports: [CommonModule, IonicModule, FormsModule]
 })
 export class SettingsPage implements OnInit {
-  darkMode = false;
   currentLanguage = 'es';
   availableLanguages: any[] = [];
 
   constructor(
     private router: Router,
-    private themeService: ThemeService,
     private i18nService: I18nService,
     private userSettingsService: UserSettingsService,
     private authService: AuthService,
@@ -37,23 +34,9 @@ export class SettingsPage implements OnInit {
   }
 
   private loadSettings(): void {
-    // Cargar tema
-    this.themeService.darkMode$.subscribe(isDark => {
-      this.darkMode = isDark;
-    });
-
     // Cargar idioma
     this.currentLanguage = this.i18nService.getLanguage();
     this.availableLanguages = this.i18nService.getAvailableLanguages();
-  }
-
-  onDarkModeToggle(event: any): void {
-    const isDark = event.detail.checked;
-    this.themeService.toggleDarkMode(isDark);
-    this.userSettingsService.updateSettings({
-      darkMode: isDark,
-      theme: isDark ? 'dark' : 'light',
-    });
   }
 
   onLanguageChange(): void {

@@ -19,6 +19,7 @@ import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
+import { PhoneFormatter } from '../../../shared/formatters';
 
 @Component({
   selector: 'app-register-client',
@@ -80,7 +81,7 @@ export class RegisterClientPage {
         asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'profile')],
         updateOn: 'change',
       }],
-      phone: ['', [Validators.required, Validators.pattern(/^(\+56|56)?\s?9\s?[0-9]{4}\s?[0-9]{4}$/)]],
+      phone: ['', [Validators.required, Validators.pattern(/^(\+56\s?9\s?)?[0-9]{8}$/)]],
       password: ['', [
         Validators.required,
         Validators.minLength(8),
@@ -125,14 +126,28 @@ export class RegisterClientPage {
   }
 
   formatPhone(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
-    if (value.startsWith('56') && value.length === 11) {
+    let value = (event.target.value || '').replace(/\D/g, '');
+
+    if (value.startsWith('56')) {
       value = value.substring(2);
     }
-    if (value.startsWith('9') && value.length === 9) {
-      value = `+56 ${value.substring(0, 1)} ${value.substring(1, 5)} ${value.substring(5)}`;
+    if (value.startsWith('9')) {
+      value = value.substring(1);
     }
-    this.registerForm.patchValue({ phone: value });
+
+    value = value.substring(0, 8);
+
+    if (!value) {
+      this.registerForm.patchValue({ phone: '+56 9' }, { emitEvent: false });
+      return;
+    }
+
+    if (value.length <= 4) {
+      this.registerForm.patchValue({ phone: `+56 9 ${value}` }, { emitEvent: false });
+      return;
+    }
+
+    this.registerForm.patchValue({ phone: `+56 9 ${value.substring(0, 4)} ${value.substring(4)}` }, { emitEvent: false });
   }
 
   // ==================== SUBMIT ====================
@@ -146,7 +161,7 @@ export class RegisterClientPage {
       this.isLoading = true;
       
       const { confirmPassword, ...data } = this.registerForm.value;
-      const phone = data.phone.replace(/\s/g, '');
+      const phone = PhoneFormatter.normalizeToE164(data.phone);
       
       // ══ AVATAR POR DEFECTO ══════════════════════════════════════
       // Si el usuario NO subió avatar, asignar automáticamente el avatar por defecto

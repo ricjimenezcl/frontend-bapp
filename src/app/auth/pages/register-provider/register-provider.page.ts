@@ -14,6 +14,7 @@ import { CameraService } from '../../../shared/services/camera.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
+import { PhoneFormatter } from '../../../shared/formatters';
 
 @Component({
   selector: 'app-register-provider',
@@ -303,61 +304,36 @@ export class RegisterProviderPage implements OnInit {
 
   phoneValidator(control: FormControl): ValidationErrors | null {
     if (!control.value) return null;
-    
-    // Limpiar el número de teléfono
+
     const phone = control.value.toString().replace(/\D/g, '');
-    
-    // Validar que sea un número chileno válido
-    // Debe tener 9 dígitos (sin contar código de país)
-    if (phone.length < 9) return { phoneLength: true };
-    
-    // Si comienza con 56, debe tener 11 dígitos totales
-    if (phone.startsWith('56') && phone.length !== 11) return { phoneLength: true };
-    
-    // Si tiene 11 dígitos, debe comenzar con 56
-    if (phone.length === 11 && !phone.startsWith('56')) return { phoneFormat: true };
-    
-    // Si tiene 10 dígitos, debe comenzar con 9
-    if (phone.length === 10 && !phone.startsWith('9')) return { phoneFormat: true };
-    
-    // Si tiene 9 dígitos, debe comenzar con 9
-    if (phone.length === 9 && !phone.startsWith('9')) return { phoneFormat: true };
-    
-    return null;
+    const normalized = phone.replace(/^56/, '').replace(/^9/, '');
+
+    return /^\d{8}$/.test(normalized) ? null : { phoneLength: true };
   }
+
   formatPhone(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
-    
-    // Eliminar código de país si está al inicio
+    let value = (event.target.value || '').replace(/\D/g, '');
+
     if (value.startsWith('56')) {
       value = value.substring(2);
     }
-    
-    // Asegurar que empieza con 9 (número chileno válido)
-    if (value.length > 0 && !value.startsWith('9')) {
-      if (value.startsWith('569')) {
-        value = value.substring(1); // Eliminar 56 extra
-      }
+    if (value.startsWith('9')) {
+      value = value.substring(1);
     }
-    
-    // Limitar a 9 dígitos
-    value = value.substring(0, 9);
-    
-    // Formatear: +56 9 XXXX XXXX
-    if (value.length > 0) {
-      if (value.length <= 1) {
-        value = `+56 9 ${value}`;
-      } else if (value.length <= 5) {
-        value = `+56 9 ${value.substring(1, 5)}`;
-        if (value.length > 12) {
-          value = `+56 9 ${value.substring(5, 9)} ${value.substring(9)}`;
-        }
-      } else {
-        value = `+56 9 ${value.substring(1, 5)} ${value.substring(5, 9)}`;
-      }
+
+    value = value.substring(0, 8);
+
+    if (!value) {
+      this.registerForm.patchValue({ phone: '+56 9' }, { emitEvent: false });
+      return;
     }
-    
-    this.registerForm.patchValue({ phone: value });
+
+    if (value.length <= 4) {
+      this.registerForm.patchValue({ phone: `+56 9 ${value}` }, { emitEvent: false });
+      return;
+    }
+
+    this.registerForm.patchValue({ phone: `+56 9 ${value.substring(0, 4)} ${value.substring(4)}` }, { emitEvent: false });
   }
 
   // ==================== SUBMIT ====================
@@ -372,8 +348,8 @@ export class RegisterProviderPage implements OnInit {
       
       const { confirmPassword, ...formData } = this.registerForm.value;
       
-      // Normalizar teléfono: eliminar espacios y signo +, dejar solo dígitos con código de país
-      const phone = formData.phone.replace(/\D/g, '');
+      // Normalizar teléfono al formato internacional canónico: +569...
+      const phone = PhoneFormatter.normalizeToE164(formData.phone);
       const runLimpio = formData.run.replace(/[\.\-\s]/g, '').toUpperCase();
       const run = `${runLimpio.slice(0, -1)}-${runLimpio.slice(-1)}`;
       

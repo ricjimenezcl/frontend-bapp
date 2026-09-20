@@ -26,18 +26,6 @@
       </ion-select>
     </ion-item>
 
-    <!-- Modo Oscuro -->
-    <ion-item lines="none" class="content-item">
-      <ion-icon slot="start" name="contrast" color="dark"></ion-icon>
-      <ion-label class="lbl">Modo Oscuro</ion-label>
-      <ion-toggle 
-        slot="end" 
-        mode="md" 
-        [checked]="darkMode" 
-        (ionChange)="onDarkModeToggle($event)">
-      </ion-toggle>
-    </ion-item>
-
     <!-- Centro de Ayuda -->
     <ion-item lines="none" class="content-item" detail (click)="onPage('help')">
       <ion-icon slot="start" name="information-circle-outline" color="dark"></ion-icon>

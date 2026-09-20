@@ -475,28 +475,28 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   }
 
   formatPhone(event: any): void {
-    let value = event.target.value.replace(/\D/g, '');
+    let value = (event.target.value || '').replace(/\D/g, '');
 
-    // Eliminar código de país si está al inicio
     if (value.startsWith('56')) {
       value = value.substring(2);
     }
-
-    // Limitar a 9 dígitos (9 + 8 dígitos reales)
-    value = value.substring(0, 9);
-
-    // Formatear progresivamente: +56 9 XXXX XXXX
-    if (value.length > 0) {
-      if (value.length <= 1) {
-        value = `+56 9 ${value}`;
-      } else if (value.length <= 5) {
-        value = `+56 9 ${value.substring(1, 5)}`;
-      } else {
-        value = `+56 9 ${value.substring(1, 5)} ${value.substring(5, 9)}`;
-      }
+    if (value.startsWith('9')) {
+      value = value.substring(1);
     }
 
-    this.servicioForm.patchValue({ fono: value });
+    value = value.substring(0, 8);
+
+    if (!value) {
+      this.servicioForm.patchValue({ fono: '+56 9' }, { emitEvent: false });
+      return;
+    }
+
+    if (value.length <= 4) {
+      this.servicioForm.patchValue({ fono: `+56 9 ${value}` }, { emitEvent: false });
+      return;
+    }
+
+    this.servicioForm.patchValue({ fono: `+56 9 ${value.substring(0, 4)} ${value.substring(4)}` }, { emitEvent: false });
   }
 
   getSuggestionIcon(suggestion: any): string {

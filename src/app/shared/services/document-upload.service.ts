@@ -187,26 +187,18 @@ export class DocumentUploadService {
         };
       }
 
-      if (!backText.includes('CHL')) {
-        return {
-          valid: false,
-          frontText,
-          backText,
-          error: 'La imagen posterior no contiene el patrón CHL esperado en la zona de caracteres.',
-        };
-      }
-
-      const backRun = this.extractRunFromBack(backText);
+      const frontRunDigits = this.getRunDigits(frontRunFull);
+      const backRun = this.findMatchingRunInText(backText, frontRunDigits);
       if (!backRun) {
         return {
           valid: false,
           frontText,
           backText,
-          error: 'No se pudo extraer el RUN desde el reverso de la cédula.',
+          frontRun: frontRunFull,
+          error: 'No se pudo encontrar el RUN del frente en el reverso de la cédula.',
         };
       }
 
-      const frontRunDigits = this.getRunDigits(frontRunFull);
       const backRunDigits = this.getRunDigits(backRun);
 
       if (!frontRunDigits || !backRunDigits || frontRunDigits !== backRunDigits) {
@@ -270,6 +262,51 @@ export class DocumentUploadService {
     return normalized.slice(0, -1);
   }
 
+  private findMatchingRunInText(text: string, expectedDigits?: string): string | null {
+    const candidates = this.extractRunCandidates(text);
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    if (expectedDigits) {
+      const exactMatch = candidates.find(candidate => this.getRunDigits(candidate) === expectedDigits);
+      if (exactMatch) {
+        return exactMatch;
+      }
+    }
+
+    return candidates[0];
+  }
+
+  private extractRunCandidates(text: string): string[] {
+    const patterns = [
+      /(?:RUN|RUT)[^0-9K]*([0-9]{1,2}(?:[.\s]?[0-9]{3}){2}[-.]?[0-9K])/gi,
+      /([0-9]{1,2}(?:[.\s]?[0-9]{3}){2}[-.]?[0-9K])/g,
+      /(\d{7,9}[Kk]?)/g,
+    ];
+
+    const candidates = new Set<string>();
+
+    for (const pattern of patterns) {
+      for (const match of text.matchAll(pattern)) {
+        const rawValue = match[1] ?? match[0];
+        if (!rawValue) continue;
+
+        const normalized = this.normalizeRun(rawValue);
+        if (normalized.length >= 7 && normalized.length <= 9) {
+          candidates.add(normalized);
+        }
+      }
+    }
+
+    return [...candidates].sort((a, b) => {
+      if (b.length !== a.length) {
+        return b.length - a.length;
+      }
+      return a.localeCompare(b);
+    });
+  }
+
   private extractRunFromFront(frontText: string): string | null {
     const labeled = frontText.match(/(?:RUN|RUT)\s*[:.]?\s*([0-9]{1,2}\.?[0-9]{3}\.?[0-9]{3}-?[0-9K])/i);
     if (labeled?.[1]) {
@@ -281,23 +318,12 @@ export class DocumentUploadService {
       return this.normalizeRun(generic[1]);
     }
 
-    return null;
+    const candidate = this.extractRunCandidates(frontText)[0];
+    return candidate ?? null;
   }
 
   private extractRunFromBack(backText: string): string | null {
-    const compact = backText.replace(/\s+/g, '');
-
-    const afterChl = compact.match(/CHL[^0-9K]*([0-9]{7,9}[0-9K]?)/i);
-    if (afterChl?.[1]) {
-      return this.normalizeRun(afterChl[1]);
-    }
-
-    const mrzLike = compact.match(/<([0-9]{7,9}[0-9K]?)</i);
-    if (mrzLike?.[1]) {
-      return this.normalizeRun(mrzLike[1]);
-    }
-
-    return null;
+    return this.findMatchingRunInText(backText);
   }
 
   /**

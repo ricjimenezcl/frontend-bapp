@@ -31,10 +31,6 @@ export class HelpPage {
       questionKey: 'help.faq.avatar.question',
       answerKey: 'help.faq.avatar.answer',
     },
-    {
-      questionKey: 'help.faq.darkMode.question',
-      answerKey: 'help.faq.darkMode.answer',
-    },
   ];
 
   goBack(): void {

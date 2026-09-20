@@ -18,11 +18,11 @@ export class CustomValidators {
         return null;
       }
 
-      const cleaned = control.value.replace(/\D/g, '');
-      const phoneRegex = /^(56)?9\d{8}$/;
+      const cleaned = control.value.toString().replace(/\D/g, '');
+      const normalized = cleaned.replace(/^56/, '').replace(/^9/, '');
 
-      const isValid = phoneRegex.test(cleaned);
-      return isValid ? null : { invalidPhone: true };
+      // El campo muestra "+56 9" fijo y el usuario ingresa solo los 8 dígitos finales.
+      return /^\d{8}$/.test(normalized) ? null : { invalidPhone: true };
     };
   }
 

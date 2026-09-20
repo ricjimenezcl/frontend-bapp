@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, forkJoin } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { SocialUser } from '@abacritt/angularx-social-login';
+import { SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
 import { ProviderService, ProviderProfile, ServiceProviderData } from '../../provider/services/provider.service';
 import { ProfileCompletionService } from '../../core/services/profile-completion.service';
 import { StorageService } from '../../core/storage/storage.service';
@@ -55,6 +55,7 @@ export interface LoginRolesResponse {
 export class AuthService {
   private apiUrl = environment.apiUrl;
   private readonly storageService = inject(StorageService);
+  private readonly socialAuthService = inject(SocialAuthService);
   
   // Subject para datos básicos del usuario
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -597,6 +598,8 @@ export class AuthService {
           this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({ error: () => {} });
         });
     }
+
+    void this.socialAuthService.signOut().catch(() => undefined);
     this.profileCompletion.reset();
     this.clearAllData();
   }

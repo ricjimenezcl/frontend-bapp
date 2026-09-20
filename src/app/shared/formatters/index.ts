@@ -25,6 +25,33 @@ export class PhoneFormatter {
     return value;
   }
 
+  static normalizeToE164(value: string): string {
+    const digits = (value ?? '').toString().replace(/\D/g, '');
+    if (!digits) return '';
+
+    if (digits.startsWith('56')) {
+      const withoutCountry = digits.slice(2);
+      if (withoutCountry.length === 9 && withoutCountry.startsWith('9')) {
+        return `+56${withoutCountry}`;
+      }
+      return `+${digits}`;
+    }
+
+    if (digits.length === 9 && digits.startsWith('9')) {
+      return `+56${digits}`;
+    }
+
+    if (digits.length === 8) {
+      return `+569${digits}`;
+    }
+
+    if (digits.length >= 11) {
+      return `+${digits}`;
+    }
+
+    return `+56${digits}`;
+  }
+
   static unformat(value: string): string {
     return value.replace(/\D/g, '');
   }

@@ -7,7 +7,7 @@
 }
 
 ion-content {
-  --background: #F0EFEA;
+  --background: url('https://res.cloudinary.com/dghwotofx/image/upload/v1789862345/fondo_cwqh4i.png') no-repeat center center / cover;
 }
 
 // ── Outer layout ───────────────────────────────────────────────────────────────
@@ -15,7 +15,6 @@ ion-content {
   min-height: 100%;
   @include flex-column-center;
   padding: var(--bapp-space-6) var(--bapp-space-4);
-  background: #F0EFEA;
 }
 
 .login-wrap {
@@ -104,7 +103,7 @@ ion-content {
 // ── Card ───────────────────────────────────────────────────────────────────────
 .login-card {
   width: 100%;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--bapp-bg-card);
   border: 1px solid rgba(17, 24, 39, 0.08);
   border-radius: var(--bapp-radius-xl);
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
