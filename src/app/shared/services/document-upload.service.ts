@@ -28,6 +28,16 @@ interface ImageValidationResult {
   warnings?: string[];
 }
 
+export function normalizeRunToDigits(run: string): string {
+  return (run ?? '').toUpperCase().replace(/[^0-9K]/g, '').replace(/K$/, 'K');
+}
+
+export function normalizeChileanRUTForBackend(rawValue: string): string {
+  const cleaned = (rawValue ?? '').toUpperCase().replace(/[^0-9K]/g, '').substring(0, 9);
+  if (cleaned.length < 2) return cleaned;
+  return `${cleaned.slice(0, -1)}-${cleaned.slice(-1)}`;
+}
+
 export interface ChileanIdValidationResult {
   valid: boolean;
   error?: string;
@@ -164,11 +174,16 @@ export class DocumentUploadService {
       const frontText = this.normalizeOcrText(frontTextRaw);
       const backText = this.normalizeOcrText(backTextRaw);
 
+      const hasFrontIdentity = /(?:CEDULA|C\u00c9DULA|IDENTIDAD)/i.test(frontText);
+      const hasChileContext = /(?:REPUBLICA|CHILE)/i.test(frontText);
+      const hasRunLabel = /(?:RUN|RUT)/i.test(frontText);
+      const hasCivilRegistry = /(?:REGISTRO|IDENTIFICACION|SERVICIO)/i.test(frontText);
+
       const missingFields = DocumentUploadService.FRONT_REQUIRED_FIELDS.filter(
         field => !frontText.includes(field)
       );
 
-      if (missingFields.length > 0) {
+      if ((!hasFrontIdentity || !hasChileContext || !hasRunLabel || !hasCivilRegistry) && missingFields.length > 0) {
         return {
           valid: false,
           frontText,
@@ -251,11 +266,11 @@ export class DocumentUploadService {
   }
 
   private normalizeRun(run: string): string {
-    return run.toUpperCase().replace(/[^0-9K]/g, '');
+    return normalizeRunToDigits(run);
   }
 
   private getRunDigits(run: string): string {
-    const normalized = this.normalizeRun(run);
+    const normalized = normalizeRunToDigits(run);
     if (normalized.length <= 1) {
       return normalized;
     }
@@ -273,6 +288,14 @@ export class DocumentUploadService {
       if (exactMatch) {
         return exactMatch;
       }
+
+      const substringMatch = candidates.find(candidate => {
+        const candidateDigits = this.getRunDigits(candidate);
+        return candidateDigits && (candidateDigits.includes(expectedDigits) || expectedDigits.includes(candidateDigits));
+      });
+      if (substringMatch) {
+        return substringMatch;
+      }
     }
 
     return candidates[0];
@@ -282,6 +305,7 @@ export class DocumentUploadService {
     const patterns = [
       /(?:RUN|RUT)[^0-9K]*([0-9]{1,2}(?:[.\s]?[0-9]{3}){2}[-.]?[0-9K])/gi,
       /([0-9]{1,2}(?:[.\s]?[0-9]{3}){2}[-.]?[0-9K])/g,
+      /([0-9]{1,2}[.\s]?[0-9]{3}[.\s]?[0-9]{3}[.-]?[0-9K])/gi,
       /(\d{7,9}[Kk]?)/g,
     ];
 
@@ -308,14 +332,18 @@ export class DocumentUploadService {
   }
 
   private extractRunFromFront(frontText: string): string | null {
-    const labeled = frontText.match(/(?:RUN|RUT)\s*[:.]?\s*([0-9]{1,2}\.?[0-9]{3}\.?[0-9]{3}-?[0-9K])/i);
-    if (labeled?.[1]) {
-      return this.normalizeRun(labeled[1]);
-    }
+    const patterns = [
+      /(?:RUN|RUT)[^0-9K]{0,20}([0-9]{1,2}[\.\s]?[0-9]{3}[\.\s]?[0-9]{3}[\s.-]?[0-9K])/i,
+      /(?:RUN|RUT)[^0-9K]{0,20}([0-9]{7,8}[K])/i,
+      /\b([0-9]{1,2}[\.\s]?[0-9]{3}[\.\s]?[0-9]{3}[\s.-]?[0-9K])\b/i,
+      /\b([0-9]{7,8}[K])\b/i,
+    ];
 
-    const generic = frontText.match(/\b([0-9]{1,2}\.?[0-9]{3}\.?[0-9]{3}-[0-9K])\b/i);
-    if (generic?.[1]) {
-      return this.normalizeRun(generic[1]);
+    for (const pattern of patterns) {
+      const match = frontText.match(pattern);
+      if (match?.[1]) {
+        return this.normalizeRun(match[1]);
+      }
     }
 
     const candidate = this.extractRunCandidates(frontText)[0];
@@ -324,6 +352,17 @@ export class DocumentUploadService {
 
   private extractRunFromBack(backText: string): string | null {
     return this.findMatchingRunInText(backText);
+  }
+
+  async extractRunFromFrontImage(file: File): Promise<string | null> {
+    try {
+      const text = await this.extractTextFromImage(file);
+      const normalized = this.normalizeOcrText(text);
+      return this.extractRunFromFront(normalized);
+    } catch (error) {
+      console.warn('No se pudo extraer RUN desde el frente:', error);
+      return null;
+    }
   }
 
   /**

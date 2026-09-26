@@ -17,7 +17,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { DocumentUploadService } from '../../../shared/services/document-upload.service';
+import { DocumentUploadService, normalizeChileanRUTForBackend, normalizeRunToDigits } from '../../../shared/services/document-upload.service';
 import { FeedbackService } from '../../../shared/services/feedback.service';
 import { AuthService } from '../../services/auth.service';
 import { SelfieCaptureComponent } from '../../../shared/components/selfie-capture/selfie-capture.component';
@@ -476,6 +476,51 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
   /**
    * Iniciar verificación de rostro
    */
+  private async validateProviderRunMatchesDocument(): Promise<boolean> {
+    try {
+      const currentUser = this.authService.getCurrentUser() as any;
+      const profile = this.authService.getUserProfile() as any;
+      const registeredRun = profile?.run || currentUser?.run || profile?.rut || currentUser?.rut;
+
+      if (!registeredRun) {
+        this.feedback.showToast('No se encontró el RUN registrado del proveedor para validar la cédula.');
+        return false;
+      }
+
+      const frontFile = this.state.idDocumentFrontUrl
+        ? await this.fileUrlToFile(this.state.idDocumentFrontUrl, 'front-run-check.jpg')
+        : null;
+
+      if (!frontFile) {
+        this.feedback.showToast('No se pudo leer el frente de la cédula para comparar el RUN.');
+        return false;
+      }
+
+      const documentRun = await this.uploadService.extractRunFromFrontImage(frontFile);
+      if (!documentRun) {
+        this.feedback.showToast('No se pudo extraer el RUN de la cédula para comparar con el registro del proveedor.');
+        return false;
+      }
+
+      const registeredDigits = normalizeRunToDigits(normalizeChileanRUTForBackend(registeredRun));
+      const documentDigits = normalizeRunToDigits(documentRun);
+
+      if (registeredDigits !== documentDigits) {
+        const message = `El RUN de la cédula (${documentDigits || 'N/A'}) no coincide con el RUN registrado del proveedor (${normalizeChileanRUTForBackend(registeredRun) || 'N/A'}).`;
+        this.state.idCardValidationError = message;
+        this.feedback.showToast(message);
+        return false;
+      }
+
+      this.state.idCardValidationError = null;
+      return true;
+    } catch (error) {
+      console.error('Error validando RUN del proveedor vs documento:', error);
+      this.feedback.showToast('No se pudo validar que el RUN de la cédula coincida con el registro del proveedor.');
+      return false;
+    }
+  }
+
   async initiateVerification(): Promise<void> {
     if (!this.state.selfieDocumentId || !this.state.idDocumentFrontId || !this.state.idDocumentBackId) {
       this.feedback.showToast('Debe subir selfie, frente y reverso del documento de identidad');
@@ -484,6 +529,11 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
 
     if (!this.state.idCardValidated) {
       this.feedback.showToast(this.state.idCardValidationError || 'La cédula no está validada. Revisa frente/reverso y RUN.');
+      return;
+    }
+
+    const runMatches = await this.validateProviderRunMatchesDocument();
+    if (!runMatches) {
       return;
     }
 
@@ -800,7 +850,9 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
 
   get canInitiateVerification(): boolean {
     return (
-      this.bothDocumentsUploaded &&
+      this.state.selfieDocumentId !== null &&
+      this.state.idDocumentFrontId !== null &&
+      this.state.idDocumentBackId !== null &&
       !this.state.uploading &&
       !this.state.verificationInitiated &&
       !this.state.faceDetectionFailed &&
