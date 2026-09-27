@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductService, Transaction } from '../../services/product.service';
 import { PaymentRedirectService } from '../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../services/platform-detection.service';
 
 /**
  * Premium Badge Component
@@ -21,14 +22,18 @@ export class PremiumBadgeComponent implements OnInit {
   expiresAt?: Date;
   remainingDays = 0;
   loading = true;
+  /** Apple Guideline 3.1.1 — oculta el CTA de compra en iOS */
+  canPurchase = true;
 
   constructor(
     private productService: ProductService,
     private router: Router,
-    private paymentRedirect: PaymentRedirectService
+    private paymentRedirect: PaymentRedirectService,
+    private platformDetection: PlatformDetectionService
   ) {}
 
   ngOnInit() {
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
     this.loadPremiumStatus();
   }
 

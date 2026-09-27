@@ -99,6 +99,7 @@
         </ul>
         <ion-button 
           class="svm-btn svm-btn--primary" 
+          *ngIf="canPurchase"
           expand="block"
           [disabled]="unlockLoading"
           (click)="startUnlock()">
@@ -106,6 +107,9 @@
           <ion-icon name="star" *ngIf="!unlockLoading"></ion-icon>
           {{ unlockLoading ? 'Procesando...' : 'Desbloquear por $1.990' }}
         </ion-button>
+        <p class="svm-state-text" *ngIf="!canPurchase">
+          Esta función no está disponible en esta versión.
+        </p>
       </div>
     </div>
 

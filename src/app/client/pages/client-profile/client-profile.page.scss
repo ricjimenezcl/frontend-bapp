@@ -240,4 +240,9 @@ ion-content.profile-content { --background: var(--bapp-bg-page); }
   &:active { background: rgba(252, 165, 165, 0.06); }
 }
 
+.btn-delete-account {
+  margin-top: var(--bapp-space-2);
+  opacity: 0.7;
+}
+
 .profile-footer-spacer { height: 60px; }

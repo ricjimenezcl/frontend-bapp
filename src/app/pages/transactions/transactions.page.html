@@ -62,7 +62,7 @@
     <ion-icon name="receipt-outline" class="empty-icon"></ion-icon>
     <h3>No tienes compras</h3>
     <p>Aún no has realizado ninguna compra en BAPP.</p>
-    <ion-button (click)="goToCatalog()" expand="block" class="cta-button">
+    <ion-button *ngIf="canPurchase" (click)="goToCatalog()" expand="block" class="cta-button">
       Ver Productos Disponibles
     </ion-button>
   </div>
@@ -152,7 +152,7 @@
   </div>
 
   <!-- CTA to Catalog -->
-  <div *ngIf="!loading && transactions.length > 0" class="catalog-cta">
+  <div *ngIf="!loading && transactions.length > 0 && canPurchase" class="catalog-cta">
     <ion-button (click)="goToCatalog()" expand="block" fill="outline">
       <ion-icon slot="start" name="cart-outline"></ion-icon>
       Ver Más Productos

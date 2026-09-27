@@ -43,6 +43,13 @@ export class ProductCatalogPage implements OnInit {
   ngOnInit() {
     this.platform = this.platformDetection.getPlatform();
     this.paymentMethod = this.paymentService.getPaymentMethodName();
+
+    // Apple Guideline 3.1.1 — iOS no puede mostrar el catálogo de compra externo
+    if (!this.platformDetection.canPurchaseInApp()) {
+      this.goBack();
+      return;
+    }
+
     this.loadUserRole();
     this.loadProducts();
   }

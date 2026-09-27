@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../auth/services/auth.service';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../services/platform-detection.service';
 import { isFontAwesomeIcon, isImageIcon } from '../../../shared/utils/icon-kind.util';
 
 @Component({
@@ -65,7 +66,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     private geoLocationService: GeoLocationService,
     private mapboxService: MapboxService,
     private authService: AuthService,
-    private paymentRedirect: PaymentRedirectService
+    private paymentRedirect: PaymentRedirectService,
+    private platformDetection: PlatformDetectionService
   ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -276,13 +278,16 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
           role: 'cancel',
           handler: () => this.clearPremiumReasonQueryParam(),
         },
-        {
-          text: 'Desbloquear Premium',
-          handler: () => {
-            this.clearPremiumReasonQueryParam();
-            this.paymentRedirect.openClientUnlock('/client/tabs/categories');
-          },
-        },
+        // Apple Guideline 3.1.1 — sin CTA de compra en iOS
+        ...(this.platformDetection.canPurchaseInApp()
+          ? [{
+              text: 'Desbloquear Premium',
+              handler: () => {
+                this.clearPremiumReasonQueryParam();
+                this.paymentRedirect.openClientUnlock('/client/tabs/categories');
+              },
+            }]
+          : []),
       ],
     });
 

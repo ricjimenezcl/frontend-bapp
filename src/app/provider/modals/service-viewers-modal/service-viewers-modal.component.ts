@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../services/platform-detection.service';
 
 // ═══ Interfaces ═══════════════════════════════════════════════════
 
@@ -57,13 +58,18 @@ export class ServiceViewersModalComponent implements OnInit {
   unlockLoading = false;
   paymentRef: string | null = null;
   errorMsg = '';
+  /** Apple Guideline 3.1.1 — oculta el CTA de compra en iOS */
+  canPurchase = true;
 
   constructor(
     private readonly modalCtrl: ModalController,
     private readonly http: HttpClient,
     private readonly router: Router,
-    private readonly paymentRedirect: PaymentRedirectService
-  ) {}
+    private readonly paymentRedirect: PaymentRedirectService,
+    private readonly platformDetection: PlatformDetectionService
+  ) {
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
+  }
 
   ngOnInit() {
     // Usar API real como en el proyecto web

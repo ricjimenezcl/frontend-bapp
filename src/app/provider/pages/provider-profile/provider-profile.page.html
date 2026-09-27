@@ -31,7 +31,7 @@
         <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
         Gestiona tu agenda y horarios
       </div>
-      <button class="btn-premium" (click)="goToCatalog()" type="button">
+      <button class="btn-premium" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
         Actualizar A Premium
       </button>
     </div>
@@ -72,7 +72,7 @@
         <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
       </button>
 
-      <button class="menu-item" (click)="goToCatalog()" type="button">
+      <button class="menu-item" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
         <ion-icon name="storefront-outline" class="menu-item-icon menu-item-icon-gold"></ion-icon>
         <span class="menu-item-label">Tienda Premium</span>
         <div class="menu-tag">PREMIUM</div>
@@ -115,7 +115,11 @@
       <ion-icon name="power-outline"></ion-icon>
       Cerrar sesión
     </button>
-
+    <!-- ── Eliminar cuenta ──────────────────────────────────────── -->
+    <button class="btn-logout btn-delete-account" (click)="confirmDeleteAccount()" type="button">
+      <ion-icon name="trash-outline"></ion-icon>
+      Eliminar cuenta
+    </button>
     <div class="profile-footer-spacer"></div>
   </div>
 </ion-content>

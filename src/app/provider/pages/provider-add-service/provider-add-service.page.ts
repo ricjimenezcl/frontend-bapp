@@ -16,6 +16,7 @@ import { CameraService } from '../../../shared/services/camera.service';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../services/platform-detection.service';
 import { environment } from '../../../../environments/environment';
 
 interface DaySchedule {
@@ -89,6 +90,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly contentFilterService = inject(ContentFilterService);
   private readonly paymentRedirect = inject(PaymentRedirectService);
+  private readonly platformDetection = inject(PlatformDetectionService);
 
   // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -300,17 +302,20 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       message: result.message,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        {
-          text: 'Activar plan',
-          role: 'confirm',
-          handler: () => {
-            this.paymentRedirect.openPayment({
-              productType: result.suggestedProductType,
-              returnTo: '/provider/tabs/service-details',
-              action: 'add-service',
-            });
-          }
-        }
+        // Apple Guideline 3.1.1 — sin CTA de compra en iOS
+        ...(this.platformDetection.canPurchaseInApp()
+          ? [{
+              text: 'Activar plan',
+              role: 'confirm',
+              handler: () => {
+                this.paymentRedirect.openPayment({
+                  productType: result.suggestedProductType,
+                  returnTo: '/provider/tabs/service-details',
+                  action: 'add-service',
+                });
+              }
+            }]
+          : [])
       ]
     });
     await alert.present();

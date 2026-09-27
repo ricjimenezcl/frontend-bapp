@@ -11,6 +11,7 @@ import { CoreService } from '../../../shared/services/core.service';
 import { ProviderAddServicePage } from '../provider-add-service/provider-add-service.page';
 import { DocumentUploadService } from '../../../shared/services/document-upload.service';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../services/platform-detection.service';
 import { environment } from '../../../../environments/environment';
 
 type ServiceLimitProductType = 'PROVIDER_SERVICE_30' | 'PROVIDER_PREMIUM_MONTHLY' | 'PROVIDER_PREMIUM_ANNUAL';
@@ -48,6 +49,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly documentService = inject(DocumentUploadService);
   private readonly paymentRedirect = inject(PaymentRedirectService);
+  private readonly platformDetection = inject(PlatformDetectionService);
 
   currentUser: any;
   servicios: ProviderServices[] = [];
@@ -221,7 +223,8 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
       message: 'Para habilitar más de 2 servicios debes activar un plan de publicación. Activa tu plan para mostrar este servicio en las búsquedas durante 30 días.',
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Activar plan', role: 'confirm' }
+        // Apple Guideline 3.1.1 — sin CTA de compra en iOS
+        ...(this.platformDetection.canPurchaseInApp() ? [{ text: 'Activar plan', role: 'confirm' }] : [])
       ]
     });
     await alert.present();
@@ -317,7 +320,8 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
       message: result.message,
       buttons: [
         { text: 'Cancelar', role: 'cancel' },
-        { text: 'Activar plan', role: 'confirm' }
+        // Apple Guideline 3.1.1 — sin CTA de compra en iOS
+        ...(this.platformDetection.canPurchaseInApp() ? [{ text: 'Activar plan', role: 'confirm' }] : [])
       ]
     });
     await alert.present();

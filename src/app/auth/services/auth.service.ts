@@ -604,6 +604,14 @@ export class AuthService {
     this.clearAllData();
   }
 
+  /**
+   * Elimina la cuenta del usuario autenticado (Apple Guideline 5.1.1(v)).
+   * Requiere que el backend exponga DELETE /users/me.
+   */
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/users/me`);
+  }
+
   isAuthenticated(): boolean {
     const hasToken = !!this.currentUserSubject.value?.access_token || !!this.currentUserSubject.value?.token;
     const hasUser = !!this.currentUserSubject.value;

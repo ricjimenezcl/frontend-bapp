@@ -10,6 +10,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MonetizationComponentsModule } from '../../../components/monetization-components.module';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../services/platform-detection.service';
 
 @Component({
   selector: 'app-provider-profile',
@@ -23,6 +24,8 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
   providerProfile: ProviderProfile | null = null;
   isLoading = false;
   private destroy$ = new Subject<void>();
+  /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
+  canPurchase = true;
   constructor(
     private router: Router,
     private navCtrl: NavController,
@@ -31,10 +34,13 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
     private readonly toastCtrl: ToastController,
     private authService: AuthService,
     private providerService: ProviderService,
-    private paymentRedirect: PaymentRedirectService
+    private paymentRedirect: PaymentRedirectService,
+    private platformDetection: PlatformDetectionService
   ) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
+  }
 
   ionViewWillEnter() {
     this.loadProviderProfile();
@@ -179,5 +185,41 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
     });
     
     await alert.present();
+  }
+
+  /**
+   * Eliminación de cuenta in-app (Apple Guideline 5.1.1(v)).
+   */
+  async confirmDeleteAccount() {
+    const alert = await this.alertCtrl.create({
+      header: 'Eliminar cuenta',
+      message: 'Esta acción es permanente: se eliminarán tu perfil y tus datos de BAPP. ¿Deseas continuar?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar mi cuenta',
+          role: 'destructive',
+          handler: () => this.executeDeleteAccount()
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  private executeDeleteAccount() {
+    this.authService.deleteAccount().subscribe({
+      next: async () => {
+        this.authService.logout();
+        await this.navCtrl.navigateRoot(['/auth/login']);
+      },
+      error: async () => {
+        const toast = await this.toastCtrl.create({
+          message: 'No se pudo eliminar la cuenta. Intenta nuevamente.',
+          duration: 3000,
+          color: 'danger'
+        });
+        await toast.present();
+      }
+    });
   }
 }

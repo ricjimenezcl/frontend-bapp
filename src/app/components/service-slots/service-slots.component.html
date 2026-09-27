@@ -14,7 +14,7 @@
         <span class="slots-label">Slots: {{ usedSlots }}/{{ totalSlots }}</span>
       </div>
       <ion-button 
-        *ngIf="isSlotsFullOrNearlyFull()"
+        *ngIf="isSlotsFullOrNearlyFull() && canPurchase"
         (click)="goToCatalog()" 
         size="small" 
         fill="outline"
@@ -124,6 +124,7 @@
         </ion-button>
         
         <ion-button 
+          *ngIf="canPurchase"
           (click)="goToCatalog()" 
           size="small"
           class="action-button primary">

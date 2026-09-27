@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { ProductService, Transaction } from '../../services/product.service';
 import { PaymentRedirectService } from '../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../services/platform-detection.service';
 
 @Component({
   selector: 'app-transactions',
@@ -21,16 +22,20 @@ export class TransactionsPage implements OnInit {
     pending: 0,
     failed: 0
   };
+  /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
+  canPurchase = true;
 
   constructor(
     private productService: ProductService,
     private router: Router,
     private loadingCtrl: LoadingController,
     private toastCtrl: ToastController,
-    private paymentRedirect: PaymentRedirectService
+    private paymentRedirect: PaymentRedirectService,
+    private platformDetection: PlatformDetectionService
   ) {}
 
   ngOnInit() {
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
     this.loadTransactions();
   }
 

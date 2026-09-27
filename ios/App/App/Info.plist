@@ -28,6 +28,8 @@
 	<string>Necesitamos acceso a tus fotos para gestionar imágenes usadas en la verificación.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Necesitamos acceso a tus fotos para seleccionar tu documento de identidad.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Necesitamos tu ubicación para encontrar proveedores cercanos.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -42,6 +42,12 @@ export class PaymentRedirectService {
    * correspondientes al producto elegido.
    */
   openPayment(options: PaymentRedirectOptions): void {
+    // Apple Guideline 3.1.1: bloqueo duro — iOS no puede redirigir a pago externo.
+    if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios') {
+      console.warn('[PaymentRedirectService] Pago externo bloqueado en iOS (App Store Guideline 3.1.1)');
+      return;
+    }
+
     const user = this.auth.getCurrentUser();
     const userId = user?.id ?? user?.user_id ?? '';
     const role   = (user?.role ?? 'CLIENT').toUpperCase();

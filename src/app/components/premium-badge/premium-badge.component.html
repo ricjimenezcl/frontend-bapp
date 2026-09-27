@@ -78,6 +78,7 @@
         <span class="upgrade-label">Gratuito</span>
       </div>
       <ion-button 
+        *ngIf="canPurchase"
         (click)="goToCatalog()" 
         size="small" 
         fill="outline"
@@ -116,6 +117,7 @@
 
       <!-- CTA Button -->
       <ion-button 
+        *ngIf="canPurchase"
         (click)="goToCatalog()" 
         expand="block" 
         class="upgrade-button">
