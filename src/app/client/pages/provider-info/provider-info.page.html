@@ -157,28 +157,45 @@
         <ion-label class="title">Información de Contacto</ion-label>
       </div>
 
-      <div class="contact-list">
-        <div class="contact-item" *ngIf="provider.phone">
-          <ion-icon name="call-outline" color="primary"></ion-icon>
-          <div class="contact-info">
-            <span class="value">{{ provider.phone }}</span>
+      <div class="contact-wrapper">
+        <div class="contact-list" [class.contact-list--locked]="!hasPremium">
+          <div class="contact-item" *ngIf="provider.phone">
+            <ion-icon name="call-outline" color="primary"></ion-icon>
+            <div class="contact-info">
+              <span class="label">Teléfono</span>
+              <a *ngIf="hasPremium && providerWhatsappLink; else plainPhone"
+                 [href]="providerWhatsappLink" target="_blank" rel="noopener noreferrer"
+                 class="contact-whatsapp-link">
+                <span class="value">{{ provider.phone }}</span>
+                <ion-icon name="logo-whatsapp" class="whatsapp-icon"></ion-icon>
+              </a>
+              <ng-template #plainPhone>
+                <span class="value">{{ provider.phone }}</span>
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="contact-item" *ngIf="provider.email">
+            <ion-icon name="mail-outline" color="primary"></ion-icon>
+            <div class="contact-info">
+              <span class="label">Email</span>
+              <span class="value">{{ provider.email }}</span>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <ion-icon name="location" color="primary"></ion-icon>
+            <div class="contact-info">
+              <span class="label">Ubicación</span>
+              <span class="value">{{ provider.address || 'No disponible' }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="contact-item" *ngIf="provider.email">
-          <ion-icon name="mail-outline" color="primary"></ion-icon>
-          <div class="contact-info">
-            <span class="label">Email</span>
-            <span class="value">{{ provider.email }}</span>
-          </div>
-        </div>
-
-        <div class="contact-item">
-          <ion-icon name="location" color="primary"></ion-icon>
-          <div class="contact-info">
-            <span class="label">Ubicación</span>
-            <span class="value">{{ provider.address || 'No disponible' }}</span>
-          </div>
+        <div class="contact-locked-overlay" *ngIf="!hasPremium">
+          <ion-icon name="lock-closed-outline" class="contact-locked-icon"></ion-icon>
+          <p>Si quieres obtener teléfono, correo y dirección debes contratar un plan.</p>
+          <ion-button size="small" color="primary" (click)="goToPremium()">Contratar plan</ion-button>
         </div>
       </div>
     </div>

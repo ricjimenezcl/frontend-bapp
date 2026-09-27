@@ -85,6 +85,10 @@ export class PaymentRedirectService {
     this.openPayment({ productType: 'CLIENT_UNLOCK_7', returnTo });
   }
 
+  openClientUnlock30(returnTo?: string): void {
+    this.openPayment({ productType: 'CLIENT_UNLOCK_30', returnTo });
+  }
+
   openProviderServicePlan(returnTo?: string, action?: string): void {
     this.openPayment({ productType: 'PROVIDER_SERVICE_30', returnTo, action });
   }

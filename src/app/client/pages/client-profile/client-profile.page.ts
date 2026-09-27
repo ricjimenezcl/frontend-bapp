@@ -231,6 +231,10 @@ export class ClientProfilePage implements OnInit, OnDestroy {
     this.paymentRedirect.openClientUnlock('/client/tabs/profile');
   }
 
+  goToCatalog30() {
+    this.paymentRedirect.openClientUnlock30('/client/tabs/profile');
+  }
+
   async inviteFriends() {
     const user = this.authService.getCurrentUser();
     const inviteUrl = `https://bapp.app/invite/${user?.id ?? ''}`;

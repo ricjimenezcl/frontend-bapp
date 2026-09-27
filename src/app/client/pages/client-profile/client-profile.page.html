@@ -32,7 +32,10 @@
         Contacta proveedores ilimitados
       </div>
       <button class="btn-premium" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
-        Actualizar A Premium
+        Desbloquear acceso 7 días — $1.490
+      </button>
+      <button class="btn-premium btn-premium--secondary" *ngIf="canPurchase" (click)="goToCatalog30()" type="button">
+        Desbloquear acceso 30 días — $4.990
       </button>
     </div>
 

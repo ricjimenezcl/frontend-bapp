@@ -319,6 +319,72 @@ ion-datetime {
     }
   }
 
+  /* Contact List — bloqueo para clientes sin plan premium */
+  .contact-wrapper {
+    position: relative;
+    padding: 0px 16px;
+    margin-bottom: 20px;
+
+    .contact-list {
+      padding: 0;
+      margin-bottom: 0;
+
+      &--locked {
+        filter: blur(6px);
+        pointer-events: none;
+        user-select: none;
+      }
+    }
+  }
+
+  .contact-whatsapp-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+
+    .value { color: #fff; }
+
+    .whatsapp-icon {
+      font-size: var(--bapp-text-lg);
+      color: #25D366;
+      flex-shrink: 0;
+      margin: 0;
+    }
+  }
+
+  .contact-locked-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    padding: 24px;
+    background: rgba(15, 15, 20, 0.6);
+    border-radius: 12px;
+
+    .contact-locked-icon {
+      font-size: 32px;
+      color: var(--ion-color-primary);
+      margin: 0;
+    }
+
+    p {
+      max-width: 280px;
+      font-size: var(--bapp-text-sm);
+      font-family: 'regular';
+      color: #fff;
+      margin: 0;
+    }
+
+    ion-button {
+      margin: 0;
+    }
+  }
+
   /* Form Group */
   .form-group {
     padding: 0px 16px;
