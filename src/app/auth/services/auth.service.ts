@@ -559,6 +559,40 @@ export class AuthService {
     );
   }
 
+  loginWithApple(identityToken: string, role: string = 'CLIENT', fullName?: string, emailHint?: string): Observable<any> {
+    // Backend espera: { identity_token: string, role: string, full_name?: string, email_hint?: string }
+    // El backend debe decodificar el identity_token (JWT de Apple) para obtener email/sub.
+    // Backend retorna: { access_token, user_id, role, provider_id, client_id, email, name, avatar_url, terms_accepted }
+    return this.http.post(`${this.apiUrl}/auth/oauth/apple`, {
+      identity_token: identityToken,
+      role,
+      full_name: fullName?.trim() || undefined,
+      email_hint: emailHint?.trim().toLowerCase() || undefined,
+    }).pipe(
+      tap((response: any) => {
+        this.persistTokens(response.access_token, response.refresh_token);
+        const appleUser: User = {
+          id: response.user_id,
+          email: response.email,
+          role: response.role || 'CLIENT',
+          access_token: response.access_token,
+          user_id: response.user_id,
+          provider_id: response.provider_id,
+          client_id: response.client_id,
+          name: response.name,
+          picture: response.avatar_url,
+          terms_accepted: response.terms_accepted,
+          is_new_user: response.is_new_user,
+        };
+        this.setUser(appleUser, response.access_token);
+      }),
+      catchError((error) => {
+        console.error('Error en loginWithApple:', error);
+        throw error;
+      })
+    );
+  }
+
   acceptTerms(emailOptIn: boolean): Observable<any> {
     return this.http.patch(`${this.apiUrl}/auth/accept-terms`, { email_opt_in: emailOptIn }).pipe(
       tap(() => {

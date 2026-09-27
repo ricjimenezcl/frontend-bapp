@@ -10,6 +10,9 @@ import {
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { Capacitor } from '@capacitor/core';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -63,7 +66,8 @@ export class LoginPage implements OnInit, OnDestroy {
   private pendingLoginCredentials: { email: string; password: string } | null = null;
   socialRolePrompt = false;
   socialRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
-  private pendingSocialLogin: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean } | null = null;
+  private pendingSocialLogin: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string } | null = null;
+  readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -449,6 +453,36 @@ export class LoginPage implements OnInit, OnDestroy {
       });
   }
 
+  async loginWithApple(): Promise<void> {
+    this.isLoading = true;
+    this.errorMessage = '';
+    const wasRegistering = this.activeTab() === 'register';
+
+    try {
+      const result = await SignInWithApple.authorize({
+        clientId: 'io.ionic.bappsearch',
+        redirectURI: `${environment.apiUrl}/auth/oauth/apple/callback`,
+        scopes: 'email name',
+        state: `${Date.now()}`,
+      });
+
+      const identityToken = result?.response?.identityToken || '';
+      if (!identityToken) {
+        this.isLoading = false;
+        this.errorMessage = 'Apple no devolvió un token válido.';
+        return;
+      }
+
+      const fullName = [result?.response?.givenName, result?.response?.familyName].filter(Boolean).join(' ');
+      this.resolveSocialLoginRole('apple', identityToken, result?.response?.email || '', wasRegistering, fullName || undefined);
+    } catch (error: any) {
+      this.isLoading = false;
+      if (String(error?.message || '').toLowerCase().includes('cancel')) return;
+      this.errorMessage = 'No se pudo conectar con Apple';
+      console.error('Error en Apple signIn:', error);
+    }
+  }
+
   selectSocialLoginRole(role: 'CLIENT' | 'PROVIDER'): void {
     if (!this.pendingSocialLogin) return;
     this.isLoading = true;
@@ -457,12 +491,13 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   private resolveSocialLoginRole(
-    provider: 'google' | 'facebook',
+    provider: 'google' | 'facebook' | 'apple',
     token: string,
     email: string,
     wasRegistering: boolean,
+    fullName?: string,
   ): void {
-    const pending = { provider, token, email, wasRegistering };
+    const pending = { provider, token, email, wasRegistering, fullName };
     const requestedRole = (wasRegistering ? this.registerRole().toUpperCase() : 'CLIENT') as 'CLIENT' | 'PROVIDER';
 
     this.socialRolePrompt = false;
@@ -499,12 +534,14 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   private continueSocialLogin(
-    pending: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean },
+    pending: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string },
     role: 'CLIENT' | 'PROVIDER'
   ): void {
     const request$ = pending.provider === 'google'
       ? this.authService.loginWithGoogle(pending.token, role)
-      : this.authService.loginWithFacebook(pending.token, role, pending.email);
+      : pending.provider === 'facebook'
+        ? this.authService.loginWithFacebook(pending.token, role, pending.email)
+        : this.authService.loginWithApple(pending.token, role, pending.fullName, pending.email);
 
     request$.subscribe({
       next: (response) => {
@@ -528,9 +565,15 @@ export class LoginPage implements OnInit, OnDestroy {
         }
 
         this.isLoading = false;
-        this.errorMessage = error.error?.detail || `Error en login con ${pending.provider === 'google' ? 'Google' : 'Facebook'}`;
+        this.errorMessage = error.error?.detail || `Error en login con ${this.getProviderLabel(pending.provider)}`;
       }
     });
+  }
+
+  private getProviderLabel(provider: 'google' | 'facebook' | 'apple'): string {
+    if (provider === 'google') return 'Google';
+    if (provider === 'facebook') return 'Facebook';
+    return 'Apple';
   }
 
   private isFacebookMissingEmailError(error: any): boolean {
@@ -539,7 +582,7 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   private async handleFacebookEmailFallback(
-    pending: { provider: 'google' | 'facebook'; token: string; email: string; wasRegistering: boolean },
+    pending: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string },
     role: 'CLIENT' | 'PROVIDER'
   ): Promise<void> {
     const manualEmail = await this.promptFacebookEmailFallback();

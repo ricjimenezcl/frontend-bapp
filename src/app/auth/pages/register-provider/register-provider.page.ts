@@ -12,6 +12,9 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { CameraService } from '../../../shared/services/camera.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { Capacitor } from '@capacitor/core';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { environment } from '../../../../environments/environment';
 import { ContentFilterService } from '../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../shared/validators/content-filter.validators';
 import { PhoneFormatter } from '../../../shared/formatters';
@@ -48,6 +51,7 @@ export class RegisterProviderPage implements OnInit {
   isTakingPhoto = false;
   showPassword = false;
   showConfirmPassword = false;
+  readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
   constructor() {
     this.registerForm = this.createForm();
@@ -526,6 +530,42 @@ export class RegisterProviderPage implements OnInit {
           this.showAlert('Error', this.getSocialErrorMessage(error, 'Facebook'));
         }
       });
+  }
+
+  async registerWithApple(): Promise<void> {
+    this.isLoading = true;
+    try {
+      const result = await SignInWithApple.authorize({
+        clientId: 'io.ionic.bappsearch',
+        redirectURI: `${environment.apiUrl}/auth/oauth/apple/callback`,
+        scopes: 'email name',
+        state: `${Date.now()}`,
+      });
+
+      const identityToken = result?.response?.identityToken || '';
+      if (!identityToken) {
+        this.isLoading = false;
+        this.showAlert('Error', 'Apple no devolvió un token válido.');
+        return;
+      }
+
+      const fullName = [result?.response?.givenName, result?.response?.familyName].filter(Boolean).join(' ');
+
+      this.authService.loginWithApple(identityToken, 'PROVIDER', fullName || undefined, result?.response?.email || '').subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showAlert('Error', error.error?.detail || 'Error al registrarse con Apple');
+        }
+      });
+    } catch (error: any) {
+      this.isLoading = false;
+      if (String(error?.message || '').toLowerCase().includes('cancel')) return;
+      this.showAlert('Error', 'No se pudo conectar con Apple');
+    }
   }
 
   private handleOAuthNavigation(role: string, termsAccepted: boolean = true): void {

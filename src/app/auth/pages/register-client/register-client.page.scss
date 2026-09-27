@@ -263,6 +263,10 @@ ion-content {
 
   &:active { background: rgba(255, 255, 255, 0.08); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &.social-btn--apple {
+    grid-column: 1 / -1;
+  }
 }
 
 // ── Login link ─────────────────────────────────────────────────────────────────

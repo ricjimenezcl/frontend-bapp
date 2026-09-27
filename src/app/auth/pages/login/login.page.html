@@ -231,6 +231,12 @@
             </svg>
             Facebook
           </button>
+          <button type="button" class="social-btn social-btn--apple" *ngIf="isAppleSignInAvailable" (click)="loginWithApple()" [disabled]="isLoading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000">
+              <path d="M17.05 12.536c-.03-3.06 2.5-4.53 2.61-4.6-1.42-2.08-3.63-2.36-4.42-2.39-1.88-.19-3.68 1.11-4.63 1.11-.96 0-2.43-1.09-4-1.06-2.05.03-3.96 1.2-5.02 3.04-2.14 3.72-.55 9.22 1.54 12.24 1.02 1.47 2.24 3.13 3.83 3.07 1.55-.06 2.13-.99 4-.99 1.87 0 2.4.99 4.02.96 1.66-.03 2.71-1.5 3.72-2.98 1.18-1.71 1.66-3.36 1.69-3.44-.04-.02-3.23-1.24-3.26-4.92-.03-3.07 2.51-4.55 2.63-4.62-1.45-2.13-3.69-2.37-4.48-2.42h.27z"/>
+            </svg>
+            Apple
+          </button>
         </div>
         
           <div *ngIf="socialRolePrompt" class="role-prompt">

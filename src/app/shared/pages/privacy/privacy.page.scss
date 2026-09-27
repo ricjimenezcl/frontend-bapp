@@ -123,6 +123,19 @@
   }
 }
 
+.legal-official-note {
+  margin: var(--bapp-space-6) 0 0 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-tertiary);
+  text-align: center;
+
+  a {
+    color: var(--bapp-color-primary);
+    font-weight: var(--bapp-font-semibold);
+    text-decoration: none;
+  }
+}
+
 // ── RESPONSIVE ──────────────────────────────────────────────────────────────
 @media (max-width: 430px) {
   .legal-container {
