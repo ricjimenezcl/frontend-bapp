@@ -94,6 +94,28 @@ export class ProviderInfoPage implements OnInit {
     return !!this.selectedDate && !!this.selectedTime && !!this.locationAddress;
   }
 
+  /** true si el cliente autenticado tiene un plan premium activo */
+  get hasPremium(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    const profile = this.authService.getUserProfile();
+    return Boolean(currentUser?.has_premium || profile?.has_premium);
+  }
+
+  /** Número de teléfono del proveedor listo para link de WhatsApp (wa.me) */
+  get providerWhatsappLink(): string | null {
+    const digits = (this.provider?.phone || '').replace(/\D/g, '');
+    if (!digits) return null;
+    // wa.me requiere código de país; si el número viene sin +56, se antepone (Chile)
+    const withCountryCode = digits.startsWith('56') ? digits : `56${digits.replace(/^0+/, '')}`;
+    return `https://wa.me/${withCountryCode}`;
+  }
+
+  goToPremium(): void {
+    this.router.navigate(['/payment-callback'], {
+      queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
+    });
+  }
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,

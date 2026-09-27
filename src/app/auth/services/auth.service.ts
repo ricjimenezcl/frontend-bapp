@@ -27,6 +27,7 @@ export interface User {
   refresh_token?: string;
   terms_accepted?: boolean;
   is_new_user?: boolean;
+  has_premium?: boolean;
 }
 
 export interface UserProfile extends User {
