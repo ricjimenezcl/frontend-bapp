@@ -52,6 +52,7 @@
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@ionic/angular": "8.4.2",
     "@ionic/pwa-elements": "3.3.0",
+    "@revenuecat/purchases-capacitor": "^9.2.2",
     "@tensorflow-models/face-landmarks-detection": "^1.0.0",
     "@tensorflow/tfjs": "4.11.0",
     "ionicons": "7.4.0",

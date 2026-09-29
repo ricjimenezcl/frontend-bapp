@@ -18,6 +18,7 @@ function parseEnv(filePath) {
       GEOAPIFY_API_KEY: process.env['GEOAPIFY_API_KEY'] || '',
       GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'] || '',
       FACEBOOK_APP_ID:  process.env['FACEBOOK_APP_ID']  || '',
+      REVENUECAT_API_KEY_IOS: process.env['REVENUECAT_API_KEY_IOS'] || '',
     };
   }
 

@@ -10,4 +10,6 @@ export const environment = {
   cloudinaryCloudName: '',
   cloudinaryUploadPreset: 'ml_default',
   mapDefaultStyle: 'liberty' as 'liberty' | 'positron' | 'dark-matter',
+  // API key pública de RevenueCat (proyecto Apple App Store) — ver .env.example
+  revenueCatApiKeyIos: '',
 };

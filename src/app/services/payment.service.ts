@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, from, throwError } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
 import { PlatformDetectionService } from './platform-detection.service';
+import { AppleIapService } from './apple-iap.service';
 import { environment } from '../../environments/environment';
 import {
   PaymentVerificationResponse,
@@ -30,7 +31,8 @@ export class PaymentService {
 
   constructor(
     private http: HttpClient,
-    private platformDetection: PlatformDetectionService
+    private platformDetection: PlatformDetectionService,
+    private appleIap: AppleIapService
   ) {}
 
   /**
@@ -91,26 +93,31 @@ export class PaymentService {
   }
 
   /**
-   * Purchase via Apple IAP
+   * Purchase via Apple IAP (RevenueCat/StoreKit)
    */
   private purchaseAppleIAP(product: Product): Observable<PaymentVerificationResponse> {
-    // Get Apple IAP product ID
     const platformProduct = product.platforms?.find(p => p.platform === 'apple_iap');
-    
+
     if (!platformProduct) {
       return throwError(() => new Error('Product not available for iOS'));
     }
 
-    console.log('Initiating Apple IAP purchase:', platformProduct.platform_product_id);
-
-    // In production, you would use:
-    // import { InAppPurchase2 } from '@capacitor-community/in-app-purchases';
-    // 
-    // return from(InAppPurchase2.order(platformProduct.platform_product_id)).pipe(
-    //   switchMap(purchase => this.verifyAppleIAPPurchase(purchase))
-    // );
-
-    return throwError(() => new Error('Apple IAP not yet implemented. Install @capacitor-community/in-app-purchases plugin.'));
+    return from(this.appleIap.purchase(product.sku as ProductType)).pipe(
+      switchMap(result => {
+        if (result.cancelled) {
+          return throwError(() => new Error('Purchase cancelled'));
+        }
+        if (!result.success) {
+          return throwError(() => new Error(result.error || 'Apple IAP purchase failed'));
+        }
+        // El backend recibe la confirmación real vía webhook de RevenueCat;
+        // aquí solo informamos éxito optimista para la UI.
+        return new Observable<PaymentVerificationResponse>(observer => {
+          observer.next({ success: true, message: 'Compra procesada por RevenueCat' });
+          observer.complete();
+        });
+      })
+    );
   }
 
   /**
