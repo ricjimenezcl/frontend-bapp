@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, IonicModule } from '@ionic/angular';
-import { CoreService, MainCategory, ServiceCategory } from '../../../shared/services/core.service';
+import { CoreService, MainCategory, ServiceCategory, Subcategory } from '../../../shared/services/core.service';
 import { SelectionService } from '../../../shared/services/selection.service';
 import { StateService } from '../../../shared/services/state.service';
 import { GeoLocationService } from  '../../../shared/services/geo-location.service';
@@ -30,8 +30,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   mainCategories: MainCategory[] = [];
   selectedServices: ServiceCategory[] = [];
   selectedMainCategory: MainCategory | null = null;
-  subcategoryOptions: ServiceCategory[] = [];
-  selectedSubcategory: ServiceCategory | null = null;
+  subcategoryOptions: Subcategory[] = [];
+  selectedSubcategory: Subcategory | null = null;
   subcategories: ServiceCategory[] = [];
   isLoading = true;
 
@@ -157,7 +157,9 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.selectedServices = [];
     this.isLoading = true;
 
-    this.coreService.getMainCategoryWithServices(category.id).subscribe({
+    // Homologado con web (CategoriesComponent.select): primero se cargan las
+    // subcategorías reales de esta categoría principal (tabla `subcategories`).
+    this.coreService.getSubcategories(category.id).subscribe({
       next: (subs) => {
         this.subcategoryOptions = subs;
         this.isLoading = false;
@@ -178,10 +180,20 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     this.selectedServices = [];
     this.isLoading = true;
 
-    // Filtrar servicios de la subcategoría seleccionada
-    this.coreService.getServiceCategories(subcategoryId).subscribe({
+    // Homologado con web (CategoriesComponent.onSubcategoryChange): servicios
+    // reales de la subcategoría seleccionada (tabla `services`), no el endpoint
+    // legado que ignoraba la subcategoría.
+    this.coreService.getServicesBySubcategory(subcategoryId).subscribe({
       next: (services) => {
-        this.subcategories = services;
+        this.subcategories = services.map(s => ({
+          id: s.service_category_id ?? s.id,
+          name: s.name,
+          description: s.description ?? '',
+          icon: s.icon ?? '',
+          main_category_id: this.selectedMainCategory?.id ?? 0,
+          is_active: true,
+          created_at: ''
+        }));
         this.isLoading = false;
       },
       error: () => { this.isLoading = false; }
@@ -196,7 +208,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
   loadSubcategories(mainCategoryId: number) {
     // Mantenido por compatibilidad — ya no se usa en el flujo principal
-    this.coreService.getMainCategoryWithServices(mainCategoryId).subscribe({
+    this.coreService.getSubcategories(mainCategoryId).subscribe({
       next: (subs) => { this.subcategoryOptions = subs; this.isLoading = false; },
       error: () => { this.isLoading = false; }
     });
@@ -483,7 +495,23 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   selectServiceCategory(cat: ServiceCategory) {
     this.searchQuery = '';
     this.filteredCategories = [];
-    this.router.navigate(['/client/service-search'], { queryParams: { service_id: cat.id } });
+
+    // Homologado con web (CategoriesComponent.selectServiceCategory): la página de
+    // resultados en mobile (ServiceSearchPage) no lee queryParams, solo
+    // stateService.selectedServices$, así que hay que poblarlo aquí — igual que
+    // hace confirmSelection() en el flujo de categoría → subcategoría → servicios.
+    const mainCategoryName = this.mainCategories.find(m => m.id === cat.main_category_id)?.name ?? '';
+    this.stateService.setSelectedServices([{
+      id: cat.id,
+      name: cat.name,
+      description: cat.description,
+      main_category_id: cat.main_category_id,
+      mainCategoryName
+    }]);
+
+    // Ruta real registrada es '/client/tabs/service-search' (antes apuntaba a
+    // '/client/service-search', que no existe).
+    this.router.navigate(['/client/tabs/service-search']);
   }
 
   cancel() {

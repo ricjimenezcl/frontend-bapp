@@ -56,7 +56,7 @@ export class ProviderTabsPage implements OnInit, OnDestroy {
   }
 
   goToAddService() {
-    this.router.navigate(['/provider/provider-add-service']);
+    this.router.navigate(['/provider/add-service']);
   }
 
   private updateActiveTabFromUrl(url: string) {

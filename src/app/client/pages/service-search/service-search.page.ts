@@ -12,6 +12,7 @@ import { ProviderActionSheetComponent } from '../../../shared/components/provide
 import { StateService, SelectedService } from '../../../shared/services/state.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { GeoLocationService } from '../../../shared/services/geo-location.service';
+import { ContactLimitService } from '../../../core/services/contact-limit.service';
 import { Subject } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -50,8 +51,6 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  readonly freeProviderLimit = 5;
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -64,7 +63,50 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
-    private geoLocationService: GeoLocationService) {}
+    private geoLocationService: GeoLocationService,
+    private contactLimit: ContactLimitService) {}
+
+  /** true si el cliente autenticado tiene un plan premium activo (igual que provider-info.page / web) */
+  hasPremiumAccess(): boolean {
+    const currentUser = this.authService.getCurrentUser() as any;
+    const profile = this.authService.getUserProfile() as any;
+    return Boolean(currentUser?.has_premium || profile?.has_premium);
+  }
+
+  /**
+   * Marca cada proveedor de filteredProviders como locked/unlocked replicando
+   * la regla de negocio de web (ContactLimitService): premium ve todo desbloqueado;
+   * si no, se respetan los slots gratuitos por servicio y los proveedores ya contactados.
+   */
+  private applyContactLocks(): void {
+    if (this.hasPremiumAccess()) {
+      this.filteredProviders.forEach(p => { p.locked = false; });
+      return;
+    }
+
+    const slotsMap = new Map<number, number>();
+    this.filteredProviders.forEach(provider => {
+      const svcId = provider.service_id ?? provider.serviceId ?? 0;
+      const providerId = provider.provider_id ?? provider.id;
+      const contacted = this.contactLimit.contactedProviders(svcId);
+
+      if (contacted.includes(providerId)) {
+        provider.locked = false;
+        return;
+      }
+
+      if (!slotsMap.has(svcId)) {
+        slotsMap.set(svcId, this.contactLimit.remaining(svcId));
+      }
+      const slots = slotsMap.get(svcId)!;
+      if (slots > 0) {
+        slotsMap.set(svcId, slots - 1);
+        provider.locked = false;
+      } else {
+        provider.locked = true;
+      }
+    });
+  }
 
   get activeLocationLabel(): string {
     const alt = this.stateService.getAlternateLocation();
@@ -277,6 +319,7 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     }
 
     this.filteredProviders = [...filtered];
+    this.applyContactLocks();
   }
 
   onFilterChange(event: any) {
@@ -335,18 +378,29 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
   }
 
   async handleProviderInteraction(provider: any, index: number) {
-    if (index >= this.freeProviderLimit) {
+    if (provider.locked) {
       const alert = await this.alertCtrl.create({
         header: 'Acceso premium',
-        message: `Con el plan gratuito puedes interactuar con los primeros ${this.freeProviderLimit} proveedores. Activa tu plan de 7 días para contactar a todos los proveedores.`,
+        message: 'Con el plan gratuito solo puedes ver el contacto de un número limitado de proveedores por servicio. Activa tu plan para contactar a todos los proveedores.',
         buttons: [
           { text: 'Ahora no', role: 'cancel' },
-          { text: 'Activar plan', handler: () => { /* TODO: navegar a pantalla de pago */ } }
+          {
+            text: 'Activar plan',
+            handler: () => {
+              this.router.navigate(['/payment-callback'], {
+                queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
+              });
+            }
+          }
         ]
       });
       await alert.present();
       return;
     }
+
+    const svcId = provider.service_id ?? provider.serviceId ?? 0;
+    const providerId = provider.provider_id ?? provider.id;
+    this.contactLimit.recordContact(svcId, providerId);
     await this.openProviderDetails(provider);
   }
 

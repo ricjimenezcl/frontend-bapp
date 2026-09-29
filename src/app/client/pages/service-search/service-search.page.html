@@ -54,11 +54,11 @@
       <div
         class="provider-card"
         *ngFor="let provider of filteredProviders; let i = index"
-        [class.provider-locked]="i >= freeProviderLimit"
+        [class.provider-locked]="provider.locked"
         (click)="handleProviderInteraction(provider, i)">
 
         <!-- Lock overlay -->
-        <div class="lock-overlay" *ngIf="i >= freeProviderLimit">
+        <div class="lock-overlay" *ngIf="provider.locked">
           <div class="lock-content">
             <ion-icon name="lock-closed"></ion-icon>
             <span>Premium</span>

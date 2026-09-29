@@ -197,8 +197,8 @@ export class ServiceMapPage implements OnInit, OnDestroy {
 
     this.mapService.clearUserMarker();
 
-    // SVG Cloudinary: mismo que web (ubi_cli_2)
-    const userIconUrl = 'https://res.cloudinary.com/dghwotofx/image/upload/v1782705912/ubi_cli_2_nlnxac.svg';
+    // SVG Cloudinary: mismo ícono que usa actualmente proyecto web (createUserMarker)
+    const userIconUrl = 'https://res.cloudinary.com/dghwotofx/image/upload/v1789871024/pin_ubicacion_j7u7ov.svg';
 
     // NOTA: este elemento se crea con document.createElement fuera del árbol de
     // renderizado de Angular, por lo que el encapsulamiento de estilos (ViewEncapsulation.Emulated)

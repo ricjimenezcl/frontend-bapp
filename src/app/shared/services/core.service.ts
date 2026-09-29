@@ -24,6 +24,27 @@ export interface ServiceCategory {
   is_active: boolean;
   created_at: string;
 }
+
+// Subcategoría real (tabla `subcategories`, nivel intermedio entre
+// MainCategory y los servicios finales). Homologado con web-bapp CategoryService.
+export interface Subcategory {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  main_category_id: number;
+}
+
+// Servicio final devuelto por /categories/subcategories/{id}/services
+// (tabla `services`, nueva taxonomía).
+export interface Service {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  subcategory_id: number;
+  service_category_id?: number | null;
+}
 export interface ServiceProvider {
   id: number;
   provider_id: number;  // ✅ OPCIÓN B: Added for provider ID mapping
@@ -237,6 +258,17 @@ export class CoreService {
   // Alias para compatibilidad
   getCategories(): Observable<ServiceCategory[]> {
     return this.getServiceCategories();
+  }
+
+  // ==================== SUBCATEGORÍAS (taxonomía nueva: main → sub → servicio) ====================
+  // Homologado con web-bapp CategoryService.getSubcategories / getServicesBySubcategory
+
+  getSubcategories(mainCategoryId: number): Observable<Subcategory[]> {
+    return this.http.get<Subcategory[]>(`${this.apiUrl}/categories/main-categories/${mainCategoryId}/subcategories`);
+  }
+
+  getServicesBySubcategory(subcategoryId: number): Observable<Service[]> {
+    return this.http.get<Service[]>(`${this.apiUrl}/categories/subcategories/${subcategoryId}/services`);
   }
 
   // ==================== PROVEEDORES ====================

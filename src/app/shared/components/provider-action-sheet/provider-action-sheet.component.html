@@ -156,42 +156,58 @@
 
   <!-- Contact tab -->
   <div *ngIf="activeDetailTab==='contact'" class="pas-tab-body">
-    <div class="pas-contact-list">
-      <div class="pas-contact-item" *ngIf="providerPhone">
-        <div class="pas-contact-icon">
-          <ion-icon name="call-outline"></ion-icon>
+    <div class="pas-contact-wrapper">
+      <div class="pas-contact-list" [class.pas-contact-list--locked]="!hasPremium">
+        <div class="pas-contact-item" *ngIf="providerPhone">
+          <div class="pas-contact-icon">
+            <ion-icon name="call-outline"></ion-icon>
+          </div>
+          <div class="pas-contact-info">
+            <span class="pas-contact-lbl">Teléfono</span>
+            <a *ngIf="hasPremium && providerWhatsappLink; else pasPlainPhone"
+               [href]="providerWhatsappLink" target="_blank" rel="noopener noreferrer"
+               class="pas-contact-whatsapp-link">
+              <span class="pas-contact-val">{{ providerPhone }}</span>
+              <ion-icon name="logo-whatsapp" class="pas-whatsapp-icon"></ion-icon>
+            </a>
+            <ng-template #pasPlainPhone>
+              <span class="pas-contact-val">{{ providerPhone }}</span>
+            </ng-template>
+          </div>
         </div>
-        <div class="pas-contact-info">
-          <span class="pas-contact-lbl">Teléfono</span>
-          <span class="pas-contact-val">{{ providerPhone }}</span>
+        <div class="pas-contact-item" *ngIf="providerMail">
+          <div class="pas-contact-icon">
+            <ion-icon name="mail-outline"></ion-icon>
+          </div>
+          <div class="pas-contact-info">
+            <span class="pas-contact-lbl">Email</span>
+            <span class="pas-contact-val">{{ providerMail }}</span>
+          </div>
+        </div>
+        <div class="pas-contact-item">
+          <div class="pas-contact-icon">
+            <ion-icon name="location-outline"></ion-icon>
+          </div>
+          <div class="pas-contact-info">
+            <span class="pas-contact-lbl">Dirección</span>
+            <span class="pas-contact-val">{{ providerAddress }}</span>
+          </div>
         </div>
       </div>
-      <div class="pas-contact-item" *ngIf="providerMail">
-        <div class="pas-contact-icon">
-          <ion-icon name="mail-outline"></ion-icon>
-        </div>
-        <div class="pas-contact-info">
-          <span class="pas-contact-lbl">Email</span>
-          <span class="pas-contact-val">{{ providerMail }}</span>
-        </div>
+
+      <div class="pas-contact-locked-overlay" *ngIf="!hasPremium">
+        <ion-icon name="lock-closed-outline" class="pas-contact-locked-icon"></ion-icon>
+        <p>Si quieres obtener teléfono, correo y dirección debes contratar un plan.</p>
+        <ion-button size="small" color="primary" (click)="goToPremium()">Contratar plan</ion-button>
       </div>
-      <div class="pas-contact-item">
-        <div class="pas-contact-icon">
-          <ion-icon name="location-outline"></ion-icon>
-        </div>
-        <div class="pas-contact-info">
-          <span class="pas-contact-lbl">Dirección</span>
-          <span class="pas-contact-val">{{ providerAddress }}</span>
-        </div>
-      </div>
-      
-      <!-- ══ BOTÓN DENUNCIAR PERFIL ══ -->
-      <div class="pas-report-section">
-        <button class="pas-report-btn" (click)="reportProvider()" type="button">
-          <ion-icon name="alert-circle-outline"></ion-icon>
-          <span>Denunciar perfil</span>
-        </button>
-      </div>
+    </div>
+
+    <!-- ══ BOTÓN DENUNCIAR PERFIL ══ -->
+    <div class="pas-report-section">
+      <button class="pas-report-btn" (click)="reportProvider()" type="button">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>Denunciar perfil</span>
+      </button>
     </div>
   </div>
 

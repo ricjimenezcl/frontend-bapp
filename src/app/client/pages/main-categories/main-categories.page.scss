@@ -495,16 +495,6 @@ ion-content.mc-content {
   gap: var(--bapp-space-3);
 }
 
-// Tile color palette — 6 variants cycling with data-idx
-$tile-colors: (
-  0: (#FDE68A, #F0A500, #111),       // primary gold
-  1: (#0EA5E9, #0284C7, #fff),       // accent sky
-  2: (#22C55E, #16A34A, #fff),       // emerald
-  3: (#A855F7, #7C3AED, #fff),       // violet
-  4: (#F97316, #EA580C, #fff),       // orange
-  5: (#EC4899, #DB2777, #fff),       // rose
-);
-
 .cat-tile {
   @include flex-column-center;
   gap: var(--bapp-space-2);
@@ -555,29 +545,15 @@ $tile-colors: (
     width: 100%;
   }
 
-  // Active state
+  // Active state — estilo uniforme igual que web (un solo acento, sin colores por índice)
   &.cat-tile-active {
-    .cat-tile-icon-wrap { transform: scale(1.05); }
-    .cat-tile-label { font-weight: var(--bapp-font-bold); }
-  }
-}
-
-// Generate per-color styles
-@each $idx, $colors in $tile-colors {
-  $grad-start: nth($colors, 1);
-  $grad-end: nth($colors, 2);
-  $icon-color: nth($colors, 3);
-
-  .cat-tile[data-idx="#{$idx}"] {
-    .cat-tile-icon {
-      color: $grad-start;
-      @if $idx == 0 { color: #C89800; } // gold needs darker on light bg
+    .cat-tile-icon-wrap {
+      transform: scale(1.05);
+      background: var(--bapp-surface-hover);
+      border-color: var(--bapp-color-primary);
+      color: var(--bapp-color-primary);
     }
-
-    &.cat-tile-active {
-      .cat-tile-icon { color: $icon-color; }
-      .cat-tile-label { color: var(--bapp-text-primary); }
-    }
+    .cat-tile-label { font-weight: var(--bapp-font-bold); color: var(--bapp-text-primary); }
   }
 }
 

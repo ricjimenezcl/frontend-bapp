@@ -134,6 +134,28 @@ export class ProviderActionSheetComponent implements OnInit {
     return this.provider?.address ?? 'No disponible';
   }
 
+  /** true si el cliente autenticado tiene un plan premium activo (igual que provider-info.page) */
+  get hasPremium(): boolean {
+    const currentUser = this.authService.getCurrentUser();
+    const profile = this.authService.getUserProfile();
+    return Boolean((currentUser as any)?.has_premium || (profile as any)?.has_premium);
+  }
+
+  /** Número de teléfono del proveedor listo para link de WhatsApp (wa.me) */
+  get providerWhatsappLink(): string | null {
+    const digits = (this.provider?.phone || '').replace(/\D/g, '');
+    if (!digits) return null;
+    const withCountryCode = digits.startsWith('56') ? digits : `56${digits.replace(/^0+/, '')}`;
+    return `https://wa.me/${withCountryCode}`;
+  }
+
+  async goToPremium(): Promise<void> {
+    await this.modalCtrl.dismiss();
+    this.router.navigate(['/payment-callback'], {
+      queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
+    });
+  }
+
   constructor(
     private modalCtrl: ModalController,
     private router: Router,

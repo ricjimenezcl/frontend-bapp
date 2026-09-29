@@ -53,6 +53,16 @@ export interface ServiceCategory {
   created_at: string;
 }
 
+// Subcategoría real (tabla `subcategories`) — nivel intermedio entre
+// categoría principal y servicio final. Homologado con web-bapp.
+export interface Subcategory {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  main_category_id: number;
+}
+
 type ServiceLimitProductType = 'PROVIDER_SERVICE_30' | 'PROVIDER_PREMIUM_MONTHLY' | 'PROVIDER_PREMIUM_ANNUAL';
 
 interface ServiceLimitResult {
@@ -101,6 +111,9 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
   // Selección de categoría / servicio (2 pasos inline)
   selectedMainCategoryId: number = 0;
+  selectedSubcategoryId: number = 0;
+  subcategoryOptions: Subcategory[] = [];
+  loadingSubcategories = false;
   selectedServiceId: number = 0;
   selectedService: ServiceCategory | null = null;
   subServices: ServiceCategory[] = [];
@@ -152,6 +165,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private createForm(): FormGroup {
     return this.fb.group({
       servicio: ['', [Validators.required]],
+      subcategoria: ['', [Validators.required]],
       categoria: ['', [Validators.required]],
       nombre_prestador: this.fb.control('', {
         validators: [Validators.required, Validators.minLength(5), Validators.maxLength(45)],
@@ -186,6 +200,19 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       this.presentToast('Debe iniciar sesión para agregar servicios', 'danger');
       this.cancel();
       return;
+    }
+
+    // Cargar categorías principales propias (homologado con web: AddServiceComponent
+    // las carga siempre en ngOnInit). El @Input() solo las precarga cuando este
+    // componente se abre como modal; si se navega por ruta directa (tab "Agregar
+    // servicio") el @Input llega vacío, así que se hace fallback al fetch propio.
+    if (this.mainCategories.length === 0) {
+      this.coreService.getMainCategories()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (cats) => { this.mainCategories = cats; },
+          error: () => {}
+        });
     }
 
     // Cargar perfil del proveedor para obtener providers.id garantizado
@@ -323,10 +350,39 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
   // ── Selección inline 2 pasos (reemplaza flujo modal) ─────────────────
 
-  /** Paso 1: usuario cambia categoría principal → cargar subcategorías */
+  /** Paso 1: usuario cambia categoría principal → cargar subcategorías reales */
   onMainCategoryChange(event: any): void {
     const id = Number(event?.detail?.value ?? 0);
     this.selectedMainCategoryId = id;
+    // Resetear selección de subcategoría y servicio
+    this.servicioForm.patchValue({ subcategoria: '', categoria: '' });
+    this.selectedSubcategoryId = 0;
+    this.subcategoryOptions = [];
+    this.selectedServiceId = 0;
+    this.selectedService = null;
+    this.subServices = [];
+    if (!id) return;
+
+    this.loadingSubcategories = true;
+    this.coreService.getSubcategories(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (subs) => {
+          this.subcategoryOptions = subs;
+          this.loadingSubcategories = false;
+        },
+        error: () => {
+          this.subcategoryOptions = [];
+          this.loadingSubcategories = false;
+          this.presentToast('Error al cargar subcategorías', 'danger');
+        }
+      });
+  }
+
+  /** Paso 2: usuario elige subcategoría → cargar servicios reales de esa subcategoría */
+  onSubcategoryChange(event: any): void {
+    const id = Number(event?.detail?.value ?? 0);
+    this.selectedSubcategoryId = id;
     // Resetear selección de servicio
     this.servicioForm.patchValue({ categoria: '' });
     this.selectedServiceId = 0;
@@ -335,11 +391,19 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     if (!id) return;
 
     this.loadingSubServices = true;
-    this.coreService.getMainCategoryWithServices(id)
+    this.coreService.getServicesBySubcategory(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (services: ServiceCategory[]) => {
-          this.subServices = services || [];
+        next: (services) => {
+          this.subServices = services.map(s => ({
+            id: s.service_category_id ?? s.id,
+            name: s.name,
+            description: s.description ?? '',
+            icon: s.icon ?? '',
+            main_category_id: this.selectedMainCategoryId,
+            is_active: true,
+            created_at: ''
+          }));
           this.loadingSubServices = false;
         },
         error: () => {
@@ -350,7 +414,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       });
   }
 
-  /** Paso 2: usuario selecciona servicio específico */
+  /** Paso 3: usuario selecciona servicio específico */
   onServiceChange(event: any): void {
     const id = Number(event?.detail?.value ?? 0);
     this.selectedServiceId = id;

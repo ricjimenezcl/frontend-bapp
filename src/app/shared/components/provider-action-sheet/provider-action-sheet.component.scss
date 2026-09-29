@@ -288,6 +288,58 @@
   font-weight: var(--bapp-font-medium);
 }
 
+// ── Bloqueo de contacto para clientes sin plan premium ───────────────────────
+.pas-contact-wrapper {
+  position: relative;
+}
+
+.pas-contact-list--locked {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.pas-contact-whatsapp-link {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+  text-decoration: none;
+
+  .pas-contact-val { color: var(--bapp-text-primary); }
+
+  .pas-whatsapp-icon {
+    font-size: var(--bapp-text-lg);
+    color: #25D366;
+    flex-shrink: 0;
+  }
+}
+
+.pas-contact-locked-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bapp-space-2);
+  text-align: center;
+  padding: var(--bapp-space-6);
+  background: rgba(15, 15, 20, 0.6);
+  border-radius: var(--bapp-radius-xl);
+
+  .pas-contact-locked-icon {
+    font-size: 32px;
+    color: var(--bapp-color-primary);
+  }
+
+  p {
+    max-width: 280px;
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-primary);
+    margin: 0;
+  }
+}
+
 // ── Report button ──────────────────────────────────────────────────────────────
 .pas-report-section {
   margin-top: var(--bapp-space-4);
