@@ -1,0 +1,19 @@
+// ─── Provider Chats ────────────────────────────────────────────────────────
+@import '../../../../features/client/pages/client-chats/client-chats-chatbee.scss';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+ion-content {
+  --background: var(--bapp-bg-page);
+}
+
+// Skeleton loading rows
+ion-skeleton-text {
+  --background: var(--bapp-bg-card-raised);
+  --background-rgb: 44, 44, 44;
+  border-radius: var(--bapp-radius-sm);
+}

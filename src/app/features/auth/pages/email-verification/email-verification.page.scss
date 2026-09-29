@@ -1,0 +1,118 @@
+// email-verification.page.scss
+@import '../../../../../theme/mixins';
+
+:host { display: block; height: 100%; }
+
+ion-content {
+  --background: url('../../../../../assets/imgs/fondo.png') no-repeat center center / cover;
+}
+
+// ── Layout (reutiliza el patrón de auth) ─────────────────────────────────────
+.login-bg {
+  min-height: 100%;
+  @include flex-column-center;
+  padding: var(--bapp-space-6) var(--bapp-space-4);
+}
+
+.login-wrap {
+  width: 100%;
+  max-width: 400px;
+  @include flex-column-center;
+  gap: var(--bapp-space-5);
+}
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+.login-logo {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+
+  .logo-img  { width: 72px; height: 72px; object-fit: contain; }
+  .titulo-img { width: 160px; height: auto; object-fit: contain; }
+}
+
+// ── Card ──────────────────────────────────────────────────────────────────────
+.login-card {
+  width: 100%;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  padding: var(--bapp-space-8) var(--bapp-space-6);
+}
+
+.ev-card {
+  @include flex-column-center;
+  gap: var(--bapp-space-4);
+  text-align: center;
+}
+
+// ── State icon circles ────────────────────────────────────────────────────────
+.ev-state-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  @include flex-center;
+  flex-shrink: 0;
+
+  svg, ion-spinner {
+    width: 36px;
+    height: 36px;
+  }
+
+  &.ev-icon-loading {
+    background: rgba(253, 215, 53, 0.12);
+    ion-spinner { --color: var(--bapp-color-primary); width: 40px; height: 40px; }
+  }
+
+  &.ev-icon-success {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    svg { stroke: #22c55e; }
+  }
+
+  &.ev-icon-warning {
+    background: rgba(234, 179, 8, 0.12);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    svg { stroke: #eab308; }
+  }
+
+  &.ev-icon-danger {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    svg { stroke: var(--bapp-color-danger); }
+  }
+}
+
+// ── Texts ─────────────────────────────────────────────────────────────────────
+.ev-title {
+  margin: 0;
+  font-size: var(--bapp-text-xl);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-primary);
+}
+
+.ev-text {
+  margin: 0;
+  font-size: var(--bapp-text-sm);
+  color: var(--bapp-text-secondary);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+.submit-btn {
+  width: 100%;
+  --border-radius: var(--bapp-radius-full);
+  --background: var(--bapp-color-primary);
+  --color: #000;
+  font-weight: var(--bapp-font-semibold);
+  height: 48px;
+}
+
+.ev-btn-outline {
+  width: 100%;
+  --border-radius: var(--bapp-radius-full);
+  --border-color: var(--bapp-border);
+  --color: var(--bapp-text-secondary);
+  height: 48px;
+}

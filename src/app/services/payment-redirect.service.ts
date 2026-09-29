@@ -15,7 +15,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
-import { AuthService } from '../auth/services/auth.service';
+import { AuthService } from '../features/auth/services/auth.service';
 import { ProductType } from '../core/models/payment.model';
 
 export interface PaymentRedirectOptions {

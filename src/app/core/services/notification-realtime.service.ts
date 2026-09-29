@@ -7,7 +7,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { ToastController } from '@ionic/angular';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 import { environment } from '../../../environments/environment';
 
 export interface RealTimeNotification {

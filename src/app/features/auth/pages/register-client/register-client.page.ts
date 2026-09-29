@@ -1,0 +1,431 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { 
+  FormsModule, 
+  ReactiveFormsModule, 
+  FormBuilder, 
+  FormGroup, 
+  FormControl, 
+  Validators, 
+  ValidationErrors 
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import {
+  IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem,
+  IonInput, IonSpinner, IonBackButton, AlertController, IonIcon, IonLabel,
+  IonCheckbox } from '@ionic/angular/standalone';
+import { AuthService } from '../../services/auth.service';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { Capacitor } from '@capacitor/core';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { environment } from '../../../../../environments/environment';
+import { ContentFilterService } from '../../../../shared/services/content-filter.service';
+import { offensiveContentAsyncValidator } from '../../../../shared/validators/content-filter.validators';
+import { PhoneFormatter } from '../../../../shared/formatters';
+
+@Component({
+  selector: 'app-register-client',
+  templateUrl: './register-client.page.html',
+  styleUrls: ['./register-client.page.scss'],
+  standalone: true,
+  imports: [IonIcon,
+    CommonModule, FormsModule, ReactiveFormsModule, RouterModule,
+    IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent,
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem,
+    IonInput, IonSpinner, IonBackButton, IonIcon, IonLabel, IonCheckbox,
+    GoogleSigninButtonModule
+  ]
+})
+export class RegisterClientPage {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private alertController = inject(AlertController);
+  private socialAuthService = inject(SocialAuthService);
+  private contentFilterService = inject(ContentFilterService);
+
+  registerForm: FormGroup;
+  isLoading = false;
+  showPassword = false;
+  showConfirmPassword = false;
+  readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
+
+  constructor() {
+    this.registerForm = this.createForm();
+
+    this.socialAuthService.authState.subscribe((socialUser) => {
+      if (!socialUser || socialUser.provider !== 'GOOGLE') return;
+
+      const googleIdToken = socialUser.idToken || socialUser.authToken || (socialUser as any)?.response?.id_token || '';
+      if (!googleIdToken) {
+        this.isLoading = false;
+        this.showAlert('Error', 'Google no devolvió un token válido. Revisa la configuración de OAuth en Google Console.');
+        return;
+      }
+
+      this.authService.loginWithGoogle(googleIdToken, 'CLIENT').subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showAlert('Error', error.error?.detail || 'Error al registrarse con Google');
+        }
+      });
+    });
+  }
+
+  private createForm(): FormGroup {
+    return this.fb.group({
+      email: ['', [Validators.required, Validators.email, this.strictEmailValidator]],
+      fullName: ['', {
+        validators: [Validators.required, Validators.minLength(2)],
+        asyncValidators: [offensiveContentAsyncValidator(this.contentFilterService, 'profile')],
+        updateOn: 'change',
+      }],
+      phone: ['', [Validators.required, Validators.pattern(/^(\+56\s?9\s?)?[0-9]{8}$/)]],
+      password: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        this.uppercaseValidator,
+        this.numberValidator
+      ]],
+      confirmPassword: ['', [Validators.required]],
+      termsAccepted: [false, [Validators.requiredTrue]],
+      emailOptIn: [false]
+    }, { validator: this.passwordMatchValidator });
+  }
+
+  // ==================== VALIDADORES ====================
+
+  strictEmailValidator(control: FormControl): ValidationErrors | null {
+    if (!control.value) return null;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(control.value)) {
+      return { strictEmail: true };
+    }
+    return null;
+  }
+
+  uppercaseValidator(control: FormControl): ValidationErrors | null {
+    if (!control.value) return null;
+    return /[A-Z]/.test(control.value) ? null : { uppercaseRequired: true };
+  }
+
+  numberValidator(control: FormControl): ValidationErrors | null {
+    if (!control.value) return null;
+    return /[0-9]/.test(control.value) ? null : { numberRequired: true };
+  }
+
+  passwordMatchValidator(g: FormGroup): ValidationErrors | null {
+    const password = g.get('password')?.value;
+    const confirmPassword = g.get('confirmPassword')?.value;
+    if (password !== confirmPassword) {
+      g.get('confirmPassword')?.setErrors({ mismatch: true });
+      return { mismatch: true };
+    }
+    return null;
+  }
+
+  formatPhone(event: any): void {
+    let value = (event.target.value || '').replace(/\D/g, '');
+
+    if (value.startsWith('56')) {
+      value = value.substring(2);
+    }
+    if (value.startsWith('9')) {
+      value = value.substring(1);
+    }
+
+    value = value.substring(0, 8);
+
+    if (!value) {
+      this.registerForm.patchValue({ phone: '+56 9' }, { emitEvent: false });
+      return;
+    }
+
+    if (value.length <= 4) {
+      this.registerForm.patchValue({ phone: `+56 9 ${value}` }, { emitEvent: false });
+      return;
+    }
+
+    this.registerForm.patchValue({ phone: `+56 9 ${value.substring(0, 4)} ${value.substring(4)}` }, { emitEvent: false });
+  }
+
+  // ==================== SUBMIT ====================
+
+  async onSubmit(): Promise<void> {
+    if (this.registerForm.pending) {
+      return;
+    }
+
+    if (this.registerForm.valid && !this.isLoading) {
+      this.isLoading = true;
+      
+      const { confirmPassword, ...data } = this.registerForm.value;
+      const phone = PhoneFormatter.normalizeToE164(data.phone);
+      
+      // ══ AVATAR POR DEFECTO ══════════════════════════════════════
+      // Si el usuario NO subió avatar, asignar automáticamente el avatar por defecto
+      const defaultAvatar = 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png';
+      const avatarToSend = data.avatar && data.avatar.trim() !== '' ? data.avatar : defaultAvatar;
+      
+      // ══ RATING INICIAL ═══════════════════════════════════════════
+      // Asignar rating inicial = 5 (el backend debe manejarlo, pero lo enviamos por compatibilidad)
+      const rating_avg = 5;
+      
+      this.authService.registerClient({
+        email: data.email,
+        password: data.password,
+        full_name: data.fullName,
+        phone: phone,
+        avatar: avatarToSend,
+        rating_avg: rating_avg,
+        terms_accepted: data.termsAccepted,
+        email_opt_in: data.emailOptIn
+      }).subscribe({
+        next: async () => {
+          this.isLoading = false;
+          const alert = await this.alertController.create({
+            header: 'Registro Exitoso',
+            message: 'Tu cuenta ha sido creada correctamente.',
+            buttons: [{ 
+              text: 'Continuar', 
+              handler: () => this.router.navigate(['/auth/login']) 
+            }]
+          });
+          await alert.present();
+        },
+        error: async (error) => {
+          this.isLoading = false;
+          const detail = error?.error?.detail;
+          let errorMessage = 'Error al registrar. Intenta nuevamente.';
+          
+          if (detail === 'Email already registered') {
+            errorMessage = 'Este email ya está registrado.';
+          } else if (detail === 'Phone already registered') {
+            errorMessage = 'Este teléfono ya está registrado.';
+          } else if (detail) {
+            errorMessage = detail;
+          }
+          
+          const alert = await this.alertController.create({
+            header: 'Error de Registro',
+            message: errorMessage,
+            buttons: ['OK']
+          });
+          await alert.present();
+        }
+      });
+    } else {
+      // Marcar todos los campos como tocados para mostrar errores
+      Object.keys(this.registerForm.controls).forEach(key => {
+        this.registerForm.get(key)?.markAsTouched();
+      });
+      this.showAlert('Error', 'Por favor completa todos los campos requeridos correctamente.');
+    }
+  }
+
+  async showAlert(header: string, message: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    await alert.present();
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirm'): void {
+    if (field === 'password') {
+      this.showPassword = !this.showPassword;
+      return;
+    }
+    this.showConfirmPassword = !this.showConfirmPassword;
+  }
+
+  // ==================== REGISTRO SOCIAL ====================
+
+  registerWithGoogle(): void {
+    this.isLoading = true;
+    this.signInWithRetry(GoogleLoginProvider.PROVIDER_ID)
+      .then((socialUser) => {
+        this.authService.loginWithGoogle(socialUser.idToken || '', 'CLIENT').subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.showAlert('Error', error.error?.detail || 'Error al registrarse con Google');
+          }
+        });
+      })
+      .catch((error) => {
+        this.isLoading = false;
+        if (error?.error !== 'popup_closed_by_user') {
+          this.showAlert('Error', this.getSocialErrorMessage(error, 'Google'));
+        }
+      });
+  }
+
+  registerWithFacebook(): void {
+    this.isLoading = true;
+    this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID, {
+      scope: 'public_profile,email',
+      return_scopes: true,
+      auth_type: 'rerequest',
+    })
+      .then((socialUser) => {
+        this.authService.loginWithFacebook(
+          socialUser.authToken || '',
+          'CLIENT',
+          socialUser.email || ''
+        ).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          },
+          error: (error) => {
+            if (this.isFacebookMissingEmailError(error)) {
+              this.retryFacebookWithManualEmail('CLIENT', socialUser.authToken || '');
+              return;
+            }
+            this.isLoading = false;
+            this.showAlert('Error', error.error?.detail || 'Error al registrarse con Facebook');
+          }
+        });
+      })
+      .catch((error) => {
+        this.isLoading = false;
+        if (error?.error !== 'popup_closed_by_user') {
+          this.showAlert('Error', this.getSocialErrorMessage(error, 'Facebook'));
+        }
+      });
+  }
+
+  async registerWithApple(): Promise<void> {
+    this.isLoading = true;
+    try {
+      const result = await SignInWithApple.authorize({
+        clientId: 'io.ionic.bappsearch',
+        redirectURI: `${environment.apiUrl}/auth/oauth/apple/callback`,
+        scopes: 'email name',
+        state: `${Date.now()}`,
+      });
+
+      const identityToken = result?.response?.identityToken || '';
+      if (!identityToken) {
+        this.isLoading = false;
+        this.showAlert('Error', 'Apple no devolvió un token válido.');
+        return;
+      }
+
+      const fullName = [result?.response?.givenName, result?.response?.familyName].filter(Boolean).join(' ');
+
+      this.authService.loginWithApple(identityToken, 'CLIENT', fullName || undefined, result?.response?.email || '').subscribe({
+        next: (response) => {
+          this.isLoading = false;
+          this.handleOAuthNavigation(response.role, response.terms_accepted);
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.showAlert('Error', error.error?.detail || 'Error al registrarse con Apple');
+        }
+      });
+    } catch (error: any) {
+      this.isLoading = false;
+      if (String(error?.message || '').toLowerCase().includes('cancel')) return;
+      this.showAlert('Error', 'No se pudo conectar con Apple');
+    }
+  }
+
+  private handleOAuthNavigation(role: string, termsAccepted: boolean = true): void {
+    if (!termsAccepted) {
+      this.router.navigate(['/auth/terms-acceptance']);
+      return;
+    }
+    this.router.navigate(['/client/categories']);
+  }
+
+  private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await this.socialAuthService.signIn(providerId, options);
+      } catch (err: any) {
+        if (err?.message?.toLowerCase().includes('not ready') && attempt < retries) {
+          await new Promise(r => setTimeout(r, 1500));
+          continue;
+        }
+        throw err;
+      }
+    }
+  }
+
+  private getSocialErrorMessage(error: any, provider: string): string {
+    const msg: string = error?.message ?? '';
+    if (msg.toLowerCase().includes('not ready')) {
+      return `El servicio de ${provider} no está disponible. Verifica tu conexión e intenta nuevamente.`;
+    }
+    return `No se pudo conectar con ${provider}`;
+  }
+
+  private isFacebookMissingEmailError(error: any): boolean {
+    const detail = String(error?.error?.detail ?? error?.message ?? '').toLowerCase();
+    return detail.includes('facebook') && detail.includes('email') && detail.includes('no proporcion');
+  }
+
+  private async retryFacebookWithManualEmail(role: 'CLIENT' | 'PROVIDER', accessToken: string): Promise<void> {
+    const manualEmail = await this.promptFacebookEmailFallback();
+    if (!manualEmail) {
+      this.isLoading = false;
+      await this.showAlert('Correo requerido', 'Debes ingresar un correo válido para continuar con Facebook.');
+      return;
+    }
+
+    this.authService.loginWithFacebook(accessToken, role, manualEmail).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.handleOAuthNavigation(response.role, response.terms_accepted);
+      },
+      error: (fallbackError) => {
+        this.isLoading = false;
+        this.showAlert('Error', fallbackError?.error?.detail || 'No fue posible completar el registro con Facebook');
+      }
+    });
+  }
+
+  private async promptFacebookEmailFallback(): Promise<string | null> {
+    const alert = await this.alertController.create({
+      header: 'Correo requerido',
+      message: 'Facebook no devolvió tu correo. Ingresa tu email para continuar.',
+      cssClass: 'custom-alert-dark',
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'tu@email.com'
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Continuar', role: 'confirm' }
+      ]
+    });
+
+    await alert.present();
+    const result = await alert.onDidDismiss();
+    if (result.role !== 'confirm') return null;
+
+    const email = String(result.data?.values?.email ?? '').trim().toLowerCase();
+    return this.isBasicValidEmail(email) ? email : null;
+  }
+
+  private isBasicValidEmail(email: string): boolean {
+    if (!email || email.includes(' ')) return false;
+    const at = email.indexOf('@');
+    const dot = email.lastIndexOf('.');
+    return at > 0 && dot > at + 1 && dot < email.length - 1;
+  }
+}

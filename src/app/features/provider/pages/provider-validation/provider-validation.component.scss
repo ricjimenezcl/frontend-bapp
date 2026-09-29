@@ -1,0 +1,66 @@
+// ─── Provider Validation ───────────────────────────────────────────────────
+@import '../../../../../theme/mixins';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--bapp-space-4);
+}
+
+ion-content {
+  --background: var(--bapp-bg-page);
+}
+
+// ─── Autofill override (iOS/web) ───────────────────────────────────────────
+ion-input input {
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--bapp-text-primary) !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    box-shadow: 0 0 0 1000px var(--bapp-bg-input) inset !important;
+    caret-color: var(--bapp-color-primary);
+    transition: background-color 99999s ease-in-out 0s;
+  }
+}
+
+ion-card {
+  --background: var(--bapp-bg-card);
+  --color: var(--bapp-text-primary);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  box-shadow: var(--bapp-shadow-card);
+  margin-bottom: var(--bapp-space-6);
+}
+
+ion-img, img {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto var(--bapp-space-3);
+  display: block;
+  border-radius: var(--bapp-radius-lg);
+  box-shadow: var(--bapp-shadow-sm);
+}
+
+ion-button {
+  margin-top: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-4);
+  --border-radius: var(--bapp-radius-full);
+}
+
+ion-label {
+  font-weight: var(--bapp-font-medium);
+  color: var(--bapp-text-primary);
+  margin-bottom: var(--bapp-space-2);
+  display: block;
+}
+
+ion-row {
+  margin-bottom: var(--bapp-space-4);
+}
+
+ion-card-content {
+  @include flex-column-center;
+}

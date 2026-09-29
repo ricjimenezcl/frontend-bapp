@@ -1,0 +1,241 @@
+// edit-profile.page.scss
+@import '../../../../../theme/mixins';
+
+:host { display: block; height: 100%; width: 100%; }
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.ep-header {
+  .ep-toolbar {
+    --background: var(--bapp-bg-page);
+    --border-color: transparent;
+    --padding-start: var(--bapp-space-2);
+  }
+
+  .ep-back-btn {
+    --color: var(--bapp-text-secondary);
+    --border-radius: 12px;
+    --padding-start: var(--bapp-space-2);
+    --padding-end: var(--bapp-space-2);
+  }
+
+  .ep-title {
+    font-size: var(--bapp-text-lg);
+    font-weight: var(--bapp-font-bold);
+    color: var(--bapp-text-primary);
+    letter-spacing: -0.3px;
+  }
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+.ep-content { --background: var(--bapp-bg-page); }
+
+.ep-wrapper {
+  @include flex-column;
+  padding: var(--bapp-space-5) var(--bapp-space-4) var(--bapp-space-10);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+// ── Avatar ────────────────────────────────────────────────────────────────────
+.ep-avatar-section {
+  @include flex-column-center;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-7);
+}
+
+.ep-avatar-wrap {
+  position: relative;
+  display: inline-block;
+  
+  &.ep-avatar-editing {
+    .ep-avatar {
+      border-color: var(--bapp-color-primary);
+      box-shadow: 0 0 0 4px rgba(var(--bapp-color-primary-rgb), 0.1);
+    }
+  }
+}
+
+.ep-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 35px;
+  object-fit: cover;
+  border: 3px solid var(--bapp-color-primary);
+  padding: 3px;
+  background: var(--bapp-bg-page);
+  display: block;
+  transition: all var(--bapp-transition-normal);
+}
+
+.ep-camera-btn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bapp-color-primary);
+  border: 3px solid var(--bapp-bg-page);
+  @include flex-center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all var(--bapp-transition-fast);
+  z-index: 10;
+  
+  // Animación de pulso sutil
+  animation: camera-pulse 2s ease-in-out infinite;
+
+  ion-icon { 
+    font-size: 20px; 
+    color: #000; 
+    font-weight: bold;
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+  
+  &:active { 
+    transform: scale(0.95); 
+  }
+}
+
+@keyframes camera-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(var(--bapp-color-primary-rgb), 0.3);
+  }
+}
+
+.ep-avatar-hint {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  margin: 0;
+  text-align: center;
+  @include flex-center;
+  gap: var(--bapp-space-1);
+  
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+// ── Form ──────────────────────────────────────────────────────────────────────
+.ep-form {
+  @include flex-column;
+  gap: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-6);
+}
+
+.ep-field-group {
+  @include flex-column;
+  gap: var(--bapp-space-1);
+}
+
+.ep-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--bapp-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: var(--bapp-space-1);
+  padding-left: var(--bapp-space-1);
+}
+
+.ep-input-wrap {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: 15px;
+  padding: 0 var(--bapp-space-1);
+  transition: border-color var(--bapp-transition-fast);
+
+  &:focus-within {
+    border-color: rgba(253, 215, 53, 0.4);
+    box-shadow: 0 0 0 3px rgba(253, 215, 53, 0.06);
+  }
+
+  ion-input {
+    --background: transparent;
+    --color: var(--bapp-text-primary);
+    --placeholder-color: var(--bapp-text-disabled);
+    --padding-start: var(--bapp-space-3);
+    --padding-end: var(--bapp-space-3);
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    font-size: var(--bapp-text-sm);
+  }
+
+  &.ep-input-disabled {
+    background: var(--bapp-bg-card-raised);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+}
+
+.ep-textarea-wrap ion-input {
+  min-height: 60px;
+  align-items: flex-start;
+}
+
+.ep-error {
+  @include flex-start;
+  gap: var(--bapp-space-1);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-color-danger);
+  padding-left: var(--bapp-space-1);
+
+  ion-icon { font-size: 13px; flex-shrink: 0; }
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+.ep-actions { @include flex-column; gap: var(--bapp-space-3); }
+
+.ep-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--bapp-space-3);
+}
+
+.ep-btn-primary {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: 16px;
+  background: var(--bapp-color-primary);
+  color: #000;
+  border: none;
+  border-radius: 18px;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  cursor: pointer;
+  transition: opacity var(--bapp-transition-fast);
+  letter-spacing: 0.01em;
+
+  ion-icon { font-size: 18px; }
+
+  &:active { opacity: 0.85; }
+  &:disabled { opacity: 0.4; pointer-events: none; }
+}
+
+.ep-btn-ghost {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 1px solid var(--bapp-border);
+  border-radius: 18px;
+  color: var(--bapp-text-secondary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  &:active { background: var(--bapp-bg-card); }
+}
+
+.ep-spinner { width: 18px; height: 18px; color: #000; }

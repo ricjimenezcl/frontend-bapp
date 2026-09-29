@@ -9,7 +9,7 @@ import { addIcons } from 'ionicons';
 import { alertCircleOutline, checkmarkCircleOutline, lockClosedOutline } from 'ionicons/icons';
 import { HttpClient } from '@angular/common/http';
 import { ProfileCompletionService } from '../../../core/services/profile-completion.service';
-import { AuthService } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../features/auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({

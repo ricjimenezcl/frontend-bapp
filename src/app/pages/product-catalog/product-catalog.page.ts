@@ -6,7 +6,7 @@ import { ProductService, Product } from '../../services/product.service';
 import { PaymentService } from '../../services/payment.service';
 import { PaymentRedirectService } from '../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../services/platform-detection.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 import { ProductType } from '../../core/models/payment.model';
 
 @Component({

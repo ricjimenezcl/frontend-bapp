@@ -1,0 +1,460 @@
+// service-search.page.scss
+@import '../../../../../theme/mixins';
+
+:host { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+// ── Scroll container ───────────────────────────────────────────────────────
+ion-content.ss-content {
+  flex: 1;
+  min-height: 0;
+  --background: var(--bapp-bg-page);
+  --padding-bottom: var(--bapp-space-6);
+}
+
+.ss-wrapper { padding-bottom: var(--bapp-space-6); }
+
+// ── Sticky sub-header (replaces ion-header) ────────────────────────────────
+.ss-ion-header {
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.ss-header {
+  background: var(--bapp-bg-card);
+  border-bottom: 1px solid var(--bapp-border);
+  padding: var(--bapp-space-3) var(--bapp-space-4) 0;
+}
+
+.location-bar {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-3);
+
+  .loc-icon { font-size: var(--bapp-text-sm); color: var(--bapp-color-primary); flex-shrink: 0; }
+  .loc-text {
+    font-size: var(--bapp-text-xs);
+    font-weight: var(--bapp-font-medium);
+    color: var(--bapp-text-secondary);
+    @include truncate-text(1);
+  }
+}
+
+.filter-row {
+  margin-bottom: 0;
+
+  .filter-segment {
+    --background: rgba(255,255,255,0.06);
+    border-radius: var(--bapp-radius-lg) var(--bapp-radius-lg) 0 0;
+    padding: 3px 3px 0;
+
+    ion-segment-button {
+      --background: transparent;
+      --background-checked: var(--bapp-color-primary);
+      --color: var(--bapp-text-tertiary);
+      --color-checked: #000;
+      --border-radius: var(--bapp-radius-md);
+      --indicator-height: 0;
+      --padding-top: 7px;
+      --padding-bottom: 7px;
+      font-size: var(--bapp-text-xs);
+      font-weight: var(--bapp-font-semibold);
+      text-transform: none;
+      min-width: unset;
+    }
+  }
+}
+
+.results-bar {
+  @include flex-start;
+  gap: var(--bapp-space-1);
+  padding: var(--bapp-space-2) 0 var(--bapp-space-3);
+
+  .results-icon { font-size: var(--bapp-text-xs); color: var(--bapp-text-tertiary); }
+  .results-text { font-size: var(--bapp-text-xs); color: var(--bapp-text-tertiary); }
+  .service-tag {
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-color-primary);
+    font-weight: var(--bapp-font-medium);
+  }
+}
+
+// ── Loading skeletons ─────────────────────────────────────────────────────────
+.loading-state {
+  @include flex-column;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-4);
+}
+
+.provider-skeleton {
+  @include flex-start;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-4);
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+
+  .skel-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    @include skeleton;
+  }
+
+  .skel-body {
+    @include flex-column;
+    gap: var(--bapp-space-2);
+    flex: 1;
+
+    .skel-name  { height: 16px; width: 60%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+    .skel-desc  { height: 12px; width: 90%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+    .skel-meta  { height: 12px; width: 45%; border-radius: var(--bapp-radius-sm); @include skeleton; }
+  }
+}
+
+// ── Provider list ─────────────────────────────────────────────────────────────
+.providers-list {
+  @include flex-column;
+  gap: var(--bapp-space-4);  // Aumentado de space-3 a space-4
+  padding: var(--bapp-space-4);
+}
+
+// 🔥 PROVIDER CARD — HOMOLOGACIÓN TOTAL CON WEB
+.provider-card {
+  display: flex;
+  flex-direction: column;  // 🔥 CAMBIADO: flex-start → flex-column (layout vertical como web)
+  gap: 0;  // 🔥 Layout sin gap global, espaciado controlado internamente
+  padding: var(--bapp-space-4);
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);  // 🔥 CAMBIADO: 1.5px → 1px (como web)
+  border-radius: var(--bapp-radius-xl);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);  // 🔥 Transición mejorada del web
+  animation: cardIn 0.3s ease both;  // ✅ Animación de entrada
+
+  // ✅ ACTIVE STATE (mobile/touch)
+  &:active {
+    transform: scale(0.98);
+    box-shadow: none;
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  // ✅ HOVER STATE (desktop only) — homologado con web
+  @media (hover: hover) {
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.14);  // 🔥 Borde más claro al hover
+      transform: translateY(-2px);  // ✅ Efecto elevación
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  // ✅ Sombra dramática
+    }
+  }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ✅ SERVICE TAG (NUEVO) — categoría en la parte superior
+.service-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--bapp-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: var(--bapp-space-2);  // 6px → 8px
+}
+
+// 🔥 CARD MAIN — avatar + info horizontal (como web)
+.card-main {
+  display: flex;
+  gap: var(--bapp-space-4);  // 15px equivalente
+  align-items: flex-start;
+  margin-bottom: var(--bapp-space-3);  // 12px equivalente
+}
+
+// Lock overlay
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.65);
+  backdrop-filter: blur(3px);
+  @include flex-center;
+  border-radius: inherit;
+  z-index: 5;
+
+  .lock-content {
+    @include flex-column-center;
+    gap: var(--bapp-space-1);
+
+    ion-icon { font-size: 24px; color: var(--bapp-color-primary); }
+    span {
+      font-size: var(--bapp-text-xs);
+      font-weight: var(--bapp-font-bold);
+      color: var(--bapp-color-primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+}
+
+// 🔥 AVATAR — homologado con web
+.provider-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+
+  .provider-avatar {
+    width: 56px;   // 🔥 CAMBIADO: 64px → 56px (como web)
+    height: 56px;  // 🔥 CAMBIADO: 64px → 56px
+    border-radius: 12px;  // 🔥 CAMBIADO: 50% → 12px (redondeado, NO circular)
+    object-fit: cover;
+    border: 1.5px solid #FFF9C4;  // 🔥 CRÍTICO: borde amarillo destacado (no gris)
+    display: block;
+  }
+
+  // Online dot ajustado para avatar cuadrado
+  .online-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--bapp-color-success);
+    border: 2px solid var(--bapp-bg-card);
+  }
+}
+
+// Info column
+.provider-info {
+  @include flex-column;
+  gap: 2px;  // 🔥 Reducido para compactar
+  flex: 1;
+  min-width: 0;
+}
+
+.provider-top {
+  @include flex-between;
+  gap: var(--bapp-space-2);
+  align-items: flex-start;
+  margin-bottom: 2px;  // ✅ Espaciado fino
+}
+
+// 🔥 PROVIDER NAME LINE (nombre + badge en una sola línea)
+.provider-name-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;  // Separación entre nombre y badge
+  flex: 1;
+  min-width: 0;  // Permite que el contenedor se comprima
+}
+
+.provider-name {
+  font-size: var(--bapp-text-md);  // 🔥 AUMENTADO: text-sm → text-md (16px como web)
+  font-weight: var(--bapp-font-bold);  // 🔥 CAMBIADO: semibold → bold (700)
+  color: var(--bapp-text-primary);
+  @include truncate-text(1);
+  line-height: 1.3;
+  margin: 0;
+  flex: 0 1 auto;  // ✅ Permite que se comprima si es necesario
+  max-width: calc(100% - 28px);  // ✅ Deja espacio para el badge
+}
+
+// 🛡️ VERIFICATION BADGE (icono + texto)
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;  // Separación entre icono y texto
+  padding: 3px 8px 3px 6px;  // Más padding a la derecha
+  border-radius: 12px;
+  font-size: var(--bapp-text-xs);  // 12px
+  font-weight: var(--bapp-font-semibold);  // 600
+  line-height: 1;
+  flex-shrink: 0;  // Nunca se comprime
+  white-space: nowrap;  // No rompe en varias líneas
+  transition: all 0.2s ease;
+  
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  .badge-text {
+    margin-top: 1px;  // Ajuste visual para alineación perfecta
+  }
+}
+
+// ✅ VERDE: Identidad verificada
+.verification-badge.verified {
+  background: rgba(16, 185, 129, 0.15);  // Fondo verde translúcido
+  color: var(--bapp-color-success);  // Texto verde #10B981
+  border: 1px solid rgba(16, 185, 129, 0.35);  // Borde verde sutil
+  
+  ion-icon {
+    color: var(--bapp-color-success);
+    filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.6));
+  }
+}
+
+// ❌ ROJO: Identidad no verificada
+.verification-badge.rejected {
+  background: rgba(239, 68, 68, 0.15);  // Fondo rojo translúcido
+  color: var(--bapp-color-danger);  // Texto rojo #EF4444
+  border: 1px solid rgba(239, 68, 68, 0.35);  // Borde rojo sutil
+  
+  ion-icon {
+    color: var(--bapp-color-danger);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+  }
+}
+
+.provider-rate {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-color-primary);
+  background: rgba(253, 215, 53, 0.12);
+  border: 1px solid rgba(253, 215, 53, 0.25);
+  border-radius: var(--bapp-radius-full);
+  padding: 2px 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+// 🔥 RATING — homologado con web (amarillo, estrella siempre visible)
+.provider-meta {
+  @include flex-start;
+  gap: 3px;  // 🔥 Reducido para compactar
+  margin: 0;  // Sin margin-top
+}
+
+.meta-item {
+  @include flex-start;
+  gap: 4px;
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-bold);  // ✅ NUEVO: rating en negrita
+  color: var(--bapp-color-primary);  // 🔥 CAMBIADO: rating en amarillo (no gris)
+
+  .star-icon { 
+    color: var(--bapp-color-primary); 
+    font-size: 13px;  // ✅ Tamaño exacto del web
+  }
+  .reviews-icon {
+    width: 12px;
+    height: 12px;
+    stroke: var(--bapp-text-tertiary);
+    flex-shrink: 0;
+    margin-left: 2px;
+  }
+  .dist-icon { 
+    color: var(--bapp-color-danger);  
+    font-size: var(--bapp-text-xs); 
+  }
+  .meta-muted { 
+    color: var(--bapp-text-tertiary);
+    font-weight: var(--bapp-font-regular);  // ✅ Reviews count no bold
+  }
+}
+
+.meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--bapp-text-disabled);
+  flex-shrink: 0;
+}
+
+.provider-desc {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  line-height: 1.5;
+  margin: var(--bapp-space-2) 0 0;
+  @include truncate-text(2);
+}
+
+// 🔥 CARD FOOTER (NUEVO) — distancia + chevron (como web)
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--bapp-space-3);  // ✅ Separación del contenido
+  font-size: var(--bapp-text-xs);
+}
+
+.distance {
+  color: var(--bapp-text-secondary);
+  font-weight: var(--bapp-font-semibold);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  ion-icon {
+    font-size: 12px;
+    color: var(--bapp-color-danger);  // Pin rojo
+  }
+}
+
+.card-chevron {
+  width: 14px;
+  height: 14px;
+  color: rgba(255, 255, 255, 0.24);
+  flex-shrink: 0;
+}
+
+// Service chips (mantener)
+.provider-chips {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  flex-wrap: wrap;
+  margin-top: var(--bapp-space-2);
+}
+
+.chip-service {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-full);
+  padding: 2px 8px;
+  white-space: nowrap;
+  @include truncate-text(1);
+  max-width: 140px;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state {
+  @include flex-column-center;
+  gap: var(--bapp-space-3);
+  padding: var(--bapp-space-12) var(--bapp-space-6);
+  text-align: center;
+
+  .empty-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    @include flex-center;
+
+    ion-icon { font-size: 36px; color: var(--bapp-text-disabled); }
+  }
+
+  .empty-title {
+    font-size: var(--bapp-text-md);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-secondary);
+    margin: 0;
+  }
+
+  .empty-sub {
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-tertiary);
+    max-width: 260px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.list-spacer { height: var(--bapp-space-6); }

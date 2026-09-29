@@ -10,7 +10,7 @@ import {
 import { catchError, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
-import { AuthService, User } from '../../auth/services/auth.service';
+import { AuthService, User } from '../../features/auth/services/auth.service';
 import {
   ChatConversation,
   ChatMessage,

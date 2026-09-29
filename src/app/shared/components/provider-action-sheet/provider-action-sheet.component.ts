@@ -7,10 +7,10 @@ import { Subject, of, forkJoin, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, takeUntil } from 'rxjs/operators';
 
 import { CoreService, Review, WorkingHours, ServiceSchedule } from '../../services/core.service';
-import { ClientBookingService } from '../../../client/services/client-booking.service';
+import { ClientBookingService } from '../../../features/client/services/client-booking.service';
 import { BookingCreate } from '../../../core/models/booking.model';
 import { ChatService } from '../../../core/services/chat.service';
-import { AuthService } from '../../../auth/services/auth.service';
+import { AuthService } from '../../../features/auth/services/auth.service';
 import { MapboxService } from '../../services/mapbox.service';
 import { StateService } from '../../services/state.service';
 import { ContentFilterService } from '../../services/content-filter.service';

@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { SqliteService } from './core/storage/sqlite.service';
 import { NotificationRealtimeService } from './core/services/notification-realtime.service';
-import { AuthService } from './auth/services/auth.service';
+import { AuthService } from './features/auth/services/auth.service';
 import { ProfileCompletionService } from './core/services/profile-completion.service';
 import { CompleteProfileModalComponent } from './shared/components/complete-profile-modal/complete-profile-modal.component';
 import { Subject, takeUntil } from 'rxjs';

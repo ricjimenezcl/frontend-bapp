@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { takeUntil, filter } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
 import { Notification } from '../models/notification.model';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 import { WebSocketService } from './websocket.service';
 
 @Injectable({

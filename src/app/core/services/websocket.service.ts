@@ -23,7 +23,7 @@ import {
   WebSocketReadConfirmation,
   Notification
 } from '../models/chat.model';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../features/auth/services/auth.service';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
