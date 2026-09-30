@@ -272,6 +272,14 @@ export class LoginPage implements OnInit, OnDestroy {
             return;
           }
 
+          if (error?.status === 403 && detail?.code === 'EMAIL_NOT_VERIFIED') {
+            this.retryAttempts = 0;
+            this.authService.resendVerificationEmail(credentials.email).subscribe({ error: () => {} });
+            this.errorMessage = detail.message || 'Debes verificar tu correo electrónico para iniciar sesión.';
+            this.successMessage = 'Te reenviamos un correo de verificación. Revisa tu bandeja de entrada y spam.';
+            return;
+          }
+
           if (error.status === 0 && this.retryAttempts < this.maxRetryAttempts) {
             this.retryAttempts++;
             this.scheduleLoginRetry({ ...credentials, role });
