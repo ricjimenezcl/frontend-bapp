@@ -10,6 +10,7 @@ import { DEFAULT_AVATAR_URL } from '../../../../core/constants/default-avatar';
 import { MonetizationComponentsModule } from '../../../../components/monetization-components.module';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
+import { ProductService, Transaction } from '../../../../services/product.service';
 
 @Component({
   selector: 'app-client-profile',
@@ -41,6 +42,9 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
   canPurchase = true;
 
+  /** Plan activo (última transacción completed con expires_at vigente) */
+  activePlan: Transaction | null = null;
+
   constructor(
     private router: Router,
     private navCtrl: NavController,
@@ -49,7 +53,8 @@ export class ClientProfilePage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private toastCtrl: ToastController,
     private paymentRedirect: PaymentRedirectService,
-    private platformDetection: PlatformDetectionService
+    private platformDetection: PlatformDetectionService,
+    private productService: ProductService
   ) {}
 
   ngOnInit() {
@@ -78,6 +83,7 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   ionViewWillEnter() {
     // Mostrar datos de caché inmediatamente
     this.loadUserData();
+    this.loadActivePlan();
 
     // Luego cargar datos frescos y completos (incluyendo bio) desde el nuevo endpoint
     const currentUser = this.authService.getCurrentUser();
@@ -114,6 +120,23 @@ export class ClientProfilePage implements OnInit, OnDestroy {
       });
 
       console.log('Cargando perfil del cliente con ID:', this.user);
+  }
+
+  private loadActivePlan() {
+    this.productService.getUserTransactions().subscribe({
+      next: (transactions) => {
+        const now = new Date();
+        this.activePlan = transactions.find(t =>
+          t.status === 'completed' && !!t.expires_at && new Date(t.expires_at) > now
+        ) ?? null;
+      },
+      error: () => { this.activePlan = null; }
+    });
+  }
+
+  /** D\u00edas restantes hasta el vencimiento del plan activo */
+  remainingDays(expiresAt: string): number {
+    return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000));
   }
 
   private loadUserData() {

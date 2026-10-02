@@ -14,30 +14,46 @@
     </header>
 
     <!-- ── Premium box ───────────────────────────────────────────────── -->
-    <div class="premium-box">
+    <div class="premium-box" *ngIf="activePlan; else freePlanBox">
       <h2 class="premium-title">
-        <ion-icon name="shield-half-outline" class="premium-icon"></ion-icon>
-        Cuenta Gratuita
+        <ion-icon name="shield-checkmark" class="premium-icon"></ion-icon>
+        Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
       </h2>
-      <div class="perk">
+      <div class="perk" *ngIf="activePlan.activated_at">
         <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
-        Acceso ilimitado a búsquedas
+        Inicio: {{ activePlan.activated_at | date:'dd/MM/yyyy' }}
       </div>
-      <div class="perk">
+      <div class="perk" *ngIf="activePlan.expires_at">
         <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
-        Sin límites de servicios guardados
+        Vence: {{ activePlan.expires_at | date:'dd/MM/yyyy' }} &mdash; {{ remainingDays(activePlan.expires_at) }} días restantes
       </div>
-      <div class="perk">
-        <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
-        Contacta proveedores ilimitados
-      </div>
-      <button class="btn-premium" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
-        Desbloquear acceso 7 días — $1.490
-      </button>
-      <button class="btn-premium btn-premium--secondary" *ngIf="canPurchase" (click)="goToCatalog30()" type="button">
-        Desbloquear acceso 30 días — $4.990
-      </button>
     </div>
+    <ng-template #freePlanBox>
+      <div class="premium-box">
+        <h2 class="premium-title">
+          <ion-icon name="shield-half-outline" class="premium-icon"></ion-icon>
+          Cuenta Gratuita
+        </h2>
+        <div class="perk">
+          <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+          Acceso ilimitado a búsquedas
+        </div>
+        <div class="perk">
+          <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+          Sin límites de servicios guardados
+        </div>
+        <div class="perk">
+          <ion-icon name="checkmark-circle" class="perk-check"></ion-icon>
+          Contacta proveedores ilimitados
+        </div>
+        <button class="btn-premium" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
+          Desbloquear acceso 7 días — $1.490
+        </button>
+        <button class="btn-premium btn-premium--secondary" *ngIf="canPurchase" (click)="goToCatalog30()" type="button">
+          Desbloquear acceso 30 días — $4.990
+        </button>
+      </div>
+    </ng-template>
 
     <!-- ── Stats row ─────────────────────────────────────────────────── -->
     <div class="stats-row">

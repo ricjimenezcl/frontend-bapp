@@ -47,6 +47,13 @@ export class NotificationsPage implements OnInit {
                 // For now, let's go to provider inbox
                 this.navCtrl.navigateForward(`/provider/tabs/bookings`);
             }
+            return;
+        }
+
+        const planTypes = ['plan_activated', 'plan_expiring_soon', 'plan_expired'];
+        if (planTypes.includes(notification.type)) {
+            const role = notification.payload?.role;
+            this.navCtrl.navigateForward(role === 'provider' ? '/provider/tabs/profile' : '/client/tabs/profile');
         }
     }
 
@@ -65,6 +72,9 @@ export class NotificationsPage implements OnInit {
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'close-circle-outline';
             case 'booking_reminder_24h': return 'time-outline';
+            case 'plan_activated': return 'checkmark-done-circle-outline';
+            case 'plan_expiring_soon': return 'hourglass-outline';
+            case 'plan_expired': return 'alert-circle-outline';
             default: return 'notifications-outline';
         }
     }
@@ -84,6 +94,9 @@ export class NotificationsPage implements OnInit {
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'danger';
             case 'booking_reminder_24h': return 'warning';
+            case 'plan_activated': return 'success';
+            case 'plan_expiring_soon': return 'warning';
+            case 'plan_expired': return 'danger';
             default: return 'medium';
         }
     }
