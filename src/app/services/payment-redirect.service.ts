@@ -95,20 +95,16 @@ export class PaymentRedirectService {
     this.openPayment({ productType: 'CLIENT_UNLOCK_30', returnTo });
   }
 
-  openProviderServicePlan(returnTo?: string, action?: string): void {
-    this.openPayment({ productType: 'PROVIDER_SERVICE_30', returnTo, action });
+  openProviderPlan7Days(returnTo?: string, action?: string): void {
+    this.openPayment({ productType: 'PROVIDER_PLAN_7D', returnTo, action });
   }
 
-  openProviderLeads(returnTo?: string): void {
-    this.openPayment({ productType: 'PROVIDER_LEADS_7', returnTo });
+  openProviderPlanMonthly(returnTo?: string, action?: string): void {
+    this.openPayment({ productType: 'PROVIDER_PLAN_MONTHLY', returnTo, action });
   }
 
-  openProviderPremium(returnTo?: string): void {
-    this.openPayment({ productType: 'PROVIDER_PREMIUM_MONTHLY', returnTo });
-  }
-
-  openProviderPremiumAnnual(returnTo?: string): void {
-    this.openPayment({ productType: 'PROVIDER_PREMIUM_ANNUAL', returnTo });
+  openProviderPlanAnnual(returnTo?: string, action?: string): void {
+    this.openPayment({ productType: 'PROVIDER_PLAN_ANNUAL', returnTo, action });
   }
 
   /**

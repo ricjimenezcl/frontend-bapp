@@ -13,6 +13,7 @@ import { StateService, SelectedService } from '../../../../shared/services/state
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { GeoLocationService } from '../../../../shared/services/geo-location.service';
 import { ContactLimitService } from '../../../../core/services/contact-limit.service';
+import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { Subject } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -64,7 +65,8 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private geoLocationService: GeoLocationService,
-    private contactLimit: ContactLimitService) {}
+    private contactLimit: ContactLimitService,
+    private paymentRedirect: PaymentRedirectService) {}
 
   /** true si el cliente autenticado tiene un plan premium activo (igual que provider-info.page / web) */
   hasPremiumAccess(): boolean {
@@ -387,9 +389,7 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
           {
             text: 'Activar plan',
             handler: () => {
-              this.router.navigate(['/payment-callback'], {
-                queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
-              });
+              this.paymentRedirect.openClientUnlock30(this.router.url);
             }
           }
         ]

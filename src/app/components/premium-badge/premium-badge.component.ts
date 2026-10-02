@@ -127,7 +127,7 @@ export class PremiumBadgeComponent implements OnInit {
    * Abre el sitio de pago en el navegador del sistema
    */
   goToCatalog() {
-    this.paymentRedirect.openProviderPremium('/tabs/profile');
+    this.paymentRedirect.openProviderPlanMonthly('/tabs/profile');
   }
 
   /**

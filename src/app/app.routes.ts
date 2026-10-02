@@ -186,16 +186,6 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
-    path: 'product-catalog',
-    loadChildren: () => import('./pages/product-catalog/product-catalog.module').then(m => m.ProductCatalogPageModule),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'payment-callback',
-    loadChildren: () => import('./pages/payment-callback/payment-callback.module').then(m => m.PaymentCallbackPageModule),
-    canActivate: [authGuard]
-  },
-  {
     path: 'transactions',
     loadChildren: () => import('./pages/transactions/transactions.module').then(m => m.TransactionsPageModule),
     canActivate: [authGuard]

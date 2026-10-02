@@ -15,6 +15,7 @@ import { MapboxService } from '../../services/mapbox.service';
 import { StateService } from '../../services/state.service';
 import { ContentFilterService } from '../../services/content-filter.service';
 import { ProviderImagePipe } from '../../pipes/provider-image.pipe';
+import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 
 interface CalendarDay {
   dateStr: string;      // YYYY-MM-DD
@@ -151,9 +152,7 @@ export class ProviderActionSheetComponent implements OnInit {
 
   async goToPremium(): Promise<void> {
     await this.modalCtrl.dismiss();
-    this.router.navigate(['/payment-callback'], {
-      queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
-    });
+    this.paymentRedirect.openClientUnlock30(this.router.url);
   }
 
   constructor(
@@ -168,6 +167,7 @@ export class ProviderActionSheetComponent implements OnInit {
     private toastCtrl: ToastController,
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
+    private paymentRedirect: PaymentRedirectService,
     private contentFilterService: ContentFilterService
   ) {}
 

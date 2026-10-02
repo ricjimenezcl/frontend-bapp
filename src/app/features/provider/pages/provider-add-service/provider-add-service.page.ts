@@ -63,7 +63,7 @@ export interface Subcategory {
   main_category_id: number;
 }
 
-type ServiceLimitProductType = 'PROVIDER_SERVICE_30' | 'PROVIDER_PREMIUM_MONTHLY' | 'PROVIDER_PREMIUM_ANNUAL';
+type ServiceLimitProductType = 'PROVIDER_PLAN_7D' | 'PROVIDER_PLAN_MONTHLY' | 'PROVIDER_PLAN_ANNUAL';
 
 interface ServiceLimitResult {
   canCreate: boolean;
@@ -257,6 +257,9 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     const hasPremium = activeTypes.some((pt: string) =>
       pt.includes('PROVIDER_PREMIUM_MONTHLY') ||
       pt.includes('PROVIDER_PREMIUM_ANNUAL') ||
+      pt.includes('PROVIDER_PLAN_7D') ||
+      pt.includes('PROVIDER_PLAN_MONTHLY') ||
+      pt.includes('PROVIDER_PLAN_ANNUAL') ||
       (pt.includes('PROVIDER_PREMIUM') && (pt.includes('YEAR') || pt.includes('ANNUAL')))
     );
 
@@ -266,29 +269,29 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
     const maxServices = hasPremium ? 7 : hasBasePlan ? 3 : 2;
     if (activeServices < maxServices) {
-      return { canCreate: true, suggestedProductType: 'PROVIDER_SERVICE_30', message: '' };
+      return { canCreate: true, suggestedProductType: 'PROVIDER_PLAN_MONTHLY', message: '' };
     }
 
     if (!hasBasePlan && activeServices >= 2) {
       return {
         canCreate: false,
-        suggestedProductType: 'PROVIDER_SERVICE_30',
-        message: 'Ya alcanzaste los 2 servicios gratuitos. Activa un plan mensual o anual para crear tu tercer servicio.',
+        suggestedProductType: 'PROVIDER_PLAN_MONTHLY',
+        message: 'Ya alcanzaste los 2 servicios gratuitos. Activa un plan para crear tu tercer servicio.',
       };
     }
 
     if (!hasPremium && activeServices >= 3) {
       return {
         canCreate: false,
-        suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
-        message: 'Tu plan actual permite hasta 3 servicios. Activa Premium mensual o anual para llegar hasta 7 servicios activos.',
+        suggestedProductType: 'PROVIDER_PLAN_ANNUAL',
+        message: 'Tu plan actual permite hasta 3 servicios. Activa el plan para llegar hasta 7 servicios activos.',
       };
     }
 
     return {
       canCreate: false,
-      suggestedProductType: 'PROVIDER_PREMIUM_ANNUAL',
-      message: 'Ya alcanzaste el máximo de 7 servicios activos para planes Premium.',
+      suggestedProductType: 'PROVIDER_PLAN_ANNUAL',
+      message: 'Ya alcanzaste el máximo de 7 servicios activos.',
     };
   }
 

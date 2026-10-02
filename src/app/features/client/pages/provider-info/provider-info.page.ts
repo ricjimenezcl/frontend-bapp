@@ -21,6 +21,7 @@ import { Review, TimeSlot } from '../../../../shared/services/core.service';
 import { ReportButtonComponent } from '../../../../shared/components/report-button/report-button.component';
 import { ReportedEntityType } from '../../../../core/models/report.model';
 import { ContentFilterService } from '../../../../shared/services/content-filter.service';
+import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 
 @Component({
   selector: 'app-provider-info',
@@ -111,9 +112,7 @@ export class ProviderInfoPage implements OnInit {
   }
 
   goToPremium(): void {
-    this.router.navigate(['/payment-callback'], {
-      queryParams: { product_type: 'CLIENT_UNLOCK_30', returnTo: this.router.url }
-    });
+    this.paymentRedirect.openClientUnlock30(this.router.url);
   }
 
   constructor(
@@ -130,7 +129,8 @@ export class ProviderInfoPage implements OnInit {
     private mapboxService: MapboxService,
     private chatService: ChatService,
     private modalCtrl: ModalController,
-    private contentFilterService: ContentFilterService
+    private contentFilterService: ContentFilterService,
+    private paymentRedirect: PaymentRedirectService
   ) { }
 
   ngOnInit() {

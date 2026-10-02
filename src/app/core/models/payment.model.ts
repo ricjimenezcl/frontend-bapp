@@ -12,12 +12,9 @@ export { Product, ProductPlatform } from './product.model';
 export type ProductType =
   | 'CLIENT_UNLOCK_7'
   | 'CLIENT_UNLOCK_30'
-  | 'PROVIDER_SERVICE_30'
-  | 'PROVIDER_SERVICE_YEAR'
-  | 'PROVIDER_LEADS_7'
-  | 'PROVIDER_LEADS_30'
-  | 'PROVIDER_PREMIUM_MONTHLY'
-  | 'PROVIDER_PREMIUM_ANNUAL';
+  | 'PROVIDER_PLAN_7D'
+  | 'PROVIDER_PLAN_MONTHLY'
+  | 'PROVIDER_PLAN_ANNUAL';
 
 /**
  * Plataformas de pago soportadas
@@ -153,12 +150,9 @@ export interface Transaction {
 export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
   CLIENT_UNLOCK_7: 'Desbloqueo 7 días',
   CLIENT_UNLOCK_30: 'Desbloqueo 30 días',
-  PROVIDER_SERVICE_30: 'Publicación servicio 30 días',
-  PROVIDER_SERVICE_YEAR: 'Publicación servicio 1 año',
-  PROVIDER_LEADS_7: 'Leads premium 7 días',
-  PROVIDER_LEADS_30: 'Leads premium 30 días',
-  PROVIDER_PREMIUM_MONTHLY: 'Premium mensual',
-  PROVIDER_PREMIUM_ANNUAL: 'Premium anual',
+  PROVIDER_PLAN_7D: 'Plan Proveedor 7 días',
+  PROVIDER_PLAN_MONTHLY: 'Plan Proveedor mensual',
+  PROVIDER_PLAN_ANNUAL: 'Plan Proveedor anual',
 };
 
 /**
@@ -167,10 +161,7 @@ export const PRODUCT_TYPE_LABELS: Record<ProductType, string> = {
 export const PRODUCT_DURATIONS: Record<ProductType, number> = {
   CLIENT_UNLOCK_7: 7,
   CLIENT_UNLOCK_30: 30,
-  PROVIDER_SERVICE_30: 30,
-  PROVIDER_SERVICE_YEAR: 365,
-  PROVIDER_LEADS_7: 7,
-  PROVIDER_LEADS_30: 30,
-  PROVIDER_PREMIUM_MONTHLY: 30,
-  PROVIDER_PREMIUM_ANNUAL: 365,
+  PROVIDER_PLAN_7D: 7,
+  PROVIDER_PLAN_MONTHLY: 30,
+  PROVIDER_PLAN_ANNUAL: 365,
 };

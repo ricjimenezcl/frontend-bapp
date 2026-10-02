@@ -185,6 +185,6 @@ export class TransactionsPage implements OnInit {
    * Go to product catalog
    */
   goToCatalog() {
-    this.paymentRedirect.openPayment({ productType: 'PROVIDER_SERVICE_30', returnTo: '/tabs/profile' });
+    this.paymentRedirect.openPayment({ productType: 'PROVIDER_PLAN_MONTHLY', returnTo: '/tabs/profile' });
   }
 }

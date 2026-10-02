@@ -185,7 +185,7 @@ export class ProviderProfilePage implements OnInit, OnDestroy {
   }
 
   goToCatalog() {
-    this.paymentRedirect.openProviderServicePlan('/provider/tabs/profile');
+    this.paymentRedirect.openProviderPlanMonthly('/provider/tabs/profile');
   }
 
   async goSalir() {

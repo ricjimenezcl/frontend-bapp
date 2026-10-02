@@ -28,8 +28,9 @@ import { ProductType } from '../core/models/payment.model';
 const IOS_PRODUCT_ID_MAP: Partial<Record<ProductType, string>> = {
   CLIENT_UNLOCK_7: 'bapp_client_unlock_7',
   CLIENT_UNLOCK_30: 'bapp_client_unlock_30',
-  PROVIDER_SERVICE_30: 'bapp_provider_service_30',
-  PROVIDER_LEADS_7: 'bapp_provider_leads_7',
+  PROVIDER_PLAN_7D: 'bapp_provider_plan_7d',
+  PROVIDER_PLAN_MONTHLY: 'bapp_provider_plan_monthly',
+  PROVIDER_PLAN_ANNUAL: 'bapp_provider_plan_annual',
 };
 
 export interface AppleIapPurchaseResult {

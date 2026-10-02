@@ -207,7 +207,7 @@ export class ServiceViewersModalComponent implements OnInit {
     
     // Modo real: cerrar modal y abrir pago en bappsearch.com
     this.modalCtrl.dismiss();
-    this.paymentRedirect.openProviderLeads('/provider/tabs/home');
+    this.paymentRedirect.openProviderPlanMonthly('/provider/tabs/home');
   }
 
   confirmPayment(): void {

@@ -152,7 +152,7 @@ export class ServiceSlotsComponent implements OnInit {
    * Abre el sitio de pago en el navegador del sistema
    */
   goToCatalog() {
-    this.paymentRedirect.openProviderServicePlan('/provider/tabs/service-details');
+    this.paymentRedirect.openProviderPlanMonthly('/provider/tabs/service-details');
   }
 
   /**
