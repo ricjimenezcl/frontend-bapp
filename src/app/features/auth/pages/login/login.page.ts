@@ -367,7 +367,7 @@ export class LoginPage implements OnInit, OnDestroy {
       return;
     }
     if (role === 'CLIENT') {
-      this.router.navigate(['/client/categories']);
+      this.router.navigate(['/client/tabs/home']);
       return;
     }
     this.router.navigate(['/home']);

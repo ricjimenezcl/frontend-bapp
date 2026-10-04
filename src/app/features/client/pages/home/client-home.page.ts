@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { StateService, SelectedService } from '../../../../shared/services/state.service';
+import { BookingService, BookingStats } from '../../../../core/services/booking.service';
 
 interface QuickAccessItem {
   label: string;
@@ -23,6 +24,8 @@ interface QuickAccessItem {
 export class ClientHomePage implements OnInit, OnDestroy {
   userName = '';
   selectedServices: SelectedService[] = [];
+  stats: BookingStats | null = null;
+  isLoadingStats = false;
 
   readonly quickAccess: QuickAccessItem[] = [
     { label: 'Mis Reservas', icon: 'calendar-outline', route: ['/client/tabs/bookings'] },
@@ -35,7 +38,8 @@ export class ClientHomePage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private stateService: StateService
+    private stateService: StateService,
+    private bookingService: BookingService
   ) {}
 
   ngOnInit() {
@@ -45,11 +49,28 @@ export class ClientHomePage implements OnInit, OnDestroy {
     this.stateService.selectedServices$
       .pipe(takeUntil(this.destroy$))
       .subscribe(services => { this.selectedServices = services; });
+
+    this.loadStats();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private loadStats() {
+    this.isLoadingStats = true;
+    this.bookingService.getClientStats()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.stats = stats;
+          this.isLoadingStats = false;
+        },
+        error: () => {
+          this.isLoadingStats = false;
+        }
+      });
   }
 
   getGreeting(): string {

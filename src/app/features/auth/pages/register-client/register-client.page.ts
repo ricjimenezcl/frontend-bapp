@@ -357,7 +357,7 @@ export class RegisterClientPage {
       this.router.navigate(['/auth/terms-acceptance']);
       return;
     }
-    this.router.navigate(['/client/categories']);
+    this.router.navigate(['/client/tabs/home']);
   }
 
   private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {

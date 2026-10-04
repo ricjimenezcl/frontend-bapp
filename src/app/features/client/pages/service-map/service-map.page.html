@@ -5,15 +5,6 @@
     <!-- Mapa real (MapLibre GL) — NO modificar este elemento -->
     <div #mapContainer id="map" class="map-element"></div>
 
-    <!-- ── Barra de búsqueda overlay (superior) ────────────────────── -->
-    <div class="map-search-overlay">
-      <ion-icon name="search-outline" class="search-icon"></ion-icon>
-      <span class="search-placeholder">Buscar en el mapa...</span>
-      <div class="radius-badge">
-        <ion-icon name="location" class="radius-icon"></ion-icon>
-        <span class="radius-text">5 km</span>
-      </div>
-    </div>
 
     <!-- ── Controles de zoom (esquina superior derecha) ──────────────── -->
     <div class="zoom-controls">
@@ -53,7 +44,7 @@
     </div>
 
     <!-- ── Leyenda inferior (glass card) ─────────────────────────────── -->
-    <div class="map-legend" *ngIf="!isLoading && userLocation">
+   <!--  <div class="map-legend" *ngIf="!isLoading && userLocation">
       <p class="legend-count">{{ providerCount }} proveedores en el área</p>
       <div class="legend-items">
         <div class="legend-item">
@@ -71,7 +62,7 @@
           <span class="legend-label">Tu posición</span>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- ── Estado de carga ───────────────────────────────────────────── -->
     <div class="loading-overlay" *ngIf="isLoading">

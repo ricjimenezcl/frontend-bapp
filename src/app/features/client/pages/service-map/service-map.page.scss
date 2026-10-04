@@ -256,32 +256,17 @@ ion-content.map-content {
   justify-content: center;
 }
 
-// Anillo de pulso centrado
-.pulse-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 62px;
-  height: 62px;
-  margin-top: -31px;
-  margin-left: -31px;
-  border-radius: 50%;
-  background: rgba(253, 215, 53, 0.3);
-  animation: pulse-animation 2s ease-out infinite;
-  pointer-events: none;
-}
-
 // Ícono del usuario
 .user-icon {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 3px solid white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   position: relative;
   z-index: 1;
   display: block;
   object-fit: cover;
+  animation: location-glow 2s ease-in-out infinite;
 }
 
 // Fallback del ícono del usuario
@@ -339,19 +324,13 @@ ion-content.map-content {
   font-size: var(--bapp-text-xs);
 }
 
-// Animación de pulso
-@keyframes pulse-animation {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.7;
+// Resplandor pulsante que indica la ubicación actual (reemplaza el anillo amarillo)
+@keyframes location-glow {
+  0%, 100% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(var(--bapp-color-accent-rgb), 0.55);
   }
-  70% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(0.8);
-    opacity: 0;
+  50% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 12px rgba(var(--bapp-color-accent-rgb), 0);
   }
 }
 

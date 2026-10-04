@@ -21,7 +21,6 @@
         (click)="setViewMode('list')">
         <ion-icon name="list-outline"></ion-icon>
         <span>Proveedores</span>
-        <ion-badge color="danger" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</ion-badge>
       </button>
     </div>
 
@@ -42,14 +41,6 @@
         </ion-segment-button>
       </ion-segment>
     </div>
-
-    <!-- Results count -->
-    <div class="results-bar" *ngIf="!isLoading">
-      <ion-icon name="business-outline" class="results-icon"></ion-icon>
-      <span class="results-text">{{ filteredProviders.length }} proveedor{{ filteredProviders.length !== 1 ? 'es' : '' }} encontrado{{ filteredProviders.length !== 1 ? 's' : '' }}</span>
-      <span class="service-tag" *ngIf="selectedServices.length > 0">· {{ selectedServices[0].name }}</span>
-    </div>
-
   </div>
 </div>
 

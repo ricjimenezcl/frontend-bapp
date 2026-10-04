@@ -6,12 +6,44 @@
     <h1 class="ch-title">¿Qué servicio necesitas hoy?</h1>
   </div>
 
+  <!-- ── Info BappSearch ─────────────────────────────────────────────── -->
+  <div class="ch-info-card">
+    <ion-icon name="sparkles-outline" class="ch-info-icon"></ion-icon>
+    <div class="ch-info-text">
+      <h2>BappSearch</h2>
+      <p>Encuentra proveedores de confianza cerca de ti y comienza a resolver tus necesidades en tu zona, de forma rápida y segura.</p>
+    </div>
+  </div>
+
   <!-- ── Buscar servicios (CTA principal) ───────────────────────────── -->
   <button class="ch-search-cta" type="button" (click)="goToCategories()">
     <ion-icon name="search-outline"></ion-icon>
     <span>Buscar servicios</span>
-    <ion-badge color="danger" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</ion-badge>
+    
   </button>
+
+  <!-- ── Mini dashboard de reservas ───────────────────────────────────── -->
+  <div class="ch-stats-row" *ngIf="!isLoadingStats && stats">
+    <div class="ch-stat-box">
+      <h3>{{ stats.pending }}</h3>
+      <p>Pendientes</p>
+    </div>
+    <div class="ch-stat-box">
+      <h3>{{ stats.confirmed }}</h3>
+      <p>Confirmadas</p>
+    </div>
+    <div class="ch-stat-box">
+      <h3 class="ch-stat--success">{{ stats.completed }}</h3>
+      <p>Completadas</p>
+    </div>
+  </div>
+
+  <div class="ch-stats-row ch-stats-row--skeleton" *ngIf="isLoadingStats">
+    <div class="ch-stat-box" *ngFor="let i of [1,2,3]">
+      <div class="ch-sk ch-sk--val"></div>
+      <div class="ch-sk ch-sk--lbl"></div>
+    </div>
+  </div>
 
   <!-- ── Accesos rápidos ─────────────────────────────────────────────── -->
   <div class="ch-quick-access">

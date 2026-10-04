@@ -366,7 +366,7 @@ export class BookingService {
    * @returns true si puede ser cancelada
    */
   canCancel(booking: BookingResponse): boolean {
-    const cancellableStatuses: BookingStatus[] = ['PENDING', 'APPROVED', 'CONFIRMED'];
+    const cancellableStatuses: BookingStatus[] = [BookingStatus.PENDING, BookingStatus.APPROVED, BookingStatus.CONFIRMED];
     return cancellableStatuses.includes(booking.status);
   }
 
@@ -385,7 +385,7 @@ export class BookingService {
    * @returns true si puede ser completada
    */
   canComplete(booking: BookingResponse): boolean {
-    const completableStatuses: BookingStatus[] = ['APPROVED', 'CONFIRMED', 'IN_PROGRESS'];
+    const completableStatuses: BookingStatus[] = [BookingStatus.APPROVED, BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS];
     return completableStatuses.includes(booking.status);
   }
 

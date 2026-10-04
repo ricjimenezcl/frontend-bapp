@@ -49,7 +49,7 @@ export const noAuthGuard: CanActivateFn = (
   if (user?.role === 'PROVIDER') {
     router.navigate(['/provider/tabs']);
   } else if (user?.role === 'CLIENT') {
-    router.navigate(['/client/tabs/categories']);
+    router.navigate(['/client/tabs/home']);
   } else {
     router.navigate(['/home']);
   }

@@ -741,7 +741,7 @@ export class DocumentVerificationPage implements OnInit, OnDestroy {
     }
 
     if (currentUser.role === 'CLIENT') {
-      this.router.navigate(['/client/categories'], { replaceUrl: true });
+      this.router.navigate(['/client/tabs/home'], { replaceUrl: true });
       return;
     }
 

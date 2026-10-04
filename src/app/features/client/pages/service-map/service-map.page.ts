@@ -204,7 +204,6 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     // renderizado de Angular, por lo que el encapsulamiento de estilos (ViewEncapsulation.Emulated)
     // NO aplica las clases de service-map.page.scss aquí. Por eso el tamaño se fija inline.
     const MARKER_SIZE = 44;
-    const PULSE_SIZE = 62;
 
     // Contenedor del marcador de usuario
     const el = document.createElement('div');
@@ -218,30 +217,16 @@ export class ServiceMapPage implements OnInit, OnDestroy {
       justify-content: center;
     `;
 
-    const pulseRingStyle = `
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: ${PULSE_SIZE}px;
-      height: ${PULSE_SIZE}px;
-      margin-top: -${PULSE_SIZE / 2}px;
-      margin-left: -${PULSE_SIZE / 2}px;
-      border-radius: 50%;
-      background: rgba(253, 215, 53, 0.3);
-      animation: pulse-animation 2s ease-out infinite;
-      pointer-events: none;
-    `;
-
     const iconStyle = `
       width: ${MARKER_SIZE}px;
       height: ${MARKER_SIZE}px;
       border-radius: 50%;
-      border: 3px solid white;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       position: relative;
       z-index: 1;
       display: block;
       object-fit: cover;
+      animation: location-glow 2s ease-in-out infinite;
     `;
 
     const img = new Image();
@@ -249,7 +234,6 @@ export class ServiceMapPage implements OnInit, OnDestroy {
 
     img.onload = () => {
       el.innerHTML = `
-        <div class="pulse-ring" style="${pulseRingStyle}"></div>
         <img class="user-icon" src="${userIconUrl}" alt="Tu ubicación" style="${iconStyle}" />
       `;
     };
@@ -257,7 +241,6 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     img.onerror = () => {
       // Fallback: SVG inline idéntico al pin rojo del hero de la web
       el.innerHTML = `
-        <div class="pulse-ring" style="${pulseRingStyle}"></div>
         <svg class="user-icon" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" style="${iconStyle}">
           <path d="M12 1C6.48 1 2 5.48 2 11c0 7.3 10 20 10 20s10-12.7 10-20C22 5.48 17.52 1 12 1z" fill="#BE202E" stroke="#FFFFFF" stroke-width="1.5"/>
           <circle cx="12" cy="11" r="4.2" fill="#FFFFFF"/>

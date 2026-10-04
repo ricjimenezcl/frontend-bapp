@@ -355,8 +355,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
       });
     }
 
-    // Navegar a la página de tabs (siempre, independiente de si la ubicación falló)
-    this.router.navigate(['/client/tabs'], { replaceUrl: true });
+    // Navegar directo a los resultados de búsqueda (siempre, independiente de si la ubicación falló)
+    this.router.navigate(['/client/tabs/service-search'], { replaceUrl: true });
   }
 
   // ── Location search ──────────────────────────────────────────────────
@@ -516,7 +516,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
 
   cancel() {
     // Navegar atrás al home del cliente
-    this.router.navigate(['/client']);
+    this.router.navigate(['/client/tabs/home']);
   }
   doRefresh(event: any) {
     this.coreService.getMainCategories().subscribe({

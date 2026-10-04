@@ -46,7 +46,7 @@ export class TermsAcceptancePage {
         if (user?.role === 'PROVIDER') {
           this.router.navigate(['/provider/tabs']);
         } else {
-          this.router.navigate(['/client/categories']);
+          this.router.navigate(['/client/tabs/home']);
         }
       },
       error: async (err) => {

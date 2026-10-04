@@ -301,7 +301,7 @@ export class MapService {
       source: this.clusterSourceId,
       layout: {
         'icon-image': 'custom-marker',
-        'icon-size': 0.55,
+        'icon-size': 0.2,
         'icon-allow-overlap': true
       },
       paint: {
