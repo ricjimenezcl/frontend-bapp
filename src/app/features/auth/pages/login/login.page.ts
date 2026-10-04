@@ -37,6 +37,11 @@ import { environment } from '../../../../../environments/environment';
   ]
 })
 export class LoginPage implements OnInit, OnDestroy {
+  // El botón de Google requiere un ancho fijo en px (200-400, lo valida el SDK).
+  // Se calcula de forma síncrona (antes de que Angular construya el directive de
+  // Google) para que coincida con el ancho real del botón de Facebook.
+  googleButtonWidth = signal<number>(this.computeGoogleButtonWidth());
+
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -309,6 +314,14 @@ export class LoginPage implements OnInit, OnDestroy {
     if (this.retryTimerRef) {
       clearInterval(this.retryTimerRef);
     }
+  }
+
+  // Replica el ancho de contenido real de .login-card:
+  // login-bg padding 16px * 2, login-wrap max-width 420px, login-card padding 24px * 2.
+  private computeGoogleButtonWidth(): number {
+    const wrapWidth = Math.min(window.innerWidth - 32, 420);
+    const contentWidth = wrapWidth - 48;
+    return Math.min(400, Math.max(200, Math.floor(contentWidth)));
   }
 
   private scheduleLoginRetry(credentials: { email: string; password: string; role?: 'CLIENT' | 'PROVIDER' }): void {

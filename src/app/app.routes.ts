@@ -65,12 +65,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/client/pages/tabs/tabs.page').then(m => m.ClientTabsPage),
         children: [
           {
-            path: 'service-search',
-            loadComponent: () => import('./features/client/pages/service-search/service-search.page').then(m => m.ServiceSearchPage)
+            path: 'home',
+            loadComponent: () => import('./features/client/pages/home/client-home.page').then(m => m.ClientHomePage)
           },
           {
-            path: 'service-map',
-            loadComponent: () => import('./features/client/pages/service-map/service-map.page').then(m => m.ServiceMapPage)
+            path: 'service-search',
+            loadComponent: () => import('./features/client/pages/service-search/service-search.page').then(m => m.ServiceSearchPage)
           },
           {
             path: 'bookings',
@@ -86,7 +86,7 @@ export const routes: Routes = [
           },
           {
             path: '',
-            redirectTo: 'service-search',
+            redirectTo: 'home',
             pathMatch: 'full'
           }
         ]

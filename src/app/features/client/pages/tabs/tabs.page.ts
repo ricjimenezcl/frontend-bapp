@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { StateService } from '../../../../shared/services/state.service';
-import { MapService } from '../../../../core/services/map.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BappieChatbotComponent } from '../../../../shared/components/bappie-chatbot/bappie-chatbot.component';
@@ -19,13 +18,13 @@ import { BappieChatbotComponent } from '../../../../shared/components/bappie-cha
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
   selectedServices: any[] = [];
-  activeTab: string = 'service-search';
+  activeTab: string = 'home';
   private readonly destroy$ = new Subject<void>();
 
   // Maps tab names to child route segments defined in app.routes.ts
   private readonly tabRoutes: Record<string, string> = {
+    'home':           'home',
     'service-search': 'service-search',
-    'service-map':    'service-map',
     'bookings':       'bookings',
     'chats':          'chats',
     'client-profile': 'profile'
@@ -33,8 +32,7 @@ export class ClientTabsPage implements OnInit, OnDestroy {
 
   constructor(
     private stateService: StateService,
-    private router: Router,
-    private mapService: MapService
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -60,9 +58,6 @@ export class ClientTabsPage implements OnInit, OnDestroy {
     const route = this.tabRoutes[tabName];
     if (!route) return;
     this.router.navigate(['/client/tabs', route]);
-    if (tabName === 'service-map') {
-      setTimeout(() => this.mapService.resize(), 200);
-    }
   }
 
   goToCategories() {
@@ -70,8 +65,8 @@ export class ClientTabsPage implements OnInit, OnDestroy {
   }
 
   private updateActiveTabFromUrl(url: string) {
-    if      (url.includes('/tabs/service-search')) this.activeTab = 'service-search';
-    else if (url.includes('/tabs/service-map'))    this.activeTab = 'service-map';
+    if      (url.includes('/tabs/home'))            this.activeTab = 'home';
+    else if (url.includes('/tabs/service-search'))  this.activeTab = 'service-search';
     else if (url.includes('/tabs/bookings'))        this.activeTab = 'bookings';
     else if (url.includes('/tabs/chats'))           this.activeTab = 'chats';
     else if (url.includes('/tabs/profile'))         this.activeTab = 'client-profile';

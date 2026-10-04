@@ -1,5 +1,5 @@
 // src/app/client/pages/service-search/service-search.page.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,15 +17,22 @@ import { PaymentRedirectService } from '../../../../services/payment-redirect.se
 import { Subject } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { MapService } from '../../../../core/services/map.service';
+import { ServiceMapPage } from '../service-map/service-map.page';
 
 @Component({
   selector: 'app-service-search',
   templateUrl: './service-search.page.html',
   styleUrls: ['./service-search.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, ProviderImagePipe, ProviderActionSheetComponent,EmptyStateComponent, LoadingSkeletonComponent]
+  imports: [CommonModule, FormsModule, IonicModule, ProviderImagePipe, ProviderActionSheetComponent, EmptyStateComponent, LoadingSkeletonComponent, ServiceMapPage]
 })
 export class ServiceSearchPage implements OnInit, OnDestroy {
+
+  // Fusión service-search + service-map: alterna entre la lista de
+  // proveedores y el mapa embebido sin perder el estado de ninguno de los dos.
+  @ViewChild(ServiceMapPage) serviceMapPage?: ServiceMapPage;
+  viewMode: 'list' | 'map' = 'list';
 
   categoryId: number = 0;
   categoryName: string = '';
@@ -66,7 +73,22 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     private loadingCtrl: LoadingController,
     private geoLocationService: GeoLocationService,
     private contactLimit: ContactLimitService,
-    private paymentRedirect: PaymentRedirectService) {}
+    private paymentRedirect: PaymentRedirectService,
+    private mapService: MapService) {}
+
+  /** Alterna entre la vista de lista y la de mapa (reemplaza el tab "service-map"). */
+  setViewMode(mode: 'list' | 'map') {
+    if (this.viewMode === mode) return;
+    this.viewMode = mode;
+    if (mode === 'map') {
+      // Espera a que el contenedor del mapa quede visible antes de
+      // inicializar/redimensionar MapLibre (necesita medir su tamaño real).
+      setTimeout(() => {
+        this.serviceMapPage?.initMapIfNeeded();
+        this.mapService.resize();
+      }, 150);
+    }
+  }
 
   /** true si el cliente autenticado tiene un plan premium activo (igual que provider-info.page / web) */
   hasPremiumAccess(): boolean {

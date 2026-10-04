@@ -27,20 +27,20 @@ ion-content {
 // ── Logo section ───────────────────────────────────────────────────────────────
 .login-logo {
   @include flex-column-center;
-  gap: var(--bapp-space-4);
+  gap: var(--bapp-space-2);
   text-align: center;
 
   .web-brand-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 2px;
   }
 
   .logo-container {
-    width: 84px;
-    height: 128px;
+    width: 48px;
+    height: 72px;
     background: transparent;
     border-radius: var(--bapp-radius-xl);
     display: flex;
@@ -54,7 +54,7 @@ ion-content {
   }
 
   .titulo-img {
-    height: 42px;
+    height: 24px;
     object-fit: contain;
     display: block;
   }
@@ -71,24 +71,24 @@ ion-content {
 @media (min-width: 640px) {
   .login-logo {
     .logo-container {
-      width: 112px;
-      height: 172px;
+      width: 60px;
+      height: 92px;
     }
 
     .titulo-img {
-      height: 44px;
+      height: 28px;
     }
   }
 }
 @media (min-width: 1024px) {
   .login-logo {
     .logo-container {
-      width: 140px;
-      height: 216px;
+      width: 76px;
+      height: 116px;
     }
 
     .titulo-img {
-      height: 60px;
+      height: 36px;
     }
   }
 }
@@ -453,19 +453,26 @@ ion-content {
 // ── Social buttons ─────────────────────────────────────────────────────────────
 .social-btns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: var(--bapp-space-3);
+}
 
-  asl-google-signin-button {
-    display: block;
-    width: 100%;
-    min-width: 200px;
-  }
+// Contenedor que recorta el botón nativo de Google (iframe de ancho fijo)
+// para que visualmente tenga el mismo alto/ancho/radio que .social-btn.
+.google-btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 44px;
+  border-radius: var(--bapp-radius-md);
+  overflow: hidden;
 }
 
 .social-btn {
   @include flex-center;
   gap: var(--bapp-space-2);
+  width: 100%;
   height: 44px;
   background: var(--bapp-bg-card-raised);
   border: 1px solid var(--bapp-border);
@@ -478,10 +485,6 @@ ion-content {
 
   &:active { background: rgba(255, 255, 255, 0.08); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  &.social-btn--apple {
-    grid-column: 1 / -1;
-  }
 }
 
 // ── Register links ─────────────────────────────────────────────────────────────

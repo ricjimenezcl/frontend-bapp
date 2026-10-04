@@ -4,6 +4,27 @@
 <div class="ss-ion-header">
   <div class="ss-header">
 
+    <!-- Alternar Mapa / Proveedores (fusión service-search + service-map) -->
+    <div class="view-toggle-row">
+      <button
+        class="view-toggle-btn"
+        type="button"
+        [class.active]="viewMode === 'map'"
+        (click)="setViewMode('map')">
+        <ion-icon name="map-outline"></ion-icon>
+        <span>Mapa</span>
+      </button>
+      <button
+        class="view-toggle-btn"
+        type="button"
+        [class.active]="viewMode === 'list'"
+        (click)="setViewMode('list')">
+        <ion-icon name="list-outline"></ion-icon>
+        <span>Proveedores</span>
+        <ion-badge color="danger" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</ion-badge>
+      </button>
+    </div>
+
     <!-- Active location bar -->
     <div class="location-bar">
       <ion-icon name="location" class="loc-icon"></ion-icon>
@@ -36,7 +57,7 @@
      ion-infinite-scroll to work. The height-measurement issue (display:none
      parent at connectedCallback time) is fixed by dispatching a resize event
      from tabs.page ngAfterViewInit after Angular's first change detection. -->
-<ion-content class="ss-content">
+<ion-content class="ss-content" [class.ss-view-hidden]="viewMode !== 'list'">
 
   <!-- Pull to refresh (must be slot="fixed" inside ion-content) -->
   <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
@@ -161,3 +182,8 @@
   </ion-infinite-scroll>
 
 </ion-content>
+
+<!-- Mapa embebido (antes era la página/tab "service-map" independiente).
+     Se mantiene siempre montado para conservar el estado de MapLibre y
+     solo se oculta con CSS al cambiar a la vista de lista. -->
+<app-service-map [class.ss-view-hidden]="viewMode !== 'map'"></app-service-map>

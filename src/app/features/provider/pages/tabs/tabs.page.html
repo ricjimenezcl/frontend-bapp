@@ -20,59 +20,51 @@
   <ion-router-outlet></ion-router-outlet>
 </div>
 
-<!-- ── Nav Dock ─────────────────────────────────────────────────── -->
-<div class="nav-dock-outer">
-  <nav class="nav-dock">
+<!-- ── Bottom navigation (notch style) ─────────────────────────────── -->
+<div class="app-tab-bar-wrap">
+  <ion-tab-bar class="ion-no-border app-tab-bar">
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'home'"
-      (click)="changeTab('home')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      [class.tab-active]="activeTab === 'home'"
+      (click)="changeTab('home')">
+      <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'service-details'"
-      (click)="changeTab('service-details')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'service-details' ? 'briefcase' : 'briefcase-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      class="notch-adjacent-left"
+      [class.tab-active]="activeTab === 'service-details'"
+      (click)="changeTab('service-details')">
+      <ion-icon [name]="activeTab === 'service-details' ? 'briefcase' : 'briefcase-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'inbox'"
-      (click)="changeTab('inbox')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'inbox' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
-      </div>
-    </button>
+    <!-- Hueco reservado: el FAB + notch flotan fuera de ion-tab-bar (ver abajo) -->
+    <div class="fab-spacer"></div>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'bookings'"
-      (click)="changeTab('bookings')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      class="notch-adjacent-right"
+      [class.tab-active]="activeTab === 'bookings'"
+      (click)="changeTab('bookings')">
+      <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'profile'"
-      (click)="changeTab('profile')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      [class.tab-active]="activeTab === 'profile'"
+      (click)="changeTab('profile')">
+      <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>
+    </ion-tab-button>
 
-  </nav>
+  </ion-tab-bar>
+
+  <!-- FAB + notch flotante: fuera de ion-tab-bar para evitar que su
+       "contain: strict" interno recorte el botón al sobresalir -->
+  <div class="fab-slot">
+    <svg class="tab-notch" viewBox="0 0 100 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M100 0v50H0V0c.543 27.153 22.72 49 50 49S99.457 27.153 99.99 0h.01z" fill-rule="evenodd"></path>
+    </svg>
+    <div class="fab-halo">
+      <ion-fab-button class="center-fab-btn" color="primary" (click)="goToAddService()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </div>
+  </div>
 </div>

@@ -3,8 +3,8 @@
 
     <!-- Dynamic title -->
     <div slot="start" class="tabs-title-wrap">
+      <span class="tabs-title" *ngIf="activeTab === 'home'">Inicio</span>
       <span class="tabs-title" *ngIf="activeTab === 'service-search'">Proveedores</span>
-      <span class="tabs-title" *ngIf="activeTab === 'service-map'">Mapa</span>
       <span class="tabs-title" *ngIf="activeTab === 'bookings'">Mis Reservas</span>
       <span class="tabs-title" *ngIf="activeTab === 'chats'">Mensajes</span>
       <span class="tabs-title" *ngIf="activeTab === 'client-profile'">Mi Perfil</span>
@@ -17,9 +17,9 @@
         <ion-icon name="construct-outline"></ion-icon>
         <span>{{ selectedServices.length }}</span>
       </div>
-      <!-- New search button -->
-      <button class="new-search-btn" (click)="goToCategories()" type="button">
-        <ion-icon name="search-outline"></ion-icon>
+      <!-- Profile button -->
+      <button class="profile-btn" [class.profile-btn-active]="activeTab === 'client-profile'" (click)="changeTab('client-profile')" type="button">
+        <ion-icon [name]="activeTab === 'client-profile' ? 'person' : 'person-outline'"></ion-icon>
       </button>
     </ion-buttons>
 
@@ -31,62 +31,53 @@
   <ion-router-outlet></ion-router-outlet>
 </div>
 
-<!-- ── Nav Dock ─────────────────────────────────────────────────── -->
-<div class="nav-dock-outer">
-  <nav class="nav-dock">
+<!-- ── Bottom navigation (notch style) ─────────────────────────────── -->
+<div class="app-tab-bar-wrap">
+  <ion-tab-bar class="ion-no-border app-tab-bar">
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'service-search'"
-      (click)="changeTab('service-search')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'service-search' ? 'search' : 'search-outline'"></ion-icon>
-        <span class="dock-badge" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</span>
-      </div>
-    </button>
+    <ion-tab-button
+      [class.tab-active]="activeTab === 'home'"
+      (click)="changeTab('home')">
+      <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'service-map'"
-      (click)="changeTab('service-map')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'service-map' ? 'map' : 'map-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      class="notch-adjacent-left"
+      [class.tab-active]="activeTab === 'service-search'"
+      (click)="changeTab('service-search')">
+      <ion-icon [name]="activeTab === 'service-search' ? 'list' : 'list-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'bookings'"
-      (click)="changeTab('bookings')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
-      </div>
-    </button>
+    <!-- Hueco reservado: el FAB + notch flotan fuera de ion-tab-bar (ver abajo) -->
+    <div class="fab-spacer"></div>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'chats'"
-      (click)="changeTab('chats')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'chats' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      class="notch-adjacent-right"
+      [class.tab-active]="activeTab === 'bookings'"
+      (click)="changeTab('bookings')">
+      <ion-icon [name]="activeTab === 'bookings' ? 'calendar' : 'calendar-outline'"></ion-icon>
+    </ion-tab-button>
 
-    <button
-      class="dock-btn"
-      [class.dock-btn-active]="activeTab === 'client-profile'"
-      (click)="changeTab('client-profile')"
-      type="button">
-      <div class="dock-icon-wrap">
-        <ion-icon [name]="activeTab === 'client-profile' ? 'person' : 'person-outline'"></ion-icon>
-      </div>
-    </button>
+    <ion-tab-button
+      [class.tab-active]="activeTab === 'chats'"
+      (click)="changeTab('chats')">
+      <ion-icon [name]="activeTab === 'chats' ? 'chatbubbles' : 'chatbubbles-outline'"></ion-icon>
+    </ion-tab-button>
 
-  </nav>
+  </ion-tab-bar>
+
+  <!-- FAB + notch flotante: fuera de ion-tab-bar para evitar que su
+       "contain: strict" interno recorte el botón al sobresalir -->
+  <div class="fab-slot">
+    <svg class="tab-notch" viewBox="0 0 100 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M100 0v50H0V0c.543 27.153 22.72 49 50 49S99.457 27.153 99.99 0h.01z" fill-rule="evenodd"></path>
+    </svg>
+    <div class="fab-halo">
+      <ion-fab-button class="center-fab-btn" color="primary" (click)="goToCategories()">
+        <ion-icon name="search-outline"></ion-icon>
+      </ion-fab-button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Bappie IA Chatbot ─────────────────────────────────────────── -->

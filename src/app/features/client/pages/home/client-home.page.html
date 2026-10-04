@@ -1,0 +1,28 @@
+<ion-content class="ch-content" [fullscreen]="true">
+
+  <!-- ── Saludo ───────────────────────────────────────────────────────── -->
+  <div class="ch-greeting">
+    <span class="ch-greeting-label">{{ getGreeting() }}{{ userName ? ', ' + userName : '' }}</span>
+    <h1 class="ch-title">¿Qué servicio necesitas hoy?</h1>
+  </div>
+
+  <!-- ── Buscar servicios (CTA principal) ───────────────────────────── -->
+  <button class="ch-search-cta" type="button" (click)="goToCategories()">
+    <ion-icon name="search-outline"></ion-icon>
+    <span>Buscar servicios</span>
+    <ion-badge color="danger" *ngIf="selectedServices.length > 0">{{ selectedServices.length }}</ion-badge>
+  </button>
+
+  <!-- ── Accesos rápidos ─────────────────────────────────────────────── -->
+  <div class="ch-quick-access">
+    <button
+      class="ch-quick-card"
+      type="button"
+      *ngFor="let item of quickAccess"
+      (click)="goTo(item.route)">
+      <ion-icon [name]="item.icon"></ion-icon>
+      <span>{{ item.label }}</span>
+    </button>
+  </div>
+
+</ion-content>

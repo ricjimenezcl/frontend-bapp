@@ -259,7 +259,7 @@ export class MapService {
 
   // URL del pin de proveedor (SVG Cloudinary — mismo que web)
   private static readonly PROVIDER_PIN_URL =
-    'https://res.cloudinary.com/dghwotofx/image/upload/v1782705912/ubi_prov_1_o7rzel.svg';
+    'https://res.cloudinary.com/dghwotofx/image/upload/v1774631660/proveedor_y6k7il.ico';
 
   addProviderCluster(collection: GeoJSONFeatureCollection): void {
     if (!this.map) return;
@@ -301,7 +301,7 @@ export class MapService {
       source: this.clusterSourceId,
       layout: {
         'icon-image': 'custom-marker',
-        'icon-size': 0.82,
+        'icon-size': 0.55,
         'icon-allow-overlap': true
       },
       paint: {

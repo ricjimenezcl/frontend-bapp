@@ -1,5 +1,5 @@
 // ─── Bappie Chatbot (App Mobile) ─────────────────────────────────────────────
-// Mismo diseño visual que la versión web, adaptado para mobile (posición sobre nav-dock)
+// Mismo diseño visual que la versión web, adaptado para mobile (posición sobre la tab-bar)
 
 :host {
     // Variables locales del chatbot (en :host para que funcionen con ViewEncapsulation.Emulated)
@@ -12,7 +12,7 @@
     --text-muted: #A1A1AA;
 
     position: fixed;
-    bottom: 88px;    // sobre la nav-dock de 80px
+    bottom: 72px;    // sobre la app-tab-bar de 64px
     right: 16px;
     z-index: 8000;
     display: block;

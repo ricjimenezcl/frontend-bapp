@@ -3,12 +3,54 @@
 
 :host { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
+// ── Alternar Mapa / Proveedores (fusión service-search + service-map) ──────
+.view-toggle-row {
+  display: flex;
+  gap: var(--bapp-space-2);
+  padding-top: var(--bapp-space-1);
+}
+
+.view-toggle-btn {
+  @include flex-center;
+  flex: 1;
+  gap: var(--bapp-space-1);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: var(--bapp-space-2) 0 var(--bapp-space-3);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-tertiary);
+
+  ion-icon { font-size: var(--bapp-text-md); }
+  ion-badge { margin-left: 2px; }
+
+  &.active {
+    color: var(--bapp-color-primary);
+    border-bottom-color: var(--bapp-color-primary);
+  }
+}
+
 // ── Scroll container ───────────────────────────────────────────────────────
 ion-content.ss-content {
   flex: 1;
   min-height: 0;
   --background: var(--bapp-bg-page);
   --padding-bottom: var(--bapp-space-6);
+}
+
+// ── Mapa embebido (reemplaza al antiguo tab independiente "service-map") ──
+app-service-map {
+  flex: 1;
+  min-height: 0;
+}
+
+// Oculta la vista inactiva (lista o mapa). Se usa una clase propia en lugar
+// del atributo [hidden] porque app-service-map define su propio
+// `:host { display: flex !important }`, que ganaría contra el `display:none`
+// del stylesheet del navegador para [hidden].
+.ss-view-hidden {
+  display: none !important;
 }
 
 .ss-wrapper { padding-bottom: var(--bapp-space-6); }
