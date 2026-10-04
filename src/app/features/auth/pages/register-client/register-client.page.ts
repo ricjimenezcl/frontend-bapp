@@ -189,10 +189,10 @@ export class RegisterClientPage {
         next: async () => {
           this.isLoading = false;
           const alert = await this.alertController.create({
-            header: 'Registro Exitoso',
-            message: 'Tu cuenta ha sido creada correctamente.',
+            header: 'Verifica tu correo',
+            message: 'Te enviamos un correo electrónico para validar tu cuenta. Revisa tu bandeja de entrada (y spam) y confirma tu correo antes de iniciar sesión.',
             buttons: [{ 
-              text: 'Continuar', 
+              text: 'Entendido', 
               handler: () => this.router.navigate(['/auth/login']) 
             }]
           });
@@ -201,6 +201,17 @@ export class RegisterClientPage {
         error: async (error) => {
           this.isLoading = false;
           const detail = error?.error?.detail;
+
+          if (detail && typeof detail === 'object' && detail.code === 'EMAIL_ALREADY_REGISTERED_UNVERIFIED') {
+            const alert = await this.alertController.create({
+              header: 'Cuenta pendiente de verificación',
+              message: detail.message || 'Ya existe una cuenta con este correo, pero aún no ha sido validada. Te enviamos un nuevo correo de verificación.',
+              buttons: ['OK']
+            });
+            await alert.present();
+            return;
+          }
+
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
           if (detail === 'Email already registered') {

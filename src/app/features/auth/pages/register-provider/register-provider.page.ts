@@ -381,33 +381,33 @@ export class RegisterProviderPage implements OnInit {
 
       this.authService.registerProvider(providerData).subscribe({
         next: async () => {
-          this.isLoading = true;
-          // Auto-login para llevar al dashboard inmediatamente
-          this.authService.loginClient({ email: formData.email, password: formData.password }).subscribe({
-            next: () => {
-              this.isLoading = false;
-              this.router.navigate(['/provider/tabs'], { replaceUrl: true });
-            },
-            error: async () => {
-              // Fallback: si el auto-login falla, ir al login con credenciales precargadas
-              this.isLoading = false;
-              const alert = await this.alertController.create({
-                header: '✅ Registro Exitoso',
-                message: 'Tu cuenta de proveedor ha sido creada. Inicia sesión para continuar.',
-                buttons: [{
-                  text: 'Ir al Login',
-                  handler: () => {
-                    this.router.navigate(['/auth/login']);
-                  }
-                }]
-              });
-              await alert.present();
-            }
+          this.isLoading = false;
+          const alert = await this.alertController.create({
+            header: 'Verifica tu correo',
+            message: 'Te enviamos un correo electrónico para validar tu cuenta de proveedor. Revisa tu bandeja de entrada (y spam) y confirma tu correo antes de iniciar sesión.',
+            buttons: [{
+              text: 'Ir al Login',
+              handler: () => {
+                this.router.navigate(['/auth/login']);
+              }
+            }]
           });
+          await alert.present();
         },
         error: async (error) => {
           this.isLoading = false;
           const detail = error?.error?.detail;
+
+          if (detail && typeof detail === 'object' && detail.code === 'EMAIL_ALREADY_REGISTERED_UNVERIFIED') {
+            const alert = await this.alertController.create({
+              header: 'Cuenta pendiente de verificación',
+              message: detail.message || 'Ya existe una cuenta con este correo, pero aún no ha sido validada. Te enviamos un nuevo correo de verificación.',
+              buttons: ['OK']
+            });
+            await alert.present();
+            return;
+          }
+
           let errorMessage = 'Error al registrar. Intenta nuevamente.';
           
           if (detail === 'Email already registered') {

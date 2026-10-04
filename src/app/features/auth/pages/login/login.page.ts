@@ -164,27 +164,29 @@ export class LoginPage implements OnInit, OnDestroy {
         next: (resp) => {
           this.isLoading = false;
           console.log('✅ Registro exitoso', resp);
-          this.successMessage = 'Cuenta creada exitosamente. Iniciando sesión...';
-          this.authService.loginClient({
-            email: data.email,
-            password: data.password,
-            role: data.role as 'CLIENT' | 'PROVIDER'
-          }).subscribe({
-            next: (loginResp) => {
-              this.handleRoleBasedNavigation(loginResp.role);
-            },
-            error: () => {
-              this.successMessage = 'Cuenta creada exitosamente. Por favor, inicia sesión.';
-              this.activeTab.set('login');
-              this.loginForm.patchValue({ email: data.email });
-            }
-          });
+          const registeredEmail = data.email;
+          this.alertController.create({
+            header: 'Verifica tu correo',
+            message: 'Te enviamos un correo electrónico para validar tu cuenta. Revisa tu bandeja de entrada (y spam) y confirma tu correo antes de iniciar sesión.',
+            buttons: [{
+              text: 'Entendido',
+              handler: () => {
+                this.activeTab.set('login');
+                this.loginForm.patchValue({ email: registeredEmail });
+              }
+            }]
+          }).then(alert => alert.present());
         },
         error: (err) => {
           this.isLoading = false;
           console.error('❌ Error en registro:', err);
           
           const detail = err.error?.detail || err.error?.message;
+
+          if (detail && typeof detail === 'object' && detail.code === 'EMAIL_ALREADY_REGISTERED_UNVERIFIED') {
+            this.errorMessage = detail.message || 'Ya existe una cuenta con este correo, pero aún no ha sido validada. Te enviamos un nuevo correo de verificación.';
+            return;
+          }
           
           if (detail === 'Email already registered' || (typeof detail === 'string' && detail.includes('already registered'))) {
             this.errorMessage = this.registerRole() === 'provider'
