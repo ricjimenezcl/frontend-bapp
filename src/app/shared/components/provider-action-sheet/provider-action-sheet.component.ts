@@ -135,6 +135,18 @@ export class ProviderActionSheetComponent implements OnInit {
     return this.provider?.address ?? 'No disponible';
   }
 
+  /** ID del servicio actualmente visualizado (service_providers.id), para excluirlo del listado "Nuestros Servicios" */
+  get currentServiceProviderId(): number {
+    return Number(this.provider?.service_provider_id ?? this.provider?.id ?? 0);
+  }
+
+  /** Servicios del proveedor distintos al que se está visualizando actualmente */
+  get otherProviderServices(): any[] {
+    const currentId = this.currentServiceProviderId;
+    if (!currentId) return this.providerServices;
+    return this.providerServices.filter(svc => Number(svc?.id) !== currentId);
+  }
+
   /** true si el cliente autenticado tiene un plan premium activo (igual que provider-info.page) */
   get hasPremium(): boolean {
     const currentUser = this.authService.getCurrentUser();

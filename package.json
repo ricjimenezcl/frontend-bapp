@@ -55,6 +55,7 @@
     "@revenuecat/purchases-capacitor": "^11.3.2",
     "@tensorflow-models/face-landmarks-detection": "^1.0.0",
     "@tensorflow/tfjs": "4.11.0",
+    "animejs": "^4.5.0",
     "ionicons": "7.4.0",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^5.20.1",

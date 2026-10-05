@@ -38,6 +38,7 @@ export class MapService {
   private hoverHandlers: Array<{ layer: string; event: string; fn: any }> = []; // ✅ Fix memory leak
   private readonly clusterPointClickSubject = new Subject<any>();
   clusterPointClick$ = this.clusterPointClickSubject.asObservable();
+  private activePreviewPopup: maplibregl.Popup | null = null;
 
   // Observables
   private readonly mapLoadedSubject = new BehaviorSubject<boolean>(false);
@@ -217,6 +218,8 @@ export class MapService {
 
   destroy(): void {
     this.clearMarkers();
+    this.activePreviewPopup?.remove();
+    this.activePreviewPopup = null;
     if (this.map) {
       this.map.remove();
       this.map = null;
@@ -301,7 +304,18 @@ export class MapService {
       source: this.clusterSourceId,
       layout: {
         'icon-image': 'custom-marker',
-        'icon-size': 0.2,
+        // Escala el ícono según el zoom del mapa: más chico al alejar, más grande al acercar.
+        // Cubre todo el rango de zoom (2-22) para que siga achicándose/agrandándose
+        // en los extremos en vez de quedar fijo (clamp) fuera de 10-18.
+        'icon-size': [
+          'interpolate', ['linear'], ['zoom'],
+          2, 0.05,
+          6, 0.08,
+          10, 0.12,
+          14, 0.2,
+          18, 0.32,
+          22, 0.5
+        ],
         'icon-allow-overlap': true
       },
       paint: {
@@ -335,7 +349,15 @@ export class MapService {
           ['>=', ['coalesce', ['get', 'rating_avg'], 0], 3], '#2196F3',
           '#FF9800'
         ],
-        'circle-radius': 16,
+        'circle-radius': [
+          'interpolate', ['linear'], ['zoom'],
+          2, 3,
+          6, 4,
+          10, 8,
+          14, 16,
+          18, 26,
+          22, 40
+        ],
         'circle-stroke-width': 3,
         'circle-stroke-color': '#fff'
       }
@@ -349,7 +371,9 @@ export class MapService {
 
     const pointClickFn = (e: any) => {
       if (!e.features?.length) return;
-      this.clusterPointClickSubject.next(e.features[0].properties);
+      const feature = e.features[0];
+      const coordinates = (feature.geometry.coordinates as [number, number]).slice() as [number, number];
+      this.showProviderPreviewPopup(coordinates, feature.properties);
     };
 
     const cursorOn  = () => { if (this.map) this.map.getCanvas().style.cursor = 'pointer'; };
@@ -368,6 +392,80 @@ export class MapService {
       { layer: 'unclustered-point', event: 'mouseenter', fn: cursorOn },
       { layer: 'unclustered-point', event: 'mouseleave', fn: cursorOff }
     ];
+  }
+
+  /**
+   * Resuelve la URL de avatar del proveedor para usar en HTML plano (fuera de Angular).
+   * Misma lógica que ProviderImagePipe (shared/pipes/provider-image.pipe.ts).
+   */
+  private resolveAvatarUrl(value: string | null | undefined): string {
+    const DEFAULT_AVATAR = 'assets/images/default-avatar.png';
+    if (!value) return DEFAULT_AVATAR;
+    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')) return value;
+    return 'data:image/jpeg;base64,' + value;
+  }
+
+  /**
+   * Popup informativo (no modal) con la información básica del proveedor y un
+   * botón "Ver perfil". Equivalente al popup del marcador de proveedor en el
+   * proyecto web (service-map.component.ts → createProviderPopup), implementado
+   * con el Popup nativo de MapLibre en vez de un modal de Ionic.
+   */
+  private showProviderPreviewPopup(coordinates: [number, number], properties: any): void {
+    if (!this.map) return;
+
+    this.activePreviewPopup?.remove();
+
+    const name = properties.business_name || properties.full_name || '';
+    const avatarUrl = this.resolveAvatarUrl(properties.avatar);
+    const rating = Number(properties.rating_avg) || 0;
+    const reviewCount = properties.total_reviews || 0;
+    const category = properties.service_name || '';
+    const distanceNum = Number(properties.distance);
+    const distance = distanceNum > 0 ? `${distanceNum.toFixed(1)} km` : 'No disponible';
+    const rateNum = Number(properties.hourly_rate);
+    const rate = rateNum > 0 ? `$${rateNum.toLocaleString('es-CL')}` : 'A consultar';
+
+    const ratingHtml = rating > 0
+      ? `<div class="popup-rating"><ion-icon name="star" class="icon-star"></ion-icon><span>${rating.toFixed(1)}</span>${reviewCount > 0 ? `<span class="text-muted">(${reviewCount})</span>` : ''}</div>`
+      : `<span class="text-muted">Nuevo</span>`;
+
+    const html = `
+      <div class="provider-popup">
+        <div class="popup-header">
+          <img class="popup-avatar" src="${avatarUrl}" alt="${name}" onerror="this.src='assets/images/default-avatar.png'" />
+          <div class="popup-header-info">
+            <h3 class="provider-name">${name}</h3>
+            ${ratingHtml}
+          </div>
+        </div>
+        ${category ? `<p class="popup-row"><ion-icon name="pricetag-outline" class="icon-star"></ion-icon>${category}</p>` : ''}
+        <p class="popup-row"><ion-icon name="location-outline" class="icon-location"></ion-icon>${distance}</p>
+        <p class="popup-row"><ion-icon name="cash-outline" class="icon-money"></ion-icon>${rate} / hora</p>
+        <div class="popup-action">
+          <button type="button" class="btn-details" data-provider-popup-action="view-profile">Ver perfil</button>
+        </div>
+      </div>
+    `;
+
+    const popup = new maplibregl.Popup({
+      offset: [0, -14],
+      closeButton: true,
+      closeOnClick: false,
+      maxWidth: '260px'
+    })
+      .setLngLat(coordinates)
+      .setHTML(html)
+      .addTo(this.map);
+
+    const popupEl = popup.getElement();
+    const viewProfileBtn = popupEl?.querySelector('[data-provider-popup-action="view-profile"]');
+    viewProfileBtn?.addEventListener('click', () => {
+      popup.remove();
+      this.clusterPointClickSubject.next(properties);
+    });
+
+    this.activePreviewPopup = popup;
   }
 
   clearProviderCluster(): void {

@@ -96,11 +96,12 @@ ion-content.map-content {
 }
 
 // ============ Selector de estilo del mapa ============
-// IMPORTANTE: Debe estar ENCIMA del footer del tabs (56px + margen)
+// Ubicado en la parte superior central del mapa
 .style-selector-container {
   position: absolute !important;
-  bottom: 12px !important; // Encima del footer del tabs
-  left: 16px !important;
+  top: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
   z-index: 100 !important;
 }
 
@@ -246,7 +247,7 @@ ion-content.map-content {
 // Marcador de usuario: 44px (más visible)
 // Marcador de proveedor: 40px
 
-// Contenedor del marcador de usuario
+// Contenedor del marcador de usuario (el rebote se anima vía animejs desde el .ts)
 .user-marker-container {
   width: 44px;
   height: 44px;
@@ -266,7 +267,6 @@ ion-content.map-content {
   z-index: 1;
   display: block;
   object-fit: cover;
-  animation: location-glow 2s ease-in-out infinite;
 }
 
 // Fallback del ícono del usuario
@@ -324,16 +324,6 @@ ion-content.map-content {
   font-size: var(--bapp-text-xs);
 }
 
-// Resplandor pulsante que indica la ubicación actual (reemplaza el anillo amarillo)
-@keyframes location-glow {
-  0%, 100% {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(var(--bapp-color-accent-rgb), 0.55);
-  }
-  50% {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 12px rgba(var(--bapp-color-accent-rgb), 0);
-  }
-}
-
 // ============ Estilos para popups ============
 :host ::ng-deep {
   .maplibregl-popup {
@@ -384,103 +374,138 @@ ion-content.map-content {
 }
 
 // ============ Estilos para contenido de popups ============
-.user-popup {
-  padding: 10px;
-  color: var(--bapp-text-primary);
+// NOTA: el contenido de los popups de MapLibre se inserta como HTML plano
+// (innerHTML) fuera del árbol de plantillas de Angular, por lo que NO recibe
+// el atributo de scoping de ViewEncapsulation. Por eso estas reglas van
+// dentro de :host ::ng-deep (igual que los estilos de .maplibregl-popup-* de
+// más arriba), de lo contrario nunca se aplican.
+:host ::ng-deep {
+  .user-popup {
+    padding: 10px;
+    color: var(--bapp-text-primary);
 
-  strong {
-    color: var(--ion-color-primary);
-  }
+    strong {
+      color: var(--ion-color-primary);
+    }
 
-  small {
-    color: var(--bapp-text-tertiary);
-  }
-}
-
-.provider-popup {
-  max-width: 250px;
-  padding: 14px;
-  color: var(--bapp-text-primary);
-
-  .provider-name {
-    margin: 0 0 10px 0;
-    color: var(--ion-color-primary);
-    font-size: var(--bapp-text-md);
-    font-family: 'bold', sans-serif;
-  }
-
-  .popup-section {
-    margin-bottom: 10px;
-
-    strong { color: var(--bapp-text-secondary); }
-  }
-
-  .services-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 5px;
-  }
-
-  .service-tag {
-    background: var(--bapp-surface-02);
-    color: var(--bapp-text-secondary);
-    border: 1px solid var(--bapp-border);
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: var(--bapp-text-xs);
-  }
-
-  .popup-row {
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--bapp-text-secondary);
-    font-size: var(--bapp-text-sm);
-
-    strong { color: var(--bapp-text-secondary); }
-  }
-
-  .icon-star { color: var(--ion-color-primary); }
-  .icon-location { color: #2dd36f; }
-  .icon-money { color: var(--ion-color-primary); }
-
-  .text-muted {
-    color: var(--bapp-text-tertiary);
-    font-size: var(--bapp-text-xs);
-  }
-
-  .popup-description {
-    margin-bottom: 10px;
-
-    p {
-      color: var(--bapp-text-secondary);
-      font-size: var(--bapp-text-xs);
-      margin: 0;
-      line-height: 1.4;
+    small {
+      color: var(--bapp-text-tertiary);
     }
   }
 
-  .popup-action {
-    margin-top: 12px;
-  }
+  .provider-popup {
+    max-width: 250px;
+    padding: 14px;
+    color: var(--bapp-text-primary);
 
-  .btn-details {
-    background: linear-gradient(135deg, #FDE68A 0%, #f0a500 100%);
-    color: #000;
-    border: none;
-    padding: 10px 16px;
-    border-radius: var(--bapp-radius-full);
-    cursor: pointer;
-    width: 100%;
-    font-family: 'semi-bold', sans-serif;
-    font-size: var(--bapp-text-sm);
-    transition: opacity 0.15s;
-    box-shadow: 0 3px 10px rgba(253,215,53,0.3);
+    .popup-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
 
-    &:hover { opacity: 0.9; }
-    &:active { opacity: 0.8; }
+    .popup-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--ion-color-primary);
+      flex-shrink: 0;
+    }
+
+    .popup-header-info {
+      min-width: 0;
+    }
+
+    .popup-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--bapp-text-xs);
+      color: var(--bapp-text-secondary);
+    }
+
+    .provider-name {
+      margin: 0 0 2px 0;
+      color: var(--ion-color-primary);
+      font-size: var(--bapp-text-md);
+      font-family: 'bold', sans-serif;
+    }
+
+    .popup-section {
+      margin-bottom: 10px;
+
+      strong { color: var(--bapp-text-secondary); }
+    }
+
+    .services-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+
+    .service-tag {
+      background: var(--bapp-surface-02);
+      color: var(--bapp-text-secondary);
+      border: 1px solid var(--bapp-border);
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: var(--bapp-text-xs);
+    }
+
+    .popup-row {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--bapp-text-secondary);
+      font-size: var(--bapp-text-sm);
+
+      strong { color: var(--bapp-text-secondary); }
+    }
+
+    .icon-star { color: var(--ion-color-primary); }
+    .icon-location { color: var(--bapp-text-success); }
+    .icon-money { color: var(--ion-color-primary); }
+
+    .text-muted {
+      color: var(--bapp-text-tertiary);
+      font-size: var(--bapp-text-xs);
+    }
+
+    .popup-description {
+      margin-bottom: 10px;
+
+      p {
+        color: var(--bapp-text-secondary);
+        font-size: var(--bapp-text-xs);
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+
+    .popup-action {
+      margin-top: 12px;
+    }
+
+    .btn-details {
+      background: linear-gradient(135deg, var(--bapp-color-primary-light) 0%, var(--bapp-color-primary-dark) 100%);
+      color: var(--bapp-text-inverse);
+      border: none;
+      padding: 10px 16px;
+      border-radius: var(--bapp-radius-full);
+      cursor: pointer;
+      width: 100%;
+      font-family: 'semi-bold', sans-serif;
+      font-size: var(--bapp-text-sm);
+      transition: opacity 0.15s;
+      box-shadow: var(--bapp-shadow-primary);
+
+      &:hover { opacity: 0.9; }
+      &:active { opacity: 0.8; }
+    }
   }
 }
 
@@ -646,8 +671,9 @@ ion-content.map-content {
   }
 
   .style-selector-container {
-    bottom: 12px !important;
-    left: 12px !important;
+    top: 12px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     // No right: auto-width to keep buttons horizontal
   }
 
@@ -697,11 +723,13 @@ ion-content.map-content {
 }
 
 // ============ Safe area para dispositivos con notch ============
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
+@supports (padding-top: env(safe-area-inset-top)) {
   .style-selector-container {
-    bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+    top: calc(12px + env(safe-area-inset-top)) !important;
   }
+}
 
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
   .map-legend {
     bottom: calc(60px + env(safe-area-inset-bottom)) !important;
   }

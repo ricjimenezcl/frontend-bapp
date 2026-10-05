@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { IonicModule, LoadingController, ToastController, ModalController, AlertController } from '@ionic/angular';
 import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { skip, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { animate, JSAnimation } from 'animejs';
 import { StateService, SelectedService } from '../../../../shared/services/state.service';
 
 // Services
@@ -43,6 +44,24 @@ export class ServiceMapPage implements OnInit, OnDestroy {
   // Flag para evitar inicialización múltiple
   private mapInitialized: boolean = false;
   private userMarkerAdded: boolean = false;
+
+  // Animación interactiva (animejs) del pin de ubicación del usuario
+  private userMarkerAnimation: JSAnimation | null = null;
+
+  // Escalado del pin de usuario según el zoom del mapa (marcador DOM, no capa MapLibre:
+  // no reacciona solo a 'icon-size' como los pines de proveedor, hay que escalarlo a mano).
+  private userMarkerScaleEl: HTMLDivElement | null = null;
+  private zoomListenerAttached = false;
+  // [zoom, factor] — factor 1 = tamaño base (MARKER_SIZE) en zoomLevel inicial (14).
+  // Mismas proporciones relativas que los stops de 'icon-size' en map.service.ts.
+  private readonly userMarkerZoomStops: Array<[number, number]> = [
+    [2, 0.25],
+    [6, 0.4],
+    [10, 0.6],
+    [14, 1],
+    [18, 1.6],
+    [22, 2.5]
+  ];
 
   private subscriptions: Subscription[] = [];
   private destroy$ = new Subject<void>();
@@ -113,6 +132,10 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.userMarkerAnimation?.pause();
+    this.userMarkerAnimation = null;
+    this.userMarkerScaleEl = null;
+    this.zoomListenerAttached = false;
     this.mapService.destroy();
     this.mapInitialized = false;
     this.userMarkerAdded = false;
@@ -140,6 +163,7 @@ export class ServiceMapPage implements OnInit, OnDestroy {
           this.userMarkerAdded = true;
           this.addUserMarker();
           this.loadProviders();
+          this.attachZoomListener();
         }
       });
       this.subscriptions.push(mapLoadedSub);
@@ -205,7 +229,12 @@ export class ServiceMapPage implements OnInit, OnDestroy {
     // NO aplica las clases de service-map.page.scss aquí. Por eso el tamaño se fija inline.
     const MARKER_SIZE = 44;
 
-    // Contenedor del marcador de usuario
+    // Contenedor del marcador de usuario.
+    // IMPORTANTE: este nodo (`el`) es el que MapLibre usa directamente para
+    // posicionar el marcador en el mapa (le escribe su propio `style.transform`
+    // en cada redibujado). NO se debe animar `el` con animejs porque ambos
+    // pelearían por la misma propiedad y el marcador "saltaría" a la esquina
+    // (0,0) cada vez que uno pisara el transform del otro.
     const el = document.createElement('div');
     el.className = 'user-marker-container';
     el.style.cssText = `
@@ -217,6 +246,49 @@ export class ServiceMapPage implements OnInit, OnDestroy {
       justify-content: center;
     `;
 
+    // Wrapper interno: aquí sí se aplica la animación de rebote (animejs),
+    // independiente del transform de posicionamiento que controla MapLibre.
+    const bounceEl = document.createElement('div');
+    bounceEl.className = 'user-marker-bounce';
+    bounceEl.style.cssText = `
+      width: ${MARKER_SIZE}px;
+      height: ${MARKER_SIZE}px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    el.appendChild(bounceEl);
+
+    // Animación interactiva (animejs): rebote continuo que indica que este
+    // pin representa la ubicación actual del usuario.
+    this.userMarkerAnimation?.pause();
+    this.userMarkerAnimation = animate(bounceEl, {
+      translateY: [0, -8, 0, -3, 0],
+      duration: 1800,
+      ease: 'inOutSine',
+      loop: true
+    });
+
+    // Wrapper dedicado solo al escalado por zoom (transform: scale()), separado
+    // del transform de posicionamiento (el, controlado por MapLibre) y del
+    // transform de rebote (bounceEl, controlado por animejs) para que ninguno
+    // pise la propiedad `transform` del otro.
+    const scaleEl = document.createElement('div');
+    scaleEl.className = 'user-marker-scale';
+    scaleEl.style.cssText = `
+      width: ${MARKER_SIZE}px;
+      height: ${MARKER_SIZE}px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+    `;
+    bounceEl.appendChild(scaleEl);
+    this.userMarkerScaleEl = scaleEl;
+
+    const currentZoom = this.mapService.getMap()?.getZoom() ?? this.zoomLevel;
+    this.updateUserMarkerScale(currentZoom);
+
     const iconStyle = `
       width: ${MARKER_SIZE}px;
       height: ${MARKER_SIZE}px;
@@ -226,21 +298,20 @@ export class ServiceMapPage implements OnInit, OnDestroy {
       z-index: 1;
       display: block;
       object-fit: cover;
-      animation: location-glow 2s ease-in-out infinite;
     `;
 
     const img = new Image();
     img.src = userIconUrl;
 
     img.onload = () => {
-      el.innerHTML = `
+      scaleEl.innerHTML = `
         <img class="user-icon" src="${userIconUrl}" alt="Tu ubicación" style="${iconStyle}" />
       `;
     };
 
     img.onerror = () => {
       // Fallback: SVG inline idéntico al pin rojo del hero de la web
-      el.innerHTML = `
+      scaleEl.innerHTML = `
         <svg class="user-icon" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg" style="${iconStyle}">
           <path d="M12 1C6.48 1 2 5.48 2 11c0 7.3 10 20 10 20s10-12.7 10-20C22 5.48 17.52 1 12 1z" fill="#BE202E" stroke="#FFFFFF" stroke-width="1.5"/>
           <circle cx="12" cy="11" r="4.2" fill="#FFFFFF"/>
@@ -263,6 +334,42 @@ export class ServiceMapPage implements OnInit, OnDestroy {
       popupContent,
       'user'
     );
+  }
+
+  /** Engancha el listener de zoom del mapa una sola vez para reescalar el pin de usuario. */
+  private attachZoomListener() {
+    if (this.zoomListenerAttached) return;
+    const map = this.mapService.getMap();
+    if (!map) return;
+
+    map.on('zoom', () => this.updateUserMarkerScale(map.getZoom()));
+    this.zoomListenerAttached = true;
+  }
+
+  /** Interpola linealmente el factor de escala del pin de usuario según el zoom actual. */
+  private computeUserMarkerScale(zoom: number): number {
+    const stops = this.userMarkerZoomStops;
+
+    if (zoom <= stops[0][0]) return stops[0][1];
+    if (zoom >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
+
+    for (let i = 0; i < stops.length - 1; i++) {
+      const [z0, s0] = stops[i];
+      const [z1, s1] = stops[i + 1];
+      if (zoom >= z0 && zoom <= z1) {
+        const t = (zoom - z0) / (z1 - z0);
+        return s0 + (s1 - s0) * t;
+      }
+    }
+
+    return 1;
+  }
+
+  /** Aplica el factor de escala calculado al wrapper dedicado del pin de usuario. */
+  private updateUserMarkerScale(zoom: number) {
+    if (!this.userMarkerScaleEl) return;
+    const scale = this.computeUserMarkerScale(zoom);
+    this.userMarkerScaleEl.style.transform = `scale(${scale})`;
   }
 
   async loadProviders() {

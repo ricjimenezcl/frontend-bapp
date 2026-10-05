@@ -91,45 +91,13 @@
         <ion-spinner name="crescent" color="primary"></ion-spinner>
       </div>
 
-      <p *ngIf="!isLoadingServices && providerServices.length === 0" class="pas-empty">
-        Sin servicios disponibles
+      <p *ngIf="!isLoadingServices && otherProviderServices.length === 0" class="pas-empty">
+        Sin otros servicios disponibles
       </p>
 
-      <div *ngIf="!isLoadingServices && providerServices.length > 0" class="pas-services-list">
-        <div *ngFor="let svc of providerServices" class="pas-service-card">
-          <div class="pas-service-header">
-            <div class="pas-service-info">
-              <h4 class="pas-service-name">{{ svc.business_name }}</h4>
-              <span class="pas-service-category" *ngIf="svc.service_category">
-                <ion-icon name="pricetag-outline"></ion-icon>
-                {{ svc.service_category.name }}
-              </span>
-            </div>
-            <span class="pas-service-price" *ngIf="svc.hourly_rate">
-              ${{ svc.hourly_rate | number:'1.0-0' }}
-              <span class="pas-price-unit">/hr</span>
-            </span>
-          </div>
-
-          <p class="pas-service-desc" *ngIf="svc.description">
-            {{ svc.description }}
-          </p>
-
-          <div class="pas-service-meta">
-            <span class="pas-service-address" *ngIf="svc.address">
-              <ion-icon name="location-outline"></ion-icon>
-              {{ svc.address }}
-            </span>
-          </div>
-
-          <button class="pas-service-btn-locked" (click)="showPremiumPaywall()" type="button">
-            <ion-icon name="lock-closed-outline"></ion-icon>
-            <span>Reservar este servicio</span>
-            <div class="pas-premium-badge">
-              <ion-icon name="diamond-outline"></ion-icon>
-              Premium
-            </div>
-          </button>
+      <div *ngIf="!isLoadingServices && otherProviderServices.length > 0" class="pas-services-list">
+        <div *ngFor="let svc of otherProviderServices" class="pas-service-card">
+          <h4 class="pas-service-name">{{ svc.business_name }}</h4>
         </div>
       </div>
     </div>

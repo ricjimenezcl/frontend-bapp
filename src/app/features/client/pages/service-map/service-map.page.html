@@ -5,18 +5,7 @@
     <!-- Mapa real (MapLibre GL) — NO modificar este elemento -->
     <div #mapContainer id="map" class="map-element"></div>
 
-
-    <!-- ── Controles de zoom (esquina superior derecha) ──────────────── -->
-    <div class="zoom-controls">
-      <ion-fab-button size="small" color="primary" (click)="zoomIn()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button size="small" color="primary" (click)="zoomOut()">
-        <ion-icon name="remove"></ion-icon>
-      </ion-fab-button>
-    </div>
-
-    <!-- ── Selector de estilo (esquina inferior izquierda) ───────────── -->
+  <!-- ── Selector de estilo (esquina inferior izquierda) ───────────── -->
     <div class="style-selector-container">
       <ion-segment [value]="currentMapStyle" class="style-selector">
         <ion-segment-button value="streets" (click)="changeMapStyle('streets')">
@@ -30,6 +19,18 @@
         </ion-segment-button>
       </ion-segment>
     </div>
+    
+    <!-- ── Controles de zoom (esquina superior derecha) ──────────────── -->
+    <div class="zoom-controls">
+      <ion-fab-button size="small" color="primary" (click)="zoomIn()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button size="small" color="primary" (click)="zoomOut()">
+        <ion-icon name="remove"></ion-icon>
+      </ion-fab-button>
+    </div>
+
+  
 
     <!-- ── Chips de servicios seleccionados (superior izquierda) ──────── -->
     <div class="selected-services-info" *ngIf="selectedServices.length > 0">
