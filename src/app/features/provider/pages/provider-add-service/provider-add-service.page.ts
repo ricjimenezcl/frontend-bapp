@@ -1,7 +1,8 @@
 // src/app/provider/pages/provider-add-service/provider-add-service.page.ts
 import { Component, OnInit, OnDestroy, Input, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from '../../../../shared/validators/custom-validators';
 import { IonicModule, ModalController, AlertController, LoadingController, ToastController, ActionSheetController } from '@ionic/angular';
@@ -101,6 +102,16 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private readonly contentFilterService = inject(ContentFilterService);
   private readonly paymentRedirect = inject(PaymentRedirectService);
   private readonly platformDetection = inject(PlatformDetectionService);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
+  // ══ IDENTITY GATE (homologado con web-bapp: AddServiceComponent) ══════
+  /** true cuando ya se consultó el estado de verificación al backend */
+  identityCheckDone = false;
+  /** true si el proveedor NO puede agregar servicios hasta verificar su identidad */
+  showIdentityGate = false;
+  validationStatus: string = 'not_submitted';
+  identityMessage = 'Para agregar servicios debes verificar tu identidad.';
 
   // Datos recibidos del componente padre
   @Input() mainCategories: MainCategory[] = [];
@@ -202,6 +213,10 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       return;
     }
 
+    // Bloquear desde el inicio: no permitir usar el formulario (ni ninguna otra
+    // acción de este flujo) hasta confirmar que la identidad está verificada.
+    this.checkIdentityStatus();
+
     // Cargar categorías principales propias (homologado con web: AddServiceComponent
     // las carga siempre en ngOnInit). El @Input() solo las precarga cuando este
     // componente se abre como modal; si se navega por ruta directa (tab "Agregar
@@ -243,6 +258,68 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
 
     // Inicializar mapa con ubicación por defecto (Santiago, Chile)
     this.initMap(-33.4489, -70.6693);
+  }
+
+  /**
+   * Verifica el estado de verificación de identidad del proveedor ANTES de
+   * permitir cualquier interacción con el formulario (homologado con
+   * web-bapp: AddServiceComponent.checkIdentityStatus()). Mientras no esté
+   * 'approved', el template oculta el formulario completo y solo muestra
+   * el gate con el botón "Verificar identidad".
+   */
+  private checkIdentityStatus(): void {
+    this.providerService.getValidationStatus()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          const status = res?.status ?? 'not_submitted';
+          this.validationStatus = status;
+
+          if (status !== 'approved') {
+            this.showIdentityGate = true;
+            if (status === 'pending') {
+              this.identityMessage = 'Debes realizar la verificación de identidad para poder agregar servicios.';
+            } else if (status === 'rejected') {
+              this.identityMessage = 'Tu verificación fue rechazada. Debes verificar tu identidad nuevamente para poder agregar servicios.';
+            } else {
+              this.identityMessage = 'Para agregar servicios debes verificar tu identidad.';
+            }
+          } else {
+            this.showIdentityGate = false;
+          }
+
+          this.identityCheckDone = true;
+        },
+        error: () => {
+          this.showIdentityGate = true;
+          this.identityMessage = 'No se pudo validar tu identidad. Verifícala antes de agregar servicios.';
+          this.identityCheckDone = true;
+        }
+      });
+  }
+
+  /**
+   * Cierra el componente ya sea como modal (ModalController) o como página
+   * ruteada (/provider/add-service). `modalCtrl.dismiss()` rechaza la promesa
+   * cuando no hay ningún modal presentado, por lo que antes "Cancelar"/"Cerrar"
+   * no hacía nada si se accedía por ruta directa (ej: botón "+" de las tabs).
+   */
+  private async closeOrGoBack(data: any = null, role: string = 'cancel'): Promise<void> {
+    const topModal = await this.modalCtrl.getTop();
+    if (topModal) {
+      await this.modalCtrl.dismiss(data, role);
+    } else {
+      this.location.back();
+    }
+  }
+
+  /** Cierra el modal (o navega hacia atrás) y redirige a la verificación de identidad */
+  async goToVerifyIdentity(): Promise<void> {
+    const topModal = await this.modalCtrl.getTop();
+    if (topModal) {
+      await this.modalCtrl.dismiss(null, 'verify-identity');
+    }
+    this.router.navigate(['/auth/verify-identity']);
   }
 
   private async evaluateServiceCreationEntitlement(): Promise<ServiceLimitResult> {
@@ -644,6 +721,13 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   //     try {
   // Enviar servicio al backend
   async submitService() {
+    // Defensa en profundidad: el formulario no debería ser alcanzable mientras
+    // el gate de identidad está activo, pero se valida igualmente aquí.
+    if (this.showIdentityGate) {
+      await this.presentToast('Debes verificar tu identidad antes de agregar servicios', 'warning');
+      return;
+    }
+
     if (this.servicioForm.pending) {
       this.servicioForm.markAllAsTouched();
       await this.presentToast('Validando contenido...', 'primary');
@@ -702,12 +786,12 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
         if (this.coreService) {
           this.coreService.createServiceProvider(serviceData).subscribe({
             next: (response) => {
-              this.saveSchedules(response).then(() => {
+              this.saveSchedules(response).then(async () => {
                 loading.dismiss();
                 this.presentToast('Servicio guardado correctamente', 'success');
                 this.servicioForm.reset();
                 this.portfolioImages = []; // Limpiar imágenes
-                this.modalCtrl.dismiss({ success: true, data: response }, 'confirm');
+                await this.closeOrGoBack({ success: true, data: response }, 'confirm');
               });
             },
             error: async (error) => {
@@ -988,9 +1072,9 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     }
   }
 
-  // Métodos para cerrar el modal
-  cancel() {
-    this.modalCtrl.dismiss(null, 'cancel');
+  // Métodos para cerrar el modal o la página ruteada
+  async cancel(): Promise<void> {
+    await this.closeOrGoBack(null, 'cancel');
   }
 
   confirm() {

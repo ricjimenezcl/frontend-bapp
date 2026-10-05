@@ -133,30 +133,33 @@ export const routes: Routes = [
   // ==================== PROVIDER ====================
   {
     path: 'provider',
-    canActivate: [authGuard, providerGuard, providerVerificationGuard, profileCompletionGuard],
+    canActivate: [authGuard, providerGuard, profileCompletionGuard],
     children: [
       {
         path: 'tabs',
         loadComponent: () => import('./features/provider/pages/tabs/tabs.page').then(m => m.ProviderTabsPage),
         children: [
           { path: 'home',            loadComponent: () => import('./features/provider/pages/provider-home/provider-home.page').then(m => m.ProviderHomePage) },
-          { path: 'bookings',        loadComponent: () => import('./features/provider/pages/provider-bookings/provider-bookings.page').then(m => m.ProviderBookingsPage) },
-          { path: 'inbox',          loadComponent: () => import('./features/provider/pages/provider-inbox/provider-inbox.page').then(m => m.ProviderInboxPage) },
+          { path: 'bookings',        canActivate: [providerVerificationGuard], loadComponent: () => import('./features/provider/pages/provider-bookings/provider-bookings.page').then(m => m.ProviderBookingsPage) },
+          { path: 'inbox',          canActivate: [providerVerificationGuard], loadComponent: () => import('./features/provider/pages/provider-inbox/provider-inbox.page').then(m => m.ProviderInboxPage) },
           { path: 'profile',         loadComponent: () => import('./features/provider/pages/provider-profile/provider-profile.page').then(m => m.ProviderProfilePage) },
-          { path: 'service-details', loadComponent: () => import('./features/provider/pages/provider-service-details/provider-service-details.page').then(m => m.ProviderServiceDetailsPage) },
+          { path: 'service-details', canActivate: [providerVerificationGuard], loadComponent: () => import('./features/provider/pages/provider-service-details/provider-service-details.page').then(m => m.ProviderServiceDetailsPage) },
           { path: '',               redirectTo: 'home', pathMatch: 'full' }
         ]
       },
       {
         path: 'add-service',
+        canActivate: [providerVerificationGuard],
         loadComponent: () => import('./features/provider/pages/provider-add-service/provider-add-service.page').then(m => m.ProviderAddServicePage)
       },
       {
         path: 'edit-service/:id',
+        canActivate: [providerVerificationGuard],
         loadComponent: () => import('./features/provider/pages/provider-edit-service/provider-edit-service.page').then(m => m.ProviderEditServicePage)
       },
       {
         path: 'service-details/:id',
+        canActivate: [providerVerificationGuard],
         loadComponent: () => import('./features/provider/pages/provider-service-details/provider-service-details.page').then(m => m.ProviderServiceDetailsPage)
       },
       {
@@ -165,10 +168,12 @@ export const routes: Routes = [
       },
       {
         path: 'working-hours',
+        canActivate: [providerVerificationGuard],
         loadComponent: () => import('./features/provider/pages/provider-working-hours/provider-working-hours.page').then(m => m.ProviderWorkingHoursPage)
       },
       {
         path: 'chat/:id',
+        canActivate: [providerVerificationGuard],
         loadComponent: () => import('./features/chat/chat.page').then(m => m.ChatPage)
       },
       {

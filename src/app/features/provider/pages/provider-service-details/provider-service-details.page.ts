@@ -9,7 +9,6 @@ import { ProviderService, ProviderServices } from '../../services/provider.servi
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { CoreService } from '../../../../shared/services/core.service';
 import { ProviderAddServicePage } from '../provider-add-service/provider-add-service.page';
-import { DocumentUploadService } from '../../../../shared/services/document-upload.service';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { environment } from '../../../../../environments/environment';
@@ -47,7 +46,6 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   private readonly modalCtrl = inject(ModalController);
   private readonly toastCtrl = inject(ToastController);
   private readonly http = inject(HttpClient);
-  private readonly documentService = inject(DocumentUploadService);
   private readonly paymentRedirect = inject(PaymentRedirectService);
   private readonly platformDetection = inject(PlatformDetectionService);
 
@@ -56,6 +54,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
   isLoading: boolean = true;
   error: string = '';
   private pendingOpenModal = false;
+  private pendingOpenAddServiceModal = false;
 
   ngOnInit() {
     // Datos estáticos de sesión: se cargan una sola vez en la vida del componente
@@ -75,6 +74,11 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     if (action === 'add-service') {
       this.pendingOpenModal = true;
       // Limpiar el query param de la URL sin navegar
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    } else if (action === 'open-add-service') {
+      // Disparado desde el FAB (+) del tab bar: replica el botón "Nuevo servicio"
+      // (chequeo de límite de plan + verificación de identidad + modal).
+      this.pendingOpenAddServiceModal = true;
       this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
     }
     this.loadServicios();
@@ -103,6 +107,9 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
         if (this.pendingOpenModal) {
           this.pendingOpenModal = false;
           this.verificarYAbrirModal();
+        } else if (this.pendingOpenAddServiceModal) {
+          this.pendingOpenAddServiceModal = false;
+          this.openAddServiceModal();
         }
       },
       error: (error: any) => {
@@ -111,6 +118,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
         this.servicios = [];
         this.error = 'Error al cargar servicios. Por favor, intenta nuevamente.';
         this.pendingOpenModal = false;
+        this.pendingOpenAddServiceModal = false;
       }
     });
   }
@@ -295,13 +303,17 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     });
     await loading.present();
 
-    this.documentService.getVerificationStatus()
+    // Homologado con web-bapp: un solo endpoint de verdad para el estado de
+    // validación de identidad (/providers/validation/status), igual al que
+    // usan providerVerificationGuard y el gate interno de ProviderAddServicePage.
+    this.providerService.getValidationStatus()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (verification: any) => {
+        next: async (res) => {
           await loading.dismiss();
-          if (verification?.face_match_status !== 'APPROVED') {
-            await this.showVerificationRequired(verification);
+          const status = String(res?.status ?? '').toLowerCase();
+          if (status !== 'approved') {
+            await this.showVerificationRequired(status);
             return;
           }
           await this.loadCategoriesAndOpenModal();
@@ -309,7 +321,7 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
         error: async (error) => {
           await loading.dismiss();
           console.error('Error verificando estado:', error);
-          await this.showVerificationRequired(null);
+          await this.showVerificationRequired('not_submitted');
         }
       });
   }
@@ -428,19 +440,15 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
       });
   }
 
-  private async showVerificationRequired(verification: any) {
+  private async showVerificationRequired(status: string) {
     let message = 'Para poder agregar servicios, debes completar la verificación de identidad. ';
-    
-    if (!verification) {
-      message += 'Por favor, ve a la sección de Verificación de Identidad y sube tu selfie y documento de identidad.';
-    } else if (verification.face_match_status === 'PENDING') {
-      message += 'Tu verificación está pendiente de procesamiento. Te notificaremos cuando esté lista.';
-    } else if (verification.face_match_status === 'PROCESSING') {
-      message += 'Tu verificación está siendo procesada por nuestro sistema. Esto puede tomar unos minutos.';
-    } else if (verification.face_match_status === 'REJECTED') {
+
+    if (status === 'pending') {
+      message += 'Tu verificación está pendiente de revisión. Te notificaremos cuando esté lista.';
+    } else if (status === 'rejected') {
       message += 'Tu verificación fue rechazada. Por favor, intenta nuevamente con fotos más claras.';
-    } else if (verification.face_match_status === 'EXPIRED') {
-      message += 'Tu verificación ha expirado. Por favor, realiza el proceso nuevamente.';
+    } else {
+      message += 'Por favor, ve a la sección de Verificación de Identidad y sube tu selfie y documento de identidad.';
     }
 
     const alert = await this.alertCtrl.create({

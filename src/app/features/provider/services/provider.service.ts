@@ -129,6 +129,15 @@ export class ProviderService {
     this._profileRequest$ = null;
   }
 
+  /**
+   * Estado de verificación de identidad del proveedor (homologado con web-bapp:
+   * `GET /providers/validation/status`). Valores esperados: 'approved' | 'pending'
+   * | 'rejected' | 'not_submitted'.
+   */
+  getValidationStatus(): Observable<{ status: string }> {
+    return this.http.get<{ status: string }>(`${this.apiUrl}/providers/validation/status`);
+  }
+
   
   updateProviderProfile(providerId?: string, data?: Partial<ProviderProfile>): Observable<ProviderProfile> {
     return this.http.patch<ProviderProfile>(`${this.apiUrl}/providers/me`, data).pipe(

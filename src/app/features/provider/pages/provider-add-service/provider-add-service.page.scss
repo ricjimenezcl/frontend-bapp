@@ -387,6 +387,69 @@ ion-content {
   display: block;
 }
 
+// ══ IDENTITY GATE (bloqueo total hasta verificar identidad) ══════════
+.as-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: var(--bapp-space-8) var(--bapp-space-4);
+  margin-top: var(--bapp-space-6);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--bapp-border);
+  border-radius: 20px;
+}
+
+.as-gate-spinner {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+}
+
+.as-gate-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(253, 215, 53, 0.1);
+  color: var(--bapp-color-primary);
+  margin-bottom: 6px;
+
+  ion-icon { font-size: 32px; }
+}
+
+.as-gate-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--bapp-text-primary);
+  margin: 0;
+}
+
+.as-gate-desc {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--bapp-text-secondary);
+  margin: 0 0 10px;
+  max-width: 320px;
+}
+
+.as-gate .as-btn {
+  width: 100%;
+  max-width: 320px;
+}
+
+.as-gate-link {
+  --color: var(--bapp-text-tertiary);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  margin: 0;
+}
+
 // ══ LOADING ROW ═════════════════════════════════════════════════════
 .as-loading-row {
   display: flex;

@@ -56,7 +56,10 @@ export class ProviderTabsPage implements OnInit, OnDestroy {
   }
 
   goToAddService() {
-    this.router.navigate(['/provider/add-service']);
+    // Reutiliza el mismo flujo del botón "Nuevo servicio" de service-details
+    // (chequeo de límite de plan + verificación de identidad + modal), en vez
+    // de navegar directo a la página ruteada (que no tiene currentUser/coreService).
+    this.router.navigate(['/provider/tabs/service-details'], { queryParams: { action: 'open-add-service' } });
   }
 
   private updateActiveTabFromUrl(url: string) {

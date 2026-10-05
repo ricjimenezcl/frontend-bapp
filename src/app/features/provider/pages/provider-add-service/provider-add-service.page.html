@@ -22,8 +22,30 @@
 <ion-content [fullscreen]="true" [scrollY]="true">
   <div class="as-body">
 
+    <!-- ══ IDENTITY GATE: validando ═════════════════════════════════ -->
+    <div class="as-gate" *ngIf="!identityCheckDone">
+      <ion-spinner name="crescent" color="primary" class="as-gate-spinner"></ion-spinner>
+      <h2 class="as-gate-title">Validando identidad</h2>
+      <p class="as-gate-desc">Estamos verificando tu estado de identidad para habilitar esta sección.</p>
+    </div>
+
+    <!-- ══ IDENTITY GATE: bloqueado hasta verificar identidad ════════ -->
+    <div class="as-gate" *ngIf="identityCheckDone && showIdentityGate">
+      <div class="as-gate-icon">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+      </div>
+      <h2 class="as-gate-title">Verificación de identidad requerida</h2>
+      <p class="as-gate-desc">{{ identityMessage }}</p>
+      <ion-button expand="block" class="as-btn as-btn--primary" (click)="goToVerifyIdentity()">
+        Verificar identidad
+      </ion-button>
+      <ion-button expand="block" fill="clear" class="as-gate-link" (click)="cancel()">
+        Volver
+      </ion-button>
+    </div>
+
     <!-- ══ FORM ═══════════════════════════════════════════════════ -->
-    <form [formGroup]="servicioForm" class="as-form">
+    <form [formGroup]="servicioForm" class="as-form" *ngIf="identityCheckDone && !showIdentityGate">
 
       <!-- ── Sección: Categoría ───────────────────────────────── -->
       <div class="as-section">
@@ -385,6 +407,7 @@
         Cancelar
       </ion-button>
       <ion-button
+        *ngIf="identityCheckDone && !showIdentityGate"
         (click)="confirm()"
         expand="block"
         class="as-btn as-btn--primary"
