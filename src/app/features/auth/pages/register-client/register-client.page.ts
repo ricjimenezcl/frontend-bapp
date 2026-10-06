@@ -239,6 +239,14 @@ export class RegisterClientPage {
     }
   }
 
+  goToLogin(): void {
+    this.router.navigate(['/auth/login'], {
+      queryParams: { tab: 'login' },
+      replaceUrl: true,
+      queryParamsHandling: 'merge'
+    });
+  }
+
   async showAlert(header: string, message: string): Promise<void> {
     const alert = await this.alertController.create({
       header,

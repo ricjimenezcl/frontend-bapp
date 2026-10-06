@@ -107,123 +107,25 @@
           </ion-button>
         </form>
 
-        <!-- REGISTER FORM -->
-        <form *ngIf="activeTab() === 'register'" [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" novalidate class="login-form">
-          <div class="form-group">
-            <label class="form-label">Tipo de cuenta</label>
-            <ion-segment [value]="registerRole()" (ionChange)="setRegisterRole($any($event).detail.value)" mode="md" class="auth-segment">
-              <ion-segment-button value="client">
-                <ion-label>Cliente</ion-label>
-              </ion-segment-button>
-              <ion-segment-button value="provider">
-                <ion-label>Proveedor</ion-label>
-              </ion-segment-button>
-            </ion-segment>
+        <div *ngIf="activeTab() === 'register'" class="role-select-box">
+          <p>Para continuar, elige el perfil que quieres crear:</p>
+          <div class="role-select-actions">
+            <button type="button" class="role-btn" (click)="chooseRegisterProfile('client')">
+              Cliente
+            </button>
+            <button type="button" class="role-btn" (click)="chooseRegisterProfile('provider')">
+              Proveedor
+            </button>
           </div>
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">Nombre completo</label>
-            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('full_name')?.invalid && registerForm.get('full_name')?.touched">
-              <ion-icon name="person-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="full_name"
-                placeholder="Tu nombre">
-              </ion-input>
-            </div>
-          </div>
-
-          <div class="form-group" *ngIf="registerRole() === 'provider'">
-            <label class="form-label">RUT</label>
-            <div class="input-wrap" [class.input-wrap-error]="registerRole() === 'provider' && !registerForm.get('run')?.value && registerForm.get('run')?.touched">
-              <ion-icon name="card-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="run"
-                placeholder="12345678-9">
-              </ion-input>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Teléfono (opcional)</label>
-            <div class="input-wrap">
-              <ion-icon name="call-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="phone"
-                type="tel"
-                placeholder="+56 9 1234 5678">
-              </ion-input>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Correo electrónico</label>
-            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="email"
-                type="email"
-                placeholder="tu@email.com">
-              </ion-input>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Contraseña</label>
-            <div class="input-wrap" [class.input-wrap-error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="password"
-                [type]="showRegisterPassword ? 'text' : 'password'"
-                placeholder="••••••••">
-              </ion-input>
-              <button type="button" class="toggle-pass-btn" (click)="showRegisterPassword = !showRegisterPassword" tabindex="-1">
-                <ion-icon [name]="showRegisterPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Confirmar contraseña</label>
-            <div class="input-wrap" [class.input-wrap-error]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('mismatch')) && registerForm.get('confirmPassword')?.touched">
-              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-              <ion-input
-                formControlName="confirmPassword"
-                [type]="showConfirmPassword ? 'text' : 'password'"
-                placeholder="••••••••">
-              </ion-input>
-              <button type="button" class="toggle-pass-btn" (click)="showConfirmPassword = !showConfirmPassword" tabindex="-1">
-                <ion-icon [name]="showConfirmPassword ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
-              </button>
-            </div>
-            <span class="form-error" *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched">
-              Las contraseñas no coinciden
-            </span>
-          </div>
-
-          <div class="terms-wrap">
-            <ion-checkbox formControlName="terms_accepted" mode="md" class="custom-checkbox"></ion-checkbox>
-            <label class="terms-text">
-              Acepto los <a routerLink="/auth/terms" class="accent-link">Términos</a> y la <a routerLink="/auth/privacy" class="accent-link">Privacidad</a>
-            </label>
-          </div>
-
-          <ion-button
-            type="submit"
-            expand="block"
-            class="submit-btn"
-            [disabled]="isLoading || registerForm.invalid">
-            <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
-            <span>{{ registerRole() === 'provider' ? 'Crear Cuenta de Proveedor' : 'Crear Cuenta de Cliente' }}</span>
-          </ion-button>
-        </form>
-
-        <div class="divider">
+        <div *ngIf="!showRegisterProfileChoice" class="divider">
           <span class="divider-line"></span>
           <span class="divider-text">o continúa con</span>
           <span class="divider-line"></span>
         </div>
 
-        <div class="social-btns">
+        <div *ngIf="!showRegisterProfileChoice" class="social-btns">
           <div class="google-btn-container">
             <asl-google-signin-button type="standard" size="large" text="signin_with" theme="outline" shape="square" [width]="googleButtonWidth()"></asl-google-signin-button>
           </div>

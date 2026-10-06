@@ -472,6 +472,14 @@ export class RegisterProviderPage implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 
+  goToLogin(): void {
+    this.router.navigate(['/auth/login'], {
+      queryParams: { tab: 'login' },
+      replaceUrl: true,
+      queryParamsHandling: 'merge'
+    });
+  }
+
   // ==================== REGISTRO SOCIAL ====================
 
   registerWithGoogle(): void {

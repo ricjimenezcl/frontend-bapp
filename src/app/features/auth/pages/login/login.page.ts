@@ -71,6 +71,7 @@ export class LoginPage implements OnInit, OnDestroy {
   private pendingLoginCredentials: { email: string; password: string } | null = null;
   socialRolePrompt = false;
   socialRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
+  showRegisterProfileChoice = false;
   private pendingSocialLogin: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string } | null = null;
   readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
@@ -119,19 +120,58 @@ export class LoginPage implements OnInit, OnDestroy {
       }
       if (params['tab'] === 'register') {
         this.activeTab.set('register');
+        this.showRegisterProfileChoice = true;
+        this.registerRole.set('client');
+        return;
+      }
+      if (params['tab'] === 'login') {
+        this.activeTab.set('login');
+        this.showRegisterProfileChoice = false;
+        this.registerRole.set('client');
       }
     });
   }
 
   setTab(tab: 'login' | 'register') {
     this.activeTab.set(tab);
-    if (tab === 'register') this.registerRole.set('client');
+    if (tab === 'register') {
+      this.registerRole.set('client');
+      this.showRegisterProfileChoice = true;
+      this.registerForm.reset({
+        full_name: '',
+        email: '',
+        phone: '',
+        run: '',
+        password: '',
+        confirmPassword: '',
+        terms_accepted: false
+      });
+    } else {
+      this.showRegisterProfileChoice = false;
+      this.registerRole.set('client');
+    }
     this.loginRolePrompt = false;
     this.pendingLoginCredentials = null;
     this.socialRolePrompt = false;
     this.pendingSocialLogin = null;
     this.errorMessage = '';
     this.successMessage = '';
+  }
+
+  chooseRegisterProfile(role: 'client' | 'provider') {
+    this.registerRole.set(role);
+    this.showRegisterProfileChoice = false;
+    this.registerForm.reset({
+      full_name: '',
+      email: '',
+      phone: '',
+      run: '',
+      password: '',
+      confirmPassword: '',
+      terms_accepted: false
+    });
+    const targetRoute = role === 'provider' ? '/auth/register-provider' : '/auth/register-client';
+    this.router.navigate([targetRoute]);
   }
 
   setRegisterRole(role: 'client' | 'provider') {
