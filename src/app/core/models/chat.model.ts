@@ -1,5 +1,5 @@
 /**
- * Chat Models for BAPP Search FASE 2 Frontend
+ * Chat Models for Bappsearch FASE 2 Frontend
  * Tipos TypeScript para conversaciones, mensajes y notificaciones
  */
 

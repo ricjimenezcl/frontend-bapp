@@ -1,5 +1,5 @@
 /**
- * Chat Component for BAPP Search FASE 2
+ * Chat Component for Bappsearch FASE 2
  * Componente principal para conversaciones y mensajes
  */
 

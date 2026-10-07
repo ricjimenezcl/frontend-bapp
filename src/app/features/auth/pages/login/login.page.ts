@@ -10,9 +10,11 @@ import {
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 import { environment } from '../../../../../environments/environment';
+import { logGoogleIdTokenPayload } from '../../../../shared/utils/jwt-debug.util';
 
 @Component({
   selector: 'app-login',
@@ -73,6 +75,7 @@ export class LoginPage implements OnInit, OnDestroy {
   socialRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
   showRegisterProfileChoice = false;
   private pendingSocialLogin: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string } | null = null;
+  readonly isAndroidNative = Capacitor.getPlatform() === 'android';
   readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
   constructor() {
@@ -487,7 +490,55 @@ export class LoginPage implements OnInit, OnDestroy {
       });
   }
 
-  loginWithGoogle(): void {
+  async loginWithGoogle(): Promise<void> {
+    const isAndroid = Capacitor.getPlatform() === 'android';
+    // IMPORTANTE: Credential Manager (Android) exige el Web Client ID (tipo "Web application"),
+    // igual que la API legacy. El Android Client ID (package + SHA-1) solo existe como
+    // credencial registrada en Google Console para que Play Services valide la firma de la app;
+    // no se pasa por código.
+    const googleWebClientId = environment.googleClientId || '';
+
+    if (isAndroid) {
+      if (!googleWebClientId) {
+        this.isLoading = false;
+        this.errorMessage = 'Falta GOOGLE_CLIENT_ID (Web). Configúralo en Google Cloud Console con el client ID de tipo Web.';
+        return;
+      }
+
+      try {
+        this.isLoading = true;
+        this.errorMessage = '';
+
+        await SocialLogin.initialize({
+          google: { webClientId: googleWebClientId },
+        });
+
+        const { result } = await SocialLogin.login({
+          provider: 'google',
+          options: {},
+        });
+        const googleIdToken = (result as any)?.idToken || '';
+        const googleEmail = (result as any)?.profile?.email || '';
+
+        if (!googleIdToken) {
+          this.isLoading = false;
+          this.errorMessage = 'Google no devolvió un idToken válido para Android.';
+          return;
+        }
+
+        logGoogleIdTokenPayload(googleIdToken, 'login-android');
+
+        const wasRegistering = this.activeTab() === 'register';
+        this.resolveSocialLoginRole('google', googleIdToken, googleEmail, wasRegistering);
+      } catch (error: any) {
+        this.isLoading = false;
+        if (error?.message?.toLowerCase().includes('cancel') || error?.error === 'popup_closed_by_user') return;
+        this.errorMessage = 'No se pudo iniciar sesión con Google en Android.';
+        console.error('Error en Google signIn (Android):', error);
+      }
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
     const wasRegistering = this.activeTab() === 'register';

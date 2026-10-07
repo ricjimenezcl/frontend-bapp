@@ -1,5 +1,5 @@
 {
-  "name": "BappSearch",
+  "name": "Bappsearch",
   "version": "0.0.1",
   "author": "Ionic Framework",
   "homepage": "https://ionicframework.com/",
@@ -49,6 +49,7 @@
     "@capacitor/ios": "^7.0.0",
     "@capacitor/splash-screen": "^7.0.0",
     "@capacitor/status-bar": "^7.0.0",
+    "@capgo/capacitor-social-login": "^7.20.0",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@ionic/angular": "8.4.2",
     "@ionic/pwa-elements": "3.3.0",

@@ -487,6 +487,18 @@ ion-content {
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
+.social-btn--google {
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  color: var(--bapp-text-primary);
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 // ── Register links ─────────────────────────────────────────────────────────────
 .register-links {
   @include flex-column-center;

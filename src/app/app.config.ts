@@ -10,6 +10,7 @@ import {
   FacebookLoginProvider,
 } from '@abacritt/angularx-social-login';
 import type { SocialAuthServiceConfig } from '@abacritt/angularx-social-login';
+import { Capacitor } from '@capacitor/core';
 
 import { environment } from '../environments/environment';
 import { addIcons } from 'ionicons';
@@ -40,6 +41,8 @@ addIcons({
   list: listOutline,
 });
 
+const isAndroidNative = Capacitor.getPlatform() === 'android';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
@@ -52,13 +55,15 @@ export const appConfig: ApplicationConfig = {
       useValue: {
         autoLogin: false,
         providers: [
-          {
-            id: GoogleLoginProvider.PROVIDER_ID,
-            provider: new GoogleLoginProvider(environment.googleClientId, {
-              oneTapEnabled: false,
-              prompt: 'select_account'
-            }),
-          },
+          ...(!isAndroidNative ? [
+            {
+              id: GoogleLoginProvider.PROVIDER_ID,
+              provider: new GoogleLoginProvider(environment.googleClientId, {
+                oneTapEnabled: false,
+                prompt: 'select_account'
+              }),
+            },
+          ] : []),
           {
             id: FacebookLoginProvider.PROVIDER_ID,
             provider: new FacebookLoginProvider(environment.facebookAppId, {

@@ -13,12 +13,27 @@ function parseEnv(filePath) {
   // En CI/CD (Vercel, Render, GitHub Actions) no hay .env — usar process.env
   if (!fs.existsSync(filePath)) {
     console.log('ℹ️   Archivo .env no encontrado — usando variables de process.env (modo CI).');
+    const backendPublicUrl = process.env['BACKEND_PUBLIC_URL'] || '';
+    const apiUrl = process.env['API_URL'] || (backendPublicUrl ? `${backendPublicUrl}/api/v1` : '');
+    const wsUrl = process.env['WS_URL'] || (backendPublicUrl ? `wss://${backendPublicUrl.replace(/^https?:\/\//, '')}/api/v1/ws` : '');
+    const googleWebClientId = process.env['OAUTH_GOOGLE_CLIENT_ID'] || process.env['GOOGLE_CLIENT_ID'] || process.env['GOOGLE_WEB_CLIENT_ID'] || '';
+    const googleAndroidClientId = process.env['GOOGLE_ANDROID_CLIENT_ID'] || process.env['GOOGLE_CLIENT_ID'] || '';
+    const facebookAppId = process.env['OAUTH_FB_CLIENT_ID'] || process.env['FACEBOOK_APP_ID'] || '';
+
     return {
-      API_URL:         process.env['API_URL']         || '',
-      GEOAPIFY_API_KEY: process.env['GEOAPIFY_API_KEY'] || '',
-      GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'] || '',
-      FACEBOOK_APP_ID:  process.env['FACEBOOK_APP_ID']  || '',
-      REVENUECAT_API_KEY_IOS: process.env['REVENUECAT_API_KEY_IOS'] || '',
+      BACKEND_PUBLIC_URL:          backendPublicUrl,
+      API_URL:                    apiUrl,
+      WS_URL:                     wsUrl,
+      GEOAPIFY_API_KEY:           process.env['GEOAPIFY_API_KEY'] || '',
+      OAUTH_GOOGLE_CLIENT_ID:     googleWebClientId,
+      GOOGLE_ANDROID_CLIENT_ID:   googleAndroidClientId,
+      OAUTH_FB_CLIENT_ID:         facebookAppId,
+      REVENUECAT_API_KEY_IOS:     process.env['REVENUECAT_API_KEY_IOS'] || '',
+      REVENUECAT_API_KEY_ANDROID: process.env['REVENUECAT_API_KEY_ANDROID'] || '',
+      GOOGLE_CLIENT_ID:           googleWebClientId,
+      GOOGLE_WEB_CLIENT_ID:       googleWebClientId,
+      GOOGLE_ANDROID_CLIENT_ID:   googleAndroidClientId,
+      FACEBOOK_APP_ID:            facebookAppId,
     };
   }
 

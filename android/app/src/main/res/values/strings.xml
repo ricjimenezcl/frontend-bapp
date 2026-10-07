@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">BappSearch</string>
-    <string name="title_activity_main">BappSearch</string>
+    <string name="app_name">Bappsearch</string>
+    <string name="title_activity_main">Bappsearch</string>
     <string name="package_name">io.ionic.bappsearch</string>
     <string name="custom_url_scheme">io.ionic.bappsearch</string>
+    <!-- Web OAuth client ID para Google Sign-In nativo en Android. Debe ser el CLIENT ID de tipo Web, no el Android client. -->
+    <string name="server_client_id">713984511036-kvn0om4d75dq5gqdpokjg2up7eim6gq.apps.googleusercontent.com</string>
 </resources>

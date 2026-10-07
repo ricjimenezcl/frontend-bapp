@@ -1,5 +1,5 @@
 /**
- * Notifications Component for BAPP Search FASE 2
+ * Notifications Component for Bappsearch FASE 2
  * Panel de notificaciones con contador y listado
  */
 

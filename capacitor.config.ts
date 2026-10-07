@@ -1,8 +1,34 @@
 import { CapacitorConfig } from '@capacitor/cli';
+import * as fs from 'fs';
+import * as path from 'path';
+
+function readDotEnv(): Record<string, string> {
+  const envPath = path.resolve(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return {};
+
+  const values: Record<string, string> = {};
+  for (const rawLine of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const equalsIndex = line.indexOf('=');
+    if (equalsIndex === -1) continue;
+
+    const key = line.slice(0, equalsIndex).trim();
+    const value = line.slice(equalsIndex + 1).trim().replace(/^['"]|['"]$/g, '');
+    values[key] = value;
+  }
+
+  return values;
+}
+
+const env = {
+  ...process.env,
+  ...readDotEnv(),
+};
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.bappsearch',
-  appName: 'BappSearch',
+  appName: 'Bappsearch',
   webDir: 'www',
   server: {
     androidScheme: 'https'

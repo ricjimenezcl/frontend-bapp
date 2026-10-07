@@ -1,5 +1,5 @@
 // src/app/auth/pages/register-provider/register-provider.page.ts
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -12,12 +12,14 @@ import {
 import { AuthService } from '../../services/auth.service';
 import { CameraService } from '../../../../shared/services/camera.service';
 import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider, GoogleSigninButtonModule } from '@abacritt/angularx-social-login';
+import { SocialLogin } from '@capgo/capacitor-social-login';
 import { Capacitor } from '@capacitor/core';
 import { SignInWithApple } from '@capacitor-community/apple-sign-in';
 import { environment } from '../../../../../environments/environment';
 import { ContentFilterService } from '../../../../shared/services/content-filter.service';
 import { offensiveContentAsyncValidator } from '../../../../shared/validators/content-filter.validators';
 import { PhoneFormatter } from '../../../../shared/formatters';
+import { logGoogleIdTokenPayload } from '../../../../shared/utils/jwt-debug.util';
 
 @Component({
   selector: 'app-register-provider',
@@ -51,13 +53,25 @@ export class RegisterProviderPage implements OnInit {
   isTakingPhoto = false;
   showPassword = false;
   showConfirmPassword = false;
+  readonly isAndroidNative = Capacitor.getPlatform() === 'android';
   readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
+  // El botón de Google requiere un ancho fijo en px (200-400, lo valida el SDK).
+  // Se calcula para que coincida con el ancho real del botón de Facebook.
+  googleButtonWidth = signal<number>(this.computeGoogleButtonWidth());
 
   constructor() {
     this.registerForm = this.createForm();
   }
 
   ngOnInit(): void {}
+
+  // Replica el ancho de contenido real de .login-card:
+  // login-bg padding 16px * 2, login-wrap max-width 420px, login-card padding 24px * 2.
+  private computeGoogleButtonWidth(): number {
+    const wrapWidth = Math.min(window.innerWidth - 32, 420);
+    const contentWidth = wrapWidth - 48;
+    return Math.min(400, Math.max(200, Math.floor(contentWidth)));
+  }
 
   private createForm(): FormGroup {
     return this.fb.group({
@@ -482,7 +496,57 @@ export class RegisterProviderPage implements OnInit {
 
   // ==================== REGISTRO SOCIAL ====================
 
-  registerWithGoogle(): void {
+  async registerWithGoogle(): Promise<void> {
+    const isAndroid = Capacitor.getPlatform() === 'android';
+    // IMPORTANTE: requestIdToken() exige el Web Client ID, ver nota en login.page.ts
+    const googleWebClientId = environment.googleClientId || '';
+
+    if (isAndroid) {
+      if (!googleWebClientId) {
+        this.isLoading = false;
+        await this.showAlert('Error', 'Falta GOOGLE_CLIENT_ID (Web). Configúralo en Google Cloud Console con el client ID de tipo Web.');
+        return;
+      }
+
+      try {
+        this.isLoading = true;
+        await SocialLogin.initialize({
+          google: { webClientId: googleWebClientId },
+        });
+
+        const { result } = await SocialLogin.login({
+          provider: 'google',
+          options: {},
+        });
+        const googleIdToken = (result as any)?.idToken || '';
+
+        if (!googleIdToken) {
+          this.isLoading = false;
+          await this.showAlert('Error', 'Google no devolvió un idToken válido para Android.');
+          return;
+        }
+
+        logGoogleIdTokenPayload(googleIdToken, 'register-provider-android');
+
+        this.authService.loginWithGoogle(googleIdToken, 'PROVIDER').subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          },
+          error: (error) => {
+            this.isLoading = false;
+            this.showAlert('Error', error.error?.detail || 'Error al registrarse con Google');
+          }
+        });
+      } catch (error: any) {
+        this.isLoading = false;
+        if (!error?.message?.toLowerCase().includes('cancel')) {
+          this.showAlert('Error', 'No se pudo iniciar sesión con Google en Android.');
+        }
+      }
+      return;
+    }
+
     this.isLoading = true;
     this.signInWithRetry(GoogleLoginProvider.PROVIDER_ID)
       .then((socialUser) => {

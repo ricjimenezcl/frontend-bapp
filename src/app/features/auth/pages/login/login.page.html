@@ -7,17 +7,17 @@
         <div class="web-brand-row">
           <div class="logo-container">
             <img src="assets/imgs/logo.png"
-                 alt="Logo BappSearch"
+                 alt="Logo Bappsearch"
                  class="logo-img"
                  loading="eager"
                  (error)="$any($event.target).style.display='none'">
           </div>
           <img src="assets/imgs/titulo.png"
-               alt="BappSearch"
+               alt="Bappsearch"
                class="titulo-img"
                loading="eager"
                (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='inline'">
-          <span class="titulo-fallback">BappSearch</span>
+          <span class="titulo-fallback">Bappsearch</span>
         </div>
         <p class="login-subtitle">Conecta con proveedores de servicios</p>
       </div>
@@ -107,7 +107,7 @@
           </ion-button>
         </form>
 
-        <div *ngIf="activeTab() === 'register'" class="role-select-box">
+        <div *ngIf="activeTab() === 'register' && showRegisterProfileChoice" class="role-select-box">
           <p>Para continuar, elige el perfil que quieres crear:</p>
           <div class="role-select-actions">
             <button type="button" class="role-btn" (click)="chooseRegisterProfile('client')">
@@ -119,15 +119,21 @@
           </div>
         </div>
 
-        <div *ngIf="!showRegisterProfileChoice" class="divider">
+        <div *ngIf="!(activeTab() === 'register' && showRegisterProfileChoice)" class="divider">
           <span class="divider-line"></span>
           <span class="divider-text">o continúa con</span>
           <span class="divider-line"></span>
         </div>
 
-        <div *ngIf="!showRegisterProfileChoice" class="social-btns">
+        <div *ngIf="!(activeTab() === 'register' && showRegisterProfileChoice)" class="social-btns">
           <div class="google-btn-container">
-            <asl-google-signin-button type="standard" size="large" text="signin_with" theme="outline" shape="square" [width]="googleButtonWidth()"></asl-google-signin-button>
+            <button *ngIf="isAndroidNative" type="button" class="social-btn social-btn--google" (click)="loginWithGoogle()" [disabled]="isLoading">
+              <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.4-1.7 4.1-5.4 4.1-3.2 0-5.8-2.7-5.8-6s2.6-6 5.8-6c1.8 0 3.1.8 3.8 1.5l2.6-2.5C16.9 3.7 14.8 3 12 3 7.1 3 3 7.1 3 12s4.1 9 9 9c5.2 0 8.6-3.7 8.6-8.9 0-.6-.1-1.2-.2-1.7H12z"/>
+              </svg>
+              Google
+            </button>
+            <asl-google-signin-button *ngIf="!isAndroidNative" type="standard" size="large" text="signin_with" theme="outline" shape="square" [width]="googleButtonWidth()"></asl-google-signin-button>
           </div>
           <button type="button" class="social-btn" (click)="loginWithFacebook()" [disabled]="isLoading">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2">
@@ -142,19 +148,19 @@
             Apple
           </button>
         </div>
-        
-          <div *ngIf="socialRolePrompt" class="role-prompt">
-            <p>Este correo social tiene dos perfiles. ¿Cómo quieres entrar?</p>
-            <div class="role-buttons">
-              <button
-                type="button"
-                class="role-option"
-                *ngFor="let role of socialRoleOptions"
-                (click)="selectSocialLoginRole(role)">
-                {{ role === 'PROVIDER' ? 'Proveedor' : 'Cliente' }}
-              </button>
-            </div>
+
+        <div *ngIf="socialRolePrompt" class="role-prompt">
+          <p>Este correo social tiene dos perfiles. ¿Cómo quieres entrar?</p>
+          <div class="role-buttons">
+            <button
+              type="button"
+              class="role-option"
+              *ngFor="let role of socialRoleOptions"
+              (click)="selectSocialLoginRole(role)">
+              {{ role === 'PROVIDER' ? 'Proveedor' : 'Cliente' }}
+            </button>
           </div>
+        </div>
       </div>
     </div>
   </div>

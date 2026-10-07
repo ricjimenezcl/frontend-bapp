@@ -98,6 +98,7 @@ ion-content {
   font-size: var(--bapp-text-xl);
   font-weight: var(--bapp-font-semibold);
   color: var(--bapp-text-primary);
+  text-align: center;
 }
 
 // ── Form ───────────────────────────────────────────────────────────────────────
@@ -209,12 +210,12 @@ ion-content {
     --checkmark-color: var(--bapp-color-on-primary);
     flex-shrink: 0;
     margin-top: 2px;
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
   }
 
   .checkbox-label {
-    font-size: var(--bapp-text-sm);
+    font-size: calc(var(--bapp-text-sm) * 0.7);
     color: var(--bapp-text-secondary);
     line-height: 1.5;
 
@@ -289,6 +290,18 @@ ion-content {
 
   &:active { background: rgba(255, 255, 255, 0.08); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.social-btn--google {
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  color: var(--bapp-text-primary);
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 // ── Login link ─────────────────────────────────────────────────────────────────

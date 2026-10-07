@@ -1,5 +1,5 @@
 /**
- * WebSocket Service for BAPP Search FASE 2 Frontend
+ * WebSocket Service for Bappsearch FASE 2 Frontend
  * Gestiona conexiones WebSocket para chat y notificaciones en tiempo real
  */
 
