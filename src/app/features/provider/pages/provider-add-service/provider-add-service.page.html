@@ -286,6 +286,10 @@
           <div class="as-field-error" *ngIf="servicioForm.get('direccion')?.touched && servicioForm.get('lat')?.errors?.['required']">
             Selecciona una dirección de la lista de sugerencias
           </div>
+          <button type="button" class="as-map-link-btn" (click)="openMapPicker()">
+            <ion-icon name="location-outline"></ion-icon>
+            ¿No encuentras tu dirección? Selecciónala manualmente en el mapa
+          </button>
         </div>
 
         <!-- Mapa estático (opcional) -->
@@ -411,9 +415,19 @@
         (click)="confirm()"
         expand="block"
         class="as-btn as-btn--primary"
-        [disabled]="!servicioForm.valid || servicioForm.pending || !selectedService">
+        [disabled]="submitting">
         Crear servicio
       </ion-button>
     </div>
   </ion-toolbar>
 </ion-footer>
+
+<!-- Map Picker Modal — fuera de ion-content/ion-footer para evitar el stacking
+     context que atrapa elementos position:fixed dentro de ion-content. -->
+<app-map-picker
+  *ngIf="showMapPicker"
+  [initialLat]="mapPickerInitialLat"
+  [initialLng]="mapPickerInitialLng"
+  (locationSelected)="onLocationSelected($event)"
+  (closed)="onMapPickerClose()">
+</app-map-picker>

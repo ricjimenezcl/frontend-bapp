@@ -19,6 +19,8 @@ import { offensiveContentAsyncValidator } from '../../../../shared/validators/co
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { environment } from '../../../../../environments/environment';
+import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
+import { GeoLocationService } from '../../../../shared/services/geo-location.service';
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -81,7 +83,8 @@ interface ServiceLimitResult {
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    IonicModule
+    IonicModule,
+    MapPickerComponent
   ]
 })
 export class ProviderAddServicePage implements OnInit, OnDestroy {
@@ -142,6 +145,14 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   showAddressSuggestions: boolean = false;
   isSearching: boolean = false;
 
+  // Ubicación manual (map picker) — mismo formato que service-map
+  showMapPicker = false;
+  mapPickerInitialLat = -33.4489; // Santiago Centro por defecto
+  mapPickerInitialLng = -70.6693;
+
+  // Evita doble envío mientras se guarda el servicio
+  submitting = false;
+
   // ══ PORTFOLIO IMAGES ═══════════════════════════════════
   portfolioImages: { file: File | null; preview: string; url?: string }[] = [];
   uploadingImages: boolean = false;
@@ -149,6 +160,7 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
   private readonly cameraService = inject(CameraService);
   private readonly actionSheetCtrl = inject(ActionSheetController);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly geoLocationService = inject(GeoLocationService);
   readonly MAX_PORTFOLIO_IMAGES = 5;
   // ═══════════════════════════════════════════════════════════════════
 
@@ -617,6 +629,55 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     this.initMap(-33.4489, -70.6693);
   }
 
+  // ══ Ubicación manual vía mapa (igual formato que service-map/map-picker) ══
+  async openMapPicker(): Promise<void> {
+    this.showAddressSuggestions = false;
+
+    const currentLat = Number.parseFloat(this.servicioForm.get('lat')?.value);
+    const currentLng = Number.parseFloat(this.servicioForm.get('lng')?.value);
+    if (!Number.isNaN(currentLat) && !Number.isNaN(currentLng)) {
+      this.mapPickerInitialLat = currentLat;
+      this.mapPickerInitialLng = currentLng;
+      this.showMapPicker = true;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // ✅ Usar GeoLocationService (plugin nativo Capacitor) en vez de navigator.geolocation
+    // crudo: es el mismo patrón ya usado en main-categories/service-map y es el único que
+    // dispara correctamente el diálogo de permisos nativo en Android/iOS.
+    const position = await this.geoLocationService.getCurrentLocation().catch(() => null);
+    if (position) {
+      this.mapPickerInitialLat = position.latitude;
+      this.mapPickerInitialLng = position.longitude;
+    }
+    this.showMapPicker = true;
+    this.cdr.detectChanges();
+  }
+
+  onLocationSelected(location: { lat: number; lng: number; address: string }): void {
+    this.selectedAddressObject = null;
+
+    this.servicioForm.patchValue({
+      direccion: location.address,
+      lat: location.lat.toString(),
+      lng: location.lng.toString()
+    }, { emitEvent: false });
+
+    this.address.place = location.address;
+    this.address.set = true;
+    this.addressSuggestions = [];
+    this.showAddressSuggestions = false;
+    this.showMapPicker = false;
+
+    this.updateMap(location.lat, location.lng);
+    this.cdr.detectChanges();
+  }
+
+  onMapPickerClose(): void {
+    this.showMapPicker = false;
+  }
+
   // Métodos de utilidad
   getError(controlName: string): string {
     const control = this.servicioForm.get(controlName);
@@ -710,6 +771,44 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     await alert.present();
   }
 
+  // ══ Espera acotada de validaciones asíncronas en curso (fail-open) ══════
+  private waitForPendingValidators(): Promise<void> {
+    return new Promise((resolve) => {
+      const sub = this.servicioForm.statusChanges.subscribe((status) => {
+        if (status !== 'PENDING') {
+          sub.unsubscribe();
+          resolve();
+        }
+      });
+      setTimeout(() => {
+        sub.unsubscribe();
+        resolve();
+      }, 3000);
+    });
+  }
+
+  // ══ Campos/datos faltantes para mostrar en el alert al guardar ══════════
+  private getMissingFieldLabels(): string[] {
+    const missing: string[] = [];
+    const c = this.servicioForm.controls;
+
+    if (c['servicio'].invalid) missing.push('Categoría principal');
+    if (c['subcategoria'].invalid) missing.push('Subcategoría');
+    if (c['categoria'].invalid || !this.selectedService) missing.push('Servicio específico');
+    if (c['nombre_prestador'].invalid) missing.push('Nombre del servicio');
+    if (c['nombre_prestador'].errors?.['offensiveContent']) missing.push('Nombre del servicio (contenido no permitido)');
+    if (c['detalle'].errors?.['offensiveContent']) missing.push('Descripción (contenido no permitido)');
+    if (c['fono'].invalid) missing.push('Teléfono de contacto');
+
+    if (c['direccion'].invalid) {
+      missing.push('Dirección');
+    } else if (c['lat'].invalid || c['lng'].invalid) {
+      missing.push('Ubicación exacta (selecciona una sugerencia o marca el punto en el mapa)');
+    }
+
+    return missing;
+  }
+
   // Enviar servicio
   // async submitService() {
   //   if (this.servicioForm.valid && this.currentUser) {
@@ -728,119 +827,134 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.servicioForm.pending) {
-      this.servicioForm.markAllAsTouched();
-      await this.presentToast('Validando contenido...', 'primary');
+    if (this.submitting) {
       return;
     }
 
-    if (this.servicioForm.valid && this.currentUser) {
-      const loading = await this.loadingCtrl.create({
-        message: 'Guardando servicio...'
-      });
-      await loading.present();
+    // Las validaciones asíncronas (filtro de contenido) pueden quedar "pending"
+    // indefinidamente si el endpoint tarda/falla; esperamos acotado y seguimos
+    // en modo fail-open en vez de dejar el formulario inservible para siempre.
+    if (this.servicioForm.pending) {
+      await this.waitForPendingValidators();
+    }
 
-      try {
-        // ══ SUBIR IMÁGENES DE PORTAFOLIO PRIMERO ═══════════════════════
-        let portfolioUrls: string[] = [];
-        
-        if (this.portfolioImages.length > 0) {
-          loading.message = 'Subiendo imágenes...';
-          try {
-            portfolioUrls = await this.uploadPortfolioImages();
-            console.log('Imágenes subidas:', portfolioUrls);
-          } catch (error) {
-            console.error('Error subiendo imágenes:', error);
-            await loading.dismiss();
-            await this.presentToast('Error al subir imágenes. Intenta nuevamente.', 'danger');
-            return;
-          }
-        }
-        // ═══════════════════════════════════════════════════════════════
+    this.servicioForm.markAllAsTouched();
 
-        loading.message = 'Guardando servicio...';
-        const formData = this.servicioForm.value;
-        const fono = formData.fono.replace(/\s/g, '');
-
-        const serviceData: any = {
-          servicio: Number.parseInt(formData.servicio),
-          categoria: Number.parseInt(formData.categoria),
-          nombre_prestador: formData.nombre_prestador,
-          fono: fono,
-          detalle: formData.detalle || '',
-          direccion: formData.direccion,
-          lat: Number.parseFloat(formData.lat),
-          lng: Number.parseFloat(formData.lng),
-          hourly_rate: formData.hourly_rate ? Number.parseFloat(formData.hourly_rate) : null,
-          id_contacto: this.providerProfile?.id ?? this.currentUser.id
-        };
-
-        // ══ INCLUIR PORTFOLIO IMAGES SI EXISTEN ════════════════════════
-        if (portfolioUrls.length > 0) {
-          serviceData.portfolio_images = portfolioUrls;
-        }
-        // ═══════════════════════════════════════════════════════════════
-
-        console.log('Enviando datos al backend:', serviceData);
-
-        if (this.coreService) {
-          this.coreService.createServiceProvider(serviceData).subscribe({
-            next: (response) => {
-              this.saveSchedules(response).then(async () => {
-                loading.dismiss();
-                this.presentToast('Servicio guardado correctamente', 'success');
-                this.servicioForm.reset();
-                this.portfolioImages = []; // Limpiar imágenes
-                await this.closeOrGoBack({ success: true, data: response }, 'confirm');
-              });
-            },
-            error: async (error) => {
-              loading.dismiss();
-              console.error('Error guardando servicio:', error);
-
-              if (error.status === 403) {
-                const isProfileIncomplete = error.error?.detail?.includes('Perfil incompleto');
-                await this.presentAlert(
-                  isProfileIncomplete ? 'Perfil incompleto' : 'Verificación de identidad requerida',
-                  error.error?.detail || 'Debes completar la verificación de identidad antes de agregar servicios. Por favor, ve a la sección de verificación y sube tu selfie y documento de identidad.'
-                );
-                return;
-              }
-
-              if (error.status === 402) {
-                await this.presentAlert(
-                  'Límite de servicios gratuitos',
-                  error.error?.detail || 'Has alcanzado el máximo de 2 servicios gratuitos. Actualiza tu plan para agregar más.'
-                );
-                return;
-              }
-
-              let errorMessage = 'No se pudo guardar el servicio';
-              if (error.error?.detail) {
-                errorMessage = error.error.detail;
-              } else if (error.status === 404) {
-                errorMessage = 'No se encontró el perfil de proveedor. Complete su registro primero.';
-              } else if (error.status === 401) {
-                errorMessage = 'Sesión expirada. Por favor inicie sesión nuevamente.';
-              }
-
-              this.presentToast(errorMessage, 'danger');
-            }
-          });
-        }
-      } catch (error) {
-        loading.dismiss();
-        console.error('Error al procesar el formulario:', error);
-        this.presentToast('Error al procesar el formulario', 'danger');
+    const missingFields = this.getMissingFieldLabels();
+    if (missingFields.length > 0 || !this.currentUser) {
+      if (!this.currentUser) {
+        await this.presentToast('Sesión no válida. Vuelve a iniciar sesión.', 'danger');
+        return;
       }
-    } else {
-      Object.keys(this.servicioForm.controls).forEach(key => {
-        const control = this.servicioForm.get(key);
-        if (control) {
-          control.markAsTouched();
+      await this.presentAlert(
+        'Faltan datos por completar',
+        `Antes de guardar, completa: ${missingFields.join(', ')}.`
+      );
+      return;
+    }
+
+    this.submitting = true;
+    const loading = await this.loadingCtrl.create({
+      message: 'Guardando servicio...'
+    });
+    await loading.present();
+
+    try {
+      // ══ SUBIR IMÁGENES DE PORTAFOLIO PRIMERO ═══════════════════════
+      let portfolioUrls: string[] = [];
+
+      if (this.portfolioImages.length > 0) {
+        loading.message = 'Subiendo imágenes...';
+        try {
+          portfolioUrls = await this.uploadPortfolioImages();
+          console.log('Imágenes subidas:', portfolioUrls);
+        } catch (error) {
+          console.error('Error subiendo imágenes:', error);
+          await loading.dismiss();
+          this.submitting = false;
+          await this.presentToast('Error al subir imágenes. Intenta nuevamente.', 'danger');
+          return;
         }
-      });
-      this.presentToast('Por favor complete todos los campos requeridos', 'warning');
+      }
+      // ═══════════════════════════════════════════════════════════════
+
+      loading.message = 'Guardando servicio...';
+      const formData = this.servicioForm.value;
+      const fono = formData.fono.replace(/\s/g, '');
+
+      const serviceData: any = {
+        servicio: Number.parseInt(formData.servicio),
+        categoria: Number.parseInt(formData.categoria),
+        nombre_prestador: formData.nombre_prestador,
+        fono: fono,
+        detalle: formData.detalle || '',
+        direccion: formData.direccion,
+        lat: Number.parseFloat(formData.lat),
+        lng: Number.parseFloat(formData.lng),
+        hourly_rate: formData.hourly_rate ? Number.parseFloat(formData.hourly_rate) : null,
+        id_contacto: this.providerProfile?.id ?? this.currentUser.id
+      };
+
+      // ══ INCLUIR PORTFOLIO IMAGES SI EXISTEN ════════════════════════
+      if (portfolioUrls.length > 0) {
+        serviceData.portfolio_images = portfolioUrls;
+      }
+      // ═══════════════════════════════════════════════════════════════
+
+      console.log('Enviando datos al backend:', serviceData);
+
+      if (this.coreService) {
+        this.coreService.createServiceProvider(serviceData).subscribe({
+          next: (response) => {
+            this.saveSchedules(response).then(async () => {
+              loading.dismiss();
+              this.submitting = false;
+              this.presentToast('Servicio guardado correctamente', 'success');
+              this.servicioForm.reset();
+              this.portfolioImages = []; // Limpiar imágenes
+              await this.closeOrGoBack({ success: true, data: response }, 'confirm');
+            });
+          },
+          error: async (error) => {
+            loading.dismiss();
+            this.submitting = false;
+            console.error('Error guardando servicio:', error);
+
+            if (error.status === 403) {
+              const isProfileIncomplete = error.error?.detail?.includes('Perfil incompleto');
+              await this.presentAlert(
+                isProfileIncomplete ? 'Perfil incompleto' : 'Verificación de identidad requerida',
+                error.error?.detail || 'Debes completar la verificación de identidad antes de agregar servicios. Por favor, ve a la sección de verificación y sube tu selfie y documento de identidad.'
+              );
+              return;
+            }
+
+            if (error.status === 402) {
+              await this.presentAlert(
+                'Límite de servicios gratuitos',
+                error.error?.detail || 'Has alcanzado el máximo de 2 servicios gratuitos. Actualiza tu plan para agregar más.'
+              );
+              return;
+            }
+
+            let errorMessage = 'No se pudo guardar el servicio';
+            if (error.error?.detail) {
+              errorMessage = error.error.detail;
+            } else if (error.status === 404) {
+              errorMessage = 'No se encontró el perfil de proveedor. Complete su registro primero.';
+            } else if (error.status === 401) {
+              errorMessage = 'Sesión expirada. Por favor inicie sesión nuevamente.';
+            }
+
+            this.presentToast(errorMessage, 'danger');
+          }
+        });
+      }
+    } catch (error) {
+      loading.dismiss();
+      this.submitting = false;
+      console.error('Error al procesar el formulario:', error);
+      this.presentToast('Error al procesar el formulario', 'danger');
     }
   }
 

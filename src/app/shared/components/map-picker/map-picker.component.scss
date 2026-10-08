@@ -7,7 +7,7 @@
 .map-picker-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(4px);
   z-index: 99999;
   animation: fadeIn 0.2s ease-out;
@@ -23,9 +23,10 @@
 }
 
 .map-picker-container {
-  background: var(--ion-background-color, white);
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
   border-radius: 1.5rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--bapp-shadow-modal);
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -46,7 +47,7 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--ion-color-light-shade);
+  border-bottom: 1px solid var(--bapp-border);
 
   .flex-1 {
     flex: 1;
@@ -56,13 +57,13 @@
     margin: 0 0 0.25rem 0;
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--ion-color-dark);
+    color: var(--bapp-text-primary);
   }
 
   p {
     margin: 0;
     font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    color: var(--bapp-text-secondary);
   }
 
   .close-btn {
@@ -77,12 +78,12 @@
     transition: background 0.2s ease;
 
     &:hover {
-      background: var(--ion-color-light);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     ion-icon {
       font-size: 1.5rem;
-      color: var(--ion-color-medium);
+      color: var(--bapp-text-secondary);
     }
   }
 }
@@ -95,14 +96,14 @@
   min-height: 280px;
   position: relative;
   overflow: hidden;
-  background: var(--ion-color-light);
+  background: var(--bapp-bg-page);
 
   // Leaflet control styles
   .leaflet-control-zoom {
     border: none;
     border-radius: 0.75rem;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--bapp-shadow-sm);
 
     a {
       width: 36px;
@@ -110,13 +111,13 @@
       line-height: 36px;
       font-size: 20px;
       border: none;
-      background: var(--ion-background-color, white);
-      color: var(--ion-color-dark);
+      background: var(--bapp-bg-card-raised);
+      color: var(--bapp-text-primary);
       transition: all 0.2s ease;
 
       &:hover {
-        background: var(--ion-color-light);
-        color: var(--ion-color-dark-shade);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--bapp-text-primary);
       }
     }
   }
@@ -196,7 +197,9 @@
 .loading-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(26, 26, 26, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -213,7 +216,7 @@
 
   span {
     font-size: 0.875rem;
-    color: var(--ion-color-medium);
+    color: var(--bapp-text-secondary);
     font-weight: 500;
   }
 }
@@ -230,7 +233,8 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--bapp-shadow-danger);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   z-index: 2000;
 
   ion-icon {
@@ -250,10 +254,13 @@
   top: 1rem;
   left: 1rem;
   right: 1rem;
-  background: var(--ion-background-color, white);
+  background: rgba(28, 28, 30, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--bapp-border);
   border-radius: 1rem;
   padding: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--bapp-shadow-md);
   z-index: 1000;
   animation: slideDown 0.3s ease-out 0.2s both;
 
@@ -267,7 +274,7 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 0.5rem;
-    background: var(--ion-color-primary-tint);
+    background: var(--bapp-color-primary-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -287,7 +294,7 @@
       margin: 0 0 0.25rem 0;
       font-size: 0.75rem;
       font-weight: 600;
-      color: var(--ion-color-medium);
+      color: var(--bapp-text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.025em;
     }
@@ -296,7 +303,7 @@
       margin: 0;
       font-size: 0.875rem;
       font-weight: 500;
-      color: var(--ion-color-dark);
+      color: var(--bapp-text-primary);
       line-height: 1.4;
     }
   }
@@ -339,8 +346,8 @@
   display: flex;
   gap: 0.75rem;
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--ion-color-light-shade);
-  background: var(--ion-background-color, white);
+  border-top: 1px solid var(--bapp-border);
+  background: var(--bapp-bg-card-raised);
 
   ion-button {
     flex: 1;
@@ -350,8 +357,8 @@
     letter-spacing: 0;
 
     &[fill="outline"] {
-      --border-color: var(--ion-color-medium);
-      --color: var(--ion-color-dark);
+      --border-color: var(--bapp-border-primary);
+      --color: var(--bapp-text-primary);
     }
   }
 }

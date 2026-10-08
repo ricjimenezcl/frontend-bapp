@@ -371,6 +371,26 @@ ion-content {
   text-overflow: ellipsis;
 }
 
+.as-map-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: -4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--bapp-color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+
+  ion-icon { font-size: 14px; flex-shrink: 0; }
+
+  &:active { opacity: 0.7; }
+}
+
 // ── Mapa estático ───────────────────────────────────────────────────
 .as-map-preview {
   border-radius: 14px;
