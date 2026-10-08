@@ -79,12 +79,19 @@ ion-header.tabs-header {
 .app-tab-bar-wrap {
   flex-shrink: 0;
   position: relative;
+  width: 100%;
   background: var(--bapp-bg-card-raised);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 1; // por encima del contenido de la página (.tabs-content)
 }
 
 .app-tab-bar {
+  // ion-tab-bar usado FUERA de <ion-tabs> no recibe ancho completo:
+  // su CSS interno (@ionic/core) define ":host { width: auto }" porque
+  // normalmente <ion-tabs> lo estira vía CSS Grid. Sin ese wrapper hay
+  // que forzar el ancho explícitamente o los tab-buttons se encogen a
+  // su contenido (se ven todos agrupados en una esquina).
+  width: 100%;
   --background: var(--bapp-bg-card-raised);
   --border: 0;
   height: 64px;

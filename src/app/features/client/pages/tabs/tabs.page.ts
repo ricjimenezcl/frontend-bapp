@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { IonTabBar, IonTabButton, IonFabButton } from '@ionic/angular/standalone';
 import { StateService } from '../../../../shared/services/state.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -14,7 +15,11 @@ import { BappieChatbotComponent } from '../../../../shared/components/bappie-cha
   styleUrls: ['./tabs.page.scss'],
   standalone: true,
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  imports: [CommonModule, IonicModule, RouterModule, BappieChatbotComponent]
+  // IonTabBar/IonTabButton deben importarse como standalone (no basta con
+  // IonicModule clásico) para que Angular los instancie y así se registren
+  // como Custom Elements (customElements.define). Sin esto, el navegador
+  // los trata como elementos desconocidos con display:inline por defecto.
+  imports: [CommonModule, IonicModule, RouterModule, BappieChatbotComponent, IonTabBar, IonTabButton, IonFabButton]
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
   selectedServices: any[] = [];
