@@ -1,301 +1,334 @@
-ion-content {
-  --background: #f5f5f5;
+// transactions.page.scss — "Mis Compras" (diseño homogéneo con la vista "Mis pagos" de la web)
+@import '../../../theme/mixins';
+
+ion-content.tx-content { --background: var(--bapp-bg-page); }
+
+.tx-wrapper {
+  padding: var(--bapp-space-5) var(--bapp-space-4) 0;
+  max-width: 440px;
+  margin: 0 auto;
+  @include flex-column;
 }
 
-// Stats Card
-.stats-card {
-  margin: 16px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+// ── Encabezado de vista ───────────────────────────────────────────────────────
+.view-header {
+  margin-bottom: var(--bapp-space-5);
 
-  ion-card-content {
-    padding: 16px;
-  }
-
-  .stat-item {
-    text-align: center;
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--ion-color-dark);
-      margin-bottom: 4px;
-
-      &.success {
-        color: var(--ion-color-success);
-      }
-
-      &.warning {
-        color: var(--ion-color-warning);
-      }
-
-      &.danger {
-        color: var(--ion-color-danger);
-      }
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--ion-color-medium);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-}
-
-// Filter Segment
-.filter-segment {
-  margin: 0 16px 16px;
-}
-
-// Loading State
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-
-  ion-spinner {
-    margin-bottom: 16px;
+  h2 {
+    font-size: var(--bapp-text-xl);
+    font-weight: var(--bapp-font-extrabold);
+    color: var(--bapp-text-primary);
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--bapp-space-1);
   }
 
   p {
-    color: var(--ion-color-medium);
-    font-size: 14px;
+    font-size: var(--bapp-text-xs);
+    color: var(--bapp-text-secondary);
+    margin: 0;
   }
 }
 
-// Empty State
+// ── Loading ───────────────────────────────────────────────────────────────────
+.loading-center {
+  @include flex-center;
+  padding: var(--bapp-space-16) 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bapp-color-primary-subtle);
+  border-top-color: var(--bapp-color-primary);
+  border-radius: 50%;
+  animation: tx-spin 0.7s linear infinite;
+}
+
+@keyframes tx-spin { to { transform: rotate(360deg); } }
+
+// ── Empty ─────────────────────────────────────────────────────────────────────
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: var(--bapp-space-12) var(--bapp-space-5);
+  border: 1px dashed var(--bapp-border-medium);
+  border-radius: var(--bapp-radius-lg);
+  background: var(--bapp-bg-card);
 
   .empty-icon {
-    font-size: 80px;
-    color: var(--ion-color-medium);
-    margin-bottom: 20px;
+    font-size: 48px;
+    color: var(--bapp-text-tertiary);
+    margin: 0 auto;
+    display: block;
   }
 
   h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--ion-color-dark);
-    margin-bottom: 8px;
+    font-size: var(--bapp-text-md);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+    margin: var(--bapp-space-4) 0 var(--bapp-space-2);
   }
 
   p {
-    color: var(--ion-color-medium);
-    font-size: 14px;
-    margin-bottom: 24px;
-  }
-
-  .cta-button {
-    max-width: 300px;
-    margin: 0 auto;
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-secondary);
+    margin: 0 0 var(--bapp-space-6);
   }
 }
 
-// Transactions List
+// ── Botones ───────────────────────────────────────────────────────────────────
+.btn-primary,
+.btn-outline {
+  @include flex-center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  padding: 16px;
+  border-radius: 18px;
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  line-height: 1.3;
+  cursor: pointer;
+  transition: opacity var(--bapp-transition-fast);
+
+  &:active { opacity: 0.85; }
+  ion-icon { font-size: 18px; }
+}
+
+.btn-primary {
+  background: var(--bapp-color-primary);
+  color: var(--bapp-color-on-primary);
+  border: none;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--bapp-color-primary);
+  border: 1.5px solid var(--bapp-color-primary);
+  margin-top: var(--bapp-space-4);
+}
+
+// ── Resumen ───────────────────────────────────────────────────────────────────
+.purchase-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-4) 0;
+  margin-bottom: var(--bapp-space-4);
+}
+
+.sum-item {
+  text-align: center;
+  border-right: 1px solid var(--bapp-border);
+  padding: 0 var(--bapp-space-1);
+
+  &.sum-item--last { border-right: none; }
+}
+
+.sum-val {
+  display: block;
+  font-size: var(--bapp-text-2xl);
+  font-weight: var(--bapp-font-extrabold);
+  color: var(--bapp-text-primary);
+  margin-bottom: var(--bapp-space-1);
+
+  &.sum-val--success { color: var(--bapp-text-success); }
+  &.sum-val--accent  { color: var(--bapp-color-primary); }
+  &.sum-val--danger  { color: var(--bapp-text-danger); }
+}
+
+.sum-lbl {
+  display: block;
+  font-size: 10px;
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: var(--bapp-tracking-wider);
+  @include truncate-text(1);
+}
+
+// ── Filtros ───────────────────────────────────────────────────────────────────
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bapp-space-2);
+  margin-bottom: var(--bapp-space-4);
+}
+
+.chip {
+  padding: 8px 14px;
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-full);
+  color: var(--bapp-text-secondary);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: background var(--bapp-transition-fast), color var(--bapp-transition-fast);
+
+  &--active {
+    background: var(--bapp-color-primary);
+    border-color: var(--bapp-color-primary);
+    color: var(--bapp-color-on-primary);
+    font-weight: var(--bapp-font-bold);
+  }
+}
+
+// ── Lista de transacciones ────────────────────────────────────────────────────
 .transactions-list {
-  padding: 0 16px 16px;
+  @include flex-column;
+  gap: var(--bapp-space-3);
 }
 
-// Transaction Card
-.transaction-card {
-  border-radius: 12px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-
-  ion-card-header {
-    padding: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-
-    .transaction-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .transaction-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        ion-icon {
-          font-size: 28px;
-        }
-
-        h3 {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 600;
-          color: white;
-        }
-      }
-
-      ion-badge {
-        font-size: 12px;
-        padding: 6px 12px;
-        border-radius: 12px;
-      }
-    }
-  }
-
-  ion-card-content {
-    padding: 16px;
-  }
-
-  // Detail Row
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-
-    &:last-of-type {
-      border-bottom: none;
-    }
-
-    .detail-label {
-      font-size: 14px;
-      color: var(--ion-color-medium);
-      font-weight: 500;
-    }
-
-    .detail-value {
-      font-size: 14px;
-      color: var(--ion-color-dark);
-      font-weight: 600;
-
-      &.amount {
-        color: var(--ion-color-primary);
-        font-size: 16px;
-      }
-
-      &.transaction-id {
-        font-family: monospace;
-        font-size: 11px;
-        max-width: 180px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    .platform-badge {
-      font-size: 10px;
-      padding: 4px 8px;
-    }
-  }
-
-  // Active Benefit
-  .active-benefit {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: rgba(var(--ion-color-success-rgb), 0.1);
-    border-radius: 8px;
-    margin-top: 12px;
-
-    ion-icon {
-      font-size: 20px;
-    }
-
-    span {
-      font-size: 13px;
-      color: var(--ion-color-success);
-      font-weight: 600;
-    }
-  }
-
-  // Expired Benefit
-  .expired-benefit {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-    background: rgba(var(--ion-color-warning-rgb), 0.1);
-    border-radius: 8px;
-    margin-top: 12px;
-
-    ion-icon {
-      font-size: 20px;
-    }
-
-    span {
-      font-size: 13px;
-      color: var(--ion-color-warning);
-      font-weight: 600;
-    }
-  }
-
-  // Product Description
-  .product-description {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #eee;
-
-    p {
-      font-size: 13px;
-      color: var(--ion-color-medium);
-      margin: 0;
-      line-height: 1.5;
-    }
-  }
+.transaction-item {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-4);
+  @include flex-column;
+  gap: var(--bapp-space-3);
 }
 
-// No Results
+.transaction-main {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+}
+
+.transaction-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--bapp-radius-md);
+  @include flex-center;
+  flex-shrink: 0;
+  background: var(--bapp-color-primary-subtle);
+  color: var(--bapp-color-primary);
+
+  ion-icon { font-size: 20px; }
+
+  &.icon-success { background: var(--bapp-color-success-subtle); color: var(--bapp-color-success); }
+  &.icon-warning { background: var(--bapp-color-warning-subtle); color: var(--bapp-color-warning); }
+  &.icon-danger  { background: var(--bapp-color-danger-subtle);  color: var(--bapp-color-danger); }
+  &.icon-medium  { background: var(--bapp-surface-hover);        color: var(--bapp-text-secondary); }
+}
+
+.transaction-info {
+  flex: 1;
+  min-width: 0;
+  @include flex-column;
+  gap: var(--bapp-space-1);
+}
+
+.transaction-name {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+.transaction-date {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+}
+
+.transaction-right {
+  @include flex-column;
+  align-items: flex-end;
+  gap: var(--bapp-space-1);
+  flex-shrink: 0;
+}
+
+.transaction-amount {
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-extrabold);
+  color: var(--bapp-text-primary);
+  white-space: nowrap;
+}
+
+.transaction-status {
+  font-size: 11px;
+  font-weight: var(--bapp-font-bold);
+  padding: 3px 10px;
+  border-radius: var(--bapp-radius-full);
+  white-space: nowrap;
+
+  &.badge-success { background: var(--bapp-color-success-subtle); color: var(--bapp-text-success); }
+  &.badge-warning { background: var(--bapp-color-primary-subtle); color: var(--bapp-color-primary); }
+  &.badge-danger  { background: var(--bapp-color-danger-subtle);  color: var(--bapp-text-danger); }
+  &.badge-medium  { background: var(--bapp-surface-hover);        color: var(--bapp-text-secondary); }
+}
+
+// ── Metadatos (plataforma / ID) ───────────────────────────────────────────────
+.transaction-meta {
+  border-top: 1px solid var(--bapp-border);
+  padding-top: var(--bapp-space-3);
+  @include flex-column;
+  gap: var(--bapp-space-2);
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bapp-space-3);
+}
+
+.meta-label {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-tertiary);
+  flex-shrink: 0;
+}
+
+.meta-value {
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+  color: var(--bapp-text-secondary);
+  min-width: 0;
+  @include truncate-text(1);
+
+  &--mono { font-family: var(--bapp-font-mono); }
+}
+
+// ── Beneficio activo / expirado ───────────────────────────────────────────────
+.benefit {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-2);
+  padding: var(--bapp-space-3);
+  border-radius: var(--bapp-radius-md);
+  font-size: var(--bapp-text-xs);
+  font-weight: var(--bapp-font-semibold);
+
+  ion-icon { font-size: 18px; flex-shrink: 0; }
+
+  &--active  { background: var(--bapp-color-success-subtle); color: var(--bapp-text-success); }
+  &--expired { background: var(--bapp-color-warning-subtle); color: var(--bapp-text-warning); }
+}
+
+.product-description {
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+  line-height: var(--bapp-leading-normal);
+  margin: 0;
+}
+
+// ── Sin resultados ────────────────────────────────────────────────────────────
 .no-results {
   text-align: center;
-  padding: 40px 20px;
+  padding: var(--bapp-space-10) var(--bapp-space-5);
 
   ion-icon {
-    font-size: 60px;
-    color: var(--ion-color-medium);
-    margin-bottom: 12px;
+    font-size: 40px;
+    color: var(--bapp-text-tertiary);
+    margin-bottom: var(--bapp-space-2);
   }
 
   p {
-    color: var(--ion-color-medium);
-    font-size: 14px;
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-secondary);
+    margin: 0;
   }
 }
 
-// Catalog CTA
-.catalog-cta {
-  padding: 16px;
-}
-
-// Responsive
-@media (max-width: 768px) {
-  .stats-card {
-    ion-card-content {
-      padding: 12px;
-    }
-
-    .stat-item {
-      .stat-value {
-        font-size: 20px;
-      }
-
-      .stat-label {
-        font-size: 10px;
-      }
-    }
-  }
-
-  .transaction-card {
-    ion-card-header {
-      .transaction-header {
-        .transaction-title {
-          h3 {
-            font-size: 16px;
-          }
-        }
-      }
-    }
-  }
-}
+.tx-footer-spacer { height: var(--bapp-space-8); }

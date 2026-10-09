@@ -21,6 +21,13 @@ import { parseUtcDate } from '../../../../shared/utils/date.util';
   imports: [CommonModule, IonicModule, MonetizationComponentsModule]
 })
 export class ClientProfilePage implements OnInit, OnDestroy {
+  /**
+   * Caché en memoria del plan activo (por usuario). La página se destruye al
+   * cambiar de tab, así que sin esto se mostraba "Cuenta Gratuita" hasta que
+   * respondía el backend.
+   */
+  private static planCache: { userId: string; plan: Transaction | null } | null = null;
+
   private readonly destroy$ = new Subject<void>();
   fullName = '';
   phone = '';
@@ -28,6 +35,11 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   bio = '';
   avatarPreview = DEFAULT_AVATAR_URL;
   avatar: string | null = null;
+
+  /** true cuando ya hay nombre/avatar para pintar (caché o backend) */
+  profileReady = false;
+  /** true cuando ya se conoce el estado del plan (caché o backend) */
+  planReady = false;
 
   user: {
     id: number;
@@ -60,16 +72,9 @@ export class ClientProfilePage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.canPurchase = this.platformDetection.canPurchaseInApp();
-    const user = this.authService.getCurrentUser();
-    this.clientService.getMyProfile().subscribe(profile => {
-      this.fullName = profile?.full_name || (user as any)?.full_name || '';
-      this.phone = profile?.phone || (user as any)?.phone || '';
-      this.email = profile?.email || user?.email || '';
-      this.bio = profile?.bio || '';
-      this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
-    });
-
-    console.log('Perfil obtenido en clientProfilePage:', user);
+    // Pintar de inmediato lo que ya se conoce (sin esperar al backend)
+    this.applyCachedProfile();
+    this.applyCachedPlan();
   }
 
   ngOnDestroy(): void {
@@ -82,11 +87,70 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    // Mostrar datos de caché inmediatamente
+    // Refresco en segundo plano: los datos de caché ya están en pantalla
     this.loadUserData();
     this.loadActivePlan();
+  }
 
-    // Luego cargar datos frescos y completos (incluyendo bio) desde el nuevo endpoint
+  /** Siembra nombre/email/teléfono/avatar desde la sesión local (síncrono). */
+  private applyCachedProfile() {
+    const user: any = this.authService.getCurrentUser();
+    const cached: any = this.authService.getUserProfile();
+    const name = cached?.full_name || user?.full_name;
+
+    this.email = cached?.email || user?.email || '';
+    if (!name) return;
+
+    this.fullName = name;
+    this.phone = cached?.phone || user?.phone || '';
+    this.bio = cached?.bio || '';
+    this.avatar = cached?.avatar || user?.avatar || null;
+    this.profileReady = true;
+  }
+
+  /** Siembra el plan activo desde la caché en memoria si sigue vigente. */
+  private applyCachedPlan() {
+    const cache = ClientProfilePage.planCache;
+    if (!cache || cache.userId !== this.currentUserKey()) return;
+
+    const plan = cache.plan;
+    const stillValid = !plan || (parseUtcDate(plan.expires_at ?? '')?.getTime() ?? 0) > Date.now();
+    if (!stillValid) return;
+
+    this.activePlan = plan;
+    this.planReady = true;
+  }
+
+  private currentUserKey(): string {
+    return String(this.authService.getCurrentUser()?.id ?? '');
+  }
+
+  private loadActivePlan() {
+    this.productService.getUserTransactions().subscribe({
+      next: (transactions) => {
+        const now = Date.now();
+        this.activePlan = transactions.find(t =>
+          t.status === 'completed' && !!t.expires_at && (parseUtcDate(t.expires_at)?.getTime() ?? 0) > now
+        ) ?? null;
+        ClientProfilePage.planCache = { userId: this.currentUserKey(), plan: this.activePlan };
+        this.planReady = true;
+      },
+      error: () => {
+        // Si hay caché se conserva; si no, se asume cuenta gratuita
+        this.planReady = true;
+      }
+    });
+  }
+
+  /** Días restantes hasta el vencimiento del plan activo */
+  remainingDays(expiresAt: string): number {
+    const expires = parseUtcDate(expiresAt);
+    if (!expires) return 0;
+    return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
+  }
+
+  /** Carga datos frescos y completos (incluyendo bio) y actualiza la caché local. */
+  private loadUserData() {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
 
@@ -96,6 +160,13 @@ export class ClientProfilePage implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.isLoading = false;
+          this.fullName = data.full_name || (currentUser as any)?.full_name || '';
+          this.phone = data.phone || (currentUser as any)?.phone || '';
+          this.email = data.email || currentUser.email || '';
+          this.bio = data.bio || '';
+          this.avatar = data.avatar || (currentUser as any)?.avatar || DEFAULT_AVATAR_URL;
+          this.profileReady = true;
+
           this.user = {
             id: data.user_id,
             email: data.email,
@@ -116,72 +187,11 @@ export class ClientProfilePage implements OnInit, OnDestroy {
         },
         error: () => {
           this.isLoading = false;
-          // El caché ya fue mostrado por loadUserData()
+          // Sin red: se mantiene la caché y se evita dejar el avatar en blanco
+          this.avatar = this.avatar || DEFAULT_AVATAR_URL;
+          this.profileReady = true;
         }
       });
-
-      console.log('Cargando perfil del cliente con ID:', this.user);
-  }
-
-  private loadActivePlan() {
-    this.productService.getUserTransactions().subscribe({
-      next: (transactions) => {
-        const now = Date.now();
-        this.activePlan = transactions.find(t =>
-          t.status === 'completed' && !!t.expires_at && (parseUtcDate(t.expires_at)?.getTime() ?? 0) > now
-        ) ?? null;
-      },
-      error: () => { this.activePlan = null; }
-    });
-  }
-
-  /** Días restantes hasta el vencimiento del plan activo */
-  remainingDays(expiresAt: string): number {
-    const expires = parseUtcDate(expiresAt);
-    if (!expires) return 0;
-    return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
-  }
-
-  private loadUserData() {
-    const user = this.authService.getCurrentUser();
-    this.clientService.getMyProfile().subscribe(profile => {
-      this.fullName = profile?.full_name || (user as any)?.full_name || '';
-      this.phone = profile?.phone || (user as any)?.phone || '';
-      this.email = profile?.email || user?.email || '';
-      this.bio = profile?.bio || '';
-      this.avatar = profile?.avatar || (user as any)?.avatar || DEFAULT_AVATAR_URL;
-    });
-    // const user = this.authService.getCurrentUser();
-    //     const userId = typeof user?.id === 'string'
-    //       ? parseInt(user?.id, 10)
-    //       : user?.id as number;
-    //    const profile =  this.clientService.getClientById(userId)
-    // //const profile = this.authService.getUserProfile();
-    // console.log("CLIENT PROFILEEE : ",profile);
-
-    // if (profile) {
-    //   this.profile = profile;
-    //   this.user = {
-    //     id: typeof profile.id === 'string' ? parseInt(profile.id, 10) : profile.id,
-    //     email: profile.email || '',
-    //     full_name: profile.full_name || profile.name || 'Usuario',
-    //     phone: profile.phone || '',
-    //     avatar: profile.avatar || DEFAULT_AVATAR_URL,
-    //     role: profile.role || 'client'
-    //   };
-    // } else {
-    //   const currentUser = this.authService.getCurrentUser();
-    //   if (currentUser) {
-    //     this.user = {
-    //       id: typeof currentUser.id === 'string' ? parseInt(currentUser.id, 10) : currentUser.id,
-    //       email: currentUser.email || '',
-    //       full_name: (currentUser as any).full_name || currentUser.name || 'Usuario',
-    //       phone: (currentUser as any).phone || '',
-    //       avatar: (currentUser as any).avatar || DEFAULT_AVATAR_URL,
-    //       role: currentUser.role || 'client'
-    //     };
-    //   }
-    // }
   }
 
   async goLogout() {

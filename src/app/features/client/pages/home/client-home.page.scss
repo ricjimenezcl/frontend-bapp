@@ -124,7 +124,7 @@ ion-content.ch-content {
 // ── Mini dashboard de reservas (BookingStats) ─────────────────────────────
 .ch-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   background: var(--bapp-border);
   border: 1px solid var(--bapp-border);
@@ -144,17 +144,20 @@ ion-content.ch-content {
     cursor: pointer;
   }
 
-  &--plan h3 {
-    font-size: var(--bapp-text-sm);
-    line-height: 1.2;
-    word-break: break-word;
-  }
-
   h3 {
     font-size: var(--bapp-text-xl);
     font-weight: var(--bapp-font-extrabold);
     color: var(--bapp-text-primary);
     margin: 0 0 4px;
+  }
+
+  // Debe ir después de "h3" para sobrescribir su tamaño (misma especificidad)
+  &--plan h3 {
+    font-size: var(--bapp-text-xs);
+    line-height: 1.25;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
   }
 
   p {

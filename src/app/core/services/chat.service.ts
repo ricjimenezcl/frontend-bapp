@@ -137,6 +137,10 @@ export class ChatService {
       }),
       catchError(error => {
         console.error('[ChatService] loadConversations failed', error);
+        const cached = this.conversationsSubject.value;
+        if (cached.length > 0) {
+          return of(cached);
+        }
         return throwError(() => error);
       })
     );

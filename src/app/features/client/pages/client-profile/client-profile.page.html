@@ -5,16 +5,24 @@
     <header class="profile-header">
       <div class="avatar-wrap">
         <img
-          [src]="avatar || 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'"
+          *ngIf="avatar; else avatarSkeleton"
+          [src]="avatar"
           alt="Avatar"
           (error)="$any($event.target).src='https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'" />
+        <ng-template #avatarSkeleton><div class="sk sk-avatar"></div></ng-template>
       </div>
-      <h1 class="profile-name">{{ fullName || 'Usuario' }}</h1>
+      <h1 class="profile-name" *ngIf="profileReady; else nameSkeleton">{{ fullName || 'Usuario' }}</h1>
+      <ng-template #nameSkeleton><div class="sk sk-name"></div></ng-template>
       <p class="profile-email">{{ email }}</p>
     </header>
 
     <!-- ── Premium box ───────────────────────────────────────────────── -->
-    <div class="premium-box" *ngIf="activePlan; else freePlanBox">
+    <div class="premium-box premium-box--skeleton" *ngIf="!planReady">
+      <div class="sk sk-line sk-line--title"></div>
+      <div class="sk sk-line"></div>
+      <div class="sk sk-line"></div>
+    </div>
+    <div class="premium-box" *ngIf="planReady && activePlan; else freePlanBox">
       <h2 class="premium-title">
         <ion-icon name="shield-checkmark" class="premium-icon"></ion-icon>
         Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
@@ -29,7 +37,7 @@
       </div>
     </div>
     <ng-template #freePlanBox>
-      <div class="premium-box">
+      <div class="premium-box" *ngIf="planReady">
         <h2 class="premium-title">
           <ion-icon name="shield-half-outline" class="premium-icon"></ion-icon>
           Cuenta Gratuita

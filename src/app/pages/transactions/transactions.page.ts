@@ -123,7 +123,12 @@ export class TransactionsPage implements OnInit {
    * Format amount
    */
   formatAmount(transaction: Transaction): string {
-    const amount = transaction.amount.toLocaleString('es-CL');
+    // El backend puede devolver el monto como string ("1490.0"), por eso se convierte antes de formatear
+    const decimals = transaction.currency === 'CLP' ? 0 : 2;
+    const amount = Number(transaction.amount).toLocaleString('es-CL', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
     return `$${amount} ${transaction.currency}`;
   }
 
