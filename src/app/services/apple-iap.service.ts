@@ -24,13 +24,18 @@ import { ProductType } from '../core/models/payment.model';
  * Mapeo de ProductType (backend) a Product ID configurado en
  * App Store Connect + RevenueCat. Solo los productos aquí listados
  * están disponibles como compra In-App en iOS.
+ *
+ * NOTA: sufijo "_v2" porque los IDs originales (sin sufijo) se crearon
+ * primero como "No consumible" y luego se eliminaron para recrearlos como
+ * "Consumible" — Apple reserva un Product ID para siempre una vez usado,
+ * incluso borrado, por lo que no se pueden reutilizar los nombres antiguos.
  */
 const IOS_PRODUCT_ID_MAP: Partial<Record<ProductType, string>> = {
-  CLIENT_UNLOCK_7: 'bapp_client_unlock_7',
-  CLIENT_UNLOCK_30: 'bapp_client_unlock_30',
-  PROVIDER_PLAN_7D: 'bapp_provider_plan_7d',
-  PROVIDER_PLAN_MONTHLY: 'bapp_provider_plan_monthly',
-  PROVIDER_PLAN_ANNUAL: 'bapp_provider_plan_annual',
+  CLIENT_UNLOCK_7: 'bapp_client_unlock_7_v2',
+  CLIENT_UNLOCK_30: 'bapp_client_unlock_30_v2',
+  PROVIDER_PLAN_7D: 'bapp_provider_plan_7d_v2',
+  PROVIDER_PLAN_MONTHLY: 'bapp_provider_plan_monthly_v2',
+  PROVIDER_PLAN_ANNUAL: 'bapp_provider_plan_annual_v2',
 };
 
 export interface AppleIapPurchaseResult {
