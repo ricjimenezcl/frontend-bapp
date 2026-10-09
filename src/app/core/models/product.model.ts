@@ -37,7 +37,7 @@ export interface Product {
   price_clp: number;
   free_limit: number;
   is_active: boolean;
-  metadata?: any;
+  product_metadata?: any;
   platforms?: ProductPlatform[];
 }
 
