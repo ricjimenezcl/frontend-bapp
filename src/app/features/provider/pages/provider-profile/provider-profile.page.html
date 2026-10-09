@@ -88,7 +88,7 @@
         <ion-icon name="chevron-forward-outline" class="menu-chevron"></ion-icon>
       </button>
 
-      <button class="menu-item" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
+      <button class="menu-item" *ngIf="canPurchase && !activePlan" (click)="goToCatalog()" type="button">
         <ion-icon name="storefront-outline" class="menu-item-icon menu-item-icon-gold"></ion-icon>
         <span class="menu-item-label">Tienda Premium</span>
         <div class="menu-tag">PREMIUM</div>

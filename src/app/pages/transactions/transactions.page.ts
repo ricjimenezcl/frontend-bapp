@@ -4,6 +4,7 @@ import { LoadingController, ToastController } from '@ionic/angular';
 import { ProductService, Transaction } from '../../services/product.service';
 import { PaymentRedirectService } from '../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../services/platform-detection.service';
+import { parseUtcDate } from '../../shared/utils/date.util';
 
 @Component({
   selector: 'app-transactions',
@@ -130,7 +131,8 @@ export class TransactionsPage implements OnInit {
    * Format date
    */
   formatDate(dateStr: string): string {
-    const date = new Date(dateStr);
+    const date = parseUtcDate(dateStr);
+    if (!date) return '';
     return date.toLocaleDateString('es-CL', {
       year: 'numeric',
       month: 'short',
@@ -147,16 +149,17 @@ export class TransactionsPage implements OnInit {
     if (!transaction.expires_at || transaction.status !== 'completed') {
       return false;
     }
-    return new Date(transaction.expires_at) > new Date();
+    const expires = parseUtcDate(transaction.expires_at);
+    return !!expires && expires > new Date();
   }
 
   /**
    * Get remaining days
    */
   getRemainingDays(expiresAt: string): number {
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry.getTime() - now.getTime();
+    const expiry = parseUtcDate(expiresAt);
+    if (!expiry) return 0;
+    const diff = expiry.getTime() - Date.now();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
 
@@ -185,6 +188,9 @@ export class TransactionsPage implements OnInit {
    * Go to product catalog
    */
   goToCatalog() {
+    // Evita reabrir el flujo de compra si ya hay un plan activo (el backend
+    // igualmente lo bloquearía con 409, pero así no se le ofrece la opción).
+    if (this.transactions.some(t => this.isActive(t))) return;
     this.paymentRedirect.openPayment({ productType: 'PROVIDER_PLAN_MONTHLY', returnTo: '/tabs/profile' });
   }
 }

@@ -11,6 +11,7 @@ import { MonetizationComponentsModule } from '../../../../components/monetizatio
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { ProductService, Transaction } from '../../../../services/product.service';
+import { parseUtcDate } from '../../../../shared/utils/date.util';
 
 @Component({
   selector: 'app-client-profile',
@@ -125,18 +126,20 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   private loadActivePlan() {
     this.productService.getUserTransactions().subscribe({
       next: (transactions) => {
-        const now = new Date();
+        const now = Date.now();
         this.activePlan = transactions.find(t =>
-          t.status === 'completed' && !!t.expires_at && new Date(t.expires_at) > now
+          t.status === 'completed' && !!t.expires_at && (parseUtcDate(t.expires_at)?.getTime() ?? 0) > now
         ) ?? null;
       },
       error: () => { this.activePlan = null; }
     });
   }
 
-  /** D\u00edas restantes hasta el vencimiento del plan activo */
+  /** Días restantes hasta el vencimiento del plan activo */
   remainingDays(expiresAt: string): number {
-    return Math.max(0, Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86_400_000));
+    const expires = parseUtcDate(expiresAt);
+    if (!expires) return 0;
+    return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
   }
 
   private loadUserData() {
@@ -251,10 +254,14 @@ export class ClientProfilePage implements OnInit, OnDestroy {
   }
 
   goToCatalog() {
+    // Evita reabrir el flujo de compra si ya hay un plan activo (el backend
+    // igualmente lo bloquearía con 409, pero así no se le ofrece la opción).
+    if (this.activePlan) return;
     this.paymentRedirect.openClientUnlock('/client/tabs/profile');
   }
 
   goToCatalog30() {
+    if (this.activePlan) return;
     this.paymentRedirect.openClientUnlock30('/client/tabs/profile');
   }
 
