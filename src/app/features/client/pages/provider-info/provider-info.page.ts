@@ -22,6 +22,7 @@ import { ReportButtonComponent } from '../../../../shared/components/report-butt
 import { ReportedEntityType } from '../../../../core/models/report.model';
 import { ContentFilterService } from '../../../../shared/services/content-filter.service';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
+import { ProductService } from '../../../../services/product.service';
 
 @Component({
   selector: 'app-provider-info',
@@ -99,7 +100,7 @@ export class ProviderInfoPage implements OnInit {
   get hasPremium(): boolean {
     const currentUser = this.authService.getCurrentUser();
     const profile = this.authService.getUserProfile();
-    return Boolean(currentUser?.has_premium || profile?.has_premium);
+    return Boolean(currentUser?.has_premium || profile?.has_premium || this.productService.hasActivePlanSync());
   }
 
   /** Número de teléfono del proveedor listo para link de WhatsApp (wa.me) */
@@ -130,10 +131,13 @@ export class ProviderInfoPage implements OnInit {
     private chatService: ChatService,
     private modalCtrl: ModalController,
     private contentFilterService: ContentFilterService,
-    private paymentRedirect: PaymentRedirectService
+    private paymentRedirect: PaymentRedirectService,
+    private productService: ProductService
   ) { }
 
   ngOnInit() {
+
+    this.productService.refreshActivePlan().subscribe();
 
     const providerId = this.route.snapshot.paramMap.get('id');
     let serviceId: number | null = null;

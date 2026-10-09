@@ -95,6 +95,7 @@ async function nativeRequest(req: any): Promise<HttpResponse<any>> {
       error: response.data,
       headers: responseHeaders,
       status: response.status,
+      statusText: response.statusText || 'Error',
       url: req.url,
     });
   }

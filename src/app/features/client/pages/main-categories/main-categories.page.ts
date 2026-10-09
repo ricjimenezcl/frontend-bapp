@@ -15,6 +15,7 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
+import { ProductService } from '../../../../services/product.service';
 import { isFontAwesomeIcon, isImageIcon } from '../../../../shared/utils/icon-kind.util';
 
 @Component({
@@ -67,7 +68,8 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
     private mapboxService: MapboxService,
     private authService: AuthService,
     private paymentRedirect: PaymentRedirectService,
-    private platformDetection: PlatformDetectionService
+    private platformDetection: PlatformDetectionService,
+    private productService: ProductService
   ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -88,6 +90,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.productService.refreshActivePlan().subscribe();
     this.handlePremiumReasonFromQuery();
 
     this.loadMainCategories();
@@ -260,7 +263,7 @@ export class MainCategoriesPage implements OnInit, OnDestroy {
   private hasPremiumAccess(): boolean {
     const currentUser = this.authService.getCurrentUser() as any;
     const profile = this.authService.getUserProfile() as any;
-    return Boolean(currentUser?.has_premium || profile?.has_premium);
+    return Boolean(currentUser?.has_premium || profile?.has_premium || this.productService.hasActivePlanSync());
   }
 
   private handlePremiumReasonFromQuery(): void {

@@ -122,7 +122,7 @@ ion-header.tabs-header {
   width: 100%;
   --background: var(--bapp-bg-card-raised);
   --border: 0;
-  height: 56px;
+  height: 48px;
 
   ion-tab-button {
     --background: var(--bapp-bg-card-raised);
@@ -131,7 +131,7 @@ ion-header.tabs-header {
     position: relative;
 
     ion-icon {
-      font-size: 22px;
+      font-size: 20px;
       transition: color var(--bapp-transition-fast), transform var(--bapp-transition-fast);
     }
 
@@ -172,7 +172,7 @@ ion-header.tabs-header {
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
-  height: 56px;
+  height: 48px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -184,7 +184,7 @@ ion-header.tabs-header {
   top: 0;
   left: 0;
   width: 100%;
-  height: 32px;
+  height: 28px;
   pointer-events: none;
 
   path { fill: var(--bapp-bg-card-raised); }
@@ -195,26 +195,26 @@ ion-header.tabs-header {
 .fab-halo {
   position: relative;
   z-index: 1;
-  width: 70px;
-  height: 70px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   background: var(--bapp-bg-page);
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(-28px);
+  transform: translateY(-24px);
   pointer-events: none;
 }
 
 .center-fab-btn {
   position: relative;
   z-index: 1;
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   --box-shadow: var(--bapp-shadow-primary);
   pointer-events: auto;
 
-  ion-icon { font-size: 24px; }
+  ion-icon { font-size: 22px; }
 }
 
 // ── Safe area (iOS) ───────────────────────────────────────────────────────────
@@ -235,29 +235,29 @@ ion-header.tabs-header {
   }
 
   .app-tab-bar {
-    height: 56px;
+    height: 46px;
 
-    ion-tab-button ion-icon { font-size: 22px; }
+    ion-tab-button ion-icon { font-size: 19px; }
     .fab-spacer { flex: 0 0 92px; }
   }
 
   .fab-slot {
-    height: 56px;
+    height: 46px;
   }
 
-  .tab-notch { height: 34px; }
+  .tab-notch { height: 26px; }
 
   .fab-halo {
-    width: 68px;
-    height: 68px;
-    transform: translateY(-28px);
+    width: 58px;
+    height: 58px;
+    transform: translateY(-22px);
   }
 
   .center-fab-btn {
-    width: 54px;
-    height: 54px;
+    width: 46px;
+    height: 46px;
 
-    ion-icon { font-size: 24px; }
+    ion-icon { font-size: 20px; }
   }
 }
 
@@ -267,28 +267,28 @@ ion-header.tabs-header {
   }
 
   .app-tab-bar {
-    height: 50px;
+    height: 42px;
 
-    ion-tab-button ion-icon { font-size: 20px; }
+    ion-tab-button ion-icon { font-size: 18px; }
     .fab-spacer { flex: 0 0 84px; }
   }
 
   .fab-slot {
-    height: 50px;
+    height: 42px;
   }
 
-  .tab-notch { height: 30px; }
+  .tab-notch { height: 24px; }
 
   .fab-halo {
-    width: 60px;
-    height: 60px;
-    transform: translateY(-24px);
+    width: 52px;
+    height: 52px;
+    transform: translateY(-19px);
   }
 
   .center-fab-btn {
-    width: 48px;
-    height: 48px;
+    width: 42px;
+    height: 42px;
 
-    ion-icon { font-size: 22px; }
+    ion-icon { font-size: 19px; }
   }
 }

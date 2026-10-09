@@ -16,6 +16,7 @@ import { StateService } from '../../services/state.service';
 import { ContentFilterService } from '../../services/content-filter.service';
 import { ProviderImagePipe } from '../../pipes/provider-image.pipe';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
+import { ProductService } from '../../../services/product.service';
 
 interface CalendarDay {
   dateStr: string;      // YYYY-MM-DD
@@ -151,7 +152,7 @@ export class ProviderActionSheetComponent implements OnInit {
   get hasPremium(): boolean {
     const currentUser = this.authService.getCurrentUser();
     const profile = this.authService.getUserProfile();
-    return Boolean((currentUser as any)?.has_premium || (profile as any)?.has_premium);
+    return Boolean((currentUser as any)?.has_premium || (profile as any)?.has_premium || this.productService.hasActivePlanSync());
   }
 
   /** Número de teléfono del proveedor listo para link de WhatsApp (wa.me) */
@@ -180,10 +181,12 @@ export class ProviderActionSheetComponent implements OnInit {
     private loadingCtrl: LoadingController,
     private alertCtrl: AlertController,
     private paymentRedirect: PaymentRedirectService,
-    private contentFilterService: ContentFilterService
+    private contentFilterService: ContentFilterService,
+    private productService: ProductService
   ) {}
 
   ngOnInit() {
+    this.productService.refreshActivePlan().subscribe();
     this.selectedDate = '';
     this.allSlots = [];
 

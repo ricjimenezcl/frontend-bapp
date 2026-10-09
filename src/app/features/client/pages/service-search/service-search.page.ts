@@ -14,6 +14,7 @@ import { AuthService } from '../../../../features/auth/services/auth.service';
 import { GeoLocationService } from '../../../../shared/services/geo-location.service';
 import { ContactLimitService } from '../../../../core/services/contact-limit.service';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
+import { ProductService } from '../../../../services/product.service';
 import { Subject } from 'rxjs';
 import { LoadingSkeletonComponent } from '../../../../shared/components/loading-skeleton/loading-skeleton.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -74,7 +75,8 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     private geoLocationService: GeoLocationService,
     private contactLimit: ContactLimitService,
     private paymentRedirect: PaymentRedirectService,
-    private mapService: MapService) {}
+    private mapService: MapService,
+    private productService: ProductService) {}
 
   /** Alterna entre la vista de lista y la de mapa (reemplaza el tab "service-map"). */
   setViewMode(mode: 'list' | 'map') {
@@ -94,7 +96,7 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
   hasPremiumAccess(): boolean {
     const currentUser = this.authService.getCurrentUser() as any;
     const profile = this.authService.getUserProfile() as any;
-    return Boolean(currentUser?.has_premium || profile?.has_premium);
+    return Boolean(currentUser?.has_premium || profile?.has_premium || this.productService.hasActivePlanSync());
   }
 
   /**
@@ -138,6 +140,7 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.productService.refreshActivePlan().subscribe();
     this.currentUser = this.authService.getCurrentUser();
     this.loadData();
   }
