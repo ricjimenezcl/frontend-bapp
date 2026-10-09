@@ -1,6 +1,6 @@
 import { Component,  OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController, AlertController, ModalController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, ModalController, ActionSheetController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -13,6 +13,10 @@ import { DocumentUploadService } from '../../../../shared/services/document-uplo
 import { ServiceViewersModalComponent } from '../../modals/service-viewers-modal/service-viewers-modal.component';
 import { ReviewService } from '../../../../core/services/review.service';
 import { Review } from '../../../../core/models/review.model';
+import { ProductService, Transaction } from '../../../../services/product.service';
+import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../../services/platform-detection.service';
+import { parseUtcDate } from '../../../../shared/utils/date.util';
 
 @Component({
   selector: 'app-provider-home',
@@ -35,6 +39,12 @@ export class ProviderHomePage implements OnInit, OnDestroy {
   reviewsLoading = false;
   showReviewsModal = false;
 
+  // Plan contratado (misma información que provider-profile: transacción activa de /transactions/me)
+  activePlan: Transaction | null = null;
+  isLoadingPlan = false;
+  /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
+  canPurchase = true;
+
   metrics = {
     profileViews: 0,
     serviceViews: 0,
@@ -53,15 +63,21 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     private readonly alertCtrl: AlertController,
     private readonly documentService: DocumentUploadService,
     private readonly modalCtrl: ModalController,
+    private readonly actionSheetCtrl: ActionSheetController,
     private readonly reviewService: ReviewService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly productService: ProductService,
+    private readonly paymentRedirect: PaymentRedirectService,
+    private readonly platformDetection: PlatformDetectionService
   ) { }
 
   ngOnInit() {
     console.log('ProviderHomePage cargado');
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
     this.loadProviderProfile();
     this.subscribeToReviewReceived();
     this.checkVerificationStatus();
+    this.loadActivePlan();
   }
 
   private subscribeToReviewReceived() {
@@ -335,6 +351,66 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     });
 
     await modal.present();
+  }
+
+  /** Plan activo (última transacción completed vigente) — mismo patrón que provider-profile.page.ts */
+  private loadActivePlan() {
+    this.isLoadingPlan = true;
+    this.productService.getUserTransactions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (transactions) => {
+          const now = Date.now();
+          this.activePlan = (transactions ?? [])
+            .filter(t => t.status === 'completed' && !!t.expires_at && (parseUtcDate(t.expires_at)?.getTime() ?? 0) > now)
+            .sort((a, b) => (parseUtcDate(b.expires_at)?.getTime() ?? 0) - (parseUtcDate(a.expires_at)?.getTime() ?? 0))[0] ?? null;
+          this.isLoadingPlan = false;
+        },
+        error: () => {
+          this.activePlan = null;
+          this.isLoadingPlan = false;
+        }
+      });
+  }
+
+  /** Días restantes hasta el vencimiento del plan activo */
+  remainingDays(expiresAt: string): number {
+    const expires = parseUtcDate(expiresAt);
+    if (!expires) return 0;
+    return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
+  }
+
+  goToCatalog() {
+    // Evita reabrir el flujo de compra si ya hay un plan activo (el backend
+    // igualmente lo bloquearía con 409, pero así no se le ofrece la opción).
+    if (this.activePlan) return;
+    void this.presentPlanOptions();
+  }
+
+  /** Selector de las 3 modalidades de plan proveedor (7 días / mensual / anual) */
+  private async presentPlanOptions() {
+    const sheet = await this.actionSheetCtrl.create({
+      header: 'Elige tu plan',
+      buttons: [
+        {
+          text: '7 días',
+          handler: () => this.paymentRedirect.openProviderPlan7Days('/provider/tabs/home')
+        },
+        {
+          text: 'Mensual',
+          handler: () => this.paymentRedirect.openProviderPlanMonthly('/provider/tabs/home')
+        },
+        {
+          text: 'Anual',
+          handler: () => this.paymentRedirect.openProviderPlanAnnual('/provider/tabs/home')
+        },
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        }
+      ]
+    });
+    await sheet.present();
   }
 }
    

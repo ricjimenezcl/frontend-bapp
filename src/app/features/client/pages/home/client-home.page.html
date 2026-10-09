@@ -36,7 +36,7 @@
     <div class="ch-sk ch-sk--lbl"></div>
   </div>
 
-  <!-- ── Resumen (Mensajes / Reservas / Plan) ─────────────────────────── -->
+  <!-- ── Resumen (Mensajes / Reservas) ────────────────────────────────── -->
   <div class="ch-stats-row">
     <div class="ch-stat-box ch-stat-box--clickable" (click)="goTo(['/client/tabs/chats'])">
       <h3>{{ unreadMessages }}</h3>
@@ -47,11 +47,56 @@
       <p>Reservas</p>
     </div>
     <div class="ch-stat-box ch-sk--val" *ngIf="isLoadingStats"></div>
-    <div class="ch-stat-box ch-stat-box--clickable ch-stat-box--plan" *ngIf="!isLoadingPlan" (click)="goTo(['/client/tabs/profile'])">
-      <h3 [class.ch-stat--success]="activePlan">{{ activePlan?.product?.name || 'Gratuito' }}</h3>
-      <p>Plan</p>
+  </div>
+
+  <!-- ── Plan ──────────────────────────────────────────────────────────── -->
+  <div class="ch-plan-panel ch-plan-panel--skeleton" *ngIf="isLoadingPlan">
+    <div class="ch-sk ch-sk--title"></div>
+    <div class="ch-sk ch-sk--line"></div>
+    <div class="ch-sk ch-sk--line"></div>
+  </div>
+
+  <div class="ch-plan-panel" *ngIf="!isLoadingPlan && activePlan">
+    <h2 class="ch-plan-title">
+      <ion-icon name="shield-checkmark"></ion-icon>
+      Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
+    </h2>
+    <div class="ch-plan-perk" *ngIf="activePlan.activated_at">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Inicio: {{ activePlan.activated_at | date:'dd/MM/yyyy' }}
     </div>
-    <div class="ch-stat-box ch-sk--val" *ngIf="isLoadingPlan"></div>
+    <div class="ch-plan-perk" *ngIf="activePlan.expires_at">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Vence: {{ activePlan.expires_at | date:'dd/MM/yyyy' }} &mdash; {{ remainingDays(activePlan.expires_at) }} días restantes
+    </div>
+    <button class="ch-btn-plan ch-btn-plan--secondary" (click)="goTo(['/client/tabs/profile'])" type="button">
+      Gestionar plan
+    </button>
+  </div>
+
+  <div class="ch-plan-panel" *ngIf="!isLoadingPlan && !activePlan">
+    <h2 class="ch-plan-title">
+      <ion-icon name="shield-half-outline"></ion-icon>
+      Cuenta Gratuita
+    </h2>
+    <div class="ch-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Acceso ilimitado a búsquedas
+    </div>
+    <div class="ch-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Sin límites de servicios guardados
+    </div>
+    <div class="ch-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Contacta proveedores ilimitados
+    </div>
+    <button class="ch-btn-plan" *ngIf="canPurchase" (click)="goToCatalog()" type="button">
+      Desbloquear acceso 7 días — $1.490
+    </button>
+    <button class="ch-btn-plan ch-btn-plan--secondary" *ngIf="canPurchase" (click)="goToCatalog30()" type="button">
+      Desbloquear acceso 30 días — $4.990
+    </button>
   </div>
 
   <!-- ── Mini dashboard de reservas ───────────────────────────────────── -->

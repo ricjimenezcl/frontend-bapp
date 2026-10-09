@@ -10,6 +10,9 @@ import { StateService, SelectedService } from '../../../../shared/services/state
 import { BookingService, BookingStats } from '../../../../core/services/booking.service';
 import { NotificationStateService } from '../../../../core/services/notification-state.service';
 import { ProductService, Transaction } from '../../../../services/product.service';
+import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
+import { PlatformDetectionService } from '../../../../services/platform-detection.service';
+import { parseUtcDate } from '../../../../shared/utils/date.util';
 import { environment } from '../../../../../environments/environment';
 
 interface QuickAccessItem {
@@ -42,6 +45,8 @@ export class ClientHomePage implements OnInit, OnDestroy {
   // Plan contratado (misma información que el dashboard web: transacción activa de /transactions/me)
   activePlan: Transaction | null = null;
   isLoadingPlan = false;
+  /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
+  canPurchase = true;
 
   readonly quickAccess: QuickAccessItem[] = [
     { label: 'Mis Reservas', icon: 'calendar-outline', route: ['/client/tabs/bookings'] },
@@ -58,12 +63,15 @@ export class ClientHomePage implements OnInit, OnDestroy {
     private bookingService: BookingService,
     private notificationStateService: NotificationStateService,
     private productService: ProductService,
+    private paymentRedirect: PaymentRedirectService,
+    private platformDetection: PlatformDetectionService,
     private http: HttpClient
   ) {}
 
   ngOnInit() {
     const currentUser = this.authService.getCurrentUser();
     this.userName = currentUser?.name?.split(' ')[0] || '';
+    this.canPurchase = this.platformDetection.canPurchaseInApp();
 
     this.stateService.selectedServices$
       .pipe(takeUntil(this.destroy$))
@@ -140,6 +148,13 @@ export class ClientHomePage implements OnInit, OnDestroy {
       });
   }
 
+  /** Días restantes hasta el vencimiento del plan activo */
+  remainingDays(expiresAt: string): number {
+    const expires = parseUtcDate(expiresAt);
+    if (!expires) return 0;
+    return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
+  }
+
   getGreeting(): string {
     const hour = new Date().getHours();
     if (hour < 12) return 'Buenos días';
@@ -153,5 +168,17 @@ export class ClientHomePage implements OnInit, OnDestroy {
 
   goTo(route: string[]) {
     this.router.navigate(route);
+  }
+
+  goToCatalog() {
+    // Evita reabrir el flujo de compra si ya hay un plan activo (el backend
+    // igualmente lo bloquearía con 409, pero así no se le ofrece la opción).
+    if (this.activePlan) return;
+    this.paymentRedirect.openClientUnlock('/client/tabs/home');
+  }
+
+  goToCatalog30() {
+    if (this.activePlan) return;
+    this.paymentRedirect.openClientUnlock30('/client/tabs/home');
   }
 }

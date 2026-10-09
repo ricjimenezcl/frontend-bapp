@@ -124,13 +124,13 @@ ion-content.ch-content {
 // ── Mini dashboard de reservas (BookingStats) ─────────────────────────────
 .ch-stats-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   background: var(--bapp-border);
   border: 1px solid var(--bapp-border);
   border-radius: var(--bapp-radius-lg);
   overflow: hidden;
-  margin-bottom: var(--bapp-space-6);
+  margin-bottom: var(--bapp-space-4);
 
   &--skeleton { pointer-events: none; }
 }
@@ -186,6 +186,65 @@ ion-content.ch-content {
 @keyframes ch-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+// ── Plan activo / Cuenta gratuita (panel completo, equivalente al plan-panel web) ──
+.ch-plan-panel {
+  background: var(--bapp-bg-card);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-6);
+
+  &--skeleton {
+    .ch-sk--title { width: 60%; height: 18px; margin: 0 0 var(--bapp-space-3); }
+    .ch-sk--line { width: 100%; height: 12px; margin: 0 0 var(--bapp-space-2); }
+  }
+}
+
+.ch-plan-title {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-base);
+  font-weight: var(--bapp-font-bold);
+  color: var(--bapp-text-primary);
+  margin: 0 0 var(--bapp-space-3);
+
+  ion-icon { font-size: 18px; color: var(--bapp-color-primary); }
+}
+
+.ch-plan-perk {
+  @include flex-start;
+  gap: var(--bapp-space-2);
+  font-size: var(--bapp-text-xs);
+  color: var(--bapp-text-secondary);
+  margin-bottom: var(--bapp-space-2);
+
+  ion-icon { font-size: 12px; color: var(--bapp-color-success); flex-shrink: 0; }
+}
+
+.ch-btn-plan {
+  @include flex-center;
+  width: 100%;
+  padding: 16px;
+  background: var(--bapp-color-primary);
+  color: #000;
+  border: none;
+  border-radius: var(--bapp-radius-lg);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-bold);
+  margin-top: var(--bapp-space-3);
+  cursor: pointer;
+  transition: opacity var(--bapp-transition-fast);
+
+  &--secondary {
+    background: transparent;
+    color: var(--bapp-color-primary);
+    border: 1.5px solid var(--bapp-color-primary);
+    margin-top: var(--bapp-space-2);
+  }
+
+  &:active { opacity: 0.85; }
 }
 
 .ch-quick-access {

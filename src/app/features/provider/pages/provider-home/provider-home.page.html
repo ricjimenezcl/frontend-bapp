@@ -79,6 +79,55 @@
     </div>
   </div>
 
+  <!-- ══ PLAN ════════════════════════════════════════════════════ -->
+  <div class="ph-section ph-plan-section">
+    <div class="ph-plan-panel ph-plan-panel--skeleton" *ngIf="isLoadingPlan">
+      <div class="ph-sk ph-sk--title"></div>
+      <div class="ph-sk ph-sk--line"></div>
+      <div class="ph-sk ph-sk--line"></div>
+    </div>
+
+    <div class="ph-plan-panel" *ngIf="!isLoadingPlan && activePlan">
+      <h2 class="ph-plan-title">
+        <ion-icon name="shield-checkmark"></ion-icon>
+        Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
+      </h2>
+      <div class="ph-plan-perk" *ngIf="activePlan.activated_at">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Inicio: {{ activePlan.activated_at | date:'dd/MM/yyyy' }}
+      </div>
+      <div class="ph-plan-perk" *ngIf="activePlan.expires_at">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Vence: {{ activePlan.expires_at | date:'dd/MM/yyyy' }} &mdash; {{ remainingDays(activePlan.expires_at) }} días restantes
+      </div>
+      <ion-button class="ph-btn-primary" fill="outline" size="small" (click)="router.navigate(['/provider/tabs/profile'])">
+        Gestionar plan
+      </ion-button>
+    </div>
+
+    <div class="ph-plan-panel" *ngIf="!isLoadingPlan && !activePlan">
+      <h2 class="ph-plan-title">
+        <ion-icon name="shield-half-outline"></ion-icon>
+        Cuenta Proveedor
+      </h2>
+      <div class="ph-plan-perk">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Publica servicios ilimitados
+      </div>
+      <div class="ph-plan-perk">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Recibe solicitudes directas
+      </div>
+      <div class="ph-plan-perk">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        Gestiona tu agenda y horarios
+      </div>
+      <ion-button class="ph-btn-primary" fill="solid" size="small" *ngIf="canPurchase" (click)="goToCatalog()">
+        Ver planes premium
+      </ion-button>
+    </div>
+  </div>
+
   <!-- ══ BODY ════════════════════════════════════════════════════ -->
   <div class="ph-body">
 
