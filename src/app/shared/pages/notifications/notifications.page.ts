@@ -72,6 +72,8 @@ export class NotificationsPage implements OnInit {
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'close-circle-outline';
             case 'booking_reminder_24h': return 'time-outline';
+            case 'booking_expired':
+            case 'BOOKING_EXPIRED': return 'close-circle-outline';
             case 'plan_activated': return 'checkmark-done-circle-outline';
             case 'plan_expiring_soon': return 'hourglass-outline';
             case 'plan_expired': return 'alert-circle-outline';
@@ -94,6 +96,8 @@ export class NotificationsPage implements OnInit {
             case 'booking_rejected':
             case 'BOOKING_REJECTED': return 'danger';
             case 'booking_reminder_24h': return 'warning';
+            case 'booking_expired':
+            case 'BOOKING_EXPIRED': return 'medium';
             case 'plan_activated': return 'success';
             case 'plan_expiring_soon': return 'warning';
             case 'plan_expired': return 'danger';
