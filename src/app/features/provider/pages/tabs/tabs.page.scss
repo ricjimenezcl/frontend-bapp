@@ -83,6 +83,14 @@ ion-header.tabs-header {
   background: var(--bapp-bg-card-raised);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   z-index: 1; // por encima del contenido de la página (.tabs-content)
+
+  // Altura del tab bar controlada de forma fluida según el ancho real del
+  // viewport (vw), NO según breakpoints de alto de pantalla. Esto evita que
+  // equipos con "zoom de pantalla" del sistema o distintos tamaños físicos
+  // se vean todos igual de altos: a mayor ancho de pantalla, barra más alta;
+  // a menor ancho (teléfonos compactos), barra más delgada. El rango 46-56px
+  // cubre desde phones angostos (~320px) hasta grandes (~430px+).
+  --tab-bar-height: clamp(46px, 12vw, 56px);
 }
 
 .app-tab-bar {
@@ -94,7 +102,7 @@ ion-header.tabs-header {
   width: 100%;
   --background: var(--bapp-bg-card-raised);
   --border: 0;
-  height: 48px;
+  height: var(--tab-bar-height);
 
   ion-tab-button {
     --background: var(--bapp-bg-card-raised);
@@ -103,7 +111,7 @@ ion-header.tabs-header {
     position: relative;
 
     ion-icon {
-      font-size: 20px;
+      font-size: 22px;
       transition: color var(--bapp-transition-fast), transform var(--bapp-transition-fast);
     }
 
@@ -132,7 +140,7 @@ ion-header.tabs-header {
   left: 50%;
   transform: translateX(-50%);
   width: 120px;
-  height: 48px;
+  height: var(--tab-bar-height);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -144,7 +152,7 @@ ion-header.tabs-header {
   top: 0;
   left: 0;
   width: 100%;
-  height: 28px;
+  height: 32px;
   pointer-events: none;
 
   path { fill: var(--bapp-bg-card-raised); }
@@ -155,26 +163,26 @@ ion-header.tabs-header {
 .fab-halo {
   position: relative;
   z-index: 1;
-  width: 62px;
-  height: 62px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: var(--bapp-bg-page);
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(-24px);
+  transform: translateY(-28px);
   pointer-events: none;
 }
 
 .center-fab-btn {
   position: relative;
   z-index: 1;
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   --box-shadow: var(--bapp-shadow-primary);
   pointer-events: auto;
 
-  ion-icon { font-size: 22px; }
+  ion-icon { font-size: 24px; }
 }
 
 // ── Safe area (iOS) ───────────────────────────────────────────────────────────
@@ -189,66 +197,18 @@ ion-header.tabs-header {
 // pantallas bajas, header + tab-bar + FAB flotante sumaban demasiada altura
 // visual y recortaban el área de contenido. Se reduce header, tab-bar, íconos
 // y FAB de forma escalonada según el alto disponible.
+// Estos breakpoints por ALTO de viewport solo achican el header (toolbar),
+// para casos de teclado abierto o pantallas muy bajas en landscape. El tab
+// bar YA es responsivo por ANCHO vía --tab-bar-height (clamp + vw) definido
+// en .app-tab-bar-wrap, así que no se duplica lógica de tamaño aquí.
 @media (max-height: 700px) {
   ion-header.tabs-header .tabs-toolbar {
     --min-height: 48px;
-  }
-
-  .app-tab-bar {
-    height: 46px;
-
-    ion-tab-button ion-icon { font-size: 19px; }
-    .fab-spacer { flex: 0 0 92px; }
-  }
-
-  .fab-slot {
-    height: 46px;
-  }
-
-  .tab-notch { height: 26px; }
-
-  .fab-halo {
-    width: 58px;
-    height: 58px;
-    transform: translateY(-22px);
-  }
-
-  .center-fab-btn {
-    width: 46px;
-    height: 46px;
-
-    ion-icon { font-size: 20px; }
   }
 }
 
 @media (max-height: 600px) {
   ion-header.tabs-header .tabs-toolbar {
     --min-height: 44px;
-  }
-
-  .app-tab-bar {
-    height: 42px;
-
-    ion-tab-button ion-icon { font-size: 18px; }
-    .fab-spacer { flex: 0 0 84px; }
-  }
-
-  .fab-slot {
-    height: 42px;
-  }
-
-  .tab-notch { height: 24px; }
-
-  .fab-halo {
-    width: 52px;
-    height: 52px;
-    transform: translateY(-19px);
-  }
-
-  .center-fab-btn {
-    width: 42px;
-    height: 42px;
-
-    ion-icon { font-size: 19px; }
   }
 }
