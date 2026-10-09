@@ -22,6 +22,38 @@
     
   </button>
 
+  <!-- ── Actividad de búsqueda ────────────────────────────────────────── -->
+  <div class="ch-search-activity" *ngIf="!isLoadingSearchStats">
+    <div class="ch-search-activity-text">
+      <h3>{{ searchesToday }}</h3>
+      <p>{{ searchesToday === 1 ? 'búsqueda realizada hoy' : 'búsquedas realizadas hoy' }}</p>
+    </div>
+    <ion-icon name="trending-up-outline" class="ch-search-activity-icon"></ion-icon>
+  </div>
+
+  <div class="ch-search-activity ch-search-activity--skeleton" *ngIf="isLoadingSearchStats">
+    <div class="ch-sk ch-sk--val"></div>
+    <div class="ch-sk ch-sk--lbl"></div>
+  </div>
+
+  <!-- ── Resumen (Mensajes / Reservas / Plan) ─────────────────────────── -->
+  <div class="ch-stats-row">
+    <div class="ch-stat-box ch-stat-box--clickable" (click)="goTo(['/client/tabs/chats'])">
+      <h3>{{ unreadMessages }}</h3>
+      <p>Mensajes</p>
+    </div>
+    <div class="ch-stat-box ch-stat-box--clickable" *ngIf="!isLoadingStats" (click)="goTo(['/client/tabs/bookings'])">
+      <h3>{{ bookingsUpcomingCount }}</h3>
+      <p>Reservas</p>
+    </div>
+    <div class="ch-stat-box ch-sk--val" *ngIf="isLoadingStats"></div>
+    <div class="ch-stat-box ch-stat-box--clickable ch-stat-box--plan" *ngIf="!isLoadingPlan" (click)="goTo(['/client/tabs/profile'])">
+      <h3 [class.ch-stat--success]="activePlan">{{ activePlan?.product?.name || 'Gratuito' }}</h3>
+      <p>Plan</p>
+    </div>
+    <div class="ch-stat-box ch-sk--val" *ngIf="isLoadingPlan"></div>
+  </div>
+
   <!-- ── Mini dashboard de reservas ───────────────────────────────────── -->
   <div class="ch-stats-row" *ngIf="!isLoadingStats && stats">
     <div class="ch-stat-box">

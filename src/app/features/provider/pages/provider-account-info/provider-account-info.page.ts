@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { DocumentUploadService } from '../../../../shared/services/document-upload.service';
 import { ContentFilterService } from '../../../../shared/services/content-filter.service';
 import { firstValueFrom } from 'rxjs';
+import { DEFAULT_AVATAR_URL } from '../../../../core/constants/default-avatar';
 
 @Component({
   selector: 'app-provider-account-info',
@@ -137,10 +138,10 @@ export class ProviderAccountInfoPage implements OnInit {
           } else if (this.isValidBase64(dataprov.avatar)) {
             this.avatar = 'data:image/jpeg;base64,' + dataprov.avatar;
           } else {
-            this.avatar = 'assets/images/default-avatar.png';
+            this.avatar = DEFAULT_AVATAR_URL;
           }
         } else {
-          this.avatar = 'assets/images/default-avatar.png';
+          this.avatar = DEFAULT_AVATAR_URL;
         }
 
         this.saveOriginalData();

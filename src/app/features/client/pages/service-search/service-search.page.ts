@@ -229,34 +229,30 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
     let newCount = 0;
 
     try {
-      const allPromises = this.selectedServices.map((service: any) =>
-        this.coreService.getNearbyProvidersByServiceId(
-          location.latitude,
-          location.longitude,
-          20,
-          service.id,
-          this.currentSkip,
-          this.PAGE_SIZE
-        ).toPromise()
-      );
+      const serviceIds = this.selectedServices.map((service: any) => service.id);
 
-      const allResults = await Promise.all(allPromises);
+      const results = await this.coreService.getNearbyProvidersByServiceIds(
+        location.latitude,
+        location.longitude,
+        20,
+        serviceIds,
+        this.currentSkip,
+        this.PAGE_SIZE
+      ).toPromise();
 
-      const newProviders: any[] = [];
-      allResults.forEach((providers, index) => {
-        if (providers && providers.length > 0) {
-          const service = this.selectedServices[index];
-          providers.forEach((provider: any) => {
-            newProviders.push({
-              ...provider,
-              serviceId: service.id,
-              serviceName: service.name,
-              mainCategoryId: service.main_category_id
-            });
-          });
-          newCount = Math.max(newCount, providers.length);
-        }
+      const newProviders: any[] = (results ?? []).map((provider: any) => {
+        const matchedService = this.selectedServices.find(
+          (service: any) => service.id === (provider.service_id ?? provider.serviceId)
+        );
+        return {
+          ...provider,
+          serviceId: matchedService?.id ?? provider.service_id,
+          serviceName: matchedService?.name,
+          mainCategoryId: matchedService?.main_category_id
+        };
       });
+
+      newCount = newProviders.length;
 
       const deduped = this.removeDuplicates([...this.providers, ...newProviders]);
       this.providers = deduped;
@@ -268,6 +264,12 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
 
     } catch (error: any) {
       console.error('Error cargando proveedores:', error);
+
+      // Límite de negocio (plan gratuito): redirigir a categorías para mostrar el modal premium
+      if (this.handleBusinessLimitError(error)) {
+        return 0;
+      }
+
       // ✅ Mensaje más informativo para el usuario
       let errorMsg = 'Error al cargar proveedores';
       if (error?.status === 0) {
@@ -279,7 +281,7 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
             this.loadProviders();
           }
         }, 5000);
-      } else if (error?.error?.detail) {
+      } else if (error?.error?.detail && typeof error.error.detail === 'string') {
         errorMsg = error.error.detail;
       }
       this.presentToast(errorMsg, 'danger');
@@ -287,6 +289,24 @@ export class ServiceSearchPage implements OnInit, OnDestroy {
       this.isLoading = false;
     }
     return newCount;
+  }
+
+  /**
+   * Detecta errores de límite de negocio (plan gratuito: 3 búsquedas/día o 3
+   * servicios/búsqueda) devueltos por el backend y redirige a categorías con
+   * `premium_reason` para que `MainCategoriesPage` muestre el modal premium.
+   * Devuelve true si el error fue manejado (ya se redirigió).
+   */
+  private handleBusinessLimitError(error: any): boolean {
+    const code = error?.error?.detail?.code;
+    if (code === 'DAILY_SEARCH_LIMIT_REACHED' || code === 'FREE_SERVICE_SELECTION_LIMIT') {
+      this.router.navigate(['/client/categories'], {
+        queryParams: { premium_reason: code },
+        replaceUrl: true,
+      });
+      return true;
+    }
+    return false;
   }
 
   removeDuplicates(providers: any[]): any[] {

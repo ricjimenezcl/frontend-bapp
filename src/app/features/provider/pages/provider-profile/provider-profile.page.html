@@ -5,9 +5,9 @@
     <header class="profile-header">
       <div class="avatar-wrap" (click)="onPage('/provider/provider-account-info')">
         <img
-          [src]="providerProfile?.avatar || 'assets/images/default-avatar.png'"
+          [src]="providerProfile?.avatar || 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'"
           [alt]="providerProfile?.full_name || 'Avatar'"
-          (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+          (error)="$any($event.target).src='https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'" />
       </div>
       <h1 class="profile-name">{{ providerProfile?.full_name || 'Proveedor' }}</h1>
       <p class="profile-email">{{ providerProfile?.email || 'proveedor@bapp.app' }}</p>

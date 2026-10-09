@@ -437,5 +437,19 @@ export class CoreService {
     return this.http.get<Provider[]>(`${this.apiUrl}/${url}`);
   }
 
+  /**
+   * Búsqueda unificada por múltiples service_ids (1 sola operación de búsqueda en backend).
+   * Evita el consumo múltiple de la cuota diaria de búsquedas gratuitas y permite que
+   * el backend valide realmente el límite de "máx 3 servicios por búsqueda".
+   */
+  getNearbyProvidersByServiceIds(
+    lat: number, lng: number, radius: number, serviceIds: number[],
+    skip: number = 0, limit: number = 20
+  ): Observable<Provider[]> {
+    const serviceIdsParam = serviceIds.join(',');
+    const url = `providers/nearby/services?lat=${lat}&lng=${lng}&radius=${radius}&service_ids=${serviceIdsParam}&skip=${skip}&limit=${limit}`;
+    return this.http.get<Provider[]>(`${this.apiUrl}/${url}`);
+  }
+
 
 }

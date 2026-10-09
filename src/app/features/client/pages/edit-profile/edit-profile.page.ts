@@ -140,10 +140,10 @@ export class EditProfilePage implements OnInit {
           } else if (this.isValidBase64(dataprov.avatar)) {
             this.avatar = 'data:image/jpeg;base64,' + dataprov.avatar;
           } else {
-            this.avatar = 'assets/images/default-avatar.png';
+            this.avatar = DEFAULT_AVATAR_URL;
           }
         } else {
-          this.avatar = 'assets/images/default-avatar.png';
+          this.avatar = DEFAULT_AVATAR_URL;
         }
 
         this.saveOriginalData();

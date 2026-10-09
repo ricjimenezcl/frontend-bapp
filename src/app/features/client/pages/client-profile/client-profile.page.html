@@ -5,9 +5,9 @@
     <header class="profile-header">
       <div class="avatar-wrap">
         <img
-          [src]="avatar || 'assets/images/default-avatar.png'"
+          [src]="avatar || 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'"
           alt="Avatar"
-          (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+          (error)="$any($event.target).src='https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'" />
       </div>
       <h1 class="profile-name">{{ fullName || 'Usuario' }}</h1>
       <p class="profile-email">{{ email }}</p>

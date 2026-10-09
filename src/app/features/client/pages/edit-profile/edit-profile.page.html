@@ -16,10 +16,10 @@
     <div class="ep-avatar-section">
       <div class="ep-avatar-wrap" [class.ep-avatar-editing]="isEditing">
         <img
-          [src]="avatar || 'assets/images/default-avatar.png'"
+          [src]="avatar || 'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'"
           class="ep-avatar"
           alt="Avatar"
-          (error)="$any($event.target).src='assets/images/default-avatar.png'" />
+          (error)="$any($event.target).src='https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png'" />
         <button 
           class="ep-camera-btn" 
           (click)="changeAvatar()" 

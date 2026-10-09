@@ -223,3 +223,72 @@ ion-header.tabs-header {
     --padding-top: env(safe-area-inset-top);
   }
 }
+
+// ── Responsive: teléfonos con poca altura de viewport ─────────────────────────
+// En equipos con barra de navegación de Android grande (gestos/3 botones) o
+// pantallas bajas, header + tab-bar + FAB flotante sumaban demasiada altura
+// visual y recortaban el área de contenido. Se reduce header, tab-bar, íconos
+// y FAB de forma escalonada según el alto disponible.
+@media (max-height: 700px) {
+  ion-header.tabs-header .tabs-toolbar {
+    --min-height: 48px;
+  }
+
+  .app-tab-bar {
+    height: 56px;
+
+    ion-tab-button ion-icon { font-size: 22px; }
+    .fab-spacer { flex: 0 0 92px; }
+  }
+
+  .fab-slot {
+    height: 56px;
+  }
+
+  .tab-notch { height: 34px; }
+
+  .fab-halo {
+    width: 68px;
+    height: 68px;
+    transform: translateY(-28px);
+  }
+
+  .center-fab-btn {
+    width: 54px;
+    height: 54px;
+
+    ion-icon { font-size: 24px; }
+  }
+}
+
+@media (max-height: 600px) {
+  ion-header.tabs-header .tabs-toolbar {
+    --min-height: 44px;
+  }
+
+  .app-tab-bar {
+    height: 50px;
+
+    ion-tab-button ion-icon { font-size: 20px; }
+    .fab-spacer { flex: 0 0 84px; }
+  }
+
+  .fab-slot {
+    height: 50px;
+  }
+
+  .tab-notch { height: 30px; }
+
+  .fab-halo {
+    width: 60px;
+    height: 60px;
+    transform: translateY(-24px);
+  }
+
+  .center-fab-btn {
+    width: 48px;
+    height: 48px;
+
+    ion-icon { font-size: 22px; }
+  }
+}

@@ -1,3 +1,3 @@
 // Imagen por defecto para usuarios sin avatar
-// Usando imagen SVG local desde assets
-export const DEFAULT_AVATAR_URL = 'assets/images/default-avatar.png';
+export const DEFAULT_AVATAR_URL =
+  'https://res.cloudinary.com/dghwotofx/image/upload/v1769918403/default-avatar_e2c4t0.png';
