@@ -10,6 +10,18 @@
   position: relative !important;
 }
 
+// ── Responsive (tablet/iPad) ──────────────────────────────────────────────────
+// La app está diseñada para iPhone; en vez de estirar header + contenido +
+// tab-bar a todo el ancho del iPad (iconos del tab-bar muy separados y mucho
+// espacio "vacío" alrededor), se centra toda la interfaz en una columna de
+// ancho fijo tipo teléfono dentro de la pantalla grande.
+@include md-up {
+  :host {
+    max-width: 680px;
+    margin-inline: auto;
+  }
+}
+
 // ── Header ────────────────────────────────────────────────────────────────────
 ion-header.tabs-header {
   flex-shrink: 0;
@@ -109,16 +121,21 @@ ion-header.tabs-header {
   position: relative;
   width: 100%;
   background: var(--bapp-bg-card-raised);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  // NOTA: NO agregar aquí padding-bottom con safe-area-inset-bottom: el propio
+  // <ion-tab-bar> ya aplica "padding-bottom: var(--ion-safe-area-bottom)" de
+  // forma interna (ver tab-bar.ios.css de @ionic/core). Duplicarlo aquí sumaba
+  // DOS veces el alto del safe-area, dejando un hueco oscuro extra debajo de
+  // los íconos.
   z-index: 1; // por encima del contenido de la página (.tabs-content)
 
   // Altura del tab bar controlada de forma fluida según el ancho real del
   // viewport (vw), NO según breakpoints de alto de pantalla. Esto evita que
   // equipos con "zoom de pantalla" del sistema o distintos tamaños físicos
   // se vean todos igual de altos: a mayor ancho de pantalla, barra más alta;
-  // a menor ancho (teléfonos compactos), barra más delgada. El rango 46-56px
-  // cubre desde phones angostos (~320px) hasta grandes (~430px+).
-  --tab-bar-height: clamp(46px, 12vw, 56px);
+  // a menor ancho (teléfonos compactos), barra más delgada. El rango 40-48px
+  // cubre desde phones angostos (~320px) hasta grandes (~430px+). Reducido
+  // desde 46-56px: dejaba mucho espacio vacío debajo de los íconos.
+  --tab-bar-height: clamp(40px, 9vw, 48px);
 }
 
 .app-tab-bar {
@@ -136,10 +153,30 @@ ion-header.tabs-header {
     --background: var(--bapp-bg-card-raised);
     --color: var(--bapp-text-tertiary);
     --color-selected: var(--bapp-color-primary);
+    // Sin <ion-label>, ion-tab-button igual reserva espacio como si hubiera
+    // una etiqueta debajo del ícono (layout interno "icon-top"), dejando el
+    // ícono pegado arriba y un hueco vacío abajo. Se fuerza centrado real.
+    --padding-top: 0;
+    --padding-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
 
+    // El contenedor interno real (shadow DOM) usa flex-direction: column, por
+    // lo que su eje PRINCIPAL es vertical y el centrado depende de
+    // justify-content (no de align-items). Forzarlo solo desde fuera con
+    // variables/host no bastaba: se usa ::part(native) para sobreescribir
+    // directamente el elemento interno ".button-native" con prioridad
+    // garantizada sobre los estilos propios del componente.
+    &::part(native) {
+      align-items: center;
+      justify-content: center;
+    }
+
     ion-icon {
-      font-size: 22px;
+      font-size: 33px; // +50% sobre 22px, a pedido del usuario
+      margin: 0;
       transition: color var(--bapp-transition-fast), transform var(--bapp-transition-fast);
     }
 
@@ -210,7 +247,12 @@ ion-header.tabs-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(-28px);
+  // Antes -28px: estaba calibrado para la barra alta anterior (46-56px). Al
+  // reducir --tab-bar-height a 40-48px el FAB quedaba flotando demasiado
+  // arriba y tapaba contenido de las páginas (ej. botones al final del
+  // scroll). Se reduce el desplazamiento para que flote apenas por encima
+  // de la barra, sin invadir el contenido.
+  transform: translateY(-10px);
   pointer-events: none;
 }
 

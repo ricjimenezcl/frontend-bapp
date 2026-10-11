@@ -25,12 +25,14 @@
   <ion-tab-bar class="ion-no-border app-tab-bar">
 
     <ion-tab-button
+      layout="icon-only"
       [class.tab-active]="activeTab === 'home'"
       (click)="changeTab('home')">
       <ion-icon [name]="activeTab === 'home' ? 'home' : 'home-outline'"></ion-icon>
     </ion-tab-button>
 
     <ion-tab-button
+      layout="icon-only"
       class="notch-adjacent-left"
       [class.tab-active]="activeTab === 'service-details'"
       (click)="changeTab('service-details')">
@@ -41,6 +43,7 @@
     <div class="fab-spacer"></div>
 
     <ion-tab-button
+      layout="icon-only"
       class="notch-adjacent-right"
       [class.tab-active]="activeTab === 'bookings'"
       (click)="changeTab('bookings')">
@@ -48,6 +51,7 @@
     </ion-tab-button>
 
     <ion-tab-button
+      layout="icon-only"
       [class.tab-active]="activeTab === 'profile'"
       (click)="changeTab('profile')">
       <ion-icon [name]="activeTab === 'profile' ? 'person' : 'person-outline'"></ion-icon>

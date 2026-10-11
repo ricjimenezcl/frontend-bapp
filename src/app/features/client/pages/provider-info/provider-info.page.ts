@@ -1,6 +1,6 @@
 // src/app/client/pages/provider-info/provider-info.page.ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule, ToastController, LoadingController, AlertController, ModalController, IonDatetime  } from '@ionic/angular';
@@ -132,7 +132,8 @@ export class ProviderInfoPage implements OnInit {
     private modalCtrl: ModalController,
     private contentFilterService: ContentFilterService,
     private paymentRedirect: PaymentRedirectService,
-    private productService: ProductService
+    private productService: ProductService,
+    private location: Location
   ) { }
 
   ngOnInit() {
@@ -735,7 +736,13 @@ export class ProviderInfoPage implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/client/tabs']);
+    // Si hay historial de navegación previo (venimos de otra pantalla dentro de la app),
+    // regresamos a esa pantalla en lugar de forzar siempre el home de tabs.
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/client/tabs']);
+    }
   }
 
   // ==================== BOOKING MODAL METHODS ====================
