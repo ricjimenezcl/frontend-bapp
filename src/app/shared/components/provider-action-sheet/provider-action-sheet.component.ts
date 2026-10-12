@@ -720,18 +720,18 @@ export class ProviderActionSheetComponent implements OnInit {
       };
 
       this.clientBookingService.createBooking(bookingData).subscribe({
-        next: () => {
+        next: async () => {
           this.isConfirmingBooking = false;
-          this.showToast('¡Reserva enviada exitosamente!', 'success');
           this.showBookingModal = false;
+          await this.showAlert('¡Reserva enviada!', 'Tu solicitud fue enviada exitosamente al proveedor.');
           this.modalCtrl.dismiss({ action: 'booked' });
         },
-        error: (err) => {
+        error: async (err) => {
           this.isConfirmingBooking = false;
           let errorMsg = 'Error al crear la reserva';
           if (err.error?.detail) errorMsg = err.error.detail;
           else if (err.error?.message) errorMsg = err.error.message;
-          this.showToast(errorMsg, 'danger');
+          await this.showAlert('Error', errorMsg);
         }
       });
     } catch {
@@ -899,6 +899,11 @@ export class ProviderActionSheetComponent implements OnInit {
   async showToast(message: string, color: string = 'primary') {
     const toast = await this.toastCtrl.create({ message, duration: 3000, color, position: 'bottom' });
     await toast.present();
+  }
+
+  async showAlert(header: string, message: string): Promise<void> {
+    const alert = await this.alertCtrl.create({ header, message, buttons: ['OK'] });
+    await alert.present();
   }
 
   dismiss() {

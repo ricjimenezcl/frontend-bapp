@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "ng": "ng",
+    "postinstall": "patch-package",
     "set-env": "node scripts/set-env.js",
     "start": "npm run set-env && ng serve",
     "build": "npm run set-env && ng build",
@@ -86,6 +87,8 @@
     "karma-jasmine": "5.1.0",
     "karma-jasmine-html-reporter": "2.1.0",
     "node-addon-api": "^8.7.0",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "typescript": "5.5.4"
   },
   "engines": {

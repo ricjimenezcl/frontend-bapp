@@ -44,6 +44,9 @@ addIcons({
 // Google Sign-In nativo (SocialLogin de @capgo/capacitor-social-login) se usa en
 // Android E iOS; el GoogleLoginProvider web (asl-google-signin-button) queda solo
 // para navegador, ya que dentro del WebView nativo de Capacitor no es confiable.
+// Facebook Login nativo (SocialLogin) se usa en Android e iOS por el mismo motivo:
+// el SDK web de Facebook (FacebookLoginProvider) abre una pestaña externa de Chrome
+// para el OAuth que nunca puede devolver el resultado al WebView nativo.
 const isNativePlatform = Capacitor.isNativePlatform();
 
 export const appConfig: ApplicationConfig = {
@@ -67,13 +70,15 @@ export const appConfig: ApplicationConfig = {
               }),
             },
           ] : []),
-          {
-            id: FacebookLoginProvider.PROVIDER_ID,
-            provider: new FacebookLoginProvider(environment.facebookAppId, {
-              scope: 'public_profile,email',
-              return_scopes: true,
-            }),
-          },
+          ...(!isNativePlatform ? [
+            {
+              id: FacebookLoginProvider.PROVIDER_ID,
+              provider: new FacebookLoginProvider(environment.facebookAppId, {
+                scope: 'public_profile,email',
+                return_scopes: true,
+              }),
+            },
+          ] : []),
         ],
         onError: (err) => console.error('[SocialAuth] Error:', err),
       } as SocialAuthServiceConfig,

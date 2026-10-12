@@ -471,16 +471,49 @@ export class LoginPage implements OnInit, OnDestroy {
     });
   }
 
-  loginWithFacebook(): void {
+  async loginWithFacebook(): Promise<void> {
+    const wasRegistering = this.activeTab() === 'register';
+
+    if (this.isNativePlatform) {
+      try {
+        this.isLoading = true;
+        this.errorMessage = '';
+
+        await SocialLogin.initialize({
+          facebook: { appId: environment.facebookAppId, clientToken: environment.facebookClientToken },
+        });
+
+        const { result } = await SocialLogin.login({
+          provider: 'facebook',
+          options: { permissions: ['email', 'public_profile'] },
+        });
+        const facebookAccessToken = (result as any)?.accessToken?.token || '';
+        const facebookEmail = (result as any)?.profile?.email || '';
+
+        if (!facebookAccessToken) {
+          this.isLoading = false;
+          this.errorMessage = 'Facebook no devolvió un token válido.';
+          return;
+        }
+
+        this.resolveSocialLoginRole('facebook', facebookAccessToken, facebookEmail, wasRegistering);
+      } catch (error: any) {
+        this.isLoading = false;
+        if (error?.message?.toLowerCase().includes('cancel')) return;
+        this.errorMessage = 'No se pudo conectar con Facebook.';
+        console.error('Error en Facebook signIn (nativo):', error);
+      }
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
-    const wasRegistering = this.activeTab() === 'register';
-    
+
     this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID, {
       scope: 'public_profile,email',
       return_scopes: true,
       auth_type: 'rerequest',
-    })
+    }, 3, 6000)
       .then((socialUser) => {
         this.resolveSocialLoginRole('facebook', socialUser.authToken || '', socialUser.email || '', wasRegistering);
       })
@@ -771,20 +804,42 @@ export class LoginPage implements OnInit, OnDestroy {
   /**
    * Intenta signIn y reintenta una vez si el SDK aún no está listo (timing).
    * El SDK de Google/Facebook puede tardar 1-2s en inicializarse tras cargar la página.
+   *
+   * `timeoutMs` (opcional, solo usado para Facebook): el SDK de Facebook a veces
+   * descarta el login silenciosamente (console.error 'FB.login() called before
+   * FB.init()' SIN resolver ni rechazar la promesa) cuando se invoca justo después
+   * de cargar la página, dejando el spinner trabado indefinidamente. Si se agota
+   * el tiempo, se trata como 'no listo' y se reintenta igual que con 'not ready'.
+   * No se aplica a Google porque su flujo con Credential Manager puede tardar
+   * legítimamente varios segundos mientras el usuario interactúa con el selector
+   * nativo de cuentas.
    */
-  private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {
+  private async signInWithRetry(providerId: string, options?: any, retries = 3, timeoutMs?: number): Promise<any> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await this.socialAuthService.signIn(providerId, options);
+        const signInPromise = this.socialAuthService.signIn(providerId, options);
+        return await (timeoutMs ? this.withTimeout(signInPromise, timeoutMs) : signInPromise);
       } catch (err: any) {
-        const notReady = err?.message?.toLowerCase().includes('not ready');
-        if (notReady && attempt < retries) {
+        const msg = err?.message?.toLowerCase() ?? '';
+        // El SDK de Facebook puede tardar en completar FB.init() dentro del WebView;
+        // mientras tanto lanza 'FB.login() called before FB.init()' en vez de 'not ready'.
+        const sdkNotReady = msg.includes('not ready') || msg.includes('before fb.init');
+        if (sdkNotReady && attempt < retries) {
           await new Promise(r => setTimeout(r, 1500));
           continue;
         }
         throw err;
       }
     }
+  }
+
+  private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error('not ready: tiempo de espera agotado esperando el SDK')), ms)
+      ),
+    ]);
   }
 
   private getSocialErrorMessage(error: any, provider: string): string {
@@ -804,7 +859,7 @@ export class LoginPage implements OnInit, OnDestroy {
     if (role === 'PROVIDER') {
       this.router.navigate(['/provider/tabs']);
     } else {
-      this.router.navigate(['/client/categories']);
+      this.router.navigate(['/client/tabs/home']);
     }
   }
 

@@ -657,23 +657,23 @@ export class ProviderInfoPage implements OnInit {
       console.log('📤 Sending booking data:', JSON.stringify(bookingData, null, 2));
 
       this.clientBookingService.createBooking(bookingData).subscribe({
-        next: (response) => {
+        next: async (response) => {
           this.isBookingLoading = false;
           console.log('✅ Booking created successfully:', response);
-          this.showToast('¡Reserva enviada exitosamente!', 'success');
           this.showBookingModal = false;
           this.bookingAttempted = false;
           this.selectionService.clearAll();
-          setTimeout(() => this.router.navigate(['/client/tabs']), 1000);
+          await this.showAlert('¡Reserva enviada!', 'Tu solicitud fue enviada exitosamente al proveedor.');
+          this.router.navigate(['/client/tabs']);
         },
-        error: (err) => {
+        error: async (err) => {
           this.isBookingLoading = false;
           console.error('❌ Booking error:', err);
           let errorMsg = 'Error al crear la reserva';
           if (err.error?.detail) errorMsg = err.error.detail;
           else if (err.error?.message) errorMsg = err.error.message;
           else if (typeof err.error === 'string') errorMsg = err.error;
-          this.showToast(errorMsg, 'danger');
+          await this.showAlert('Error', errorMsg);
         }
       });
 
@@ -733,6 +733,11 @@ export class ProviderInfoPage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  async showAlert(header: string, message: string): Promise<void> {
+    const alert = await this.alertCtrl.create({ header, message, buttons: ['OK'] });
+    await alert.present();
   }
 
   goBack() {

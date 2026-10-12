@@ -193,7 +193,7 @@ export class EditProfilePage implements OnInit {
     }
 
     this.http.patch(`${environment.apiUrl}/users/me`, payload).subscribe({
-      next: () => {
+      next: async () => {
         const existing = this.authService.getUserProfile();
         this.authService.setUserProfile({
           ...existing,
@@ -203,12 +203,12 @@ export class EditProfilePage implements OnInit {
           avatar: this.avatarChanged ? this.avatarPreview : (existing?.avatar ?? undefined)
         });
         this.isSaving = false;
-        this.presentToast('Perfil actualizado correctamente', 'success');
+        await this.showAlert('¡Perfil actualizado!', 'Tus datos se guardaron correctamente.');
         this.router.navigate(['/client/tabs'], { state: { activeTab: 'client-profile' } });
       },
-      error: () => {
+      error: async () => {
         this.isSaving = false;
-        this.presentToast('Error al actualizar el perfil', 'danger');
+        await this.showAlert('Error', 'No se pudo actualizar el perfil. Intenta nuevamente.');
       }
     });
   }
@@ -221,6 +221,11 @@ export class EditProfilePage implements OnInit {
       position: 'top'
     });
     await toast.present();
+  }
+
+  private async showAlert(header: string, message: string): Promise<void> {
+    const alert = await this.alertCtrl.create({ header, message, buttons: ['OK'] });
+    await alert.present();
   }
 
 

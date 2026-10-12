@@ -363,13 +363,57 @@ export class RegisterClientPage {
       });
   }
 
-  registerWithFacebook(): void {
+  async registerWithFacebook(): Promise<void> {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        this.isLoading = true;
+
+        await SocialLogin.initialize({
+          facebook: { appId: environment.facebookAppId, clientToken: environment.facebookClientToken },
+        });
+
+        const { result } = await SocialLogin.login({
+          provider: 'facebook',
+          options: { permissions: ['email', 'public_profile'] },
+        });
+        const facebookAccessToken = (result as any)?.accessToken?.token || '';
+        const facebookEmail = (result as any)?.profile?.email || '';
+
+        if (!facebookAccessToken) {
+          this.isLoading = false;
+          await this.showAlert('Error', 'Facebook no devolvió un token válido.');
+          return;
+        }
+
+        this.authService.loginWithFacebook(facebookAccessToken, 'CLIENT', facebookEmail).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            this.handleOAuthNavigation(response.role, response.terms_accepted);
+          },
+          error: (error) => {
+            if (this.isFacebookMissingEmailError(error)) {
+              this.retryFacebookWithManualEmail('CLIENT', facebookAccessToken);
+              return;
+            }
+            this.isLoading = false;
+            this.showAlert('Error', error.error?.detail || 'Error al registrarse con Facebook');
+          }
+        });
+      } catch (error: any) {
+        this.isLoading = false;
+        if (!error?.message?.toLowerCase().includes('cancel')) {
+          this.showAlert('Error', 'No se pudo conectar con Facebook.');
+        }
+      }
+      return;
+    }
+
     this.isLoading = true;
     this.signInWithRetry(FacebookLoginProvider.PROVIDER_ID, {
       scope: 'public_profile,email',
       return_scopes: true,
       auth_type: 'rerequest',
-    })
+    }, 3, 6000)
       .then((socialUser) => {
         this.authService.loginWithFacebook(
           socialUser.authToken || '',
@@ -442,18 +486,32 @@ export class RegisterClientPage {
     this.router.navigate(['/client/tabs/home']);
   }
 
-  private async signInWithRetry(providerId: string, options?: any, retries = 2): Promise<any> {
+  private async signInWithRetry(providerId: string, options?: any, retries = 3, timeoutMs?: number): Promise<any> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
-        return await this.socialAuthService.signIn(providerId, options);
+        const signInPromise = this.socialAuthService.signIn(providerId, options);
+        return await (timeoutMs ? this.withTimeout(signInPromise, timeoutMs) : signInPromise);
       } catch (err: any) {
-        if (err?.message?.toLowerCase().includes('not ready') && attempt < retries) {
+        const msg = err?.message?.toLowerCase() ?? '';
+        // El SDK de Facebook puede tardar en completar FB.init() dentro del WebView;
+        // mientras tanto lanza 'FB.login() called before FB.init()' en vez de 'not ready'.
+        const sdkNotReady = msg.includes('not ready') || msg.includes('before fb.init');
+        if (sdkNotReady && attempt < retries) {
           await new Promise(r => setTimeout(r, 1500));
           continue;
         }
         throw err;
       }
     }
+  }
+
+  private withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error('not ready: tiempo de espera agotado esperando el SDK')), ms)
+      ),
+    ]);
   }
 
   private getSocialErrorMessage(error: any, provider: string): string {

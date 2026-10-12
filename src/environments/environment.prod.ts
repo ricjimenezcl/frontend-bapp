@@ -12,7 +12,8 @@ export const environment = {
   // Cliente iOS de Google Console (bundle id io.ionic.bappsearch). Requerido por
   // SocialLogin.initialize({ google: { iOSClientId } }) para el login nativo en iOS.
   googleIosClientId: '713984511036-127bv18q2b0kemnj20fsf4v6h741v2mm.apps.googleusercontent.com',
-  facebookAppId: '',
+  facebookAppId: '864227603333716',
+  facebookClientToken: '80b3f4c20e0a2dd5200a7f18ffabc16f',
   cloudinaryCloudName: '',
   cloudinaryUploadPreset: '',
   mapDefaultStyle: 'liberty' as 'liberty' | 'positron' | 'dark-matter',
