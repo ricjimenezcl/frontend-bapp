@@ -175,7 +175,7 @@ ion-header.tabs-header {
     }
 
     ion-icon {
-      font-size: 33px; // +50% sobre 22px, a pedido del usuario
+      font-size: 26px; // reducido desde 33px, a pedido del usuario
       margin: 0;
       transition: color var(--bapp-transition-fast), transform var(--bapp-transition-fast);
     }
