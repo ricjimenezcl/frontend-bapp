@@ -9,6 +9,9 @@ export const environment = {
   // Cliente Android de Google Console (package + SHA-1). Este valor es el que usa GoogleAuth.initialize() en APK.
   googleAndroidClientId: '713984511036-s04aakme1l0norgd7g6djk08b0ur3gqo.apps.googleusercontent.com',
   googleWebClientId: '713984511036-kvn0om4d75dq5gqdpokjg2up7eim6gq.apps.googleusercontent.com',
+  // Cliente iOS de Google Console (bundle id io.ionic.bappsearch). Requerido por
+  // SocialLogin.initialize({ google: { iOSClientId } }) para el login nativo en iOS.
+  googleIosClientId: '713984511036-127bv18q2b0kemnj20fsf4v6h741v2mm.apps.googleusercontent.com',
   facebookAppId: '',
   cloudinaryCloudName: '',
   cloudinaryUploadPreset: '',

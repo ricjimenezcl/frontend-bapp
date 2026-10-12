@@ -55,5 +55,15 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Reversed Client ID del OAuth Client iOS de Google (requerido por GoogleSignIn nativo) -->
+				<string>com.googleusercontent.apps.713984511036-127bv18q2b0kemnj20fsf4v6h741v2mm</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

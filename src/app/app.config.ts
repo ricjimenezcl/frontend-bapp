@@ -41,7 +41,10 @@ addIcons({
   list: listOutline,
 });
 
-const isAndroidNative = Capacitor.getPlatform() === 'android';
+// Google Sign-In nativo (SocialLogin de @capgo/capacitor-social-login) se usa en
+// Android E iOS; el GoogleLoginProvider web (asl-google-signin-button) queda solo
+// para navegador, ya que dentro del WebView nativo de Capacitor no es confiable.
+const isNativePlatform = Capacitor.isNativePlatform();
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -55,7 +58,7 @@ export const appConfig: ApplicationConfig = {
       useValue: {
         autoLogin: false,
         providers: [
-          ...(!isAndroidNative ? [
+          ...(!isNativePlatform ? [
             {
               id: GoogleLoginProvider.PROVIDER_ID,
               provider: new GoogleLoginProvider(environment.googleClientId, {

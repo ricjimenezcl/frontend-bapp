@@ -18,6 +18,7 @@ function parseEnv(filePath) {
     const wsUrl = process.env['WS_URL'] || (backendPublicUrl ? `wss://${backendPublicUrl.replace(/^https?:\/\//, '')}/api/v1/ws` : '');
     const googleWebClientId = process.env['OAUTH_GOOGLE_CLIENT_ID'] || process.env['GOOGLE_CLIENT_ID'] || process.env['GOOGLE_WEB_CLIENT_ID'] || '';
     const googleAndroidClientId = process.env['GOOGLE_ANDROID_CLIENT_ID'] || process.env['GOOGLE_CLIENT_ID'] || '';
+    const googleIosClientId = process.env['GOOGLE_IOS_CLIENT_ID'] || '';
     const facebookAppId = process.env['OAUTH_FB_CLIENT_ID'] || process.env['FACEBOOK_APP_ID'] || '';
 
     return {
@@ -27,6 +28,7 @@ function parseEnv(filePath) {
       GEOAPIFY_API_KEY:           process.env['GEOAPIFY_API_KEY'] || '',
       OAUTH_GOOGLE_CLIENT_ID:     googleWebClientId,
       GOOGLE_ANDROID_CLIENT_ID:   googleAndroidClientId,
+      GOOGLE_IOS_CLIENT_ID:       googleIosClientId,
       OAUTH_FB_CLIENT_ID:         facebookAppId,
       REVENUECAT_API_KEY_IOS:     process.env['REVENUECAT_API_KEY_IOS'] || '',
       REVENUECAT_API_KEY_ANDROID: process.env['REVENUECAT_API_KEY_ANDROID'] || '',

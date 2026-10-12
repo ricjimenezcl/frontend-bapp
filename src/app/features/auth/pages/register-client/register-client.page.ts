@@ -51,7 +51,9 @@ export class RegisterClientPage {
   isLoading = false;
   showPassword = false;
   showConfirmPassword = false;
-  readonly isAndroidNative = Capacitor.getPlatform() === 'android';
+  // Google Sign-In nativo (SocialLogin) se usa en Android e iOS; el botón web
+  // (asl-google-signin-button) queda solo para navegador.
+  readonly isNativePlatform = Capacitor.isNativePlatform();
   readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
   // El botón de Google requiere un ancho fijo en px (200-400, lo valida el SDK).
   // Se calcula para que coincida con el ancho real del botón de Facebook.
@@ -281,21 +283,29 @@ export class RegisterClientPage {
   // ==================== REGISTRO SOCIAL ====================
 
   async registerWithGoogle(): Promise<void> {
+    const isNative = Capacitor.isNativePlatform();
     const isAndroid = Capacitor.getPlatform() === 'android';
-    // IMPORTANTE: requestIdToken() exige el Web Client ID, ver nota en login.page.ts
+    // IMPORTANTE: requestIdToken() exige el Web Client ID, ver nota en login.page.ts.
+    // iOS exige su propio Client ID de tipo "iOS".
     const googleWebClientId = environment.googleClientId || '';
+    const googleIosClientId = environment.googleIosClientId || '';
 
-    if (isAndroid) {
-      if (!googleWebClientId) {
+    if (isNative) {
+      if (isAndroid && !googleWebClientId) {
         this.isLoading = false;
         await this.showAlert('Error', 'Falta GOOGLE_CLIENT_ID (Web). Configúralo en Google Cloud Console con el client ID de tipo Web.');
+        return;
+      }
+      if (!isAndroid && !googleIosClientId) {
+        this.isLoading = false;
+        await this.showAlert('Error', 'Falta GOOGLE_IOS_CLIENT_ID. Configúralo en Google Cloud Console con el client ID de tipo iOS.');
         return;
       }
 
       try {
         this.isLoading = true;
         await SocialLogin.initialize({
-          google: { webClientId: googleWebClientId },
+          google: { webClientId: googleWebClientId, iOSClientId: googleIosClientId },
         });
 
         const { result } = await SocialLogin.login({
@@ -306,11 +316,11 @@ export class RegisterClientPage {
 
         if (!googleIdToken) {
           this.isLoading = false;
-          await this.showAlert('Error', 'Google no devolvió un idToken válido para Android.');
+          await this.showAlert('Error', `Google no devolvió un idToken válido para ${isAndroid ? 'Android' : 'iOS'}.`);
           return;
         }
 
-        logGoogleIdTokenPayload(googleIdToken, 'register-client-android');
+        logGoogleIdTokenPayload(googleIdToken, isAndroid ? 'register-client-android' : 'register-client-ios');
 
         this.authService.loginWithGoogle(googleIdToken, 'CLIENT').subscribe({
           next: (response) => {
@@ -325,7 +335,7 @@ export class RegisterClientPage {
       } catch (error: any) {
         this.isLoading = false;
         if (!error?.message?.toLowerCase().includes('cancel')) {
-          this.showAlert('Error', 'No se pudo iniciar sesión con Google en Android.');
+          this.showAlert('Error', `No se pudo iniciar sesión con Google en ${isAndroid ? 'Android' : 'iOS'}.`);
         }
       }
       return;

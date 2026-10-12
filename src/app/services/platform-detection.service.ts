@@ -107,12 +107,13 @@ export class PlatformDetectionService {
   }
 
   /**
-   * Apple Guideline 3.1.1: en iOS no se puede ofrecer ni ejecutar compras
-   * fuera de StoreKit. Hasta que exista IAP nativo, el flujo de compra
-   * (botones, alertas, catálogo) debe ocultarse solo en iOS.
+   * Apple Guideline 3.1.1: en iOS las compras deben ir por StoreKit, nunca
+   * por un pago externo. Desde que existe IAP nativo (ver apple-iap.service.ts
+   * y PaymentRedirectService.openPayment(), que enruta a purchaseViaAppleIap()
+   * en iOS), el flujo de compra ya puede mostrarse en todas las plataformas.
    */
   canPurchaseInApp(): boolean {
-    return !this.isIOS();
+    return true;
   }
 
   /**

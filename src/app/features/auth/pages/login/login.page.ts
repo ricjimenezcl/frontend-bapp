@@ -75,7 +75,9 @@ export class LoginPage implements OnInit, OnDestroy {
   socialRoleOptions: Array<'CLIENT' | 'PROVIDER'> = [];
   showRegisterProfileChoice = false;
   private pendingSocialLogin: { provider: 'google' | 'facebook' | 'apple'; token: string; email: string; wasRegistering: boolean; fullName?: string } | null = null;
-  readonly isAndroidNative = Capacitor.getPlatform() === 'android';
+  // Google Sign-In nativo (SocialLogin) se usa en Android e iOS; el botón web
+  // (asl-google-signin-button) queda solo para navegador.
+  readonly isNativePlatform = Capacitor.isNativePlatform();
   readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
   constructor() {
@@ -491,17 +493,24 @@ export class LoginPage implements OnInit, OnDestroy {
   }
 
   async loginWithGoogle(): Promise<void> {
+    const isNative = Capacitor.isNativePlatform();
     const isAndroid = Capacitor.getPlatform() === 'android';
     // IMPORTANTE: Credential Manager (Android) exige el Web Client ID (tipo "Web application"),
     // igual que la API legacy. El Android Client ID (package + SHA-1) solo existe como
     // credencial registrada en Google Console para que Play Services valide la firma de la app;
-    // no se pasa por código.
+    // no se pasa por código. iOS exige su propio Client ID de tipo "iOS".
     const googleWebClientId = environment.googleClientId || '';
+    const googleIosClientId = environment.googleIosClientId || '';
 
-    if (isAndroid) {
-      if (!googleWebClientId) {
+    if (isNative) {
+      if (isAndroid && !googleWebClientId) {
         this.isLoading = false;
         this.errorMessage = 'Falta GOOGLE_CLIENT_ID (Web). Configúralo en Google Cloud Console con el client ID de tipo Web.';
+        return;
+      }
+      if (!isAndroid && !googleIosClientId) {
+        this.isLoading = false;
+        this.errorMessage = 'Falta GOOGLE_IOS_CLIENT_ID. Configúralo en Google Cloud Console con el client ID de tipo iOS.';
         return;
       }
 
@@ -510,7 +519,7 @@ export class LoginPage implements OnInit, OnDestroy {
         this.errorMessage = '';
 
         await SocialLogin.initialize({
-          google: { webClientId: googleWebClientId },
+          google: { webClientId: googleWebClientId, iOSClientId: googleIosClientId },
         });
 
         const { result } = await SocialLogin.login({
@@ -522,19 +531,19 @@ export class LoginPage implements OnInit, OnDestroy {
 
         if (!googleIdToken) {
           this.isLoading = false;
-          this.errorMessage = 'Google no devolvió un idToken válido para Android.';
+          this.errorMessage = `Google no devolvió un idToken válido para ${isAndroid ? 'Android' : 'iOS'}.`;
           return;
         }
 
-        logGoogleIdTokenPayload(googleIdToken, 'login-android');
+        logGoogleIdTokenPayload(googleIdToken, isAndroid ? 'login-android' : 'login-ios');
 
         const wasRegistering = this.activeTab() === 'register';
         this.resolveSocialLoginRole('google', googleIdToken, googleEmail, wasRegistering);
       } catch (error: any) {
         this.isLoading = false;
         if (error?.message?.toLowerCase().includes('cancel') || error?.error === 'popup_closed_by_user') return;
-        this.errorMessage = 'No se pudo iniciar sesión con Google en Android.';
-        console.error('Error en Google signIn (Android):', error);
+        this.errorMessage = `No se pudo iniciar sesión con Google en ${isAndroid ? 'Android' : 'iOS'}.`;
+        console.error('Error en Google signIn (nativo):', error);
       }
       return;
     }
