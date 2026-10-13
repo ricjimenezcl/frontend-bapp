@@ -684,7 +684,7 @@ export class ProviderActionSheetComponent implements OnInit {
         ?? Number(prov?.service_id ?? prov?.service_category_id ?? 0);
       const resolvedServiceProviderId = Number(prov?.service_provider_id ?? prov?.id ?? 0);
 
-      const rawCategory = prov?.service_category_name ?? prov?.category_name ?? prov?.service_category;
+      const rawCategory = prov?.service_category_name ?? prov?.category_name ?? prov?.service_category ?? prov?.service_name;
       const resolvedServiceCategory = typeof rawCategory === 'object' && rawCategory?.name
         ? rawCategory.name
         : (typeof rawCategory === 'string' ? rawCategory : 'GENERAL');

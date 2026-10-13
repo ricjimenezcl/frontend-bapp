@@ -64,6 +64,8 @@ export class ClientProviderService {
                     avatar: p.avatar,
                     service_icon: p.service_icon || p.service_category?.icon || 'business',
                     service_name: p.service_category_name,
+                    service_category_name: p.service_category_name,
+                    category_name: p.service_category_name,
                     distance: p.distance
                 }
             }));

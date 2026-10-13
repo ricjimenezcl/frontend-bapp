@@ -57,7 +57,11 @@ export class PaymentRedirectService {
     const user = this.auth.getCurrentUser();
     const userId = user?.id ?? user?.user_id ?? '';
     const role   = (user?.role ?? 'CLIENT').toUpperCase();
-    const token  = localStorage.getItem('token') ?? '';
+    // ⚠️ No usar localStorage.getItem('token') directamente: en nativo (iOS/Android)
+    // el token se persiste solo en SQLite (ver AuthService.persistTokens), por lo que
+    // localStorage siempre devuelve null allí. AuthService.getToken() ya contempla
+    // el fallback correcto (currentUserSubject en memoria → localStorage en web).
+    const token  = this.auth.getToken() ?? '';
 
     const params = new URLSearchParams({
       token,
