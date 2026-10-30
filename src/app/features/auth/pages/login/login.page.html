@@ -6,13 +6,13 @@
       <div class="login-logo">
         <div class="web-brand-row">
           <div class="logo-container">
-            <img src="assets/imgs/logo.png"
+            <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/logo_gsgyrf.png"
                  alt="Logo Bappsearch"
                  class="logo-img"
                  loading="eager"
                  (error)="$any($event.target).style.display='none'">
           </div>
-          <img src="assets/imgs/titulo.png"
+          <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png"
                alt="Bappsearch"
                class="titulo-img"
                loading="eager"
@@ -24,17 +24,7 @@
 
       <!-- Card -->
       <div class="login-card">
-        <h2 class="login-card-title">{{ activeTab() === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta' }}</h2>
-
-        <!-- Tabs -->
-        <ion-segment [value]="activeTab()" (ionChange)="setTab($any($event).detail.value)" mode="md" class="auth-segment">
-          <ion-segment-button value="login">
-            <ion-label>Entrar</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="register">
-            <ion-label>Registrar</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <h2 class="login-card-title">Iniciar Sesión</h2>
 
         <!-- Messages -->
         <div *ngIf="errorMessage && !isRetrying" class="error-alert">
@@ -107,25 +97,13 @@
           </ion-button>
         </form>
 
-        <div *ngIf="activeTab() === 'register' && showRegisterProfileChoice" class="role-select-box">
-          <p>Para continuar, elige el perfil que quieres crear:</p>
-          <div class="role-select-actions">
-            <button type="button" class="role-btn" (click)="chooseRegisterProfile('client')">
-              Cliente
-            </button>
-            <button type="button" class="role-btn" (click)="chooseRegisterProfile('provider')">
-              Proveedor
-            </button>
-          </div>
-        </div>
-
-        <div *ngIf="!(activeTab() === 'register' && showRegisterProfileChoice)" class="divider">
+        <div class="divider">
           <span class="divider-line"></span>
           <span class="divider-text">o continúa con</span>
           <span class="divider-line"></span>
         </div>
 
-        <div *ngIf="!(activeTab() === 'register' && showRegisterProfileChoice)" class="social-btns">
+        <div class="social-btns">
           <div class="google-btn-container">
             <button *ngIf="isNativePlatform" type="button" class="social-btn social-btn--google" (click)="loginWithGoogle()" [disabled]="isLoading">
               <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">

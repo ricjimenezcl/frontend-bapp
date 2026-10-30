@@ -123,38 +123,25 @@ export class LoginPage implements OnInit, OnDestroy {
         this.sessionExpired = true;
         this.errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
       }
-      if (params['tab'] === 'register') {
-        this.activeTab.set('register');
-        this.showRegisterProfileChoice = true;
-        this.registerRole.set('client');
-        return;
-      }
-      if (params['tab'] === 'login') {
-        this.activeTab.set('login');
-        this.showRegisterProfileChoice = false;
-        this.registerRole.set('client');
-      }
+
+      // El registro se maneja desde los modales de acceso y no desde esta pantalla.
+      this.activeTab.set('login');
+      this.showRegisterProfileChoice = false;
+      this.registerRole.set('client');
     });
   }
 
   setTab(tab: 'login' | 'register') {
-    this.activeTab.set(tab);
-    if (tab === 'register') {
-      this.registerRole.set('client');
-      this.showRegisterProfileChoice = true;
-      this.registerForm.reset({
-        full_name: '',
-        email: '',
-        phone: '',
-        run: '',
-        password: '',
-        confirmPassword: '',
-        terms_accepted: false
-      });
-    } else {
+    if (tab !== 'login') {
+      this.activeTab.set('login');
       this.showRegisterProfileChoice = false;
       this.registerRole.set('client');
+      return;
     }
+
+    this.activeTab.set('login');
+    this.showRegisterProfileChoice = false;
+    this.registerRole.set('client');
     this.loginRolePrompt = false;
     this.pendingLoginCredentials = null;
     this.socialRolePrompt = false;

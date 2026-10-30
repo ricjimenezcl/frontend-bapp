@@ -1,0 +1,247 @@
+<ion-modal
+  [isOpen]="isOpen"
+  (didDismiss)="closeModal()"
+  [backdropDismiss]="true"
+  [keepContentsMounted]="true"
+  cssClass="access-auth-modal"
+>
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>{{ mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">
+            <ion-icon name="close" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <div class="bm-scroll-content ion-padding">
+      <div class="bm-provider-summary">
+        <ion-icon name="person-circle-outline" color="primary" class="bm-biz-icon"></ion-icon>
+        <div>
+          <div class="bm-provider-name">
+            {{ mode === 'login' ? 'Accede para continuar' : (role === 'provider' ? 'Registra tu perfil proveedor' : 'Registra tu perfil cliente') }}
+          </div>
+          <div class="bm-provider-rate">
+            {{ mode === 'login'
+              ? 'Ingresa tus datos o usa una red social.'
+              : (role === 'provider'
+                ? 'Completa tus datos de proveedor para publicar tus servicios.'
+                : 'Completa tus datos de cliente para reservar y contactar proveedores.') }}
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="bm-error access-auth-error">
+        <ion-icon name="alert-circle" color="danger"></ion-icon> {{ error }}
+      </div>
+
+      <ng-container *ngIf="mode === 'login'">
+        <div class="bm-section">
+          <div class="bm-label">
+            <ion-icon name="mail"></ion-icon>
+            Correo electrónico
+          </div>
+          <ion-item lines="none" class="bm-item">
+            <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+            <ion-input
+              type="email"
+              placeholder="tu@email.com"
+              [(ngModel)]="loginEmail"
+              autocomplete="email"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="bm-section">
+          <div class="bm-label">
+            <ion-icon name="lock-closed"></ion-icon>
+            Contraseña
+          </div>
+          <ion-item lines="none" class="bm-item">
+            <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+            <ion-input
+              type="password"
+              placeholder="••••••••"
+              [(ngModel)]="loginPassword"
+              autocomplete="current-password"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        <ion-button expand="block" color="primary" size="large" (click)="submitAuth()" [disabled]="loading">
+          <ion-spinner *ngIf="loading" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
+          <ion-icon *ngIf="!loading" name="log-in-outline" slot="start"></ion-icon>
+          {{ loading ? 'Ingresando...' : 'Iniciar sesión' }}
+        </ion-button>
+      </ng-container>
+
+      <ng-container *ngIf="mode === 'register'">
+        <ng-container *ngIf="role !== 'provider' || providerRegistrationStep === 1">
+          <div class="bm-section">
+            <div class="bm-label">
+              Nombre completo
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="text" placeholder="Tu nombre" [(ngModel)]="registerFullName"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section">
+            <div class="bm-label">
+              Correo electrónico
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="mail-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="email" placeholder="tu@email.com" [(ngModel)]="registerEmail" (ionInput)="onEmailInput($event)" autocomplete="email" inputmode="email"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section">
+            <div class="bm-label">
+              Teléfono
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="call-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="tel" placeholder="+56 9 1234 5678" [(ngModel)]="registerPhone" (ionInput)="onPhoneInput($event)" autocomplete="tel" inputmode="numeric"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section" *ngIf="role === 'provider'">
+            <div class="bm-label">
+              RUT
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="text" placeholder="12.345.678-9" [(ngModel)]="registerRun" (ionInput)="onRutInput($event)" inputmode="numeric"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section">
+            <div class="bm-label">
+              Contraseña
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="lock-closed-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="password" placeholder="Mínimo 8 caracteres" [(ngModel)]="registerPassword" autocomplete="new-password"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section">
+            <div class="bm-label">
+              Confirmar contraseña
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="shield-checkmark-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="password" placeholder="Repite tu contraseña" [(ngModel)]="registerConfirmPassword" autocomplete="new-password"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section bm-terms">
+            <ion-item lines="none" class="bm-checkbox-item">
+              <ion-checkbox slot="start" [(ngModel)]="registerTermsAccepted"></ion-checkbox>
+              <ion-label>Acepto los términos y políticas.</ion-label>
+            </ion-item>
+          </div>
+
+          <ion-button expand="block" color="primary" size="large" (click)="submitAuth()" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
+            <ion-icon *ngIf="!loading" name="arrow-forward-outline" slot="start"></ion-icon>
+            {{ loading ? 'Procesando...' : 'Siguiente' }}
+          </ion-button>
+        </ng-container>
+
+        <ng-container *ngIf="role === 'provider' && providerRegistrationStep === 2">
+          <div class="bm-section">
+            <div class="bm-label">
+              <ion-icon name="camera"></ion-icon>
+              Foto de perfil
+            </div>
+
+            <div *ngIf="avatarPreview" style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+              <img [src]="avatarPreview" alt="Foto de perfil" style="width:60px; height:60px; object-fit:cover; border-radius:50%; border:2px solid var(--ion-color-primary);" />
+              <ion-button fill="clear" color="medium" size="small" (click)="removeAvatar()">
+                Quitar
+              </ion-button>
+            </div>
+
+            <ion-button expand="block" fill="outline" (click)="takePhoto()" [disabled]="isTakingPhoto">
+              <ion-icon name="camera-outline" slot="start"></ion-icon>
+              {{ isTakingPhoto ? 'Procesando...' : (avatarPreview ? 'Cambiar foto' : 'Tomar foto') }}
+            </ion-button>
+          </div>
+
+          <div class="bm-section">
+            <div class="bm-label">
+              Biografía / descripción
+            </div>
+            <ion-item lines="none" class="bm-item">
+              <ion-icon name="reader-outline" slot="start" color="primary"></ion-icon>
+              <ion-input type="text" placeholder="Cuéntanos sobre tu experiencia" [(ngModel)]="registerBio"></ion-input>
+            </ion-item>
+          </div>
+
+          <div class="bm-section bm-terms">
+            <ion-item lines="none" class="bm-checkbox-item">
+              <ion-checkbox slot="start" [(ngModel)]="registerEmailOptIn"></ion-checkbox>
+              <ion-label>Quiero recibir novedades y promociones por correo.</ion-label>
+            </ion-item>
+          </div>
+
+          <ion-button expand="block" color="primary" size="large" (click)="submitAuth()" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
+            <ion-icon *ngIf="!loading" name="person-add-outline" slot="start"></ion-icon>
+            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+          </ion-button>
+        </ng-container>
+
+        <ng-container *ngIf="role === 'client'">
+          <div class="bm-section bm-terms" *ngIf="role === 'client'">
+            <ion-item lines="none" class="bm-checkbox-item">
+              <ion-checkbox slot="start" [(ngModel)]="registerEmailOptIn"></ion-checkbox>
+              <ion-label>Quiero recibir novedades y promociones por correo.</ion-label>
+            </ion-item>
+          </div>
+
+          <ion-button expand="block" color="primary" size="large" (click)="submitAuth()" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="crescent" slot="start" style="width:18px;height:18px"></ion-spinner>
+            <ion-icon *ngIf="!loading" name="person-add-outline" slot="start"></ion-icon>
+            {{ loading ? 'Creando cuenta...' : 'Crear cuenta' }}
+          </ion-button>
+        </ng-container>
+      </ng-container>
+
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">o continúa con</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <div class="access-social-btns">
+        <button type="button" class="social-btn social-btn--google" (click)="loginWithGoogle()" [disabled]="loading">
+          <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.4-1.7 4.1-5.4 4.1-3.2 0-5.8-2.7-5.8-6s2.6-6 5.8-6c1.8 0 3.1.8 3.8 1.5l2.6-2.5C16.9 3.7 14.8 3 12 3 7.1 3 3 7.1 3 12s4.1 9 9 9c5.2 0 8.6-3.7 8.6-8.9 0-.6-.1-1.2-.2-1.7H12z"/>
+          </svg>
+          Google
+        </button>
+
+        <button type="button" class="social-btn" (click)="loginWithFacebook()" [disabled]="loading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Facebook
+        </button>
+
+        <button *ngIf="appleSignInAvailable" type="button" class="social-btn social-btn--apple" (click)="loginWithApple()" [disabled]="loading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#000000" aria-hidden="true">
+            <path d="M17.05 12.536c-.03-3.06 2.5-4.53 2.61-4.6-1.42-2.08-3.63-2.36-4.42-2.39-1.88-.19-3.68 1.11-4.63 1.11-.96 0-2.43-1.09-4-1.06-2.05.03-3.96 1.2-5.02 3.04-2.14 3.72-.55 9.22 1.54 12.24 1.02 1.47 2.24 3.13 3.83 3.07 1.55-.06 2.13-.99 4-.99 1.87 0 2.4.99 4.02.96 1.66-.03 2.71-1.5 3.72-2.98 1.18-1.71 1.66-3.36 1.69-3.44-.04-.02-3.23-1.24-3.26-4.92-.03-3.07 2.51-4.55 2.63-4.62-1.45-2.13-3.69-2.37-4.48-2.42h.27z"/>
+          </svg>
+          Apple
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

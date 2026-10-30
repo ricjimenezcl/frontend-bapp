@@ -19,6 +19,7 @@ import { BookingCreate } from '../../../../core/models/booking.model';
 import { ChatService } from '../../../../core/services/chat.service';
 import { Review, TimeSlot } from '../../../../shared/services/core.service';
 import { ReportButtonComponent } from '../../../../shared/components/report-button/report-button.component';
+import { ProviderActionSheetComponent } from '../../../../shared/components/provider-action-sheet/provider-action-sheet.component';
 import { ReportedEntityType } from '../../../../core/models/report.model';
 import { ContentFilterService } from '../../../../shared/services/content-filter.service';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
@@ -114,6 +115,32 @@ export class ProviderInfoPage implements OnInit {
 
   goToPremium(): void {
     this.paymentRedirect.openClientUnlock30(this.router.url);
+  }
+
+  async presentGuestAccessModal(options?: {
+    message?: string;
+    registerRoute?: string;
+    loginRoute?: string;
+  }) {
+    const modal = await this.modalCtrl.create({
+      component: ProviderActionSheetComponent,
+      componentProps: {
+        provider: { business_name: 'Bappsearch' }
+      },
+      backdropDismiss: true,
+      initialBreakpoint: 0.75,
+      breakpoints: [0, 0.42, 0.65, 0.75]
+    });
+
+    const instance = (modal as any).componentInstance as ProviderActionSheetComponent | undefined;
+    if (instance) {
+      await instance.presentGuestAccessModal({
+        mode: 'register',
+        message: options?.message ?? 'Para realizar esta acción debes crear tu cuenta de cliente.'
+      });
+    }
+
+    await modal.present();
   }
 
   constructor(
@@ -553,8 +580,11 @@ export class ProviderInfoPage implements OnInit {
     // Check auth
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      this.showToast('Debes iniciar sesión para reservar');
-      this.router.navigate(['/auth/login']);
+      await this.presentGuestAccessModal({
+        message: 'Para reservar este servicio debes continuar con el acceso desde el modal de autenticación.',
+        registerRoute: '/auth/login',
+        loginRoute: '/auth/login'
+      });
       return;
     }
 
@@ -690,6 +720,15 @@ export class ProviderInfoPage implements OnInit {
       return;
     }
 
+    if (!this.authService.isAuthenticated()) {
+      await this.presentGuestAccessModal({
+        message: 'Para abrir el chat con un proveedor debes continuar desde el modal de autenticación.',
+        registerRoute: '/auth/login',
+        loginRoute: '/auth/login'
+      });
+      return;
+    }
+
     console.log('🔍 [startChat] Provider object:', this.provider);
     console.log('🔍 [startChat] provider.provider_id:', this.provider.provider_id);
     console.log('🔍 [startChat] provider.user_id:', this.provider.user_id);
@@ -719,7 +758,11 @@ export class ProviderInfoPage implements OnInit {
       }
     } catch (error) {
       console.error('❌ Error starting chat:', error);
-      this.showToast('No se pudo abrir el chat', 'danger');
+      await this.presentGuestAccessModal({
+        message: 'No pudimos abrir el chat. Puedes continuar con el modal de autenticación para ingresar o registrarte.',
+        registerRoute: '/auth/login',
+        loginRoute: '/auth/login'
+      });
     } finally {
       this.isStartingChat = false;
     }

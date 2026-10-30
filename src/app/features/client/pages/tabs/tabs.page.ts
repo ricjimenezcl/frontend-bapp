@@ -1,5 +1,5 @@
 // src/app/client/pages/tabs/tabs.page.ts
-import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import {
@@ -16,6 +16,8 @@ import { StateService } from '../../../../shared/services/state.service';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BappieChatbotComponent } from '../../../../shared/components/bappie-chatbot/bappie-chatbot.component';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
+import { AuthService } from '../../../../features/auth/services/auth.service';
 
 @Component({
   selector: 'app-client-tabs',
@@ -33,6 +35,7 @@ import { BappieChatbotComponent } from '../../../../shared/components/bappie-cha
     CommonModule,
     RouterModule,
     BappieChatbotComponent,
+    AccessAuthModalComponent,
     IonHeader,
     IonToolbar,
     IonButtons,
@@ -44,8 +47,13 @@ import { BappieChatbotComponent } from '../../../../shared/components/bappie-cha
   ]
 })
 export class ClientTabsPage implements OnInit, OnDestroy {
+  @ViewChild(AccessAuthModalComponent) accessAuthModal?: AccessAuthModalComponent;
+
   selectedServices: any[] = [];
   activeTab: string = 'home';
+  accessAuthMode: 'login' | 'register' = 'register';
+  accessAuthLoading = false;
+  accessAuthError = '';
   private readonly destroy$ = new Subject<void>();
 
   // Maps tab names to child route segments defined in app.routes.ts
@@ -59,7 +67,8 @@ export class ClientTabsPage implements OnInit, OnDestroy {
 
   constructor(
     private stateService: StateService,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -81,9 +90,38 @@ export class ClientTabsPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  async openGuestAccessPrompt() {
+    const hasStoredUser = !!localStorage.getItem('user_data');
+    this.accessAuthMode = hasStoredUser ? 'login' : 'register';
+    this.accessAuthError = '';
+    this.accessAuthLoading = false;
+
+    this.accessAuthModal?.configure({
+      mode: this.accessAuthMode,
+      role: 'client',
+      appleSignInAvailable: false
+    });
+    this.accessAuthModal?.open(this.accessAuthMode, 'client');
+  }
+
+  closeAccessAuthModal() {
+    this.accessAuthModal?.closeModal();
+    this.accessAuthError = '';
+    this.accessAuthLoading = false;
+  }
+
   changeTab(tabName: string) {
     const route = this.tabRoutes[tabName];
     if (!route) return;
+
+    const isGuestClientRoute = !this.authService.isAuthenticated() && localStorage.getItem('bapp_user_role') === 'client';
+    const guestProtectedRoutes = ['bookings', 'chats', 'profile'];
+
+    if (isGuestClientRoute && guestProtectedRoutes.includes(route)) {
+      this.openGuestAccessPrompt();
+      return;
+    }
+
     this.router.navigate(['/client/tabs', route]);
   }
 

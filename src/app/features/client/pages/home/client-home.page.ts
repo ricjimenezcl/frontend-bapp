@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ModalController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
@@ -13,6 +13,8 @@ import { ProductService, Transaction } from '../../../../services/product.servic
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { parseUtcDate } from '../../../../shared/utils/date.util';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
+import { ProviderActionSheetComponent } from '../../../../shared/components/provider-action-sheet/provider-action-sheet.component';
 import { environment } from '../../../../../environments/environment';
 
 interface QuickAccessItem {
@@ -33,6 +35,7 @@ export class ClientHomePage implements OnInit, OnDestroy {
   selectedServices: SelectedService[] = [];
   stats: BookingStats | null = null;
   isLoadingStats = false;
+  isGuestMode = false;
 
   // Actividad de búsqueda (mismo dato que el dashboard web: /users/me/search-stats)
   searchesToday = 0;
@@ -48,11 +51,21 @@ export class ClientHomePage implements OnInit, OnDestroy {
   /** Apple Guideline 3.1.1 — oculta el flujo de compra en iOS */
   canPurchase = true;
 
-  readonly quickAccess: QuickAccessItem[] = [
-    { label: 'Mis Reservas', icon: 'calendar-outline', route: ['/client/tabs/bookings'] },
-    { label: 'Mensajes', icon: 'chatbubbles-outline', route: ['/client/tabs/chats'] },
-    { label: 'Mi Perfil', icon: 'person-outline', route: ['/client/tabs/profile'] }
-  ];
+  get quickAccess(): QuickAccessItem[] {
+    if (this.isGuestMode) {
+      return [
+        { label: 'Crear cuenta', icon: 'person-add-outline', route: ['/client/categories'] },
+        { label: 'Contactar proveedores', icon: 'chatbubbles-outline', route: ['/client/categories'] },
+        { label: 'Explorar servicios', icon: 'search-outline', route: ['/client/categories'] }
+      ];
+    }
+
+    return [
+      { label: 'Mis Reservas', icon: 'calendar-outline', route: ['/client/tabs/bookings'] },
+      { label: 'Mensajes', icon: 'chatbubbles-outline', route: ['/client/tabs/chats'] },
+      { label: 'Mi Perfil', icon: 'person-outline', route: ['/client/tabs/profile'] }
+    ];
+  }
 
   private destroy$ = new Subject<void>();
 
@@ -65,13 +78,25 @@ export class ClientHomePage implements OnInit, OnDestroy {
     private productService: ProductService,
     private paymentRedirect: PaymentRedirectService,
     private platformDetection: PlatformDetectionService,
-    private http: HttpClient
+    private http: HttpClient,
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
     const currentUser = this.authService.getCurrentUser();
     this.userName = currentUser?.name?.split(' ')[0] || '';
     this.canPurchase = this.platformDetection.canPurchaseInApp();
+    this.isGuestMode = !this.authService.isAuthenticated() && localStorage.getItem('bapp_user_role') === 'client';
+
+    if (this.isGuestMode) {
+      this.stats = null;
+      this.activePlan = null;
+      this.searchesToday = 0;
+      this.searchesDailyLimit = null;
+      this.isLoadingStats = false;
+      this.isLoadingPlan = false;
+      return;
+    }
 
     this.stateService.selectedServices$
       .pipe(takeUntil(this.destroy$))
@@ -166,7 +191,45 @@ export class ClientHomePage implements OnInit, OnDestroy {
     this.router.navigate(['/client/categories']);
   }
 
+  async openClientRegisterModal() {
+    await this.openAccessAuthModal('register', 'client');
+  }
+
+  async openAccessAuthModal(mode: 'login' | 'register' = 'register', role: 'client' | 'provider' = 'client') {
+    const modal = await this.modalCtrl.create({
+      component: AccessAuthModalComponent,
+      backdropDismiss: true,
+      cssClass: 'access-auth-modal'
+    });
+
+    const instance = (modal as any).componentInstance as AccessAuthModalComponent | undefined;
+    if (instance) {
+      instance.configure({
+        mode,
+        role,
+        appleSignInAvailable: false
+      });
+      instance.open(mode, role);
+    }
+
+    await modal.present();
+  }
+
+  handleQuickAccess(item: QuickAccessItem) {
+    if (this.isGuestMode && (item.label === 'Crear cuenta' || item.label === 'Contactar proveedores')) {
+      this.openClientRegisterModal();
+      return;
+    }
+
+    this.goTo(item.route);
+  }
+
   goTo(route: string[]) {
+    if (this.isGuestMode && (route[0] === '/client/tabs/chats' || route[0] === '/client/tabs/bookings' || route[0] === '/client/tabs/profile' || route[0] === '/auth/login')) {
+      this.openClientRegisterModal();
+      return;
+    }
+
     this.router.navigate(route);
   }
 

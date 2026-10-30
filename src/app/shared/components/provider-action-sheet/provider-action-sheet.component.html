@@ -125,14 +125,14 @@
   <!-- Contact tab -->
   <div *ngIf="activeDetailTab==='contact'" class="pas-tab-body">
     <div class="pas-contact-wrapper">
-      <div class="pas-contact-list" [class.pas-contact-list--locked]="!hasPremium">
+      <div class="pas-contact-list" [hidden]="isGuestMode" [class.pas-contact-list--locked]="!hasPremium || isGuestMode">
         <div class="pas-contact-item" *ngIf="providerPhone">
           <div class="pas-contact-icon">
             <ion-icon name="call-outline"></ion-icon>
           </div>
           <div class="pas-contact-info">
             <span class="pas-contact-lbl">Teléfono</span>
-            <a *ngIf="hasPremium && providerWhatsappLink; else pasPlainPhone"
+            <a *ngIf="hasPremium && !isGuestMode && providerWhatsappLink; else pasPlainPhone"
                [href]="providerWhatsappLink" target="_blank" rel="noopener noreferrer"
                class="pas-contact-whatsapp-link">
               <span class="pas-contact-val">{{ providerPhone }}</span>
@@ -163,15 +163,21 @@
         </div>
       </div>
 
-      <div class="pas-contact-locked-overlay" *ngIf="!hasPremium">
+      <div class="pas-contact-locked-overlay" *ngIf="!hasPremium && !isGuestMode">
         <ion-icon name="lock-closed-outline" class="pas-contact-locked-icon"></ion-icon>
         <p>Si quieres obtener teléfono, correo y dirección debes contratar un plan.</p>
         <ion-button size="small" color="primary" (click)="goToPremium()">Contratar plan</ion-button>
       </div>
+
+      <div class="pas-contact-locked-overlay" *ngIf="isGuestMode">
+        <ion-icon name="person-circle-outline" class="pas-contact-locked-icon"></ion-icon>
+        <p>Para ver teléfono, correo y dirección debes crear una cuenta o iniciar sesión.</p>
+        <ion-button size="small" color="primary" (click)="openGuestContactAuth()">Crear cuenta</ion-button>
+      </div>
     </div>
 
     <!-- ══ BOTÓN DENUNCIAR PERFIL ══ -->
-    <div class="pas-report-section">
+    <div class="pas-report-section" *ngIf="!isGuestMode">
       <button class="pas-report-btn" (click)="reportProvider()" type="button">
         <ion-icon name="alert-circle-outline"></ion-icon>
         <span>Denunciar perfil</span>
@@ -198,8 +204,8 @@
 <ion-modal
   [isOpen]="showBookingModal"
   (didDismiss)="closeBookingModal()"
-  [initialBreakpoint]="0.9"
-  [breakpoints]="[0, 0.5, 0.9, 1]"
+  [initialBreakpoint]="0.8"
+  [breakpoints]="[0, 0.45, 0.7, 0.8]"
   [backdropDismiss]="true"
   [keepContentsMounted]="true"
 >
@@ -398,3 +404,5 @@
     </div>
   </ng-template>
 </ion-modal>
+
+<app-access-auth-modal></app-access-auth-modal>

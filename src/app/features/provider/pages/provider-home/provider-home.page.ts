@@ -17,6 +17,7 @@ import { ProductService, Transaction } from '../../../../services/product.servic
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { parseUtcDate } from '../../../../shared/utils/date.util';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
 
 @Component({
   selector: 'app-provider-home',
@@ -27,6 +28,7 @@ import { parseUtcDate } from '../../../../shared/utils/date.util';
 })
 export class ProviderHomePage implements OnInit, OnDestroy {
   isLoading = false;
+  isGuestMode = false;
   providerName = 'Provider';
   providerProfile: ProviderProfile | null = null;
   validationStatus: string = 'not_submitted';
@@ -74,6 +76,18 @@ export class ProviderHomePage implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('ProviderHomePage cargado');
     this.canPurchase = this.platformDetection.canPurchaseInApp();
+    this.isGuestMode = !this.authService.isAuthenticated() && localStorage.getItem('bapp_user_role') === 'provider';
+
+    if (this.isGuestMode) {
+      this.providerName = 'Invitado';
+      this.providerProfile = null;
+      this.isLoading = false;
+      this.showVerificationAlert = false;
+      this.isProfileIncomplete = false;
+      this.missingFields = [];
+      return;
+    }
+
     this.loadProviderProfile();
     this.subscribeToReviewReceived();
     this.checkVerificationStatus();
@@ -143,20 +157,33 @@ export class ProviderHomePage implements OnInit, OnDestroy {
    * Manejar caso de perfil faltante o error de autorización
    */
   private async handleMissingProfile() {
+    const guestRole = localStorage.getItem('bapp_user_role');
+    const isGuestProvider = guestRole === 'provider' && !this.authService.isAuthenticated();
+
     const alert = await this.alertCtrl.create({
       header: 'No se encontró tu perfil',
-      message: 'Parece que tu cuenta no está registrada como proveedor o tu sesión ha expirado.',
+      message: isGuestProvider
+        ? 'Parece que aún no tienes un perfil de proveedor registrado. Completa la creación de tu cuenta para continuar.'
+        : 'Parece que tu cuenta no está registrada como proveedor o tu sesión ha expirado.',
       buttons: [
         {
-          text: 'Completar Registro',
-          handler: () => {
-            this.router.navigate(['/auth/register-provider']);
+          text: isGuestProvider ? 'Crear cuenta' : 'Iniciar sesión',
+          handler: async () => {
+            if (isGuestProvider) {
+              await this.openAccessAuthModal('register');
+              return;
+            }
+            this.router.navigate(['/auth/login']);
           }
         },
         {
           text: 'Ir a Inicio',
           handler: () => {
             this.authService.logout();
+            if (isGuestProvider) {
+              this.router.navigate(['/provider/tabs/home']);
+              return;
+            }
             this.router.navigate(['/auth/login']);
           }
         }
@@ -256,6 +283,30 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     if (hour < 12) return 'Buenos días';
     if (hour < 18) return 'Buenas tardes';
     return 'Buenas noches';
+  }
+
+  async openProviderRegisterModal() {
+    await this.openAccessAuthModal('register', 'provider');
+  }
+
+  async openAccessAuthModal(mode: 'login' | 'register' = 'register', role: 'client' | 'provider' = 'provider') {
+    const modal = await this.modalCtrl.create({
+      component: AccessAuthModalComponent,
+      backdropDismiss: true,
+      cssClass: 'access-auth-modal'
+    });
+
+    const instance = (modal as any).componentInstance as AccessAuthModalComponent | undefined;
+    if (instance) {
+      instance.configure({
+        mode,
+        role,
+        appleSignInAvailable: false
+      });
+      instance.open(mode, role);
+    }
+
+    await modal.present();
   }
 
   /**
@@ -378,6 +429,15 @@ export class ProviderHomePage implements OnInit, OnDestroy {
     const expires = parseUtcDate(expiresAt);
     if (!expires) return 0;
     return Math.max(0, Math.ceil((expires.getTime() - Date.now()) / 86_400_000));
+  }
+
+  goToProtectedProviderRoute(route: string[]) {
+    if (this.isGuestMode) {
+      this.openProviderRegisterModal();
+      return;
+    }
+
+    this.router.navigate(route);
   }
 
   goToCatalog() {

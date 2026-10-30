@@ -1,5 +1,5 @@
 // src/app/provider/pages/tabs/tabs.page.ts
-import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, OnInit, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import {
@@ -13,6 +13,8 @@ import {
 } from '@ionic/angular/standalone';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { AuthService } from '../../../../features/auth/services/auth.service';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
 
 @Component({
   selector: 'app-provider-tabs',
@@ -29,6 +31,7 @@ import { filter, takeUntil } from 'rxjs/operators';
   imports: [
     CommonModule,
     RouterModule,
+    AccessAuthModalComponent,
     IonHeader,
     IonToolbar,
     IonIcon,
@@ -39,6 +42,8 @@ import { filter, takeUntil } from 'rxjs/operators';
   ]
 })
 export class ProviderTabsPage implements OnInit, OnDestroy {
+  @ViewChild(AccessAuthModalComponent) accessAuthModal?: AccessAuthModalComponent;
+
   activeTab: string = 'home';
   private readonly destroy$ = new Subject<void>();
 
@@ -52,7 +57,8 @@ export class ProviderTabsPage implements OnInit, OnDestroy {
   };
 
   constructor(
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -73,13 +79,36 @@ export class ProviderTabsPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  async openAccessAuthModal(mode: 'login' | 'register' = 'register') {
+    this.accessAuthModal?.configure({
+      mode,
+      role: 'provider',
+      appleSignInAvailable: false
+    });
+    this.accessAuthModal?.open(mode, 'provider');
+  }
+
   changeTab(tabName: string) {
     const route = this.tabRoutes[tabName];
     if (!route) return;
+
+    const isGuestProviderRoute = !this.authService.isAuthenticated() && localStorage.getItem('bapp_user_role') === 'provider';
+    const guestProtectedRoutes = ['service-details', 'bookings', 'inbox', 'profile'];
+
+    if (isGuestProviderRoute && guestProtectedRoutes.includes(route)) {
+      this.openAccessAuthModal('register');
+      return;
+    }
+
     this.router.navigate(['/provider/tabs', route]);
   }
 
   goToAddService() {
+    if (!this.authService.isAuthenticated() && localStorage.getItem('bapp_user_role') === 'provider') {
+      this.openAccessAuthModal('register');
+      return;
+    }
+
     // Reutiliza el mismo flujo del botón "Nuevo servicio" de service-details
     // (chequeo de límite de plan + verificación de identidad + modal), en vez
     // de navegar directo a la página ruteada (que no tiene currentUser/coreService).

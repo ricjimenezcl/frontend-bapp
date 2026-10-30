@@ -1,10 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonicModule, ModalController, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { Subject, of, forkJoin, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, takeUntil } from 'rxjs/operators';
+import { SocialAuthService, GoogleLoginProvider, FacebookLoginProvider } from '@abacritt/angularx-social-login';
+import { SignInWithApple } from '@capacitor-community/apple-sign-in';
+import { Capacitor } from '@capacitor/core';
 
 import { CoreService, Review, WorkingHours, ServiceSchedule } from '../../services/core.service';
 import { ClientBookingService } from '../../../features/client/services/client-booking.service';
@@ -17,6 +20,8 @@ import { ContentFilterService } from '../../services/content-filter.service';
 import { ProviderImagePipe } from '../../pipes/provider-image.pipe';
 import { PaymentRedirectService } from '../../../services/payment-redirect.service';
 import { ProductService } from '../../../services/product.service';
+import { AccessAuthModalComponent } from '../access-auth-modal/access-auth-modal.component';
+import { environment } from '../../../../environments/environment';
 
 interface CalendarDay {
   dateStr: string;      // YYYY-MM-DD
@@ -32,9 +37,11 @@ interface CalendarDay {
   templateUrl: './provider-action-sheet.component.html',
   styleUrls: ['./provider-action-sheet.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonicModule, ProviderImagePipe]
+  imports: [CommonModule, FormsModule, IonicModule, ProviderImagePipe, AccessAuthModalComponent]
 })
 export class ProviderActionSheetComponent implements OnInit {
+  @ViewChild(AccessAuthModalComponent) accessAuthModal?: AccessAuthModalComponent;
+
   @Input() provider!: any;
   @Input() serviceId?: number;
 
@@ -89,6 +96,21 @@ export class ProviderActionSheetComponent implements OnInit {
   private useManualAddress = false;
   private readonly searchTerms = new Subject<string>();
   private readonly destroy$ = new Subject<void>();
+  private readonly socialAuthService = inject(SocialAuthService);
+
+  showAccessAuthModal = false;
+  accessAuthMode: 'login' | 'register' = 'login';
+  accessAuthLoading = false;
+  accessAuthError = '';
+  accessLoginEmail = '';
+  accessLoginPassword = '';
+  accessRegisterFullName = '';
+  accessRegisterEmail = '';
+  accessRegisterPhone = '';
+  accessRegisterPassword = '';
+  accessRegisterConfirmPassword = '';
+  accessRegisterTermsAccepted = false;
+  readonly isAppleSignInAvailable = Capacitor.getPlatform() === 'ios';
 
   get isBookingValid(): boolean {
     return !!this.selectedDate && !!this.selectedTime && !!this.locationAddress;
@@ -124,6 +146,10 @@ export class ProviderActionSheetComponent implements OnInit {
     return this.provider?.description ?? this.provider?.bio ?? '';
   }
 
+  get isGuestMode(): boolean {
+    return !this.authService.isAuthenticated();
+  }
+
    get providerPhone(): string {
     return this.provider?.phone ?? 'No disponible';
   }
@@ -134,6 +160,83 @@ export class ProviderActionSheetComponent implements OnInit {
 
   get providerAddress(): string {
     return this.provider?.address ?? 'No disponible';
+  }
+
+  private hasStoredAccount(): boolean {
+    try {
+      const raw = localStorage.getItem('user_data');
+      if (!raw) return false;
+      const parsed = JSON.parse(raw);
+      return !!(parsed?.email || parsed?.id || parsed?.user_id);
+    } catch {
+      return false;
+    }
+  }
+
+  async presentGuestAccessModal(options?: {
+    message?: string;
+    registerRoute?: string;
+    loginRoute?: string;
+    mode?: 'login' | 'register';
+  }) {
+    const hasStoredUser = this.hasStoredAccount();
+    const mode = options?.mode ?? (hasStoredUser ? 'login' : 'register');
+
+    this.accessAuthMode = mode;
+    this.accessAuthError = '';
+    this.accessLoginEmail = this.getStoredAccountEmail();
+    this.accessLoginPassword = '';
+    this.accessRegisterFullName = '';
+    this.accessRegisterEmail = '';
+    this.accessRegisterPhone = '';
+    this.accessRegisterPassword = '';
+    this.accessRegisterConfirmPassword = '';
+    this.accessRegisterTermsAccepted = false;
+
+    this.accessAuthModal?.configure({
+      mode,
+      role: 'client',
+      loginEmail: this.accessLoginEmail,
+      loginPassword: this.accessLoginPassword,
+      registerFullName: this.accessRegisterFullName,
+      registerEmail: this.accessRegisterEmail,
+      registerPhone: this.accessRegisterPhone,
+      registerPassword: this.accessRegisterPassword,
+      registerConfirmPassword: this.accessRegisterConfirmPassword,
+      registerTermsAccepted: this.accessRegisterTermsAccepted,
+      appleSignInAvailable: this.isAppleSignInAvailable
+    });
+    this.accessAuthModal?.open(mode, 'client');
+  }
+
+  private getStoredAccountEmail(): string {
+    try {
+      const raw = localStorage.getItem('user_data');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw);
+      return parsed?.email || '';
+    } catch {
+      return '';
+    }
+  }
+
+  private async handleMissingAuthForGuestAction(context: 'booking' | 'chat') {
+    const hasStoredUser = this.hasStoredAccount();
+
+    if (hasStoredUser) {
+      await this.presentGuestAccessModal({
+        mode: 'login',
+        message: 'Inicia sesión para continuar con esta acción.'
+      });
+      return;
+    }
+
+    await this.presentGuestAccessModal({
+      mode: 'register',
+      message: context === 'booking'
+        ? 'Para reservar este servicio debes crear tu cuenta de cliente.'
+        : 'Para abrir el chat con este proveedor debes crear tu cuenta de cliente.'
+    });
   }
 
   /** ID del servicio actualmente visualizado (service_providers.id), para excluirlo del listado "Nuestros Servicios" */
@@ -166,6 +269,13 @@ export class ProviderActionSheetComponent implements OnInit {
   async goToPremium(): Promise<void> {
     await this.modalCtrl.dismiss();
     this.paymentRedirect.openClientUnlock30(this.router.url);
+  }
+
+  async openGuestContactAuth(): Promise<void> {
+    await this.presentGuestAccessModal({
+      mode: 'register',
+      message: 'Crea tu cuenta para ver teléfono, correo y dirección de este proveedor.'
+    });
   }
 
   constructor(
@@ -641,7 +751,7 @@ export class ProviderActionSheetComponent implements OnInit {
 
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      this.showToast('Debes iniciar sesión para reservar', 'warning');
+      await this.handleMissingAuthForGuestAction('booking');
       return;
     }
 
@@ -740,7 +850,205 @@ export class ProviderActionSheetComponent implements OnInit {
     }
   }
 
+  closeAccessAuthModal() {
+    this.accessAuthModal?.closeModal();
+    this.showAccessAuthModal = false;
+    this.accessAuthError = '';
+    this.accessAuthLoading = false;
+  }
+
+  async submitAccessAuth() {
+    if (this.accessAuthMode === 'login') {
+      if (!this.accessLoginEmail.trim() || !this.accessLoginPassword.trim()) {
+        this.accessAuthError = 'Completa tu email y contraseña para continuar.';
+        return;
+      }
+
+      this.accessAuthLoading = true;
+      this.accessAuthError = '';
+
+      this.authService.loginClient({
+        email: this.accessLoginEmail.trim(),
+        password: this.accessLoginPassword,
+        role: 'CLIENT'
+      }).subscribe({
+        next: () => {
+          this.accessAuthLoading = false;
+          this.closeAccessAuthModal();
+          this.showToast('Sesión iniciada correctamente.', 'success');
+          setTimeout(() => this.router.navigate(['/client/tabs/home']), 250);
+        },
+        error: (error) => {
+          this.accessAuthLoading = false;
+          this.accessAuthError = error?.error?.detail || error?.error?.message || 'Email o contraseña incorrectos.';
+        }
+      });
+      return;
+    }
+
+    if (!this.accessRegisterFullName.trim() || !this.accessRegisterEmail.trim() || !this.accessRegisterPassword || !this.accessRegisterConfirmPassword) {
+      this.accessAuthError = 'Completa todos los campos para crear la cuenta.';
+      return;
+    }
+
+    if (this.accessRegisterPassword.length < 8) {
+      this.accessAuthError = 'La contraseña debe tener al menos 8 caracteres.';
+      return;
+    }
+
+    if (this.accessRegisterPassword !== this.accessRegisterConfirmPassword) {
+      this.accessAuthError = 'Las contraseñas no coinciden.';
+      return;
+    }
+
+    if (!this.accessRegisterTermsAccepted) {
+      this.accessAuthError = 'Debes aceptar los términos para continuar.';
+      return;
+    }
+
+    this.accessAuthLoading = true;
+    this.accessAuthError = '';
+
+    this.authService.registerClient({
+      full_name: this.accessRegisterFullName.trim(),
+      email: this.accessRegisterEmail.trim(),
+      phone: this.accessRegisterPhone.trim(),
+      password: this.accessRegisterPassword,
+      terms_accepted: true,
+      role: 'CLIENT'
+    }).subscribe({
+      next: () => {
+        this.accessAuthLoading = false;
+        this.accessAuthMode = 'login';
+        this.accessLoginEmail = this.accessRegisterEmail.trim();
+        this.accessLoginPassword = '';
+        this.accessRegisterFullName = '';
+        this.accessRegisterEmail = '';
+        this.accessRegisterPhone = '';
+        this.accessRegisterPassword = '';
+        this.accessRegisterConfirmPassword = '';
+        this.accessRegisterTermsAccepted = false;
+        this.showToast('Cuenta creada correctamente. Inicia sesión para continuar.', 'success');
+      },
+      error: (error) => {
+        this.accessAuthLoading = false;
+        this.accessAuthError = error?.error?.detail || error?.error?.message || 'No se pudo crear la cuenta.';
+      }
+    });
+  }
+
+  async loginWithGoogleFromAccessModal(): Promise<void> {
+    try {
+      this.accessAuthLoading = true;
+      this.accessAuthError = '';
+      const socialUser = await this.socialAuthService.signIn(GoogleLoginProvider.PROVIDER_ID);
+      const googleIdToken = socialUser?.idToken || socialUser?.authToken || (socialUser as any)?.response?.id_token || '';
+      if (!googleIdToken) {
+        this.accessAuthLoading = false;
+        this.accessAuthError = 'Google no devolvió un token válido.';
+        return;
+      }
+
+      this.authService.loginWithGoogle(googleIdToken, 'CLIENT').subscribe({
+        next: () => {
+          this.accessAuthLoading = false;
+          this.closeAccessAuthModal();
+          this.showToast('Sesión iniciada con Google.', 'success');
+          setTimeout(() => this.router.navigate(['/client/tabs/home']), 250);
+        },
+        error: (error) => {
+          this.accessAuthLoading = false;
+          this.accessAuthError = error?.error?.detail || error?.error?.message || 'No se pudo iniciar sesión con Google.';
+        }
+      });
+    } catch (error: any) {
+      this.accessAuthLoading = false;
+      const msg = String(error?.message || '');
+      if (!msg.toLowerCase().includes('cancel')) {
+        this.accessAuthError = 'No se pudo conectar con Google.';
+      }
+    }
+  }
+
+  async loginWithFacebookFromAccessModal(): Promise<void> {
+    try {
+      this.accessAuthLoading = true;
+      this.accessAuthError = '';
+      const socialUser = await this.socialAuthService.signIn(FacebookLoginProvider.PROVIDER_ID);
+      const accessToken = socialUser?.authToken || (socialUser as any)?.response?.accessToken || '';
+      if (!accessToken) {
+        this.accessAuthLoading = false;
+        this.accessAuthError = 'Facebook no devolvió un token válido.';
+        return;
+      }
+
+      this.authService.loginWithFacebook(accessToken, 'CLIENT', socialUser?.email || '').subscribe({
+        next: () => {
+          this.accessAuthLoading = false;
+          this.closeAccessAuthModal();
+          this.showToast('Sesión iniciada con Facebook.', 'success');
+          setTimeout(() => this.router.navigate(['/client/tabs/home']), 250);
+        },
+        error: (error) => {
+          this.accessAuthLoading = false;
+          this.accessAuthError = error?.error?.detail || error?.error?.message || 'No se pudo iniciar sesión con Facebook.';
+        }
+      });
+    } catch (error: any) {
+      this.accessAuthLoading = false;
+      const msg = String(error?.message || '');
+      if (!msg.toLowerCase().includes('cancel')) {
+        this.accessAuthError = 'No se pudo conectar con Facebook.';
+      }
+    }
+  }
+
+  async loginWithAppleFromAccessModal(): Promise<void> {
+    try {
+      this.accessAuthLoading = true;
+      this.accessAuthError = '';
+      const result = await SignInWithApple.authorize({
+        clientId: 'io.ionic.bappsearch',
+        redirectURI: `${environment.apiUrl}/auth/oauth/apple/callback`,
+        scopes: 'email name',
+        state: `${Date.now()}`
+      });
+
+      const identityToken = result?.response?.identityToken || '';
+      if (!identityToken) {
+        this.accessAuthLoading = false;
+        this.accessAuthError = 'Apple no devolvió un token válido.';
+        return;
+      }
+
+      const fullName = [result?.response?.givenName, result?.response?.familyName].filter(Boolean).join(' ');
+      this.authService.loginWithApple(identityToken, 'CLIENT', fullName || undefined, result?.response?.email || '').subscribe({
+        next: () => {
+          this.accessAuthLoading = false;
+          this.closeAccessAuthModal();
+          this.showToast('Sesión iniciada con Apple.', 'success');
+          setTimeout(() => this.router.navigate(['/client/tabs/home']), 250);
+        },
+        error: (error) => {
+          this.accessAuthLoading = false;
+          this.accessAuthError = error?.error?.detail || error?.error?.message || 'No se pudo iniciar sesión con Apple.';
+        }
+      });
+    } catch (error: any) {
+      this.accessAuthLoading = false;
+      const msg = String(error?.message || '');
+      if (!msg.toLowerCase().includes('cancel')) {
+        this.accessAuthError = 'No se pudo conectar con Apple.';
+      }
+    }
+  }
+
   async startChat() {
+    if (!this.authService.isAuthenticated()) {
+      await this.handleMissingAuthForGuestAction('chat');
+      return;
+    }
+
     // provider_id = providers.id (FK esperado por el endpoint /chat/conversations/{provider_id})
     // id          = service_providers.id — NO usar como fallback, es un ID de tabla diferente
     const providerId = this.provider?.provider_id;
@@ -758,7 +1066,11 @@ export class ProviderActionSheetComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/client/chat', conversation.id]), 300);
       }
     } catch {
-      this.showToast('No se pudo abrir el chat', 'danger');
+      await this.presentGuestAccessModal({
+        message: 'No pudimos abrir el chat. Regístrate como cliente para contactar con proveedores.',
+        registerRoute: '/auth/login',
+        loginRoute: '/auth/login'
+      });
     } finally {
       this.isStartingChat = false;
     }

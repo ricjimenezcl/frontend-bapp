@@ -11,6 +11,7 @@ import { CoreService } from '../../../../shared/services/core.service';
 import { ProviderAddServicePage } from '../provider-add-service/provider-add-service.page';
 import { PaymentRedirectService } from '../../../../services/payment-redirect.service';
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
 import { environment } from '../../../../../environments/environment';
 
 type ServiceLimitProductType = 'PROVIDER_PLAN_7D' | 'PROVIDER_PLAN_MONTHLY' | 'PROVIDER_PLAN_ANNUAL';
@@ -84,9 +85,35 @@ export class ProviderServiceDetailsPage implements OnInit, OnDestroy {
     this.loadServicios();
   }
 
+  private async openGuestAccessModal(mode: 'login' | 'register' = 'register') {
+    const modal = await this.modalCtrl.create({
+      component: AccessAuthModalComponent,
+      backdropDismiss: true,
+      cssClass: 'access-auth-modal'
+    });
+
+    const instance = (modal as any).componentInstance as AccessAuthModalComponent | undefined;
+    if (instance) {
+      instance.configure({
+        mode,
+        role: 'provider',
+        appleSignInAvailable: false
+      });
+      instance.open(mode, 'provider');
+    }
+
+    await modal.present();
+  }
+
   private loadUserData() {
     this.currentUser = this.authService.getCurrentUser();
     if (!this.currentUser) {
+      const guestRole = localStorage.getItem('bapp_user_role');
+      if (guestRole === 'provider') {
+        void this.openGuestAccessModal('register');
+        return;
+      }
+
       this.presentAlert('Error', 'Usuario no autenticado');
       this.router.navigate(['/auth/login']);
     }

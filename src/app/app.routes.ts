@@ -7,8 +7,13 @@ import { profileCompletionGuard } from './features/auth/guards/profile-completio
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'auth/login',
+    redirectTo: 'welcome',
     pathMatch: 'full'
+  },
+
+  {
+    path: 'welcome',
+    loadComponent: () => import('./features/auth/pages/welcome/welcome.page').then(m => m.WelcomePage),
   },
 
   // ==================== AUTH ====================
@@ -58,7 +63,6 @@ export const routes: Routes = [
   // ==================== CLIENT ====================
   {
     path: 'client',
-    canActivate: [authGuard, clientGuard],
     children: [
       {
         path: 'tabs',
@@ -74,14 +78,17 @@ export const routes: Routes = [
           },
           {
             path: 'bookings',
+            canActivate: [authGuard, clientGuard],
             loadComponent: () => import('./features/client/pages/bookings/bookings.page').then(m => m.ClientBookingsPage)
           },
           {
             path: 'profile',
+            canActivate: [authGuard, clientGuard],
             loadComponent: () => import('./features/client/pages/client-profile/client-profile.page').then(m => m.ClientProfilePage)
           },
           {
             path: 'chats',
+            canActivate: [authGuard, clientGuard],
             loadComponent: () => import('./features/client/pages/client-chats/client-chats.page').then(m => m.ClientChatsPage)
           },
           {
@@ -93,19 +100,23 @@ export const routes: Routes = [
       },
       {
         path: 'edit-profile',
+        canActivate: [authGuard, clientGuard],
         loadComponent: () => import('./features/client/pages/edit-profile/edit-profile.page').then(m => m.EditProfilePage)
       },
 
       {
         path: 'settings',
+        canActivate: [authGuard, clientGuard],
         loadComponent: () => import('./features/client/pages/settings/settings.page').then(m => m.SettingsPage)
       },
       {
         path: 'settings/languages',
+        canActivate: [authGuard, clientGuard],
         loadComponent: () => import('./features/client/pages/settings/languages/languages.page').then(m => m.LanguagesPage)
       },
       {
         path: 'settings/help',
+        canActivate: [authGuard, clientGuard],
         loadComponent: () => import('./features/client/pages/settings/help/help.page').then(m => m.HelpPage)
       },
 
@@ -120,11 +131,12 @@ export const routes: Routes = [
       },
       {
         path: 'chat/:id',
+        canActivate: [authGuard, clientGuard],
         loadComponent: () => import('./features/chat/chat.page').then(m => m.ChatPage)
       },
       {
         path: '',
-        redirectTo: 'tabs',
+        redirectTo: 'categories',
         pathMatch: 'full'
       }
     ]

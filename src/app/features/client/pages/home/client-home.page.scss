@@ -121,6 +121,42 @@ ion-content.ch-content {
   ion-badge { margin-left: auto; }
 }
 
+.ch-guest-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-3);
+  background: var(--bapp-bg-card-raised);
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-lg);
+  padding: var(--bapp-space-4);
+  margin-bottom: var(--bapp-space-5);
+
+  .ch-guest-header {
+    @include flex-start;
+    align-items: center;
+    gap: var(--bapp-space-2);
+  }
+
+  .ch-guest-icon {
+    font-size: var(--bapp-text-xl);
+    color: var(--bapp-color-primary);
+  }
+
+  h2 {
+    font-size: var(--bapp-text-md);
+    font-weight: var(--bapp-font-semibold);
+    color: var(--bapp-text-primary);
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+    color: var(--bapp-text-secondary);
+    font-size: var(--bapp-text-sm);
+    line-height: 1.5;
+  }
+}
+
 // ── Mini dashboard de reservas (BookingStats) ─────────────────────────────
 .ch-stats-row {
   display: grid;

@@ -1,0 +1,89 @@
+<ion-content class="welcome-content">
+  <div class="welcome-shell">
+    <div class="login-logo">
+      <div class="web-brand-row">
+        <div class="logo-container">
+          <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/logo_gsgyrf.png"
+               alt="Logo Bappsearch"
+               class="logo-img"
+               loading="eager"
+               (error)="$any($event.target).style.display='none'">
+        </div>
+        <img src="https://res.cloudinary.com/dghwotofx/image/upload/v1774563936/titulo_bycrju.png"
+             alt="Bappsearch"
+             class="titulo-img"
+             loading="eager"
+             (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='inline'">
+        <span class="titulo-fallback">Bappsearch</span>
+      </div>
+      <p class="login-subtitle">Conecta con proveedores de servicios</p>
+    </div>
+
+    <div class="slides-wrapper">
+      <div class="slide-card" *ngFor="let slide of slides; let i = index" [class.is-active]="i === activeSlide">
+        <div class="slide-visual" [ngClass]="slide.accent">
+          <ion-icon [name]="slide.icon"></ion-icon>
+        </div>
+
+        <div class="slide-copy">
+          <span class="slide-step">Paso {{ i + 1 }}</span>
+          <h1>{{ slide.title }}</h1>
+          <p>{{ slide.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dots" aria-label="Paginación del onboarding">
+      <button
+        *ngFor="let slide of slides; let i = index"
+        type="button"
+        class="dot"
+        [class.is-active]="i === activeSlide"
+        [attr.aria-label]="'Ir al slide ' + (i + 1)"
+        (click)="activeSlide = i">
+      </button>
+    </div>
+
+    <div class="cta-stack">
+      <ion-button expand="block" class="primary-btn" (click)="isLastSlide ? openGuestProfileSelector() : next()">
+        {{ isLastSlide ? 'Empezar' : 'Siguiente' }}
+      </ion-button>
+
+      <ion-button expand="block" class="secondary-btn" fill="clear" (click)="openGuestProfileSelector()">
+        Explorar como invitado
+      </ion-button>
+
+      <div class="guest-selector" *ngIf="guestProfileSelectorVisible">
+        <p class="guest-selector-title">¿Con qué perfil quieres explorar?</p>
+
+        <div class="mode-grid">
+          <button type="button" class="mode-option client-option" (click)="continueGuestExplore('client')">
+            <ion-icon name="search-outline"></ion-icon>
+            <span>Buscar servicios</span>
+          </button>
+
+          <button type="button" class="mode-option provider-option" (click)="continueGuestExplore('provider')">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <span>Ofrecer servicios</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mode-grid" *ngIf="isLastSlide && !guestProfileSelectorVisible">
+        <button type="button" class="mode-option client-option" (click)="finishWelcome('client')">
+          <ion-icon name="search-outline"></ion-icon>
+          <span>Buscar servicios</span>
+        </button>
+
+        <button type="button" class="mode-option provider-option" (click)="finishWelcome('provider')">
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <span>Ofrecer servicios</span>
+        </button>
+      </div>
+
+      <button type="button" class="text-link" (click)="goToLogin()">
+        Ya tengo cuenta
+      </button>
+    </div>
+  </div>
+</ion-content>

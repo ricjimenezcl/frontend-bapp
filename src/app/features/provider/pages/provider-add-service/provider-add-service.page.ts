@@ -20,6 +20,7 @@ import { PaymentRedirectService } from '../../../../services/payment-redirect.se
 import { PlatformDetectionService } from '../../../../services/platform-detection.service';
 import { environment } from '../../../../../environments/environment';
 import { MapPickerComponent } from '../../../../shared/components/map-picker/map-picker.component';
+import { AccessAuthModalComponent } from '../../../../shared/components/access-auth-modal/access-auth-modal.component';
 import { GeoLocationService } from '../../../../shared/services/geo-location.service';
 
 interface DaySchedule {
@@ -217,10 +218,38 @@ export class ProviderAddServicePage implements OnInit, OnDestroy {
     });
   }
 
+  private async presentGuestAccessModal(options?: {
+    message?: string;
+    registerRoute?: string;
+    loginRoute?: string;
+  }) {
+    const modal = await this.modalCtrl.create({
+      component: AccessAuthModalComponent,
+      backdropDismiss: true,
+      cssClass: 'access-auth-modal'
+    });
+
+    const instance = (modal as any).componentInstance as AccessAuthModalComponent | undefined;
+    if (instance) {
+      instance.configure({
+        mode: 'register',
+        role: 'provider',
+        appleSignInAvailable: false
+      });
+      instance.open('register', 'provider');
+    }
+
+    await modal.present();
+  }
+
   ngOnInit(): void {
     // Verificar autenticación
     if (!this.currentUser || typeof this.currentUser !== 'object' || !this.currentUser.id) {
-      this.presentToast('Debe iniciar sesión para agregar servicios', 'danger');
+      this.presentGuestAccessModal({
+        message: 'Para agregar servicios y gestionar tu negocio debes crear una cuenta de proveedor.',
+        registerRoute: '/auth/login',
+        loginRoute: '/auth/login'
+      });
       this.cancel();
       return;
     }

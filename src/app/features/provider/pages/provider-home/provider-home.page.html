@@ -1,325 +1,171 @@
-<ion-content [fullscreen]="true">
-  
-  <!-- ═══════════════════════════════════════════════════════════════
-       HERO HEADER: cover + avatar + nombre
-  ═══════════════════════════════════════════════════════════════ -->
-  <div class="ph-profile-header">
-    
-    <div class="ph-cover"></div>
+<ion-content class="ph-content" [fullscreen]="true">
 
-    <!-- Badge verificación sobre el cover -->
-    <div class="ph-cover-badge ph-cover-badge--clickable" 
-         *ngIf="!isLoading && validationStatus !== 'approved'"
-         (click)="goToVerifyIdentity()">
-      <ion-icon name="shield-half-outline"></ion-icon>
-      <span>Verificar Identidad</span>
-      <ion-icon name="chevron-forward" class="ph-badge-arrow"></ion-icon>
-    </div>
-
-    <!-- Avatar -->
-    <div class="ph-avatar-wrap">
-      <img 
-        *ngIf="providerProfile?.avatar" 
-        class="ph-avatar-img"
-        [src]="providerProfile?.avatar || ''"
-        [alt]="providerProfile?.full_name || 'Proveedor'"
-        (error)="$any($event.target).src='/assets/images/default-avatar.png'" />
-      <div *ngIf="!providerProfile?.avatar" class="ph-avatar-fallback">
-        <ion-icon name="person"></ion-icon>
-      </div>
-    </div>
-
-    <!-- Info -->
-    <div class="ph-profile-meta">
-      <span class="ph-greeting-label">{{ getGreeting() }}</span>
-      <h1 class="ph-provider-name">
-        {{ providerProfile?.full_name || 'Mi panel' }}
-        <ion-icon 
-          *ngIf="validationStatus === 'approved'" 
-          name="shield-checkmark" 
-          class="ph-verified" 
-          title="Identidad verificada">
-        </ion-icon>
-      </h1>
-      <div class="ph-tagline-row">
-        <span class="ph-tagline-chip" *ngIf="metrics.activeServices > 0">
-          <ion-icon name="checkmark-circle-outline"></ion-icon>
-          {{ metrics.activeServices }} servicio{{ metrics.activeServices !== 1 ? 's' : '' }} activo{{ metrics.activeServices !== 1 ? 's' : '' }}
-        </span>
-      </div>
-    </div>
-
+  <div class="ph-greeting">
+    <span class="ph-greeting-label">{{ getGreeting() }}{{ providerProfile?.full_name ? ', ' + (providerProfile?.full_name?.split(' ')?.[0] ?? providerProfile?.full_name) : '' }}</span>
+    <h1 class="ph-title">Gestiona tu negocio</h1>
   </div>
 
-  <!-- ══ STATS ROW: 3 KPIs principales ═══════════════════════════ -->
-  <div class="ph-stats-row" *ngIf="!isLoading">
-    <div class="ph-stat-box">
+  <div class="ph-info-card">
+    <ion-icon name="briefcase-outline" class="ph-info-icon"></ion-icon>
+    <div class="ph-info-text">
+      <h2>Panel Bappsearch</h2>
+      <p>Administra tus servicios, reservas y clientes desde un solo lugar con la misma experiencia visual que la app cliente.</p>
+    </div>
+  </div>
+
+  <button class="ph-search-cta" type="button" (click)="goToProtectedProviderRoute(['/provider/tabs/service-details'])">
+    <ion-icon name="briefcase-outline"></ion-icon>
+    <span>Gestionar servicios</span>
+  </button>
+
+  <div class="ph-guest-card" *ngIf="isGuestMode">
+    <div class="ph-guest-header">
+      <ion-icon name="storefront-outline" class="ph-guest-icon"></ion-icon>
+      <h2>Regístrate para ofrecer tus servicios</h2>
+    </div>
+    <p>Publica tu perfil, recibe solicitudes y administra tu negocio desde una cuenta verificada.</p>
+    <button class="ph-btn-plan" type="button" (click)="openProviderRegisterModal()">
+      Crear perfil de proveedor
+    </button>
+  </div>
+
+  <div class="ph-search-activity" *ngIf="!isGuestMode && !isLoading">
+    <div class="ph-search-activity-text">
+      <h3>{{ metrics.activeServices }}</h3>
+      <p>servicios activos</p>
+    </div>
+    <ion-icon name="trending-up-outline" class="ph-search-activity-icon"></ion-icon>
+  </div>
+
+  <div class="ph-search-activity ph-search-activity--skeleton" *ngIf="!isGuestMode && isLoading">
+    <div class="ph-sk ph-sk--val"></div>
+    <div class="ph-sk ph-sk--lbl"></div>
+  </div>
+
+  <div class="ph-stats-row" *ngIf="!isGuestMode && !isLoading">
+    <div class="ph-stat-box ph-stat-box--clickable" (click)="goToProtectedProviderRoute(['/provider/tabs/bookings'])">
       <h3>{{ stats?.pending_bookings ?? 0 }}</h3>
       <p>Pendientes</p>
     </div>
-    <div class="ph-stat-box">
+    <div class="ph-stat-box ph-stat-box--clickable" (click)="goToProtectedProviderRoute(['/provider/tabs/bookings'])">
       <h3 class="ph-stat--success">{{ stats?.completed_bookings ?? 0 }}</h3>
       <p>Completadas</p>
     </div>
-    <div class="ph-stat-box">
+    <div class="ph-stat-box ph-stat-box--clickable" (click)="openReviews()">
       <h3>
         {{ (stats?.average_rating ?? 0) | number:'1.1-1' }}
         <ion-icon *ngIf="stats && stats.average_rating > 0" name="star" class="ph-stat-star"></ion-icon>
       </h3>
       <p>Calificación</p>
-      <small class="ph-stat-sub" *ngIf="reviews.length > 0">{{ reviews.length }} reseña{{ reviews.length !== 1 ? 's' : '' }}</small>
     </div>
   </div>
 
-  <!-- Skeleton para stats -->
-  <div class="ph-stats-row ph-stats-row--skeleton" *ngIf="isLoading">
+  <div class="ph-stats-row ph-stats-row--skeleton" *ngIf="!isGuestMode && isLoading">
     <div class="ph-stat-box" *ngFor="let i of [1,2,3]">
       <div class="ph-sk ph-sk--val"></div>
       <div class="ph-sk ph-sk--lbl"></div>
     </div>
   </div>
 
-  <!-- ══ PLAN ════════════════════════════════════════════════════ -->
-  <div class="ph-section ph-plan-section">
-    <div class="ph-plan-panel ph-plan-panel--skeleton" *ngIf="isLoadingPlan">
-      <div class="ph-sk ph-sk--title"></div>
-      <div class="ph-sk ph-sk--line"></div>
-      <div class="ph-sk ph-sk--line"></div>
-    </div>
+  <div class="ph-plan-panel ph-plan-panel--skeleton" *ngIf="!isGuestMode && isLoadingPlan">
+    <div class="ph-sk ph-sk--title"></div>
+    <div class="ph-sk ph-sk--line"></div>
+    <div class="ph-sk ph-sk--line"></div>
+  </div>
 
-    <div class="ph-plan-panel" *ngIf="!isLoadingPlan && activePlan">
-      <h2 class="ph-plan-title">
-        <ion-icon name="shield-checkmark"></ion-icon>
-        Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
-      </h2>
-      <div class="ph-plan-perk" *ngIf="activePlan.activated_at">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Inicio: {{ activePlan.activated_at | date:'dd/MM/yyyy' }}
-      </div>
-      <div class="ph-plan-perk" *ngIf="activePlan.expires_at">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Vence: {{ activePlan.expires_at | date:'dd/MM/yyyy' }} &mdash; {{ remainingDays(activePlan.expires_at) }} días restantes
-      </div>
-      <ion-button class="ph-btn-primary" fill="outline" size="small" (click)="router.navigate(['/provider/tabs/profile'])">
-        Gestionar plan
-      </ion-button>
+  <div class="ph-plan-panel" *ngIf="!isGuestMode && !isLoadingPlan && activePlan">
+    <h2 class="ph-plan-title">
+      <ion-icon name="shield-checkmark"></ion-icon>
+      Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
+    </h2>
+    <div class="ph-plan-perk" *ngIf="activePlan.activated_at">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Inicio: {{ activePlan.activated_at | date:'dd/MM/yyyy' }}
     </div>
+    <div class="ph-plan-perk" *ngIf="activePlan.expires_at">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Vence: {{ activePlan.expires_at | date:'dd/MM/yyyy' }} &mdash; {{ remainingDays(activePlan.expires_at) }} días restantes
+    </div>
+    <button class="ph-btn-plan ph-btn-plan--secondary" type="button" (click)="router.navigate(['/provider/tabs/profile'])">
+      Gestionar plan
+    </button>
+  </div>
 
-    <div class="ph-plan-panel" *ngIf="!isLoadingPlan && !activePlan">
-      <h2 class="ph-plan-title">
-        <ion-icon name="shield-half-outline"></ion-icon>
-        Cuenta Proveedor
-      </h2>
-      <div class="ph-plan-perk">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Publica servicios ilimitados
-      </div>
-      <div class="ph-plan-perk">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Recibe solicitudes directas
-      </div>
-      <div class="ph-plan-perk">
-        <ion-icon name="checkmark-circle"></ion-icon>
-        Gestiona tu agenda y horarios
-      </div>
-      <ion-button class="ph-btn-primary" fill="solid" size="small" *ngIf="canPurchase" (click)="goToCatalog()">
-        Ver planes premium
-      </ion-button>
+  <div class="ph-plan-panel" *ngIf="!isGuestMode && !isLoadingPlan && !activePlan">
+    <h2 class="ph-plan-title">
+      <ion-icon name="shield-half-outline"></ion-icon>
+      Cuenta Proveedor
+    </h2>
+    <div class="ph-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Publica servicios ilimitados
+    </div>
+    <div class="ph-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Recibe solicitudes directas
+    </div>
+    <div class="ph-plan-perk">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      Gestiona tu agenda y horarios
+    </div>
+    <button class="ph-btn-plan" type="button" *ngIf="canPurchase" (click)="goToCatalog()">
+      Ver planes premium
+    </button>
+  </div>
+
+  <div class="ph-verification-banner ph-verification-banner--incomplete" *ngIf="!isGuestMode && isProfileIncomplete">
+    <div class="ph-vb-icon ph-vb-icon--incomplete">
+      <ion-icon name="person-add-outline"></ion-icon>
+    </div>
+    <div class="ph-vb-content">
+      <h4>Perfil incompleto</h4>
+      <p>Te falta registrar tu <strong>{{ missingFields.join(' y ') }}</strong>. Debes completar estos datos para poder publicar tus servicios.</p>
+    </div>
+    <div class="ph-vb-actions">
+      <button class="ph-btn-plan ph-btn-plan--small" type="button" (click)="goToCompleteProfile()">Completar perfil</button>
     </div>
   </div>
 
-  <!-- ══ BODY ════════════════════════════════════════════════════ -->
-  <div class="ph-body">
-
-    <!-- Loading skeleton -->
-    <div class="ph-loading-grid" *ngIf="isLoading">
-      <div class="ph-sk-card" *ngFor="let i of [1,2,3,4]">
-        <div class="ph-sk ph-sk--icon"></div>
-        <div class="ph-sk ph-sk--title"></div>
-        <div class="ph-sk ph-sk--sub"></div>
-      </div>
+  <div class="ph-verification-banner" *ngIf="!isGuestMode && showVerificationAlert && !isProfileIncomplete">
+    <div class="ph-vb-icon">
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
     </div>
-
-    <ng-container *ngIf="!isLoading">
-
-      <!-- ── Banner perfil incompleto ──────────────────────────── -->
-      <div class="ph-verification-banner ph-verification-banner--incomplete" *ngIf="isProfileIncomplete">
-        <div class="ph-vb-icon ph-vb-icon--incomplete">
-          <ion-icon name="person-add-outline"></ion-icon>
-        </div>
-        <div class="ph-vb-content">
-          <h4>Perfil incompleto</h4>
-          <p>
-            Te falta registrar tu <strong>{{ missingFields.join(' y ') }}</strong>. 
-            Debes completar estos datos para poder publicar tus servicios.
-          </p>
-        </div>
-        <div class="ph-vb-actions">
-          <ion-button (click)="goToCompleteProfile()" class="ph-btn-primary" fill="solid" size="small">
-            Completar perfil
-          </ion-button>
-        </div>
-      </div>
-
-      <!-- ── Banner verificación pendiente ────────────────────── -->
-      <div class="ph-verification-banner" *ngIf="showVerificationAlert && !isProfileIncomplete">
-        <div class="ph-vb-icon">
-          <ion-icon name="shield-checkmark-outline"></ion-icon>
-        </div>
-        <div class="ph-vb-content">
-          <h4>Verificación de identidad</h4>
-          <p>{{ verificationMessage }}</p>
-        </div>
-        <div class="ph-vb-actions">
-          <ion-button class="ph-btn-primary" size="small" (click)="goToVerifyIdentity()">
-            Verificar ahora
-          </ion-button>
-          <ion-button class="ph-btn-ghost" fill="clear" size="small" (click)="dismissVerificationAlert()">
-            Más tarde
-          </ion-button>
-        </div>
-      </div>
-
-      <!-- ── Banner perfil incompleto (RUT/Teléfono) ────────────── -->
-      <div class="ph-verification-banner profile-incomplete-banner" 
-           *ngIf="providerProfile && providerProfile.is_profile_complete === false"
-           style="border-left: 4px solid var(--ion-color-danger); margin-bottom: 16px;">
-        <div class="ph-vb-icon" style="color: var(--ion-color-danger)">
-          <ion-icon name="alert-circle-outline"></ion-icon>
-        </div>
-        <div class="ph-vb-content">
-          <h4 style="color: var(--ion-color-danger)">Perfil incompleto</h4>
-          <p>Para publicar servicios debes completar tu RUT y teléfono en tu perfil.</p>
-        </div>
-        <div class="ph-vb-actions">
-          <ion-button class="ph-btn-primary" size="small" (click)="goToCompleteProfile()">
-            Completar perfil
-          </ion-button>
-        </div>
-      </div>
-
-      <!-- ── Alerta servicios pendientes ──────────────────────── -->
-      <div class="ph-pending-alert" *ngIf="metrics.pendingServices > 0" 
-        (click)="router.navigate(['/provider/tabs/service-details'])" 
-        (keypress)="router.navigate(['/provider/tabs/service-details'])"
-        role="button" tabindex="0">
-        <div class="ph-pa-icon">
-          <ion-icon name="warning-outline"></ion-icon>
-        </div>
-        <span class="ph-pa-text">
-          Tienes <strong>{{ metrics.pendingServices }}</strong>
-          servicio{{ metrics.pendingServices !== 1 ? 's' : '' }} pendiente{{ metrics.pendingServices !== 1 ? 's' : '' }} de activación
-        </span>
-        <ion-icon name="chevron-forward" class="ph-pa-chevron"></ion-icon>
-      </div>
-
-      <!-- ── Sección: Tu actividad ─────────────────────────────── -->
-      <div class="ph-section">
-        <span class="ph-section-title">Tu actividad</span>
-        <div class="ph-metrics-grid">
-
-          <div class="ph-metric-card ph-metric-card--clickable"
-            (click)="openServiceViewers()"
-            (keypress)="openServiceViewers()"
-            role="button" tabindex="0">
-            <div class="ph-metric-icon ph-metric-icon--purple">
-              <ion-icon name="document-outline"></ion-icon>
-            </div>
-            <div class="ph-metric-body">
-              <span class="ph-metric-value">{{ metrics.serviceViews }}</span>
-              <span class="ph-metric-label">Vistas de servicio</span>
-            </div>
-          </div>
-
-          <div class="ph-metric-card">
-            <div class="ph-metric-icon ph-metric-icon--teal">
-              <ion-icon name="checkmark-circle-outline"></ion-icon>
-            </div>
-            <div class="ph-metric-body">
-              <span class="ph-metric-value">{{ metrics.activeServices }}</span>
-              <span class="ph-metric-label">Servicios activos</span>
-            </div>
-          </div>
-
-          <!-- Card reseñas recibidas -->
-          <div class="ph-metric-card ph-metric-card--full ph-metric-card--clickable"
-            (click)="openReviews()"
-            (keypress)="openReviews()"
-            role="button" tabindex="0">
-            <div class="ph-metric-icon ph-metric-icon--amber">
-              <ion-icon name="star-outline"></ion-icon>
-            </div>
-            <div class="ph-metric-body">
-              <div class="ph-metric-row">
-                <span class="ph-metric-value">{{ reviews.length }}</span>
-                <span class="ph-metric-badge ph-metric-badge--amber" *ngIf="reviews.length > 0">
-                  {{ (stats?.average_rating ?? 0) | number:'1.1-1' }} ★
-                </span>
-              </div>
-              <span class="ph-metric-label">Reseñas recibidas</span>
-            </div>
-            <ion-icon name="chevron-forward" class="ph-metric-chevron"></ion-icon>
-          </div>
-
-        </div><!-- /.ph-metrics-grid -->
-      </div><!-- /.ph-section -->
-
-      <!-- ── Accesos rápidos ───────────────────────────────────── -->
-      <div class="ph-section">
-        <span class="ph-section-title">Ir a</span>
-        <div class="ph-quick-actions">
-
-          <div class="ph-qa-item" 
-            (click)="router.navigate(['/provider/tabs/bookings'])"
-            (keypress)="router.navigate(['/provider/tabs/bookings'])"
-            role="button" tabindex="0">
-            <div class="ph-qa-icon">
-              <ion-icon name="calendar-outline"></ion-icon>
-            </div>
-            <div class="ph-qa-body">
-              <span class="ph-qa-title">Mis reservas</span>
-              <span class="ph-qa-sub">{{ stats?.pending_bookings ?? 0 }} pendiente{{ (stats?.pending_bookings ?? 1) !== 1 ? 's' : '' }}</span>
-            </div>
-            <ion-icon name="chevron-forward" class="ph-qa-chevron"></ion-icon>
-          </div>
-
-          <div class="ph-qa-item" 
-            (click)="router.navigate(['/provider/tabs/service-details'])"
-            (keypress)="router.navigate(['/provider/tabs/service-details'])"
-            role="button" tabindex="0">
-            <div class="ph-qa-icon">
-              <ion-icon name="briefcase-outline"></ion-icon>
-            </div>
-            <div class="ph-qa-body">
-              <span class="ph-qa-title">Mis servicios</span>
-              <span class="ph-qa-sub">{{ metrics.activeServices }} activo{{ metrics.activeServices !== 1 ? 's' : '' }}</span>
-            </div>
-            <ion-icon name="chevron-forward" class="ph-qa-chevron"></ion-icon>
-          </div>
-
-          <div class="ph-qa-item" 
-            (click)="router.navigate(['/provider/tabs/inbox'])"
-            (keypress)="router.navigate(['/provider/tabs/inbox'])"
-            role="button" tabindex="0">
-            <div class="ph-qa-icon">
-              <ion-icon name="chatbubbles-outline"></ion-icon>
-            </div>
-            <div class="ph-qa-body">
-              <span class="ph-qa-title">Mensajes</span>
-              <span class="ph-qa-sub">Chats con clientes</span>
-            </div>
-            <ion-icon name="chevron-forward" class="ph-qa-chevron"></ion-icon>
-          </div>
-
-        </div>
-      </div>
-
-    </ng-container>
-
+    <div class="ph-vb-content">
+      <h4>Verificación de identidad</h4>
+      <p>{{ verificationMessage }}</p>
+    </div>
+    <div class="ph-vb-actions">
+      <button class="ph-btn-plan ph-btn-plan--small" type="button" (click)="goToVerifyIdentity()">Verificar ahora</button>
+      <button class="ph-btn-plan ph-btn-plan--secondary ph-btn-plan--small" type="button" (click)="dismissVerificationAlert()">Más tarde</button>
+    </div>
   </div>
 
-  <!-- ══ PANEL DE RESEÑAS ════════════════════════════════════════ -->
-  <div class="ph-rv-overlay" *ngIf="showReviewsModal" (click)="closeReviews()" (keypress)="closeReviews()" role="button" tabindex="0" aria-label="Cerrar panel"></div>
+  <div class="ph-pending-alert" *ngIf="!isGuestMode && metrics.pendingServices > 0" (click)="goToProtectedProviderRoute(['/provider/tabs/service-details'])" role="button" tabindex="0">
+    <div class="ph-pa-icon">
+      <ion-icon name="warning-outline"></ion-icon>
+    </div>
+    <span class="ph-pa-text">
+      Tienes <strong>{{ metrics.pendingServices }}</strong> servicio{{ metrics.pendingServices !== 1 ? 's' : '' }} pendiente{{ metrics.pendingServices !== 1 ? 's' : '' }} de activación
+    </span>
+    <ion-icon name="chevron-forward" class="ph-pa-chevron"></ion-icon>
+  </div>
+
+  <div class="ph-quick-access" *ngIf="!isGuestMode">
+    <button class="ph-quick-card" type="button" (click)="goToProtectedProviderRoute(['/provider/tabs/bookings'])">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>Reservas</span>
+    </button>
+    <button class="ph-quick-card" type="button" (click)="goToProtectedProviderRoute(['/provider/tabs/inbox'])">
+      <ion-icon name="chatbubbles-outline"></ion-icon>
+      <span>Mensajes</span>
+    </button>
+    <button class="ph-quick-card" type="button" (click)="goToProtectedProviderRoute(['/provider/tabs/profile'])">
+      <ion-icon name="person-outline"></ion-icon>
+      <span>Perfil</span>
+    </button>
+  </div>
+
+  <div class="ph-rv-overlay" *ngIf="showReviewsModal" (click)="closeReviews()" role="button" tabindex="0" aria-label="Cerrar panel"></div>
   <div class="ph-rv-panel" [class.ph-rv-panel--open]="showReviewsModal">
     <div class="ph-rv-header">
       <div class="ph-rv-handle"></div>
@@ -334,7 +180,6 @@
     </div>
 
     <div class="ph-rv-body">
-      <!-- Skeleton cargando -->
       <ng-container *ngIf="reviewsLoading">
         <div class="ph-rv-skeleton" *ngFor="let i of [1,2,3]">
           <div class="ph-sk ph-sk--avatar"></div>
@@ -345,14 +190,12 @@
         </div>
       </ng-container>
 
-      <!-- Sin reseñas -->
       <div class="ph-rv-empty" *ngIf="!reviewsLoading && reviews.length === 0">
         <ion-icon name="star-outline"></ion-icon>
         <p>Aún no tienes reseñas</p>
         <small>Cuando completes reservas, los clientes podrán calificarte aquí</small>
       </div>
 
-      <!-- Lista de reseñas -->
       <div class="ph-rv-list" *ngIf="!reviewsLoading && reviews.length > 0">
         <div class="ph-rv-card" *ngFor="let review of reviews">
           <div class="ph-rv-card-header">

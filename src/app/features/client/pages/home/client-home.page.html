@@ -15,11 +15,21 @@
     </div>
   </div>
 
+  <div class="ch-guest-card" *ngIf="isGuestMode">
+    <div class="ch-guest-header">
+      <ion-icon name="person-add-outline" class="ch-guest-icon"></ion-icon>
+      <h2>Tu acceso completo comienza con una cuenta</h2>
+    </div>
+    <p>Regístrate para guardar servicios favoritos, contactar proveedores y reservar sin perder el contexto de tu búsqueda.</p>
+    <button class="ch-btn-plan" type="button" (click)="openClientRegisterModal()">
+      Crear mi cuenta
+    </button>
+  </div>
+
   <!-- ── Buscar servicios (CTA principal) ───────────────────────────── -->
   <button class="ch-search-cta" type="button" (click)="goToCategories()">
     <ion-icon name="search-outline"></ion-icon>
     <span>Buscar servicios</span>
-    
   </button>
 
   <!-- ── Actividad de búsqueda ────────────────────────────────────────── -->
@@ -50,13 +60,13 @@
   </div>
 
   <!-- ── Plan ──────────────────────────────────────────────────────────── -->
-  <div class="ch-plan-panel ch-plan-panel--skeleton" *ngIf="isLoadingPlan">
+  <div class="ch-plan-panel ch-plan-panel--skeleton" *ngIf="!isGuestMode && isLoadingPlan">
     <div class="ch-sk ch-sk--title"></div>
     <div class="ch-sk ch-sk--line"></div>
     <div class="ch-sk ch-sk--line"></div>
   </div>
 
-  <div class="ch-plan-panel" *ngIf="!isLoadingPlan && activePlan">
+  <div class="ch-plan-panel" *ngIf="!isGuestMode && !isLoadingPlan && activePlan">
     <h2 class="ch-plan-title">
       <ion-icon name="shield-checkmark"></ion-icon>
       Plan activo: {{ activePlan.product?.name || 'Plan Premium' }}
@@ -74,7 +84,7 @@
     </button>
   </div>
 
-  <div class="ch-plan-panel" *ngIf="!isLoadingPlan && !activePlan">
+  <div class="ch-plan-panel" *ngIf="!isGuestMode && !isLoadingPlan && !activePlan">
     <h2 class="ch-plan-title">
       <ion-icon name="shield-half-outline"></ion-icon>
       Cuenta Gratuita
@@ -100,7 +110,7 @@
   </div>
 
   <!-- ── Mini dashboard de reservas ───────────────────────────────────── -->
-  <div class="ch-stats-row" *ngIf="!isLoadingStats && stats">
+  <div class="ch-stats-row" *ngIf="!isGuestMode && !isLoadingStats && stats">
     <div class="ch-stat-box">
       <h3>{{ stats.pending }}</h3>
       <p>Pendientes</p>
@@ -115,7 +125,7 @@
     </div>
   </div>
 
-  <div class="ch-stats-row ch-stats-row--skeleton" *ngIf="isLoadingStats">
+  <div class="ch-stats-row ch-stats-row--skeleton" *ngIf="!isGuestMode && isLoadingStats">
     <div class="ch-stat-box" *ngFor="let i of [1,2,3]">
       <div class="ch-sk ch-sk--val"></div>
       <div class="ch-sk ch-sk--lbl"></div>
@@ -128,7 +138,7 @@
       class="ch-quick-card"
       type="button"
       *ngFor="let item of quickAccess"
-      (click)="goTo(item.route)">
+      (click)="handleQuickAccess(item)">
       <ion-icon [name]="item.icon"></ion-icon>
       <span>{{ item.label }}</span>
     </button>

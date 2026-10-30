@@ -10,6 +10,21 @@
   overflow: hidden;
 }
 
+ion-modal {
+  --height: auto;
+  --max-height: 84vh;
+  --border-radius: 22px 22px 0 0;
+  --background: var(--bapp-bg-page);
+  --box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.24);
+  --ion-safe-area-bottom: 0px;
+}
+
+@media (max-height: 700px) {
+  ion-modal {
+    --max-height: 80vh;
+  }
+}
+
 // ── Hero section ──────────────────────────────────────────────────────────────
 .pas-hero-section {
   position: relative;
@@ -514,14 +529,121 @@
 
 .bm-cancel-btn { margin-top: var(--bapp-space-2); }
 
+.access-auth-error {
+  margin-bottom: var(--bapp-space-4);
+}
+
+.bm-terms {
+  margin-top: calc(var(--bapp-space-1) * -1);
+}
+
+.bm-checkbox-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 48px;
+  border: 1px solid var(--bapp-border);
+  border-radius: var(--bapp-radius-xl);
+  background: var(--bapp-bg-card);
+  padding: 0 var(--bapp-space-2);
+
+  ion-checkbox {
+    --size: 20px;
+    --checkmark-color: var(--bapp-text-inverse);
+    --background: transparent;
+    --border-color: var(--bapp-border-medium);
+    --background-checked: var(--bapp-color-primary);
+    --border-color-checked: var(--bapp-color-primary);
+  }
+
+  ion-label {
+    font-size: var(--bapp-text-sm);
+    color: var(--bapp-text-secondary);
+    margin-left: var(--bapp-space-2);
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--bapp-space-3);
+  margin: var(--bapp-space-5) 0 var(--bapp-space-3);
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--bapp-border);
+}
+
+.divider-text {
+  font-size: var(--bapp-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--bapp-tracking-wider);
+  color: var(--bapp-text-tertiary);
+  font-weight: var(--bapp-font-semibold);
+}
+
+.access-social-btns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bapp-space-3);
+  margin-top: var(--bapp-space-2);
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bapp-space-2);
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--bapp-border-medium);
+  border-radius: var(--bapp-radius-xl);
+  background: var(--bapp-bg-card);
+  color: var(--bapp-text-primary);
+  font-size: var(--bapp-text-sm);
+  font-weight: var(--bapp-font-semibold);
+  cursor: pointer;
+  transition: all var(--bapp-transition-fast);
+
+  &:active {
+    transform: translateY(1px);
+    opacity: 0.92;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.social-btn--google {
+  background: var(--bapp-bg-card);
+}
+
+.social-btn--apple {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 // Scrollable body inside the booking sheet modal.
 // Replaces <ion-content> (which cannot be nested inside another ion-content).
 .bm-scroll-content {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  height: 100%;
+  max-height: 100%;
+  height: auto;
   box-sizing: border-box;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 // ── Calendar strip ────────────────────────────────────────────────────────────

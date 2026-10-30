@@ -1,7 +1,34 @@
 // src/app/auth/guards/auth.guard.ts
 import { inject } from '@angular/core';
 import { Router, CanActivateFn, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { ModalController } from '@ionic/angular';
 import { AuthService } from '../services/auth.service';
+import { AccessAuthModalComponent } from '../../../shared/components/access-auth-modal/access-auth-modal.component';
+
+const openGuestAccessModal = async (
+  mode: 'login' | 'register' = 'register',
+  guestRole: 'client' | 'provider' = 'client'
+) => {
+  const modalCtrl = inject(ModalController);
+  const modal = await modalCtrl.create({
+    component: AccessAuthModalComponent,
+    backdropDismiss: true,
+    cssClass: 'access-auth-modal'
+  });
+
+  const resolvedRole = guestRole === 'provider' ? 'provider' : 'client';
+  const instance = (modal as any).componentInstance as AccessAuthModalComponent | undefined;
+  if (instance) {
+    instance.configure({
+      mode,
+      role: resolvedRole,
+      appleSignInAvailable: false
+    });
+    instance.open(mode, resolvedRole);
+  }
+
+  await modal.present();
+};
 
 /**
  * Guard que requiere autenticación
@@ -17,6 +44,34 @@ export const authGuard: CanActivateFn = (
   if (authService.isAuthenticated()) {
     console.log('✅ authGuard: Usuario autenticado');
     return true;
+  }
+
+  const guestRole = localStorage.getItem('bapp_user_role');
+  const isGuestProviderAccess = state.url.startsWith('/provider') && guestRole === 'provider';
+  const isGuestClientAccess = state.url.startsWith('/client') && guestRole === 'client';
+
+  if (isGuestProviderAccess) {
+    const allowGuestProviderRoute = state.url === '/provider' || state.url.startsWith('/provider/tabs/home');
+    if (allowGuestProviderRoute) {
+      console.log('✅ authGuard: Acceso temporal de invitado proveedor permitido');
+      return true;
+    }
+
+    console.log('⚠️ authGuard: Invitado proveedor intentando entrar a ruta restringida, se abre modal de acceso');
+    void openGuestAccessModal('register', 'provider');
+    return false;
+  }
+
+  if (isGuestClientAccess) {
+    const allowGuestClientRoute = state.url.startsWith('/client/categories') || state.url.startsWith('/client/provider-info') || state.url.startsWith('/client/tabs/home');
+    if (allowGuestClientRoute) {
+      console.log('✅ authGuard: Acceso temporal de invitado cliente permitido');
+      return true;
+    }
+
+    console.log('⚠️ authGuard: Invitado cliente intentando entrar a ruta restringida, se abre modal de acceso');
+    void openGuestAccessModal('register', 'client');
+    return false;
   }
   
   console.log('❌ authGuard: Usuario no autenticado, redirigiendo a login');
@@ -66,6 +121,34 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     const router = inject(Router);
     
     if (!authService.isAuthenticated()) {
+      const guestRole = localStorage.getItem('bapp_user_role');
+      const isGuestProviderAccess = state.url.startsWith('/provider') && guestRole === 'provider';
+      const isGuestClientAccess = state.url.startsWith('/client') && guestRole === 'client';
+
+      if (isGuestProviderAccess) {
+        const allowGuestProviderRoute = state.url === '/provider' || state.url.startsWith('/provider/tabs/home');
+        if (allowGuestProviderRoute) {
+          console.log('✅ roleGuard: Acceso temporal de invitado proveedor permitido');
+          return true;
+        }
+
+        console.log('⚠️ roleGuard: Invitado proveedor bloqueado en ruta restringida, se abre modal de acceso');
+        void openGuestAccessModal('register', 'provider');
+        return false;
+      }
+
+      if (isGuestClientAccess) {
+        const allowGuestClientRoute = state.url.startsWith('/client/categories') || state.url.startsWith('/client/provider-info') || state.url.startsWith('/client/tabs/home');
+        if (allowGuestClientRoute) {
+          console.log('✅ roleGuard: Acceso temporal de invitado cliente permitido');
+          return true;
+        }
+
+        console.log('⚠️ roleGuard: Invitado cliente bloqueado en ruta restringida, se abre modal de acceso');
+        void openGuestAccessModal('register', 'client');
+        return false;
+      }
+
       console.log('❌ roleGuard: No autenticado');
       router.navigate(['/auth/login'], { 
         queryParams: { returnUrl: state.url } 
